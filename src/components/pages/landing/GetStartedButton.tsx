@@ -1,0 +1,39 @@
+"use client";
+
+import { useUser } from "@/context/UserProvider";
+import { EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE } from "@/constants/clientRoutes";
+import { FC, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button, LinkButton } from "@/components/ui/button";
+
+const GetStartedButton: FC = () => {
+  const { loggedIn, logInUser, userLoading } = useUser();
+
+  const router = useRouter();
+  const [clicked, setClicked] = useState(false); //only trigger useEffect if user has clicked the button
+
+  const handleStartClicked = () => {
+    logInUser();
+    setClicked(true);
+  }
+
+  useEffect(() => {
+    if (loggedIn && clicked) {
+      router.push(EDIT_PROFILE_ACCOUNT);
+    }
+  }, [loggedIn, clicked, router]);
+  
+  if(loggedIn) return (
+    <LinkButton href={EDIT_TIMELINE} disabled={userLoading} size="lg" className="font-3xl">
+      Manage Timeline
+    </LinkButton>
+  );
+
+  return (
+    <Button onClick={handleStartClicked} disabled={userLoading} size="lg">
+      Get started
+    </Button>
+  );
+}
+
+export default GetStartedButton;
