@@ -16,18 +16,21 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
   className,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
+
   return (
-    <div className={cn(
-      "relative w-full h-full",
-      isLoading && "animate-skeleton-shimmer",
-      containerClassName
-    )}>
-  
+    <div
+      className={cn(
+        "relative w-full h-full pointer-events-auto",
+        isLoading && "animate-skeleton-shimmer",
+        containerClassName
+      )}
+    >
       <iframe
         className={cn(
-          "w-full h-full",
+          "w-full h-full ",
           isLoading ? "opacity-33" : "opacity-100",
-          className)}
+          className
+        )}
         src={src}
         onError={onError}
         sandbox="allow-scripts allow-same-origin"
@@ -39,3 +42,4 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
 };
 
 export default HtmlViewer;
+

@@ -1,4 +1,5 @@
 import { EditProfileTab, EditProfileTabQueryParam } from "@/types/ui/dashboard";
+import { ChainIdsEnum } from "@/types/wallet";
 
 export const HOME = '/';
 
@@ -12,9 +13,14 @@ export const EDIT_TIMELINE = `${DASHBOARD}/timeline`;
 
 
 export const MEDIA = '/media';
-export const USER_MEDIA = `${MEDIA}/user`;
-export const SOLANA_MEDIA = `${MEDIA}/solana`;
-export const TEZOS_MEDIA = `${MEDIA}/tezos`;
+export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
+export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
+export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
+
+export const BLOCKCHAIN_MEDIA_PATHS = {
+  [ChainIdsEnum.SOLANA]: SOLANA_MEDIA,
+  [ChainIdsEnum.TEZOS]: TEZOS_MEDIA,
+};
 
 //used in 'from' query param to return to the correct page
 

@@ -54,7 +54,7 @@ export default function RootLayout({
             <UserContextProvider>
               <ScrollArea className="h-screen">
                 <NavBar />
-                <main className="container mx-auto py-8 px-8">{children}</main>
+                {children}
                 <Toaster />
               </ScrollArea>
             </UserContextProvider>

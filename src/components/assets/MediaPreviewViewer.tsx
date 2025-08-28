@@ -41,7 +41,6 @@ const MediaPreviewViewer: FC<MediaPreviewViewerProps> = ({
           <VideoViewer
             src={mediaUrl}
             poster={imageUrl}
-            controls={false}
             minimalControls
             onLoadedMetadata={onVideoLoad}
             onError={handleError}

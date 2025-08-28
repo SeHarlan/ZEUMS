@@ -1,4 +1,4 @@
-import { GetSolanaAssetProps } from "@/types/asset";
+import { GetSolanaAssetsProps } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
 import { GetAssetResponseList, GetAssetResponse as AssetResponse } from "@/types/helius";
 import axios from "axios";
@@ -7,7 +7,7 @@ type GetAssetResponse = {
   result: GetAssetResponseList;
 };
 
-export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssetProps) => {
+export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssetsProps) => {
   const assets: AssetResponse[] = [];
 
   const maxBatch = 1000

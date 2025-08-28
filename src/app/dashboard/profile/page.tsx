@@ -1,4 +1,5 @@
 "use client";
+import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import ProfileAccountForm from "@/components/pages/dashboard/editProfile/AccountForm";
 import ProfileDisplayForm from "@/components/pages/dashboard/editProfile/DisplayForm";
@@ -31,7 +32,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <PageContainer maxWidth="small">
       <PageHeading
         title="Profile"
         subtitle="Edit your profile information and manage wallets"
@@ -79,6 +80,6 @@ export default function EditProfilePage() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

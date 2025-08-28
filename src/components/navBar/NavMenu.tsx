@@ -26,8 +26,8 @@ const NavMenu: FC = () => {
   const activeWallet = truncate(publicKey?.toString());
 
   return (
-    <NavigationMenu viewportClassName="left-1/2 translate-x-[-50%]">
-      <NavigationMenuList>
+    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2">
+      <NavigationMenuList >
         <NavigationMenuItem>
           <NavLink label="Z" href={HOME} className="font-serif text-3xl" />
         </NavigationMenuItem>
@@ -57,7 +57,7 @@ const NavMenu: FC = () => {
 
           <Separator className="w-full col-span-2" />
 
-          <div  className="col-span-2 w-full">
+          <div className="col-span-2 w-full">
             <Button className="w-full" disabled={!loggedIn}>
               <Link href="/placeholder">Go to my timeline</Link>
             </Button>
@@ -86,7 +86,7 @@ const NavDropDown: FC<NavDropDownProps> = ({ children, trigger}) => {
     <NavigationMenuItem>
       <NavigationMenuTrigger>{trigger}</NavigationMenuTrigger>
       <NavigationMenuContent >
-        <div className="grid grid-cols-2 w-[30rem] gap-4 justify-stretch p-2">{children}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2">{children}</div>
       </NavigationMenuContent>
     </NavigationMenuItem>
   );

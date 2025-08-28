@@ -2,9 +2,9 @@ import useSWRImmutable from "swr/immutable";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
 import { ASSETS_SOLANA_ROUTE } from "@/constants/serverRoutes";
-import { GetSolanaAssetProps, ParsedBlockChainAsset } from "@/types/asset";
+import { GetSolanaAssetsProps, ParsedBlockChainAsset } from "@/types/asset";
 
-const solanaAssetFetcher = async (props: GetSolanaAssetProps) => {
+const solanaAssetFetcher = async (props: GetSolanaAssetsProps) => {
   if (!props.publicKeys?.length) return [];
 
   return axios
@@ -19,7 +19,7 @@ const solanaAssetFetcher = async (props: GetSolanaAssetProps) => {
     });
 };
 
-const useSolanaAssets = (solanaFetcherprops: GetSolanaAssetProps) => {
+const useSolanaAssets = (solanaFetcherprops: GetSolanaAssetsProps) => {
   //Immutable so we only fetch once (and save on Helius API credits)
   const { data, error, isLoading, mutate } = useSWRImmutable(
     solanaFetcherprops,

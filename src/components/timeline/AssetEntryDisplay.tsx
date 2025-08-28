@@ -1,7 +1,7 @@
 import { BlockchainAssetEntry, UserAssetEntry } from "@/types/entry";
 import { FC } from "react";
 import { H3, P } from "../typography/Typography";
-import AssetMediaViewer from "../assets/AssetMediaViewer";
+import AssetViewer from "../assets/AssetViewer";
 import EntryButtons from "./EntryButtons";
 import { cn } from "@/utils/ui-utils";
 
@@ -14,7 +14,7 @@ const AssetEntryDisplay: FC<AssetEntryDisplayProps> = ({ entry, flip }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center pb-4">
       <div className={cn("order-1", flip && "lg:order-2")}>
-        <AssetMediaViewer asset={entry} />
+        <AssetViewer asset={entry} />
       </div>
 
       <div

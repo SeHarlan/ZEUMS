@@ -153,8 +153,17 @@ export const VideoViewer: FC<VideoViewerProps> = ({
     const video = videoRef.current;
     if (!video) return;
 
-    video.volume = value[0];
-    setVolume(value[0]);
+    const newVolume = value[0];
+    video.volume = newVolume;
+    setVolume(newVolume);
+
+    if (newVolume === 0) {
+      video.muted = true;
+      setIsMuted(true);
+    } else {
+      video.muted = false;
+      setIsMuted(false);
+    }
   };
 
   const formatTime = (time: number) => {
@@ -182,6 +191,7 @@ export const VideoViewer: FC<VideoViewerProps> = ({
         loop={loop}
         playsInline
         className={cn(
+          "w-full",
           "object-cover transition-opacity duration-300",
           isLoading ? "opacity-33" : "opacity-100",
           className

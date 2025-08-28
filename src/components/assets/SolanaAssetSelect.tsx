@@ -156,6 +156,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
               <AssetThumbnailCard
                 key={asset.tokenAddress}
                 asset={asset}
+                
                 onClick={(aspectRatio) => handleAssetClick({ asset, isSelected, aspectRatio })}
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-300",

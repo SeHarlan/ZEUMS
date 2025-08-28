@@ -11,23 +11,17 @@ import { VideoViewer } from "../media/VideoViewer";
 import { LinkButton } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { BlockchainAssetEntry, EntryTypes, UserAssetEntry } from "@/types/entry";
-import { ChainIdsEnum } from "@/types/wallet";
-import { RETURN_QUERY_PARAM, SOLANA_MEDIA, TEZOS_MEDIA, USER_MEDIA } from "@/constants/clientRoutes";
-import { getSimpleFromParam } from "@/utils/navigation";
+import { BLOCKCHAIN_MEDIA_PATHS, RETURN_QUERY_PARAM, USER_MEDIA } from "@/constants/clientRoutes";
+import { getReturnKey } from "@/utils/navigation";
 import { useImageFallback } from "@/hooks/useImageFallback";
 
-interface AssetMediaViewerProps {
+interface AssetViewerProps {
   asset: BlockchainAssetEntry | UserAssetEntry
   objectFit?: "object-cover" | "object-contain";
   aspectRatio?: "square" | "media-defined";
 }
 
-const BlockchainPathMap = {
-  [ChainIdsEnum.SOLANA]: SOLANA_MEDIA,
-  [ChainIdsEnum.TEZOS]: TEZOS_MEDIA,
-}
-
-const AssetMediaViewer: FC<AssetMediaViewerProps> = ({
+const AssetViewer: FC<AssetViewerProps> = ({
   asset,
   aspectRatio = "media-defined",
   objectFit = "object-contain",
@@ -51,11 +45,11 @@ const AssetMediaViewer: FC<AssetMediaViewerProps> = ({
 
   const isVideoOrImage = media.category === MediaCategory.Video || media.category === MediaCategory.Image;
   const basePath = isBlockchainAsset
-    ? `/${BlockchainPathMap[asset.blockchain]}/${asset.tokenAddress}`
-    : `/${USER_MEDIA}/${asset._id}`;
+    ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
+    : USER_MEDIA(asset._id.toString());
   
-  const fromParam = getSimpleFromParam(pathname);
-  const newPagePath = `/${basePath}?${RETURN_QUERY_PARAM}=${fromParam}`;
+  const returnKey = getReturnKey(pathname);
+  const newPagePath = `${basePath}?${RETURN_QUERY_PARAM}=${returnKey}`;
 
   const goToExplorer = () => { 
     router.push(newPagePath);
@@ -70,7 +64,6 @@ const AssetMediaViewer: FC<AssetMediaViewerProps> = ({
           src={getMediaUrl(media)}
           poster={imageUrl}
           onError={() => setVideoError(true)}
-          className={cn("w-full transition-opacity duration-200")}
         />
       );
     }
@@ -86,7 +79,7 @@ const AssetMediaViewer: FC<AssetMediaViewerProps> = ({
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
         onError={onError}
-        onLoadingComplete={onLoad}
+        onLoad={onLoad}
         src={imageUrl}
         alt={alt}
         className={cn(
@@ -139,4 +132,4 @@ const AssetMediaViewer: FC<AssetMediaViewerProps> = ({
   );
 };
 
-export default AssetMediaViewer;
+export default AssetViewer;

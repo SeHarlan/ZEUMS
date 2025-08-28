@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { FC } from "react";
+import { FC, SyntheticEvent } from "react";
 import { ImageOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 import { ParsedBlockChainAsset } from "@/types/asset";
@@ -31,9 +31,9 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
 
   const rounding = size === "sm" ? "rounded-sm" : "rounded-md";
 
-  const handleLoad = (el: HTMLImageElement) => {
+  const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     onImageLoad();
-    if (onLoad) onLoad(el);
+    if (onLoad) onLoad(event.currentTarget);
   };
 
   const renderContent = () => {
@@ -46,13 +46,14 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
         unoptimized
         loading="lazy"
         onError={onError}
-        onLoadingComplete={handleLoad}
+        onLoad={handleLoad}
         src={imageUrl}
         alt={asset.title || "Asset Thumbnail"}
         className={cn(
           "w-full transition-opacity duration-200",
           isLoaded ? "opacity-100" : "opacity-0",
-          objectFit
+          objectFit,
+          objectFit === "object-contain" && "p-3"
         )}
       />
     );

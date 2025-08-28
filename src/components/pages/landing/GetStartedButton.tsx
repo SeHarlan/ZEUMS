@@ -24,13 +24,13 @@ const GetStartedButton: FC = () => {
   }, [loggedIn, clicked, router]);
   
   if(loggedIn) return (
-    <LinkButton href={EDIT_TIMELINE} disabled={userLoading} size="lg" className="font-3xl">
+    <LinkButton href={EDIT_TIMELINE} disabled={userLoading}>
       Manage Timeline
     </LinkButton>
   );
 
   return (
-    <Button onClick={handleStartClicked} disabled={userLoading} size="lg">
+    <Button onClick={handleStartClicked} disabled={userLoading}>
       Get started
     </Button>
   );

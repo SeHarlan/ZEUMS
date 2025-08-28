@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import EditTimeline from "@/components/pages/dashboard/editTimeline/EditTimeline";
 import { PageTurnLeft, PageTurnRight } from "@/components/pages/dashboard/PageTurnButtons";
@@ -10,7 +11,7 @@ import { EditTimelineTab } from "@/types/ui/dashboard";
 
 export default function EditTimelinePage() { 
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <PageContainer maxWidth="large"> 
       <PageHeading
         title="Timeline"
         subtitle="Create and edit timeline entries"
@@ -50,6 +51,6 @@ export default function EditTimelinePage() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

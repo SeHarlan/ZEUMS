@@ -99,7 +99,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     >
       <CardContent className="p-0 relative">
         {loading && <LoadingSpinner className="absolute-center z-10" />}
-        <AssetThumbnail asset={asset} onLoad={handleLoad} />
+        <AssetThumbnail asset={asset} onLoad={handleLoad} objectFit="object-contain"/>
       </CardContent>
 
       <CardFooter className="pb-1 px-3">

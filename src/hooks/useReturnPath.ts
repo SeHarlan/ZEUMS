@@ -1,14 +1,15 @@
-import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 import { RETURN_QUERY_PARAM } from "@/constants/clientRoutes";
 import { getReturnPath } from "@/utils/navigation";
 
+
 export const useReturnPath = (fallback?: string): string | null => {
-  const router = useRouter();
-  const fromParam = router.query[RETURN_QUERY_PARAM] as string;
+  const searchParams = useSearchParams();
+  const returnKey = searchParams.get(RETURN_QUERY_PARAM);
   
-  if (!fromParam) {
-    return fallback || null
+  if (returnKey) { 
+    return getReturnPath(returnKey);
   }
-  
-  return getReturnPath(fromParam);
+
+  return fallback || null;
 };

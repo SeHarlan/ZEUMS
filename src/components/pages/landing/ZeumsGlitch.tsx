@@ -154,11 +154,8 @@ const GlitchTextMesh = () => {
 
           float centralDist = distance(vec2(0.5 * screenAspectRatio, 0.5), correctedUV);
 
-
-          mouseDist += centralDist * centralDist;
-          mouseDist += centralDist * (.85 - glitchIntensity);
-
-          if(centralDist > 0.5) {
+          if(centralDist > 0.5 + (1.0 - glitchIntensity)) {
+            mouseDist += centralDist * centralDist + (centralDist * (0.85 - glitchIntensity));
             mouseDist = 1. - mouseDist * glitchSquared;
           }
           
@@ -228,8 +225,9 @@ const GlitchTextMesh = () => {
             color = mix(color, staticCol, (0.1 + mouseDisplacement) * (glitchSquared + 0.1));//glitchSquared * (mouseDisplacement + 0.1));
           }
             
+          //static outside text
           if(text.a < 0.5) {
-            color += randomNegNeuPos(st * vec2(0.01)+ vec2(fract(t)) , 0.025 +  glitchSquared *  0.25 * (centralDist-0.15));
+            color += randomNegNeuPos(st * vec2(0.01)+ vec2(fract(t)) , 0.01 +  glitchSquared *  0.1 * (centralDist-0.1));
           }
             
           float shimmer = 0.2 ;

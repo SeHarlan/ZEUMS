@@ -1,8 +1,12 @@
 import { BlockchainAssetEntry, EntrySource } from "./entry";
 
-export interface GetSolanaAssetProps {
+export interface GetSolanaAssetsProps {
   publicKeys: string[];
   source: EntrySource;
+}
+
+export interface GetSolanaAssetProps {
+  mintAddress: string;
 }
 
 export type ParsedBlockChainAsset = Omit<
