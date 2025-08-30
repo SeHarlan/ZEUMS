@@ -1,12 +1,19 @@
 "use client"
 import { H1, P } from "@/components/typography/Typography";
-import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 import { handleClientError } from "@/utils/handleError";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useRef, useMemo, useState, useEffect, FC } from "react";
 import * as THREE from "three";
 
-const GlitchTextMesh = () => {
+interface GlitchTextMeshProps {
+  title: string;
+  subtitle: string;
+}
+
+const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
+  title,
+  subtitle
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport, size } = useThree();
   const [mousePos, setMousePos] = useState(new THREE.Vector2(-1, -1));
@@ -37,18 +44,19 @@ const GlitchTextMesh = () => {
     // Main title
     const titleHeight = canvas.height * 0.45;
     ctx.font = `500 ${titleSize}rem  serif`;
-    ctx.fillText(TITLE_COPY, canvas.width / 2, titleHeight);
+    ctx.fillText(title, canvas.width / 2, titleHeight);
 
     // Subtitle
     ctx.font = `200 ${subtitleSize}rem  sans-serif`;
     ctx.fillText(
-      SUBTITLE_COPY,
+      subtitle,
       canvas.width / 2,
       titleHeight + titleSize * pixelsInRem * 0.85
     );
 
-    return new THREE.CanvasTexture(canvas);
-  }, [size]);
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }, [size.width, size.height, title, subtitle]);
 
   // Shader material
   const shaderMaterial = useMemo(() => {
@@ -155,7 +163,7 @@ const GlitchTextMesh = () => {
           float centralDist = distance(vec2(0.5 * screenAspectRatio, 0.5), correctedUV);
 
           if(centralDist > 0.5 + (1.0 - glitchIntensity)) {
-            mouseDist += centralDist * centralDist + (centralDist * (0.85 - glitchIntensity));
+            mouseDist += centralDist * centralDist + (centralDist * (.85 - glitchIntensity));
             mouseDist = 1. - mouseDist * glitchSquared;
           }
           
@@ -334,19 +342,25 @@ const isWebGLSupported = (): boolean => {
   }
 };
 
-const FallbackText = () => {
+const FallbackText: FC<GlitchTextMeshProps> = ({
+  title,
+  subtitle,
+}) => {
   return (
     <div className="w-full h-full flex flex-col justify-center items-center space-y-8">
-      <H1 className="text-center text-7xl lg:text-9xl">{TITLE_COPY}</H1>
+      <H1 className="text-center text-7xl lg:text-9xl">{title}</H1>
       <P className="text-center text-xl lg:text-2xl pb-12">
-        {SUBTITLE_COPY}
+        {subtitle}
       </P>
     </div>
   );
 }
 
 // Main component
-const ZeumsGlitch: FC = () => {
+const GlitchFeedback: FC<GlitchTextMeshProps> = ({
+  title,
+  subtitle
+}) => {
   const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
@@ -357,7 +371,7 @@ const ZeumsGlitch: FC = () => {
   if (!webglSupported) {
     return (
       <div className="absolute inset-0 left-0 top-0 w-full h-full overflow-hidden font">
-        <FallbackText />;
+        <FallbackText title={title} subtitle={subtitle} />;
       </div>
     )
   }
@@ -386,12 +400,12 @@ const ZeumsGlitch: FC = () => {
           scroll: false,
           debounce: { scroll: 50, resize: 5 },
         }}
-        fallback={<FallbackText />}
+        fallback={<FallbackText title={title} subtitle={subtitle} />}
       >
-        <GlitchTextMesh />
+        <GlitchTextMesh title={title} subtitle={subtitle} />
       </Canvas>
     </div>
   );
 };
 
-export default ZeumsGlitch;
+export default GlitchFeedback;

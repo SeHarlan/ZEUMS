@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import WalletContextProvider from "@/context/WalletProvider";
 import UserContextProvider from "@/context/UserProvider";
 import NavBar from "@/components/navBar/NavBar";
+import NavBarActionsProvider from "@/context/NavBarActionsProvider";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
@@ -52,11 +53,13 @@ export default function RootLayout({
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
-              <ScrollArea className="h-screen">
-                <NavBar />
-                {children}
-                <Toaster />
-              </ScrollArea>
+              <NavBarActionsProvider>
+                <ScrollArea className="h-screen">
+                  <NavBar />
+                  {children}
+                  <Toaster />
+                </ScrollArea>
+              </NavBarActionsProvider>
             </UserContextProvider>
           </AuthContextProvider>
         </WalletContextProvider>

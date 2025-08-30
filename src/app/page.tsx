@@ -1,16 +1,20 @@
 "use client"
-import ZeumsGlitch from "@/components/pages/landing/ZeumsGlitch";
+import GlitchFeedback from "@/components/pages/landing/GlitchFeedback";
 import GetStartedButton from "@/components/pages/landing/GetStartedButton";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/ui-utils";
-import { Button, LinkButton } from "@/components/ui/button";
-import { ABOUT, DASHBOARD } from "@/constants/clientRoutes";
+import { LinkButton } from "@/components/ui/button";
+import { ABOUT, LANDING_RETURN_KEY } from "@/constants/clientRoutes";
 import { PageContainer } from "@/components/general/PageContainer";
+import { H1, P } from "@/components/typography/Typography";
+import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { makeReturnQueryParam } from "@/utils/navigation";
 
 export default function Home() {
   const[buttonVisible, setButtonVisible] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
 
+  const aboutPath = ABOUT + makeReturnQueryParam(LANDING_RETURN_KEY)
 
   useEffect(() => {
 
@@ -40,11 +44,8 @@ export default function Home() {
   }, []);
 
   return (
-    <PageContainer
-      noPadding
-      maxWidth="full"
-    >
-      <ZeumsGlitch />
+    <PageContainer noPadding maxWidth="full">
+      <GlitchFeedback title={TITLE_COPY} subtitle={SUBTITLE_COPY} />
       <div
         ref={buttonRef}
         className={cn("absolute-center md:p-26 max-w-full")}
@@ -53,16 +54,24 @@ export default function Home() {
       >
         <div
           className={cn(
-            "flex flex-col gap-8 bg-popover-blur rounded-lg py-6 px-12",
+            "space-y-4 bg-popover-blur rounded-lg py-6 px-12",
             "transition-opacity duration-1000",
             buttonVisible ? "opacity-100 " : "opacity-0"
           )}
         >
-          <GetStartedButton />
+          <div className="text-center">
+            <H1>{TITLE_COPY}</H1>
+            <P className="text-sm text-muted-foreground l">{SUBTITLE_COPY}</P>
+          </div>
 
-          <LinkButton href={ABOUT} variant="secondary">
-            Learn More
-          </LinkButton>
+          <div className="flex flex-col gap-8">
+            <GetStartedButton />
+
+            <LinkButton href={aboutPath} variant="secondary">
+              Learn More
+            </LinkButton>
+
+          </div>
         </div>
       </div>
     </PageContainer>

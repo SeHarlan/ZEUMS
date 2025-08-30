@@ -11,8 +11,8 @@ import { VideoViewer } from "../media/VideoViewer";
 import { LinkButton } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { BlockchainAssetEntry, EntryTypes, UserAssetEntry } from "@/types/entry";
-import { BLOCKCHAIN_MEDIA_PATHS, RETURN_QUERY_PARAM, USER_MEDIA } from "@/constants/clientRoutes";
-import { getReturnKey } from "@/utils/navigation";
+import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { useImageFallback } from "@/hooks/useImageFallback";
 
 interface AssetViewerProps {
@@ -49,7 +49,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     : USER_MEDIA(asset._id.toString());
   
   const returnKey = getReturnKey(pathname);
-  const newPagePath = `${basePath}?${RETURN_QUERY_PARAM}=${returnKey}`;
+  const newPagePath = basePath + makeReturnQueryParam(returnKey);
 
   const goToExplorer = () => { 
     router.push(newPagePath);

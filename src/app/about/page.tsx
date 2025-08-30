@@ -1,5 +1,6 @@
 "use client";
 
+import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import GetStartedButton from "@/components/pages/landing/GetStartedButton";
 import { Blockquote, H3, P } from "@/components/typography/Typography";
@@ -7,7 +8,7 @@ import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 
 export default function About() {
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-8">
+    <PageContainer maxWidth="small" className="space-y-8">
       <section>
         <PageHeading
           title={`About ${TITLE_COPY}`}
@@ -90,6 +91,6 @@ export default function About() {
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pb-16">
         <GetStartedButton />
       </div>
-    </div>
+    </PageContainer>
   );
 }

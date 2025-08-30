@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/UserProvider";
-import { EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE } from "@/constants/clientRoutes";
+import { EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE } from "@/constants/clientRoutes";
 import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -23,15 +23,21 @@ const GetStartedButton: FC = () => {
     }
   }, [loggedIn, clicked, router]);
   
+  
+//TODO change back to normal after timeline is ready
   if(loggedIn) return (
-    <LinkButton href={EDIT_TIMELINE} disabled={userLoading}>
-      Manage Timeline
+    // <LinkButton href={EDIT_TIMELINE} disabled={userLoading}>
+    //   Manage Timeline
+    // </LinkButton>
+    <LinkButton href={EDIT_PROFILE_DISPLAY} disabled={userLoading}>
+      Edit Profile
     </LinkButton>
   );
 
   return (
     <Button onClick={handleStartClicked} disabled={userLoading}>
-      Get started
+      {/* Get started */}
+      Sign up
     </Button>
   );
 }

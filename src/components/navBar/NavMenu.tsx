@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,33 +9,46 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from 'next/link';
-import { ABOUT, EDIT_GALLERIES, EDIT_PROFILE, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
+import { ABOUT, COMING_SOON, EDIT_GALLERIES, EDIT_PROFILE, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
 import LoginButton from "../general/LoginButton"
 import { cn, truncate } from "@/utils/ui-utils";
 import { useUser } from "@/context/UserProvider";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { P } from "../typography/Typography";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
+import SearchAssetDialog from "../assets/SearchAssetDialog";
 
 const NavMenu: FC = () => {
   const { loggedIn, user } = useUser();
   const {publicKey} = useWallet();
 
+  const [searchAssetOpen, setSearchAssetOpen] = useState(false);
   const activeWallet = truncate(publicKey?.toString());
 
   return (
     <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2">
-      <NavigationMenuList >
+      <SearchAssetDialog open={searchAssetOpen} onOpenChange={setSearchAssetOpen} />
+      
+      <NavigationMenuList>
         <NavigationMenuItem>
           <NavLink label="Z" href={HOME} className="font-serif text-3xl" />
         </NavigationMenuItem>
 
         <NavDropDown trigger={"Explore"}>
           <NavLink label={`About ${TITLE_COPY}`} href={ABOUT} />
-          <NavLink label="Timelines" href="/placeholder" />
-          <NavLink label="Galleries" href="/placeholder" />
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full",
+            )}
+            onClick={() => setSearchAssetOpen(true)}
+          >
+            Search Assets
+          </Button>
+          <NavLink label="Timelines" disabled href={COMING_SOON} />
+          <NavLink label="Galleries" disabled href={COMING_SOON} />
         </NavDropDown>
 
         <NavDropDown trigger={"Profile"}>
@@ -58,9 +71,9 @@ const NavMenu: FC = () => {
           <Separator className="w-full col-span-2" />
 
           <div className="col-span-2 w-full">
-            <Button className="w-full" disabled={!loggedIn}>
-              <Link href="/placeholder">Go to my timeline</Link>
-            </Button>
+            <LinkButton href={COMING_SOON} className="w-full" disabled>
+              Go to my timeline
+            </LinkButton>
           </div>
 
           <div className="w-full bg-muted rounded-md flex items-center justify-center">

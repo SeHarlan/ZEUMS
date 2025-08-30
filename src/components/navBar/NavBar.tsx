@@ -7,44 +7,36 @@ import { MenuIcon, XIcon, ArrowLeft } from 'lucide-react';
 import { cn } from '@/utils/ui-utils';
 import NavMenu from './NavMenu';
 import { useReturnPath } from '@/hooks/useReturnPath';
-
-
-//considering just using CSS cause it works with iframes, leaving js mouse tracking for now
-
-const INTENT_DELAY = 50; //ms
-const TOP_THRESHOLD = 88; //pxs (matches current nav menu hight plus margin)
-const SETUP_DELAY = 25; //ms (small delay to ensure elements are fully rendered)
+import { useNavBarActions } from '@/context/NavBarActionsProvider';
 
 const NavBar: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const timerRef = useRef<NodeJS.Timeout>(null);
-  const mouseInMenuRef = useRef(false);
-  
+
   const returnPath = useReturnPath();
+  const { actions } = useNavBarActions();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // useEffect(() => {
-  //   // Close the menu when the user clicks outside of it
+  useEffect(() => {
+    // Close the menu when the user clicks outside of it
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const menu = menuRef.current;
+      const button = buttonRef.current;
+      if (!menu?.contains(target) && !button?.contains(target)) {
+        setIsMenuOpen(false);
+      }
+    };
 
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     const menu = menuRef.current;
-  //     const button = buttonRef.current;
-  //     if (!menu?.contains(target) && !button?.contains(target)) {
-  //       setIsMenuOpen(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("click", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("click", handleClickOutside);
-  //   };
-  // }, []);
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   // useEffect(() => {
   //   const intentDelay = INTENT_DELAY;
@@ -147,14 +139,7 @@ const NavBar: FC = () => {
           size="icon"
           className={cn(
             "fixed z-100 left-4 lg:left-8 ",
-            "transition-all duration-400 ease-in-out",
-            
-            //new
-            "top-4 lg:top-8",
-            "opacity-0 group-hover/nav-bar:opacity-100",
-            isMenuOpen && "opacity-100 ",
-            //old
-            // isMenuOpen ? "top-4 lg:top-8 opacity-100" : "-top-50 opacity-0",
+            "top-4 lg:top-8"
           )}
         >
           <ArrowLeft />
@@ -167,32 +152,37 @@ const NavBar: FC = () => {
           "w-fit p-2 z-100",
           "bg-background rounded-md shadow-md",
           "transition-all duration-400 ease-in-out",
-
-          //new
           "relative left-1/2 -translate-x-1/2",
-          "top-2 lg:top-6 opacity-0 group-hover/nav-bar:opacity-100",
-          isMenuOpen && "opacity-100 ",
-
-          //old
-          // isMenuOpen ? "top-2 lg:top-6 opacity-100" : "-top-50 opacity-0",
+          "top-2 lg:top-6 opacity-0 hover:opacity-100",
+          isMenuOpen && "opacity-100"
         )}
       >
         <NavMenu />
       </div>
 
       {/* Menu Button - Right side */}
-      <Button
-        variant={isMenuOpen ? "secondary" : "outline"}
-        size="icon"
-        onClick={toggleMenu}
-        ref={buttonRef}
+      <div
         className={cn(
-          "fixed z-100 right-4 lg:right-8",
-          "top-4 lg:top-8",
+          "flex gap-4 fixed z-90 right-4 lg:right-8",
+          "top-4 lg:top-8"
         )}
       >
-        {isMenuOpen ? <XIcon /> : <MenuIcon />}
-      </Button>
+        {actions && (
+          <div className={cn("flex items-center gap-4 opacity-0 duration-300 ease-in-out hover:opacity-100", isMenuOpen && "opacity-100")}>
+            {actions}
+          </div>
+        )}
+
+        
+        <Button
+          variant={"outline"}
+          size="icon"
+          onClick={toggleMenu}
+          ref={buttonRef}
+        >
+          {isMenuOpen ? <XIcon /> : <MenuIcon />}
+        </Button>
+      </div>
     </div>
   );
 };

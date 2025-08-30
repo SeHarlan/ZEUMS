@@ -1,10 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import useSolanaAsset from '@/hooks/useSolanaAsset';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
 import { H1, P } from '@/components/typography/Typography';
 import AutomatedProgress from '@/components/general/AutomatedProgress';
+import { Button } from '@/components/ui/button';
+import { NavBarActions } from '@/context/NavBarActionsProvider';
+import { SearchIcon } from 'lucide-react';
+import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -13,6 +17,15 @@ interface Props {
 export default function SolanaAssetPage({ params }: Props) {
   const resolvedParams = use(params);
   const { solanaAsset, isLoading, isError } = useSolanaAsset(resolvedParams.id);
+  const [searchAssetOpen, setSearchAssetOpen] = useState(false);
+  
+  const handleSearch =() => {
+    setSearchAssetOpen(true);
+  }
+
+  const handleViewMetadata = () => { 
+
+  }
   
   const renderContent = () => {
     if (isLoading) {
@@ -52,6 +65,12 @@ export default function SolanaAssetPage({ params }: Props) {
 
   return (
     <div className="w-full h-screen relative flex items-center justify-center">
+      <NavBarActions>
+        <Button variant={"secondary"} onClick={handleViewMetadata}>View Metadata</Button>
+        <Button variant={"secondary"} size="icon" onClick={handleSearch}><SearchIcon /></Button>
+      </NavBarActions>
+      <SearchAssetDialog open={searchAssetOpen} onOpenChange={setSearchAssetOpen} />
+
       {renderContent()}
     </div>
   );
