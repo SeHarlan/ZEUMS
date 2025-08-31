@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input, PrefixInput } from "@/components/ui/input";
+import { PrefixInput } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { PublicKey } from "@solana/web3.js";
-import { BLOCKCHAIN_MEDIA_PATHS, MEDIA } from "@/constants/clientRoutes";
+import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
 import { ChainIdsEnum } from "@/types/wallet";
 
 interface SearchAssetDialogProps {
@@ -68,15 +68,15 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="sm:max-w-md bg-popover-blur border-none">
+    <Dialog open={open} onOpenChange={onOpenChange} >
+      <DialogContent className="sm:max-w-lg bg-popover-blur ">
         <DialogHeader>
           <DialogTitle>Search Solana Assets</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-2">
           <PrefixInput
-            wrapperClassName="max-w-sm bg-background"
+            wrapperClassName="bg-background"
             icon={<SearchIcon className="max-w-4 max-h-4" />}
             placeholder="Enter Solana mint address"
             value={searchInput}

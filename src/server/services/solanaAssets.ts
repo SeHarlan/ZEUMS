@@ -51,7 +51,7 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
         .then((res) => {
           return res.data.result;
         })
-      
+            
       if (!res || res.items.length == 0) {
         continueFetching = false
         break;

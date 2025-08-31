@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { NavBarActions } from '@/context/NavBarActionsProvider';
 import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
+import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -18,13 +19,14 @@ export default function SolanaAssetPage({ params }: Props) {
   const resolvedParams = use(params);
   const { solanaAsset, isLoading, isError } = useSolanaAsset(resolvedParams.id);
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
-  
+  const [metadataOpen, setMetadataOpen] = useState(false);
+
   const handleSearch =() => {
     setSearchAssetOpen(true);
   }
 
   const handleViewMetadata = () => { 
-
+    setMetadataOpen(true);
   }
   
   const renderContent = () => {
@@ -70,6 +72,7 @@ export default function SolanaAssetPage({ params }: Props) {
         <Button variant={"secondary"} size="icon" onClick={handleSearch}><SearchIcon /></Button>
       </NavBarActions>
       <SearchAssetDialog open={searchAssetOpen} onOpenChange={setSearchAssetOpen} />
+      {solanaAsset && <AssetMetadataDialog open={metadataOpen} onOpenChange={setMetadataOpen} asset={solanaAsset} />}
 
       {renderContent()}
     </div>

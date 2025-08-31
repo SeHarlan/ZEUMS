@@ -42,7 +42,7 @@ export const getDisplayName = (user: DisplayNameFields | null, useTruncation?: b
 export const getPrimaryWallet = (user: UserType | null) => { 
   if (!user?.wallets || user.wallets.length === 0) return null;
 
-  // Assuming the first wallet is the primary one
+  // Assuming the first wallet is the primary one for now
   const primaryWallet = user.wallets[0];
   
   return {

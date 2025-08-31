@@ -25,7 +25,9 @@ export const parseSolanaAssets = (
     const imageUrl = content.links?.image;
     if (!imageUrl) continue;
 
-    if (!creators?.length) continue;
+    // removing for now because some children nfts dont have creators (blame fubby and his ash)
+    //TODO: find smarter way to handle this (or to filter out junk nfts in general)
+    // if (!creators?.length) continue;
 
     // 🚀 TODO exclude collection nfts
     // if(isCollectionNft(asset)) continue;

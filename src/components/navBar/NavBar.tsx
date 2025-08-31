@@ -137,10 +137,7 @@ const NavBar: FC = () => {
           href={returnPath}
           variant="outline"
           size="icon"
-          className={cn(
-            "fixed z-100 left-4 lg:left-8 ",
-            "top-4 lg:top-8"
-          )}
+          className={cn("fixed z-100 left-4 lg:left-8 ", "top-4 lg:top-8")}
         >
           <ArrowLeft />
         </LinkButton>
@@ -149,11 +146,11 @@ const NavBar: FC = () => {
       <div
         ref={menuRef}
         className={cn(
-          "w-fit p-2 z-100",
+          "w-fit p-0 md:p-2 z-100",
           "bg-background rounded-md shadow-md",
           "transition-all duration-400 ease-in-out",
           "relative left-1/2 -translate-x-1/2",
-          "top-2 lg:top-6 opacity-0 hover:opacity-100",
+          "top-4 lg:top-6 opacity-0 hover:opacity-100",
           isMenuOpen && "opacity-100"
         )}
       >
@@ -163,17 +160,21 @@ const NavBar: FC = () => {
       {/* Menu Button - Right side */}
       <div
         className={cn(
-          "flex gap-4 fixed z-90 right-4 lg:right-8",
+          "flex flex-col-reverse md:flex-row items-end gap-4 fixed z-90 right-4 lg:right-8",
           "top-4 lg:top-8"
         )}
       >
         {actions && (
-          <div className={cn("flex items-center gap-4 opacity-0 duration-300 ease-in-out hover:opacity-100", isMenuOpen && "opacity-100")}>
+          <div
+            className={cn(
+              "flex flex-col md:flex-row items-end md:items-center gap-4 opacity-0 duration-300 ease-in-out hover:opacity-100",
+              isMenuOpen && "opacity-100"
+            )}
+          >
             {actions}
           </div>
         )}
 
-        
         <Button
           variant={"outline"}
           size="icon"

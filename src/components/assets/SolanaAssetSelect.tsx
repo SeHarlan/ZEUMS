@@ -136,7 +136,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           onChange={(e) => setSearch(e.target.value)}
         />
       ) : null}
-      <ScrollArea className="flex-1 min-h-0 px-2">
+      <ScrollArea className="flex-1 min-h-0 pr-3">
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
             <P className="text-lg font-bold">

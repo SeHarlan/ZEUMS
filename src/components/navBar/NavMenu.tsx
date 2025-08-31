@@ -9,16 +9,16 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from 'next/link';
-import { ABOUT, COMING_SOON, EDIT_GALLERIES, EDIT_PROFILE, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
+import { ABOUT, COMING_SOON, EDIT_GALLERIES, EDIT_PROFILE, EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
 import LoginButton from "../general/LoginButton"
 import { cn, truncate } from "@/utils/ui-utils";
 import { useUser } from "@/context/UserProvider";
 import { Separator } from "@/components/ui/separator";
 import { Button, LinkButton } from "@/components/ui/button";
-import { P } from "../typography/Typography";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import SearchAssetDialog from "../assets/SearchAssetDialog";
+import { P } from "../typography/Typography";
 
 const NavMenu: FC = () => {
   const { loggedIn, user } = useUser();
@@ -27,11 +27,26 @@ const NavMenu: FC = () => {
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
   const activeWallet = truncate(publicKey?.toString());
 
+  const userNameIsWalletAddress = user?.username === publicKey?.toString();
+
+  const userDisplayName = userNameIsWalletAddress ? (
+    <P>{activeWallet}</P>
+  ) : (
+    <P>
+      {truncate(user?.username)}<span className="text-xs italic"> - {activeWallet}</span>
+    </P>
+  );
+
+  const noUserDisplayName = <P className="font-serif">Z</P>;
+
   return (
-    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2">
-      <SearchAssetDialog open={searchAssetOpen} onOpenChange={setSearchAssetOpen} />
-      
-      <NavigationMenuList>
+    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2 max-w-[90vw]">
+      <SearchAssetDialog
+        open={searchAssetOpen}
+        onOpenChange={setSearchAssetOpen}
+      />
+
+      <NavigationMenuList >
         <NavigationMenuItem>
           <NavLink label="Z" href={HOME} className="font-serif text-3xl" />
         </NavigationMenuItem>
@@ -40,9 +55,7 @@ const NavMenu: FC = () => {
           <NavLink label={`About ${TITLE_COPY}`} href={ABOUT} />
           <Button
             variant="ghost"
-            className={cn(
-              "w-full",
-            )}
+            className={cn("w-full")}
             onClick={() => setSearchAssetOpen(true)}
           >
             Search Assets
@@ -54,34 +67,50 @@ const NavMenu: FC = () => {
         <NavDropDown trigger={"Profile"}>
           <NavLink
             label="Profile Settings"
-            href={EDIT_PROFILE}
+            href={EDIT_PROFILE_DISPLAY}
             disabled={!loggedIn}
+            className="order-1"
           />
           <NavLink
             label="Edit Timeline"
             href={EDIT_TIMELINE}
             disabled={!loggedIn}
+            className="order-2"
           />
           <NavLink
             label="Manage Galleries"
             href={EDIT_GALLERIES}
             disabled={!loggedIn}
+            className="order-3"
           />
 
-          <Separator className="w-full col-span-2" />
+          <Separator className="w-full md:col-span-2 order-4" />
 
-          <div className="col-span-2 w-full">
-            <LinkButton href={COMING_SOON} className="w-full" disabled>
-              Go to my timeline
-            </LinkButton>
-          </div>
+          <LinkButton
+            href={COMING_SOON}
+            className="md:col-span-2 w-full order-5"
+            // disabled
+          >
+            Go to my timeline
+          </LinkButton>
 
-          <div className="w-full bg-muted rounded-md flex items-center justify-center">
-            <P className="text-center text-muted-foreground text-sm">
-              {user ? `${truncate(user.username)} - ${activeWallet}` : "Z"}
-            </P>
-          </div>
-          <LoginButton variant={loggedIn ? "outline" : "default"} />
+          <LoginButton
+            className="order-6 md:order-7"
+            variant={loggedIn ? "outline" : "default"}
+          />
+
+          <LinkButton
+            href={EDIT_PROFILE_ACCOUNT}
+            className={cn(
+              "order-7 md:order-6",
+              !loggedIn && "font-serif" //for default Z when no user
+            )}
+            variant="secondary"
+            disabled={!loggedIn}
+          >
+            {loggedIn ? userDisplayName : noUserDisplayName}
+          </LinkButton>
+
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>

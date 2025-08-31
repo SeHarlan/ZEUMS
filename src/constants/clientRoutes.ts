@@ -34,3 +34,5 @@ export const EDIT_PROFILE_RETURN_KEY = "edit-profile";
 export const EDIT_GALLERIES_RETURN_KEY = "edit-galleries";
 export const EDIT_TIMELINE_RETURN_KEY = "edit-timeline";
 
+export const SOLANA_ASSET_RETURN_KEY = "solana";
+

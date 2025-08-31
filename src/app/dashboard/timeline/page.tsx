@@ -20,7 +20,17 @@ export default function EditTimelinePage() {
       <PageTurnLeft path={EDIT_PROFILE} />
       <PageTurnRight path={EDIT_GALLERIES} />
       <GlitchFeedback title={"Timeline"} subtitle={"Coming very soon..."} />
-      {/* <Card>
+    </PageContainer>
+  )
+  return (
+    <PageContainer maxWidth="large">
+      <PageHeading
+        title="Timeline"
+        subtitle="Create and edit timeline entries"
+      />
+      <PageTurnLeft path={EDIT_PROFILE} />
+      <PageTurnRight path={EDIT_GALLERIES} />
+      <Card>
         <CardContent>
           <Tabs defaultValue={EditTimelineTab.ARTIST}>
             <TabsList className="w-full justify-stretch">
@@ -51,7 +61,7 @@ export default function EditTimelinePage() {
             </TabsContent>
           </Tabs>
         </CardContent>
-      </Card> */}
+      </Card>
     </PageContainer>
   );
 }
