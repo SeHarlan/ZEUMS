@@ -81,12 +81,13 @@ const getProvider = () => {
 }
 
 
-//req: NextRequest
-export const getAuthOptions = () => {
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getAuthOptions = (req: NextRequest) => {
   const providers = getProvider();
 
   // const isDefaultSigninPage =
-    // req.method === "GET" && req.query.nextauth?.includes("signin");
+  // req.method === "GET" && req.query.nextauth?.includes("signin");
 
   // // Hides Sign-In with Solana from the default sign page
   // if (isDefaultSigninPage) {
@@ -115,7 +116,7 @@ export const getAuthOptions = () => {
         return session;
       },
     },
-  } ;
+  };
 
   return config;
 };
@@ -126,7 +127,7 @@ export async function authHandler(req: NextRequest, body: unknown): Promise<Resp
   try {
     await connectToDatabase();
 
-    const authOptions = getAuthOptions();//(req);
+    const authOptions = getAuthOptions(req);
     const handler = NextAuth(authOptions);
 
     const response = await handler(req, body);
