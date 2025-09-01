@@ -135,7 +135,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           vec2 orgSt = st;
           
-          float t = time * 0.001 * .5;
+          float t = time * 0.001 * .4;
           float blockTime = floor(time * 20.);
 
                    
@@ -197,7 +197,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           ///////////
           float size = .025;
           float strength = .01 + glitchIntensity;
-          float blockTimeZ = floor(time * 1.);
+          float blockTimeZ = floor(1. + time * .5);
 
 
           float blockSizeMult = random(vec2(blockTimeZ));

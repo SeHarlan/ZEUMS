@@ -25,7 +25,7 @@ export const ProtectedRoute = ({
   }, [loggedIn, userLoading, router, fallbackUrl, pathname]);
 
 
-  if (userLoading ) {
+  if (userLoading) {
     return <LoadingPage complete={loggedIn} loading={userLoading} />
   }
 
