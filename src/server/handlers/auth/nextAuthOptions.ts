@@ -126,7 +126,7 @@ export async function authHandler(req: NextRequest, body: unknown): Promise<Resp
   try {
     await connectToDatabase();
 
-    const authOptions = getAuthOptions(req);
+    const authOptions = getAuthOptions();//(req);
     const handler = NextAuth(authOptions);
 
     const response = await handler(req, body);
