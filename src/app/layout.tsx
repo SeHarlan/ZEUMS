@@ -11,6 +11,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
 import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Suspense } from "react";
 
 
 const dmSerif = DM_Serif_Text({
@@ -55,7 +56,9 @@ export default function RootLayout({
             <UserContextProvider>
               <NavBarActionsProvider>
                 <ScrollArea className="h-screen">
-                  <NavBar />
+                  <Suspense fallback={<nav />}>
+                    <NavBar />
+                  </Suspense>
                   {children}
                   <Toaster />
                 </ScrollArea>
