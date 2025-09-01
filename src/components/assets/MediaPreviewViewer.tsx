@@ -1,6 +1,6 @@
 import { isBlockchainImage, isUserImage, MediaCategory, MediaType } from "@/types/media";
 import { FC, useState } from "react";
-import { VideoViewer } from "../media/VideoViewer";
+import VideoViewer from "../media/VideoViewer";
 import { getMediaUrl } from "@/utils/media";
 import HtmlViewer from "../media/HtmlViewer";
 import ModelViewer from "../media/ModelViewer";

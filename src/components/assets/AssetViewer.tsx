@@ -7,7 +7,7 @@ import { getMediaUrl } from "@/utils/media";
 import { BoxIcon, Code2Icon, FullscreenIcon, ImageOffIcon, VideoOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 import { MediaCategory } from "@/types/media";
-import { VideoViewer } from "../media/VideoViewer";
+import VideoViewer from "../media/VideoViewer";
 import { LinkButton } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { BlockchainAssetEntry, EntryTypes, UserAssetEntry } from "@/types/entry";
