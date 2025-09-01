@@ -56,7 +56,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
     >
       <model-viewer
         className={cn(
-          "w-full h-full min-h-50 transition-opacity duration-500 object-cover",
+          "w-full h-full min-h-50 transition-opacity duration-500 object-cover p-4",
           isLoading ? "opacity-33" : "opacity-100",
           className
         )}

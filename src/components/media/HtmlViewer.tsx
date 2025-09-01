@@ -27,7 +27,7 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
     >
       <iframe
         className={cn(
-          "w-full h-full transition-opacity duration-500",
+          "w-full h-full transition-opacity duration-500 touch-none",
           isLoading ? "opacity-33" : "opacity-100",
           className
         )}
