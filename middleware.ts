@@ -11,7 +11,9 @@ export async function middleware(request: NextRequest) {
   // Allow public routes to pass through
   const isPublicRoute = pathname.includes("/public");
 
-  if (isPublicRoute || isAuthRoute) {
+  const isAssetRoute = pathname.includes("/assets");
+
+  if (isPublicRoute || isAuthRoute || isAssetRoute) {
     return NextResponse.next();
   }
 
