@@ -10,7 +10,6 @@ import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import LoadingPage from '@/components/general/LoadingPage';
-import { MediaCategory } from '@/types/media';
 
 interface Props {
   params: Promise<{ id: string }>;

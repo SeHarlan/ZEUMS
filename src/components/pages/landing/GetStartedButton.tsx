@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/UserProvider";
-import { EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE } from "@/constants/clientRoutes";
+import { EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY } from "@/constants/clientRoutes";
 import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/ui/button";

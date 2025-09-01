@@ -81,12 +81,12 @@ const getProvider = () => {
 }
 
 
-
-export const getAuthOptions = (req: NextRequest) => {
+//req: NextRequest
+export const getAuthOptions = () => {
   const providers = getProvider();
 
   // const isDefaultSigninPage =
-  //   req.method === "GET" && req.query.nextauth?.includes("signin");
+    // req.method === "GET" && req.query.nextauth?.includes("signin");
 
   // // Hides Sign-In with Solana from the default sign page
   // if (isDefaultSigninPage) {

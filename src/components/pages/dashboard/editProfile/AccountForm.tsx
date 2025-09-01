@@ -75,10 +75,10 @@ const ProfileAccountForm: FC = () => {
       });
   };
 
-  const addWallet = () => {
-    // const currentWallets = form.getValues("wallets") || [];
-    // form.setValue("wallets", [...currentWallets, ""]);
-  };
+  // const addWallet = () => {
+  //   // const currentWallets = form.getValues("wallets") || [];
+  //   // form.setValue("wallets", [...currentWallets, ""]);
+  // };
 
   return (
     <Form {...form}>
