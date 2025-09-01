@@ -48,6 +48,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --animate-skeleton-shimmer: skeleton-fade-bw 2s infinite linear;
+   --height-screen: 100dvh;
 }
 
 :root {
@@ -141,3 +142,4 @@
     .animate-skeleton-shimmer { animation: none; }
   }
 }
+

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 import { MediaCategory } from "@/types/media";
-import { VideoViewer } from "../media/VideoViewer";
+import VideoViewer from "../media/VideoViewer";
 import HtmlViewer from "../media/HtmlViewer";
 import ModelViewer from "../media/ModelViewer";
 import { UserAssetEntry } from "@/types/entry";
@@ -54,6 +54,8 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
         <VideoViewer
           src={getMediaUrl(media)}
           poster={imageUrl}
+          autoPlay
+          loop
           controls
           muted={false}
           onError={handleMediaError}
