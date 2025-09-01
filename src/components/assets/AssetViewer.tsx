@@ -57,19 +57,21 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
   const renderContent = () => {
     if (media.category === MediaCategory.Video) {
-      if (videoError) return <VideoOffIcon className="min-h-14 min-w-14" />;
+      if (videoError) return <VideoOffIcon className="size-14" />;
 
       return (
         <VideoViewer
           src={getMediaUrl(media)}
           poster={imageUrl}
           onError={() => setVideoError(true)}
+          minimalControls
+          muted={false}
         />
       );
     }
 
     //broken image
-    if (isError) return <ImageOffIcon className="min-h-14 min-w-14" />;
+    if (isError) return <ImageOffIcon className="size-14" />;
 
     return (
       <Image

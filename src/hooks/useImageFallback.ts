@@ -12,10 +12,9 @@ export const useImageFallback = (media: MediaType) => {
   }, [media]);
   
   const onError = () => {
-    if (imageIndex < sources.length - 1) {
-      setImageIndex((prevIndex) => prevIndex + 1);
-    }
+    setImageIndex((prevIndex) => prevIndex + 1);
   }
+  
   const onLoad = () => setLoaded(true);
   
   const sources = getImageUrlSources(media);
@@ -23,7 +22,7 @@ export const useImageFallback = (media: MediaType) => {
   const isFallbackActive = imageIndex > 0;
 
   const noImage = !imageUrl || imageIndex >= sources.length;
-  const isError = isLoaded && noImage; //no valid image or all sources failed
+  const isError = noImage; //no valid image or all sources failed
   
   const isLoading = !isLoaded && !isError
 

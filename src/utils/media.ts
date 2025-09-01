@@ -12,11 +12,7 @@ export const getImageUrlSources = (media: MediaType): string[] => {
 
   const sources = [];
 
-  if (isBlockchainMedia(media) || isBlockchainImage(media)) {
-    // For blockchain media, include the original url
-    sources.push(media.imageUrl);
-  }
-
+  //try CDNs first
   if (cdn) {
     const { type, cdnId } = cdn;
     if (type === CdnIdType.HELIUS_URL) {
@@ -25,6 +21,11 @@ export const getImageUrlSources = (media: MediaType): string[] => {
       // TODO: Cloudinary, will need to construct this URL
       sources.push(cdnId);
     }
+  }
+
+  if (isBlockchainMedia(media) || isBlockchainImage(media)) {
+    // For blockchain media, include the original url
+    sources.push(media.imageUrl);
   }
 
   return sources.length > 0

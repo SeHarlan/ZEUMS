@@ -3,8 +3,7 @@
 import { useUser } from "@/context/UserProvider";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, } from "react";
-import { H1 } from "../typography/Typography";
-import AutomatedProgress from "../general/AutomatedProgress";
+import LoadingPage from "../general/LoadingPage";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,13 +25,8 @@ export const ProtectedRoute = ({
   }, [loggedIn, userLoading, router, fallbackUrl, pathname]);
 
 
-  if (userLoading) {
-    return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen max-w-xl mx-auto p-8">
-        <H1>Z</H1>
-        <AutomatedProgress complete={loggedIn} loading={userLoading} />
-      </div>
-    );
+  if (userLoading ) {
+    return <LoadingPage complete={loggedIn} loading={userLoading} />
   }
 
   if (!loggedIn) {

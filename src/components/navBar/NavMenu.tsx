@@ -9,7 +9,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from 'next/link';
-import { ABOUT, COMING_SOON, EDIT_GALLERIES, EDIT_PROFILE, EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
+import { ABOUT, COMING_SOON, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
 import LoginButton from "../general/LoginButton"
 import { cn, truncate } from "@/utils/ui-utils";
 import { useUser } from "@/context/UserProvider";
@@ -19,6 +19,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import SearchAssetDialog from "../assets/SearchAssetDialog";
 import { P } from "../typography/Typography";
+import Logo from "../general/Logo";
 
 const NavMenu: FC = () => {
   const { loggedIn, user } = useUser();
@@ -46,9 +47,11 @@ const NavMenu: FC = () => {
         onOpenChange={setSearchAssetOpen}
       />
 
-      <NavigationMenuList >
-        <NavigationMenuItem>
-          <NavLink label="Z" href={HOME} className="font-serif text-3xl" />
+      <NavigationMenuList>
+        <NavigationMenuItem className="h-9 w-9">
+          <LinkButton href={HOME} size="icon" variant="link" className="p-0 overflow-hidden">
+            <Logo />
+          </LinkButton>
         </NavigationMenuItem>
 
         <NavDropDown trigger={"Explore"}>
@@ -89,7 +92,7 @@ const NavMenu: FC = () => {
           <LinkButton
             href={COMING_SOON}
             className="md:col-span-2 w-full order-5"
-            // disabled
+            disabled
           >
             Go to my timeline
           </LinkButton>
@@ -110,7 +113,6 @@ const NavMenu: FC = () => {
           >
             {loggedIn ? userDisplayName : noUserDisplayName}
           </LinkButton>
-
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>

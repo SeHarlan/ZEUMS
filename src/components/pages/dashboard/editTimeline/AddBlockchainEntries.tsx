@@ -4,7 +4,7 @@ import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -119,6 +119,9 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
       <DialogContent className="lg:max-w-4xl h-full flex flex-col">
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="w-fit">Select Blockchain Assets</DialogTitle>
+          <DialogDescription className="sr-only">
+            This dialog allows you to select blockchain assets to add to your timeline.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 min-h-0">

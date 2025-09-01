@@ -68,6 +68,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         glitchIntensity: { value: 0 },
         resolution: { value: new THREE.Vector2(size.width, size.height) },
         chunk: { value: pixelChunkSize },
+        dpr: { value: window.devicePixelRatio || 1 },
         textureResolution: {
           value: new THREE.Vector2(
             textTexture.image.width,
@@ -80,6 +81,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         uniform float time;
         uniform vec2 mouse;
         uniform float glitchIntensity;
+
         
         void main() {
           vUv = uv;
@@ -96,6 +98,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         uniform float chunk;
         uniform vec2 textureResolution;
         varying vec2 vUv;
+        uniform float dpr;
         
         // Noise functions
         float random(vec2 st) {
@@ -132,7 +135,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           vec2 orgSt = st;
           
-          float t = time * 0.001;
+          float t = time * 0.001 * .5;
           float blockTime = floor(time * 20.);
 
                    
@@ -141,9 +144,8 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           vec2 norm_mouse = mouse * .5 + .5;
 
-           float glitchSquared = glitchIntensity * glitchIntensity;
+          float glitchSquared = glitchIntensity * glitchIntensity;
         
-
           float screenAspectRatio = resolution.x / resolution.y;
           float textureAspect = textureResolution.x / textureResolution.y;          
 
@@ -183,7 +185,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           bool useGlitch = random(vec2(floor(time))) < 0.5 + glitchIntensity;
 
           if(useGlitch) {
-            st += random(st * vec2(1000.01, .01) + blockTime * 0.1) * 0.002;
+            st.y += random(st * vec2(1000.01, .01) + blockTime * 0.1) * 0.002;
           }
 
 
@@ -191,6 +193,50 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           st.y += random(posBlockFloor + 10. - t) * randomNegNeuPos(posBlockFloor - t + 10., 0.5 * glitchSquared) * glitchSquared * (0.01 + mouseDisplacement) * .1;
 
 
+          //ZIGZAG
+          ///////////
+          float size = .025;
+          float strength = .01 + glitchIntensity;
+          float blockTimeZ = floor(time * 1.);
+
+
+          float blockSizeMult = random(vec2(blockTimeZ));
+          
+          float blockSizeZ = blockSizeMult * size;
+
+          vec2 blockFloor = floor(st / blockSizeZ);
+          vec2 blockFract = fract(st / blockSizeZ);
+          
+          float floorCord = blockFloor.y;
+          
+          float glitchRan = random(vec2(floorCord) + blockTimeZ);
+          bool useGlitchZ = glitchRan < 0.01 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
+
+
+          
+          
+          if(useGlitchZ && useGlitch) {
+            
+            float fractCoord = blockFract.y ;
+            
+            float directionRan = random(vec2(floorCord) + blockTimeZ + 12.);
+            float multRan = random(vec2(floorCord) * blockTimeZ + 20.);
+            float stutterRan = random(vec2(floorCord) + time + 30.);
+            
+            float zagDirection = directionRan < 0.5 ? -1. : 1.;
+            
+            float timeFract = fract(time + 0.5) * stutterRan;
+            
+            float stutter = (.5 - abs(0.5 - timeFract));
+            float zagMult = multRan * stutter * strength;
+            float zagger = (.5 - abs(0.5 - fractCoord));
+
+            float zagAmount = zagMult * zagger;
+            
+            st.x += zagDirection * zagAmount ;
+          }
+            
+        ///////////
           // Center and scale the texture coordinates to maintain aspect ratio
           vec2 centeredUV = st - 0.5;
           if (screenAspectRatio > textureAspect) {
@@ -217,7 +263,6 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           vec2 rgbChunk = orgSt * vec2(0.001, 50.1) * .1;
 
-
           float rgbValue = random(rgbChunk + st + vec2(blockTime, 0.));
 
           if((rgbValue < mouseDisplacement - 0.5)) {
@@ -235,7 +280,13 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
             
           //static outside text
           if(text.a < 0.5) {
-            color += randomNegNeuPos(st * vec2(0.01)+ vec2(fract(t)) , 0.01 +  glitchSquared *  0.1 * (centralDist-0.1));
+            vec2 pixelCoord = st * resolution;
+            vec2 stDpr = floor(pixelCoord / vec2(dpr, 1.)) / resolution;
+            vec2 ranSt = mix(stDpr * vec2(.005) - vec2(fract(time * 0.005), 0.), stDpr, 0.1);
+
+            float ranMult = 0.075 +  glitchSquared *  0.1 * (centralDist-0.1) * dpr;
+
+            color -= random(ranSt) * randomNegNeuPos(ranSt, 0.45) * ranMult;
           }
             
           float shimmer = 0.2 ;
@@ -261,8 +312,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         textTexture.image.width,
         textTexture.image.height
       );
-      // shaderMaterial.uniforms.chunk.value =
-      //   pixelChunkSize * Math.min(size.width / 1920, 1);
+      shaderMaterial.uniforms.dpr.value = window.devicePixelRatio || 1; // Update DPR
     }
   }, [size, shaderMaterial, textTexture]);
 

@@ -9,7 +9,7 @@ import { getImageAspectRatio, getMediaUrl, getVideoAspectRatio } from "@/utils/m
 import { MediaCategory } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
 import { toast } from "sonner";
-import LoadingSpinner from "../general/LoadingSpinner";
+import { BoxIcon, Code2Icon } from "lucide-react";
 
 interface AssetThumbnailCardProps {
   asset: ParsedBlockChainAsset;
@@ -69,7 +69,6 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     videoElement.onloadedmetadata = () => {
       if (isProcessed) return;
       const ratio = getVideoAspectRatio(videoElement);
-      console.log("🚀 ~ handleClick ~ ratio:", ratio)
       setAspectRatio(asset, ratio); //cache incase the video asset is unclicked and reclicked
       onClick?.(ratio); //send immediately on click for main function
       cleanup(); // Stop here, don't load video data
@@ -89,6 +88,19 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     setLoading(true)
   }
 
+  const useIcon = asset.media.category === MediaCategory.Vr || asset.media.category === MediaCategory.Html;
+
+  const renderMediaIcon = () => {
+    switch (asset.media.category) {
+      case MediaCategory.Vr:
+        return <BoxIcon  className="size-5"/>;
+      case MediaCategory.Html:
+        return <Code2Icon className="size-5"/>;
+      default: // Image and Video
+        return null;
+    }
+  };
+
   return (
     <Card
       className={cn(
@@ -98,7 +110,12 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
-        {loading && <LoadingSpinner className="absolute-center z-10" />}
+
+        {useIcon &&
+          <div className="z-10 absolute top-3 right-3 bg-popover-blur p-1 rounded-full shadow-md text-muted-foreground">
+            {renderMediaIcon()}
+          </div>
+        }
         <AssetThumbnail asset={asset} onLoad={handleLoad} objectFit="object-contain"/>
       </CardContent>
 

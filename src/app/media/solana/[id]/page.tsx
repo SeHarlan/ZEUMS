@@ -3,13 +3,14 @@
 import { use, useState } from 'react';
 import useSolanaAsset from '@/hooks/useSolanaAsset';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
-import { H1, P } from '@/components/typography/Typography';
-import AutomatedProgress from '@/components/general/AutomatedProgress';
+import { P } from '@/components/typography/Typography';
 import { Button } from '@/components/ui/button';
 import { NavBarActions } from '@/context/NavBarActionsProvider';
 import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
+import LoadingPage from '@/components/general/LoadingPage';
+import { MediaCategory } from '@/types/media';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -28,15 +29,10 @@ export default function SolanaAssetPage({ params }: Props) {
   const handleViewMetadata = () => { 
     setMetadataOpen(true);
   }
-  
+
   const renderContent = () => {
     if (isLoading) {
-      return (
-        <div className="w-full max-w-xl p-8 space-y-4">
-          <H1 className="text-center">Z</H1>
-          <AutomatedProgress complete={false} loading={true} />
-        </div>
-      );
+      return <LoadingPage complete={false} loading={true} />
     }
 
     // TODO style these better

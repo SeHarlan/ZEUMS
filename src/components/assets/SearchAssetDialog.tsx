@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrefixInput } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchIcon } from "lucide-react";
 import { PublicKey } from "@solana/web3.js";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
@@ -68,10 +68,13 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} >
-      <DialogContent className="sm:max-w-lg bg-popover-blur ">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg bg-popover-blur">
         <DialogHeader>
           <DialogTitle>Search Solana Assets</DialogTitle>
+          <DialogDescription className="sr-only">
+            This dialog allows you to search for Solana assets.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">

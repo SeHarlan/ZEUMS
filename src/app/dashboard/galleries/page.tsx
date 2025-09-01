@@ -6,7 +6,7 @@ import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 
 export default function EditGalleriesPage() {
   return (
-    <PageContainer>
+    <PageContainer maxWidth="large">
       <PageHeading
         title="Galleries"
         subtitle="Create and manage your galleries"

@@ -21,7 +21,7 @@ const Pagination: React.FC<PaginationProps> = ({
   className
 }) => { 
 
-  const totalPages  = Math.floor(totalItems / perPage);
+  const totalPages = Math.ceil(totalItems / perPage) - 1;
   return (
     <div className={cn("relative mx-auto w-fit", className)}>
       <div className="flex justify-center items-center gap-2">

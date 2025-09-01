@@ -1,6 +1,6 @@
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
-import { GetAssetResponse, File } from "@/types/helius";
+import { GetAssetResponse, File, Interface } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
 
@@ -12,42 +12,47 @@ export const parseSolanaAssets = (
   const editionMap: Record<string, ParsedBlockChainAsset> = {}; 
 
   for (const asset of rawAssets) {
-    const {
-      content,
-      creators,
-      ownership,
-      id,
-    } = asset;
+    const { content, creators, ownership, id, grouping, authorities } = asset;
 
-    if (!content || !content.files || !content.links || !content.metadata)
-      continue;
 
+    ///////FILTER OUT SPAM NFTs
+    if (!content || !content.files || !content.links || !content.metadata) continue;
     const imageUrl = content.links?.image;
+
+    // Must have proper content
     if (!imageUrl) continue;
+    if (!content.metadata?.name) continue;
 
-    // removing for now because some children nfts dont have creators (blame fubby and his ash)
     //TODO: find smarter way to handle this (or to filter out junk nfts in general)
-    // if (!creators?.length) continue;
+    // allowing no creators for now because some children nfts dont have creators (blame fubby and his ash)
+    const hasVerifiedCreator = creators?.some((c) => c.verified);
+    const hasCollection = !!grouping?.[0];
+    if (!hasVerifiedCreator && !hasCollection) continue;
 
-    // 🚀 TODO exclude collection nfts
-    // if(isCollectionNft(asset)) continue;
+    // Must not have excessive authorities (spam indicator)
+    if (authorities && authorities.length > 5) continue;
+    //////
 
-    const attributes: BlockchainAttribute[] = content.metadata.attributes?.length
+    if(isCollectionNft(asset)) continue;
+
+    const attributes: BlockchainAttribute[] = content.metadata.attributes
+      ?.length
       ? content.metadata.attributes?.map((a) => ({
           type: a.trait_type,
           value: a.value,
         }))
       : [];
 
-    const onChainCreators = creators.map((creator) => ({
-      address: creator.address,
-      share: creator.share,
-    }))
+    const onChainCreators =
+      creators?.map((creator) => ({
+        address: creator.address,
+        share: creator.share,
+      })) || [];
 
     const onChainOwner = {
-      address: ownership.owner
-    }
-      
+      address: ownership.owner,
+    };
+
     //parse media and figure out category
     const { imageCdnUrl, videoUrl, htmlUrl, vrUrl } = parseSolanaMedia({
       files: content.files,
@@ -89,18 +94,19 @@ export const parseSolanaAssets = (
       media,
     };
 
-    const isEdition = asset.supply?.print_max_supply || asset.supply?.edition_number;
+    const isEdition =
+      asset.supply?.print_max_supply || asset.supply?.edition_number;
 
     if (isEdition) {
       //replace key url characters for a safe string
-      const editionKey = imageUrl.replaceAll(/[^a-zA-Z0-9]/g, "-")
+      const editionKey = imageUrl.replaceAll(/[^a-zA-Z0-9]/g, "-");
 
       //only add one edition
-      editionMap[editionKey] = parsedAsset
+      editionMap[editionKey] = parsedAsset;
     } else {
       //add normally
       parsedAssets.push(parsedAsset);
-    } 
+    }
   }
 
   //add editions to the parsed assets
@@ -156,4 +162,13 @@ export const parseSolanaMedia = ({ files, animationUrl }: ParseSolanaMediaProps)
     htmlUrl,
     vrUrl,
   }
+}
+
+function isCollectionNft(asset: GetAssetResponse): boolean {
+
+  // finds core collections
+  if (asset.interface === Interface.MPL_CORE_COLLECTION) return true;
+
+  //TODO find way to handle legacy collection types
+  return false;
 }

@@ -39,7 +39,10 @@ const ScrollableDialog: FC<ScrollableDialogProps> = ({
       >
         <DialogHeader className="row-start-1 px-3">
           {title && <DialogTitle>{title}</DialogTitle>}
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description
+            ? <DialogDescription>{description}</DialogDescription>
+            : <DialogDescription className="sr-only">This is a dialog for {title}</DialogDescription>
+          }
         </DialogHeader>
 
         <div className="row-start-2 min-h-0">

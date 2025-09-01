@@ -14,7 +14,7 @@ export const getSingleSolanaAsset = async (mintAddress: string): Promise<GetAsse
     method: "getAsset",
     params: {
       id: mintAddress,
-      displayOptions: {
+      options: {
         showUnverifiedCollections: true,
         showCollectionMetadata: true,
       },

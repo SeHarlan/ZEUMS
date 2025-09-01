@@ -1,7 +1,7 @@
 import { isBlockchainImage, isUserImage, MediaCategory, MediaType } from "@/types/media";
 import { FC, useState } from "react";
 import { VideoViewer } from "../media/VideoViewer";
-import { getImageUrlSources, getMediaUrl } from "@/utils/media";
+import { getMediaUrl } from "@/utils/media";
 import HtmlViewer from "../media/HtmlViewer";
 import ModelViewer from "../media/ModelViewer";
 import { MonitorOffIcon } from "lucide-react";
@@ -29,18 +29,16 @@ const MediaPreviewViewer: FC<MediaPreviewViewerProps> = ({
     if (isBlockchainImage(media) || isUserImage(media)) return null;
 
     if (isError) { 
-      return <MonitorOffIcon className="min-h-14 min-w-14" />
+      return <MonitorOffIcon className="size-8" />
     }
 
     const mediaUrl = getMediaUrl(media);
-    const imageUrl = getImageUrlSources(media)[0];
 
     switch (media.category) { 
       case MediaCategory.Video:
         return (
           <VideoViewer
             src={mediaUrl}
-            poster={imageUrl}
             minimalControls
             onLoadedMetadata={onVideoLoad}
             onError={handleError}
@@ -57,7 +55,6 @@ const MediaPreviewViewer: FC<MediaPreviewViewerProps> = ({
         return (
           <ModelViewer
             src={mediaUrl}
-            poster={imageUrl}
             onError={handleError}
           />
         )

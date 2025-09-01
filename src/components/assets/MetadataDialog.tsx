@@ -7,7 +7,7 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import ScrollableDialog from "../general/ScrollableDialog";
 import { P, H3 } from "../typography/Typography";
 import { Separator } from "@/components/ui/separator";
-import { truncate } from "@/utils/ui-utils";
+import { cn, truncate } from "@/utils/ui-utils";
 import { EntrySource } from "@/types/entry";
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
@@ -73,16 +73,12 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
             >
               <div className="space-y-2 grid sm:grid-cols-2 gap-4">
                 {asset.onChainCreators.map((creator) => (
-                  <div
+                  <AddressTag
                     key={creator.address}
-                    className="flex items-center justify-between"
-                  >
-                    <AddressTag
-                      address={creator.address}
-                      variant="secondary"
-                      share={creator?.share}
-                    />
-                  </div>
+                    address={creator.address}
+                    variant="secondary"
+                    share={creator?.share}
+                  />
                 ))}
               </div>
             </MetadataSection>
@@ -110,9 +106,7 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
         {childrenAssets && childrenAssets.length > 0 && (
           <>
             <Separator />
-            <MetadataSection
-              title={`Child Assets (${childrenAssets.length})`}
-            >
+            <MetadataSection title={`Child Assets (${childrenAssets.length})`}>
               <div className="space-y-2 grid sm:grid-cols-2 gap-4">
                 {childrenAssets.map((childrenAsset) => (
                   <ChildrenAsset
@@ -149,11 +143,13 @@ interface AddressTagProps {
   address: string;
   variant?: "default" | "secondary" | "outline";
   share?: number;
+  className?: string;
 }
 const AddressTag: FC<AddressTagProps> = ({
   address,
   variant = "secondary",
   share,
+  className,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -167,20 +163,20 @@ const AddressTag: FC<AddressTagProps> = ({
     }
   };
 
-  const openSolscan = () => {
+  const openExplorer = () => {
     window.open(SOLANA_BLOCKCHAIN_EXPLORER(address), "_blank");
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <Button
         variant={variant}
         size="sm"
         className="h-7 px-2 text-xs font-mono"
-        onClick={openSolscan}
+        onClick={openExplorer}
       >
         {truncate(address, 8)}
-        {share && (
+        {share !== undefined && (
           <span className="text-xs text-muted-foreground ml-1">{share}%</span>
         )}
         <ExternalLink className="ml-1 h-3 w-3" />

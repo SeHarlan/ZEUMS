@@ -192,7 +192,7 @@ export const VideoViewer: FC<VideoViewerProps> = ({
         playsInline
         className={cn(
           "w-full",
-          "object-cover transition-opacity duration-300",
+          "object-cover transition-opacity duration-500",
           isLoading ? "opacity-33" : "opacity-100",
           className
         )}
@@ -209,13 +209,15 @@ export const VideoViewer: FC<VideoViewerProps> = ({
           )}
         >
           {/* Progress bar */}
-          {/* <Slider
-            value={[currentTime]}
-            max={duration}
-            step={0.1}
-            onValueChange={handleSeek}
-            className={cn("mb-2", minimalControls ? "hidden" : "block")}
-          /> */}
+          <div className={cn("p-4", minimalControls ? "hidden" : "block")}>
+            <Slider
+              value={[currentTime]}
+              max={duration}
+              reversed
+              step={0.1}
+              onValueChange={handleSeek}
+            />
+          </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -245,8 +247,9 @@ export const VideoViewer: FC<VideoViewerProps> = ({
                 )}
               </Button>
 
-              <div className={cn("w-20", minimalControls ? "hidden" : "block")}>
+              <div className={cn("w-20")}>
                 <Slider
+                  reversed
                   value={[volume]}
                   max={1}
                   step={0.1}

@@ -35,10 +35,11 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
           [sourceParamKey]: publicKey,
           page: page,
           limit: maxBatch,
-          displayOptions: {
-            showUnverifiedCollections: true,
+          options: {
+            showUnverifiedCollections: false,
             // showCollectionMetadata: true,
           },
+          
           // sortBy: {
           //   sortBy: "created",
           //   sortDirection: "desc",

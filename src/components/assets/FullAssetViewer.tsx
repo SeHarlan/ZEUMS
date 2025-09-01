@@ -4,9 +4,7 @@ import Image from "next/image";
 import { FC, useState } from "react";
 import { getMediaUrl } from "@/utils/media";
 import { 
-  BoxIcon, 
   ImageOffIcon, 
-  VideoOffIcon, 
   MonitorOffIcon 
 } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
@@ -31,9 +29,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
     useImageFallback(asset.media);
 
-  const [videoError, setVideoError] = useState(false);
-  const [htmlError, setHtmlError] = useState(false);
-  const [modelError, setModelError] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
 
   const media = asset.media;
   const alt = asset.title || "Asset Media";
@@ -43,31 +39,24 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   //other media types handle their own loading states
   const isImageLoading = isLoading && isImage;
 
-  const handleVideoError = () => {
-    setVideoError(true);
-  };
-
-  const handleHtmlError = () => {
-    setHtmlError(true);
-  };
-
-  const handleModelError = () => {
-    setModelError(true);
+  const handleMediaError = () => {
+    setMediaError(true);
   };
 
   const renderContent = () => {
+    if(mediaError) {
+      return  <MonitorOffIcon className="size-14" />;
+    }
+
     // Handle special media types first
     if (media.category === MediaCategory.Video) {
-      if (videoError) {
-        return <VideoOffIcon className="min-h-14 min-w-14" />;
-      }
-
       return (
         <VideoViewer
           src={getMediaUrl(media)}
           poster={imageUrl}
           controls
-          onError={handleVideoError}
+          muted={false}
+          onError={handleMediaError}
           className="max-h-screen w-fit"
           containerClassName="h-fit"
         />
@@ -75,55 +64,41 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
     }
 
     if (media.category === MediaCategory.Html) {
-      if (htmlError) {
-        return <MonitorOffIcon className="min-h-14 min-w-14" />;
-      }
-
-      return <HtmlViewer src={getMediaUrl(media)} onError={handleHtmlError} />;
+      return <HtmlViewer src={getMediaUrl(media)} onError={handleMediaError} />;
     }
 
     if (media.category === MediaCategory.Vr) {
-      if (modelError) {
-        return <BoxIcon className="min-h-14 min-w-14" />;
-      }
-
       return (
         <ModelViewer
           src={getMediaUrl(media)}
-          poster={imageUrl}
-          onError={handleModelError}
+          onError={handleMediaError}
         />
       );
     }
 
-    // Handle image media (default case)
-    if (isImage) {
-      if (isError) {
-        return <ImageOffIcon className="min-h-14 min-w-14" />;
-      }
 
-      return (
-        <Image
-          unoptimized={true}
-          loading="eager"
-          priority
-          fill
-          sizes="100vw"
-          onError={onError}
-          onLoad={onLoad}
-          src={imageUrl}
-          alt={alt}
-          className={cn(
-            "object-contain",
-            "transition-opacity duration-200",
-            isLoaded ? "opacity-100" : "opacity-0"
-          )}
-        />
-      );
+    if (isError) {
+      return <ImageOffIcon className="size-14" />;
     }
 
-    // Fallback for unknown media types
-    return <MonitorOffIcon className="min-h-14 min-w-14" />;
+    return (
+      <Image
+        unoptimized={true}
+        loading="eager"
+        priority
+        fill
+        sizes="100vw"
+        onError={onError}
+        onLoad={onLoad}
+        src={imageUrl}
+        alt={alt}
+        className={cn(
+          "object-contain",
+          "transition-opacity duration-200",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+      />
+    );
   };
 
   return (
@@ -143,6 +118,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           fill
           src={imageUrl}
           alt="blurred background"
+          aria-hidden="true"
           className="object-cover scale-150 blur-3xl opacity-50"
         />
       </div>

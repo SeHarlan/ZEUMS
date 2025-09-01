@@ -105,7 +105,6 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     isSelected: boolean;
     aspectRatio: number;
   }) => {
-    console.log("🚀 ~ handleAssetClick ~ aspectRatio:", aspectRatio)
     if (isSingleSelect) {
       // If single select, always replace the selected asset
       setSelectAssets([mergeAspectRatio(asset, aspectRatio)]);
@@ -174,7 +173,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       {assetsPage.length === 0 ? (
         <div className="w-full h-full flex items-center justify-center">
           {isLoading ? (
-            <LoadingSpinner iconClass="min-w-12 min-h-12" />
+            <LoadingSpinner iconClass="size-14" />
           ) : (
             <P className="text-muted-foreground text-center">No assets found</P>
           )}

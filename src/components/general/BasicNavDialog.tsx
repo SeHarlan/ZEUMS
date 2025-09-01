@@ -9,37 +9,44 @@ import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 import GetStartedButton from "@/components/pages/landing/GetStartedButton";
 
 const BasicNavDialog = () => { 
-    const [buttonVisible, setButtonVisible] = useState(false);
-    const buttonRef = useRef<HTMLDivElement>(null);
+  const [buttonVisible, setButtonVisible] = useState(false);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [buttonReady, setButtonReady] = useState(false);
 
 
-    const aboutPath = ABOUT + makeReturnQueryParam(LANDING_RETURN_KEY);
+  const aboutPath = ABOUT + makeReturnQueryParam(LANDING_RETURN_KEY);
 
-    useEffect(() => {
-      const handleTouchMove = (event: TouchEvent) => {
-        if (event.touches.length > 0 && buttonRef.current) {
-          const touch = event.touches[0];
-          const rect = buttonRef.current.getBoundingClientRect();
+  useEffect(() => {
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length > 0 && buttonRef.current) {
+        const touch = event.touches[0];
+        const rect = buttonRef.current.getBoundingClientRect();
 
-          // Calculate distance from touch to button center
-          const buttonCenterX = rect.left + rect.width / 2;
-          const buttonCenterY = rect.top + rect.height / 2;
+        // Calculate distance from touch to button center
+        const buttonCenterX = rect.left + rect.width / 2;
+        const buttonCenterY = rect.top + rect.height / 2;
 
-          const distance = Math.sqrt(
-            Math.pow(touch.clientX - buttonCenterX, 2) +
-              Math.pow(touch.clientY - buttonCenterY, 2)
-          );
+        const distance = Math.sqrt(
+          Math.pow(touch.clientX - buttonCenterX, 2) +
+            Math.pow(touch.clientY - buttonCenterY, 2)
+        );
 
-          // Show button if touch is within 150px of center
-          const proximityThreshold = 150;
-          setButtonVisible(distance < proximityThreshold);
-        }
-      };
-      window.addEventListener("touchmove", handleTouchMove, { passive: true });
-      return () => {
-        window.removeEventListener("touchmove", handleTouchMove);
-      };
-    }, []);
+        // Show button if touch is within 150px of center
+        const proximityThreshold = 150;
+        setButtonVisible(distance < proximityThreshold);
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      setButtonReady(true);
+    }, 500);
+
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchmove", handleTouchMove);
+      clearTimeout(timeout);
+    };
+  }, []);
   
   return (
     <div
@@ -53,6 +60,7 @@ const BasicNavDialog = () => {
           "space-y-4 bg-popover-blur border rounded-lg py-6 px-8 md:px-12",
           "transition-all duration-500 fill-mode-forwards",
           "w-full max-w-full",
+          !buttonReady && "opacity-0",
           buttonVisible
             ? "animate-in zoom-in-90 fade-in-0"
             : "animate-out zoom-out-90 fade-out-0"

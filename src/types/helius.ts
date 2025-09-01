@@ -21,6 +21,7 @@ export enum Interface {
   EXECUTABLE = "Executable",
   PROGRAMMABLENFT = "ProgrammableNFT",
   FUNGIBLE_TOKEN = "FungibleToken",
+  MPL_CORE_COLLECTION = "MplCoreCollection",
 }
 
 export enum Scope {

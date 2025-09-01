@@ -82,7 +82,10 @@ const ProfileAccountForm: FC = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col space-y-6"
+      >
         <FormField
           control={form.control}
           name="username"
@@ -93,7 +96,8 @@ const ProfileAccountForm: FC = () => {
                 <Input placeholder="username" {...field} />
               </FormControl>
               <FormDescription>
-                Used for tagging and sharing your profile{usernameIsWallet ? " (defaults to wallet address)" : ""}.
+                Used for tagging and sharing your profile
+                {usernameIsWallet ? " (defaults to wallet address)" : ""}.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -145,7 +149,8 @@ const ProfileAccountForm: FC = () => {
                 />
               </FormControl>
               <FormDescription>
-                Your email address is used for notifications.
+                Your email is kept private and used solely for account and
+                update notifications.
               </FormDescription>
               <FormMessage />
             </FormItem>

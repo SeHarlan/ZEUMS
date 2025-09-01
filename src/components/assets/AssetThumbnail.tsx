@@ -38,7 +38,7 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
 
   const renderContent = () => {
     //broken image
-    if (isError) return <ImageOffIcon className="min-h-14 min-w-14" />;
+    if (isError) return <ImageOffIcon className="size-8" />;
 
     return (
       <Image
