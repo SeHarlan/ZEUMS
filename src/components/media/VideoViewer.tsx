@@ -35,7 +35,7 @@ interface VideoViewerProps {
   autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
-  onLoadedMetadata?: () => void;
+  onLoadedMetadata?: (video: HTMLVideoElement) => void;
   onError?: (error: Event) => void;
 }
 
@@ -69,7 +69,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
-      onLoadedMetadata?.();
+      onLoadedMetadata?.(video);
     };
 
     const handleLoadStart = () => {
