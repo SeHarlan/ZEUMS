@@ -47,7 +47,7 @@ const NavMenu: FC = () => {
         onOpenChange={setSearchAssetOpen}
       />
 
-      <NavigationMenuList className="gap-0 lg:gap-1">
+      <NavigationMenuList className="gap-0 md:gap-1">
         <NavigationMenuItem className="size-9">
           <LinkButton href={HOME} size="icon" variant="link" className="size-fit overflow-hidden">
             <Logo  className="size-fit" />

@@ -193,7 +193,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
   };
 
   const toggleFullscreen = useCallback(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || typeof document === 'undefined') return;
 
     const video = videoRef.current as FullscreenVideoElement;
     const doc = document as FullscreenDocument;
@@ -221,6 +221,8 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   // Listen for fullscreen changes
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };

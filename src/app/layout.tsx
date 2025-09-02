@@ -6,7 +6,7 @@ import WalletContextProvider from "@/context/WalletProvider";
 import UserContextProvider from "@/context/UserProvider";
 import NavBar from "@/components/navBar/NavBar";
 import NavBarActionsProvider from "@/context/NavBarActionsProvider";
-
+import { Analytics } from "@vercel/analytics/next";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
 import { cn } from "@/utils/ui-utils";
@@ -51,6 +51,7 @@ export default function RootLayout({
           "antialiased font-sans"
         )}
       >
+        <Analytics />
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
