@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { getMediaUrl } from "@/utils/media";
 import { 
   ImageOffIcon, 
@@ -40,8 +40,14 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   const isImageLoading = isLoading && isImage;
 
   const handleMediaError = () => {
+    console.error("Media loading error in FullAssetViewer");
     setMediaError(true);
   };
+
+  // Reset error state when asset changes
+  useEffect(() => {
+    setMediaError(false);
+  }, [asset.title, media.category]);
 
   const renderContent = () => {
     if(mediaError) {
@@ -57,8 +63,10 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           autoPlay
           loop
           controls
-          onLoadedMetadata={() => setMediaError(false)}
-          onError={handleMediaError}
+          onError={(e) => {
+            console.error("Video error in FullAssetViewer:", e);
+            handleMediaError();
+          }}
           className="max-h-screen w-fit"
           containerClassName="h-fit"
         />

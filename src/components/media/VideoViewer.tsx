@@ -2,7 +2,6 @@
 
 import { 
   FC,
-  MouseEvent,
   useCallback, 
   useEffect, 
   useRef, 
@@ -18,11 +17,15 @@ import { Slider } from "@/components/ui/slider";
 interface FullscreenVideoElement extends HTMLVideoElement {
   webkitRequestFullscreen?: () => Promise<void>;
   msRequestFullscreen?: () => Promise<void>;
+  webkitEnterFullscreen?: () => Promise<void>; // iOS Safari
+  webkitEnterFullScreen?: () => Promise<void>; // Older iOS Safari (capitalization varies)
 }
 
 interface FullscreenDocument extends Document {
   webkitExitFullscreen?: () => Promise<void>;
   msExitFullscreen?: () => Promise<void>;
+  webkitFullscreenElement?: Element;
+  msFullscreenElement?: Element;
 }
 
 interface VideoViewerProps {
@@ -55,6 +58,8 @@ const VideoViewer: FC<VideoViewerProps> = ({
 }) => {
   const defaultMuted = autoPlay ? true : muted;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(defaultMuted);
@@ -92,6 +97,17 @@ const VideoViewer: FC<VideoViewerProps> = ({
     const video = videoRef.current;
     if (!video) return;
     let bufferingTimeout: NodeJS.Timeout;
+
+    // Handle autoplay on mobile Safari
+    if (autoPlay && defaultMuted) {
+      video.play().catch((error) => {
+        if (error.name !== "AbortError") {
+          console.warn("Autoplay failed:", error);
+          // Don't set error state for autoplay failures
+          // User can manually click play
+        }
+      });
+    }
 
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
@@ -133,7 +149,19 @@ const VideoViewer: FC<VideoViewerProps> = ({
       setIsLoading(false);
       setHasError(true);
       setIsPlaying(false);
-      console.error("Video loading error:", e);
+      
+      // Log more detailed error information
+      const video = e.target as HTMLVideoElement;
+      console.error("Video loading error:", {
+        error: e,
+        readyState: video?.readyState,
+        networkState: video?.networkState,
+        error_code: video?.error?.code,
+        error_message: video?.error?.message,
+        src: video?.src,
+        currentSrc: video?.currentSrc
+      });
+      
       onError?.(e);
     };
 
@@ -158,12 +186,9 @@ const VideoViewer: FC<VideoViewerProps> = ({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("error", handleError);
     };
-  }, [isMounted, onLoadedMetadata, onError]);
+  }, [isMounted, autoPlay, defaultMuted, onLoadedMetadata, onError]);
 
-  const togglePlay = async (
-    e: MouseEvent<HTMLVideoElement | HTMLButtonElement>
-  ) => {
-    e.preventDefault();
+  const togglePlay = async () => {
 
     const video = videoRef.current;
     if (!video) return;
@@ -182,8 +207,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
     }
   };
 
-  const toggleMute = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const toggleMute = () => {
 
     const video = videoRef.current;
     if (!video) return;
@@ -228,20 +252,38 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     const video = videoRef.current as FullscreenVideoElement;
     const doc = document as FullscreenDocument;
+    
+    // Check if we're in fullscreen mode
+    const isInFullscreen = !!(
+      document.fullscreenElement || 
+      doc.webkitFullscreenElement || 
+      doc.msFullscreenElement
+    );
 
-    if (!document.fullscreenElement) {
-      // Enter fullscreen
-      if (video.requestFullscreen) {
-        video.requestFullscreen();
+    if (!isInFullscreen) {
+      // Enter fullscreen - try iOS specific method first
+      if (video.webkitEnterFullscreen) {
+        // iOS Safari specific method
+        video.webkitEnterFullscreen().catch(err => console.warn("iOS fullscreen failed:", err));
+      } else if (video.webkitEnterFullScreen) {
+        // Older iOS Safari (different capitalization)
+        video.webkitEnterFullScreen().catch(err => console.warn("iOS fullscreen failed:", err));
+      } else if (video.requestFullscreen) {
+        // Standard method
+        video.requestFullscreen().catch(err => console.warn("Fullscreen failed:", err));
       } else if (video.webkitRequestFullscreen) {
+        // Webkit browsers
         video.webkitRequestFullscreen();
       } else if (video.msRequestFullscreen) {
+        // IE/Edge
         video.msRequestFullscreen();
+      } else {
+        console.warn("Fullscreen API not supported");
       }
     } else {
       // Exit fullscreen
       if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen().catch(err => console.warn("Exit fullscreen failed:", err));
       } else if (doc.webkitExitFullscreen) {
         doc.webkitExitFullscreen();
       } else if (doc.msExitFullscreen) {
@@ -254,31 +296,129 @@ const VideoViewer: FC<VideoViewerProps> = ({
   useEffect(() => {
     if (!isMounted) return;
 
+    const doc = document as FullscreenDocument;
+    const video = videoRef.current;
+
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isInFullscreen = !!(
+        document.fullscreenElement || 
+        doc.webkitFullscreenElement || 
+        doc.msFullscreenElement
+      );
+      
+      // For iOS Safari which doesn't use standard fullscreen events
+      const isVideoInFullscreen = video && 
+        (video as { webkitDisplayingFullscreen?: boolean }).webkitDisplayingFullscreen === true;
+      
+      setIsFullscreen(isInFullscreen || !!isVideoInFullscreen);
     };
 
+    // Standard fullscreen events
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    
+    // iOS Safari specific events
+    const handleEnterFullscreen = () => setIsFullscreen(true);
+    const handleExitFullscreen = () => setIsFullscreen(false);
+    
+    if (video) {
+      video.addEventListener('webkitbeginfullscreen', handleEnterFullscreen);
+      video.addEventListener('webkitendfullscreen', handleExitFullscreen);
+    }
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      
+      if (video) {
+        video.removeEventListener('webkitbeginfullscreen', handleEnterFullscreen);
+        video.removeEventListener('webkitendfullscreen', handleExitFullscreen);
+      }
     };
   }, [isMounted]);
 
+  // Unified pointer/touch/mouse behavior
+  useEffect(() => {
+    if (!isMounted) return;
+    const container = containerRef.current;
+    const video = videoRef.current;
+    const controls = controlsRef.current;
+    if (!container || !video) return;
+
+    // Helpers
+    const isDescendantOfControls = (target: EventTarget | null): boolean => {
+      if (!controls || !(target instanceof Node)) return false;
+      return controls.contains(target);
+    };
+
+    // Unified pointer event handling
+    const handlePointerMove = (e: PointerEvent) => {
+      // Only show controls on mouse movement, not touch
+      if (e.pointerType === 'mouse') {
+        setShowControls(true);
+      }
+    };
+
+    const handlePointerLeave = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') {
+        setShowControls(false);
+      }
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') {
+        // Real mouse event
+        if (!isDescendantOfControls(e.target)) {
+          // Toggle play/pause on mouse clicks outside controls
+          e.preventDefault();
+          if (video.paused) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        } else {
+          // Inside controls: ensure panel is visible
+          setShowControls(true);
+        }
+      } else if (e.pointerType === 'touch') {
+        // Touch event
+        if (!showControls) {
+          // Panel closed: open it
+          setShowControls(true);
+          e.preventDefault();
+        } else {
+          // Panel open: if touch outside controls, close it
+          if (!isDescendantOfControls(e.target)) {
+            setShowControls(false);
+            e.preventDefault();
+          }
+          // If inside controls, let it pass through to buttons/sliders
+        }
+      }
+    };
+
+    // Add pointer event listeners
+    container.addEventListener('pointermove', handlePointerMove as EventListener);
+    container.addEventListener('pointerleave', handlePointerLeave as EventListener);
+    container.addEventListener('pointerdown', handlePointerDown as EventListener, { passive: false } as AddEventListenerOptions);
+
+    return () => {
+      container.removeEventListener('pointermove', handlePointerMove as EventListener);
+      container.removeEventListener('pointerleave', handlePointerLeave as EventListener);
+      container.removeEventListener('pointerdown', handlePointerDown as EventListener);
+    };
+  }, [isMounted, showControls]);
+
   return (
     <div
+      ref={containerRef}
       className={cn(
         "relative group/video w-full h-full flex justify-center items-center",
         isLoading && "animate-skeleton-shimmer",
         containerClassName
       )}
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
-      onTouchEnd={() => setShowControls((prev) => !prev)}
     >
       {hasError ? (
         <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -312,24 +452,18 @@ const VideoViewer: FC<VideoViewerProps> = ({
             isLoading ? "opacity-0" : "opacity-100",
             className
           )}
-          onMouseDown={(e) => {
-            // Only trigger on mouse events, not touch
-            togglePlay(e);
-          }}
         />
       )}
 
       {(controls || minimalControls) && (
         <div
+          ref={controlsRef}
           className={cn(
             "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-200",
             showControls
               ? "opacity-100"
               : "opacity-0 group-hover/video:opacity-100"
           )}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-          }}
         >
           {/* Progress bar */}
           <div className={cn("p-4", minimalControls ? "hidden" : "block")}>
