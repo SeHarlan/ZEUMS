@@ -18,24 +18,24 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   useEffect(() => {
-    //using preventDefault to stop scrolling in iframe
     const iframe = iframeRef.current;
-    if (!iframe) return;
-    iframe.addEventListener("touchstart", (e) => e.preventDefault(), {
-      passive: false,
-    });
-    iframe.addEventListener("touchmove", (e) => e.preventDefault(), {
-      passive: false,
-    });
-    iframe.addEventListener("touchend", (e) => e.preventDefault(), {
-      passive: false,
-    });
-    return () => {
-      iframe.removeEventListener("touchstart", (e) => e.preventDefault());
-      iframe.removeEventListener("touchmove", (e) => e.preventDefault());
-      iframe.removeEventListener("touchend", (e) => e.preventDefault());
+
+    const preventScrollIfFrame = (event: TouchEvent) => {
+      const isCanvas = iframeRef && (event.target === iframeRef.current || iframeRef.current?.contains(event.target as Node));    if (isCanvas) event.preventDefault();
+      if (isCanvas) event.preventDefault();
     };
-  },[])
+    
+    if (!iframe) return;
+    iframe.addEventListener("touchstart", preventScrollIfFrame, {passive: false });
+    iframe.addEventListener("touchmove", preventScrollIfFrame, {passive: false });
+    iframe.addEventListener("touchend", preventScrollIfFrame, {passive: false });
+    return () => {
+      iframe.removeEventListener("touchstart", preventScrollIfFrame);
+      iframe.removeEventListener("touchmove", preventScrollIfFrame);
+      iframe.removeEventListener("touchend", preventScrollIfFrame);
+    };
+  }, [])
+  
   return (
     <div
       className={cn(

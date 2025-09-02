@@ -8,11 +8,13 @@ import * as THREE from "three";
 interface GlitchTextMeshProps {
   title: string;
   subtitle: string;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
   title,
-  subtitle
+  subtitle,
+  canvasRef
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport, size } = useThree();
@@ -327,7 +329,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
   });
 
   // Mouse and touch tracking
-  useEffect(() => {
+  useEffect(() => {    
     const updatePosition = (clientX: number, clientY: number) => {
       // Convert screen coordinates to normalized device coordinates
       const x = (clientX / size.width) * 2 - 1;
@@ -345,26 +347,34 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
       updatePosition(event.clientX, event.clientY);
     };
 
+    const preventScrollIfCanvas = (event: TouchEvent) => {
+      const isCanvas = canvasRef && (event.target === canvasRef.current || canvasRef.current?.contains(event.target as Node));
+      if (isCanvas) event.preventDefault();
+    }
+
     //using preventDefault to stop scrolling in canvas
     const handleTouchMove = (event: TouchEvent) => {
-      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
       }
+
+      preventScrollIfCanvas(event);
     };
 
     const handleTouchStart = (event: TouchEvent) => {
-      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
       }
+
+      preventScrollIfCanvas(event);
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
-      event.preventDefault();
       updatePosition(-1, -1);
+
+      preventScrollIfCanvas(event);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -377,7 +387,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [size]);
+  }, [size, canvasRef]);
 
   return (
     <mesh ref={meshRef} material={shaderMaterial}>
@@ -421,6 +431,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   subtitle
 }) => {
   const [webglSupported, setWebglSupported] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     // Check WebGL support on mount
@@ -438,6 +449,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   return (
     <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10">
       <Canvas
+        ref={canvasRef}
         orthographic
         camera={{
           position: [0, 0, 1],
@@ -457,7 +469,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
         }}
         fallback={<FallbackText title={title} subtitle={subtitle} />}
       >
-        <GlitchTextMesh title={title} subtitle={subtitle} />
+        <GlitchTextMesh title={title} subtitle={subtitle} canvasRef={canvasRef} />
       </Canvas>
     </div>
   );
