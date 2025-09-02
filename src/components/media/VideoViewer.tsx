@@ -33,6 +33,7 @@ interface VideoViewerProps {
   controls?: boolean;
   minimalControls?: boolean;
   autoPlay?: boolean;
+  /**forced to true when autoPlay is true */
   muted?: boolean;
   loop?: boolean;
   onLoadedMetadata?: (video: HTMLVideoElement) => void;
@@ -47,14 +48,16 @@ const VideoViewer: FC<VideoViewerProps> = ({
   controls = true,
   minimalControls = false,
   autoPlay = false,
-  muted = false,
+  muted = true,
   loop = false,
   onLoadedMetadata,
   onError,
 }) => {
+  const defaultMuted = autoPlay ? true : muted;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(muted);
+  const [isMuted, setIsMuted] = useState(defaultMuted);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -264,8 +267,8 @@ const VideoViewer: FC<VideoViewerProps> = ({
       {hasError ? (
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <P className="text-red-500 mb-4">Failed to load video</P>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => {
               setHasError(false);
               setIsLoading(true);
@@ -283,7 +286,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
           src={src}
           poster={poster}
           autoPlay={autoPlay}
-          muted={muted}
+          muted={defaultMuted}
           loop={loop}
           playsInline
           preload="metadata"
@@ -299,11 +302,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
           )}
           onMouseDown={(e) => {
             // Only trigger on mouse events, not touch
-            togglePlay(e)
-          }}
-          onTouchStart={(e) => {
-            // Prevent touch events from triggering click
-            e.preventDefault()
+            togglePlay(e);
           }}
         />
       )}

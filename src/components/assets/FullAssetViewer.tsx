@@ -57,7 +57,6 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           autoPlay
           loop
           controls
-          muted={false}
           onLoadedMetadata={() => setMediaError(false)}
           onError={handleMediaError}
           className="max-h-screen w-fit"
