@@ -29,7 +29,7 @@ export const PageContainer = ({
       className={cn(
         "w-full mx-auto",
         widthClasses[maxWidth],
-        !noPadding && "py-8 px-8",
+        !noPadding && "py-16 md:py-8 px-8",
         className
       )}
     >

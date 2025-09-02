@@ -58,7 +58,7 @@ export default function EditProfilePage() {
             value={activeTab}
             onValueChange={handleTabChange}
           >
-            <TabsList className="w-full justify-stretch">
+            <TabsList className="w-full justify-stretch h-fit flex-wrap">
               <TabsTrigger value={EditProfileTab.ACCOUNT}>
                 Account Details
               </TabsTrigger>

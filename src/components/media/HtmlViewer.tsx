@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/utils/ui-utils";
-import React, { ReactEventHandler, useState } from "react";
+import React, { ReactEventHandler, useEffect, useRef, useState } from "react";
 
 interface HtmlViewerProps {
   src: string;
@@ -16,7 +16,26 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
   className,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
-
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  useEffect(() => {
+    //using preventDefault to stop scrolling in iframe
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    iframe.addEventListener("touchstart", (e) => e.preventDefault(), {
+      passive: false,
+    });
+    iframe.addEventListener("touchmove", (e) => e.preventDefault(), {
+      passive: false,
+    });
+    iframe.addEventListener("touchend", (e) => e.preventDefault(), {
+      passive: false,
+    });
+    return () => {
+      iframe.removeEventListener("touchstart", (e) => e.preventDefault());
+      iframe.removeEventListener("touchmove", (e) => e.preventDefault());
+      iframe.removeEventListener("touchend", (e) => e.preventDefault());
+    };
+  },[])
   return (
     <div
       className={cn(
@@ -26,9 +45,10 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
       )}
     >
       <iframe
+        ref={iframeRef}
         className={cn(
-          "w-full h-full transition-opacity duration-500 touch-none",
-          isLoading ? "opacity-33" : "opacity-100",
+          "w-full h-full transition-opacity duration-500",
+          isLoading ? "opacity-0" : "opacity-100",
           className
         )}
         src={src}

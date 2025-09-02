@@ -47,7 +47,7 @@ const NavMenu: FC = () => {
         onOpenChange={setSearchAssetOpen}
       />
 
-      <NavigationMenuList>
+      <NavigationMenuList className="gap-0 lg:gap-1">
         <NavigationMenuItem className="h-9 w-9">
           <LinkButton href={HOME} size="icon" variant="link" className="p-0 overflow-hidden">
             <Logo />
@@ -128,7 +128,7 @@ interface NavDropDownProps {
 const NavDropDown: FC<NavDropDownProps> = ({ children, trigger}) => { 
   return (
     <NavigationMenuItem>
-      <NavigationMenuTrigger>{trigger}</NavigationMenuTrigger>
+      <NavigationMenuTrigger className="rounded-sm">{trigger}</NavigationMenuTrigger>
       <NavigationMenuContent >
         <div className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2">{children}</div>
       </NavigationMenuContent>

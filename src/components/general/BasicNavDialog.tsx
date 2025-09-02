@@ -13,38 +13,60 @@ const BasicNavDialog = () => {
   const buttonRef = useRef<HTMLDivElement>(null);
   const [buttonReady, setButtonReady] = useState(false);
 
-
   const aboutPath = ABOUT + makeReturnQueryParam(LANDING_RETURN_KEY);
 
   useEffect(() => {
+    // Use closure variables instead of state
+    let isTouchingOverButton = false;
+
+    const isTouchOverButton = (touch: Touch): boolean => {
+      if (!buttonRef.current) return false;
+
+      const rect = buttonRef.current.getBoundingClientRect();
+      const buttonCenterX = rect.left + rect.width / 2;
+      const buttonCenterY = rect.top + rect.height / 2;
+
+      const distance = Math.sqrt(
+        Math.pow(touch.clientX - buttonCenterX, 2) +
+          Math.pow(touch.clientY - buttonCenterY, 2)
+      );
+
+      const proximityThreshold = 150;
+      return distance < proximityThreshold;
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      isTouchingOverButton = isTouchOverButton(touch);
+      setButtonVisible(isTouchingOverButton);
+    };
+
     const handleTouchMove = (event: TouchEvent) => {
-      if (event.touches.length > 0 && buttonRef.current) {
-        const touch = event.touches[0];
-        const rect = buttonRef.current.getBoundingClientRect();
+      const touch = event.touches[0];
+      isTouchingOverButton = isTouchOverButton(touch);
+      setButtonVisible(isTouchingOverButton);
+    };
 
-        // Calculate distance from touch to button center
-        const buttonCenterX = rect.left + rect.width / 2;
-        const buttonCenterY = rect.top + rect.height / 2;
-
-        const distance = Math.sqrt(
-          Math.pow(touch.clientX - buttonCenterX, 2) +
-            Math.pow(touch.clientY - buttonCenterY, 2)
-        );
-
-        // Show button if touch is within 150px of center
-        const proximityThreshold = 150;
-        setButtonVisible(distance < proximityThreshold);
+    const handleTouchEnd = () => {
+      // Only hide if we're not currently over the button
+      if (!isTouchingOverButton) {
+        setButtonVisible(false);
       }
+      isTouchingOverButton = false;
     };
 
     const timeout = setTimeout(() => {
       setButtonReady(true);
     }, 500);
 
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
     return () => {
-      window.removeEventListener("touchmove", handleTouchMove);
       clearTimeout(timeout);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
   
@@ -54,6 +76,7 @@ const BasicNavDialog = () => {
       className={cn("absolute-center md:p-16 max-w-screen")}
       onMouseEnter={() => setButtonVisible(true)}
       onMouseLeave={() => setButtonVisible(false)}
+      onTouchStart={() => setButtonVisible(true)}
     >
       <div
         className={cn(

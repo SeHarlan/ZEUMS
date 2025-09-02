@@ -63,11 +63,33 @@ export default function SolanaAssetPage({ params }: Props) {
   return (
     <div className="w-full h-screen relative flex items-center justify-center">
       <NavBarActions>
-        <Button variant={"secondary"} onClick={handleViewMetadata}>View Metadata</Button>
-        <Button variant={"secondary"} size="icon" onClick={handleSearch}><SearchIcon /></Button>
+        <Button
+          variant={"secondary"}
+          onClick={handleViewMetadata}
+          className="h-10"
+        >
+          View Metadata
+        </Button>
+        <Button
+          variant={"secondary"}
+          size="icon"
+          onClick={handleSearch}
+          className="size-10"
+        >
+          <SearchIcon className="size-5" />
+        </Button>
       </NavBarActions>
-      <SearchAssetDialog open={searchAssetOpen} onOpenChange={setSearchAssetOpen} />
-      {solanaAsset && <AssetMetadataDialog open={metadataOpen} onOpenChange={setMetadataOpen} asset={solanaAsset} />}
+      <SearchAssetDialog
+        open={searchAssetOpen}
+        onOpenChange={setSearchAssetOpen}
+      />
+      {solanaAsset && (
+        <AssetMetadataDialog
+          open={metadataOpen}
+          onOpenChange={setMetadataOpen}
+          asset={solanaAsset}
+        />
+      )}
 
       {renderContent()}
     </div>

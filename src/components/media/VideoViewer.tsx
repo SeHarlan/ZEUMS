@@ -258,7 +258,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
         className={cn(
           "w-full",
           "object-contain transition-opacity duration-500",
-          isLoading ? "opacity-33" : "opacity-100",
+          isLoading ? "opacity-0" : "opacity-100",
           className
         )}
         onClick={(e) => {

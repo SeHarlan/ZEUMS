@@ -182,7 +182,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           st = (posBlockFloor + posBlockOffset) * blockSize;
 
-          bool useGlitch = random(vec2(floor(time))) < 0.5 + glitchIntensity;
+          bool useGlitch = random(vec2(floor(time))) < 0.45 + glitchIntensity;
 
           if(useGlitch) {
             st.y += random(st * vec2(1000.01, .01) + blockTime * 0.1) * 0.002;
@@ -210,7 +210,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           float floorCord = blockFloor.y;
           
           float glitchRan = random(vec2(floorCord) + blockTimeZ);
-          bool useGlitchZ = glitchRan < 0.01 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
+          bool useGlitchZ = glitchRan < 0.015 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
 
 
           
@@ -251,7 +251,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
  
           vec3 color = 1.0 - text.rgb;
 
-          vec2 offset = vec2(0.005, -0.0025) * (glitchIntensity * 1.5 + 0.5) * (0.5 + 0.75 * random(vec2(floor(time *  5.))));
+          vec2 offset = vec2(0.006, -0.003) * (glitchIntensity * 1.5 + 0.5) * (0.5 + 0.8 * random(vec2(floor(time *  5.))));
 
 
           if (useGlitch) {
@@ -345,7 +345,9 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
       updatePosition(event.clientX, event.clientY);
     };
 
+    //using preventDefault to stop scrolling in canvas
     const handleTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
@@ -353,20 +355,27 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
     };
 
     const handleTouchStart = (event: TouchEvent) => {
+      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    const handleTouchEnd = (event: TouchEvent) => {
+      event.preventDefault();
+      updatePosition(-1, -1);
+    };
 
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: false });
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [size]);
 
@@ -427,7 +436,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   }
 
   return (
-    <div className="absolute inset-0 left-0 top-0 w-full h-full pointer-events-none -z-10">
+    <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10">
       <Canvas
         orthographic
         camera={{
@@ -440,10 +449,6 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
           alpha: true,
           antialias: true,
           premultipliedAlpha: false,
-        }}
-        style={{
-          background: "transparent",
-          pointerEvents: "none",
         }}
         // Enable resize handling
         resize={{

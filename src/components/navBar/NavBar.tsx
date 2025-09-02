@@ -14,6 +14,7 @@ const NavBar: FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+
   const returnPath = useReturnPath();
   const { actions } = useNavBarActions();
 
@@ -46,21 +47,23 @@ const NavBar: FC = () => {
           href={returnPath}
           variant="outline"
           size="icon"
-          className={cn("fixed z-100 left-4 lg:left-8 ", "top-4 lg:top-8")}
+          className={cn("fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-10")}
         >
-          <ArrowLeft />
+          <ArrowLeft className="size-5" />
         </LinkButton>
       )}
 
       <div
         ref={menuRef}
         className={cn(
-          "w-fit pl-2 md:py-2 md:px-3 z-100",
-          "bg-background rounded-md shadow-md",
+          "w-fit p-0.25 lg:p-2 pl-1 lg:pl-2.5 z-100 border bg-popover",
+          "rounded-sm shadow-md",
           "transition-all duration-400 ease-in-out",
           "relative left-1/2 -translate-x-1/2",
-          "top-4 lg:top-6 opacity-0 hover:opacity-100",
-          isMenuOpen && "opacity-100"
+
+          "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
+          isMenuOpen ? "top-4 animate-in " : "-top-[15vh] animate-out ",
+          "md:top-4 lg:top-6 md:hover:animate-in"
         )}
       >
         <NavMenu />
@@ -69,15 +72,17 @@ const NavBar: FC = () => {
       {/* Menu Button - Right side */}
       <div
         className={cn(
-          "flex flex-col-reverse md:flex-row items-end gap-4 fixed z-90 right-4 lg:right-8",
+          "flex flex-col-reverse md:flex-row items-end gap-3 fixed z-90 right-4 lg:right-8",
           "top-4 lg:top-8"
         )}
       >
         {actions && (
           <div
             className={cn(
-              "flex flex-col md:flex-row items-end md:items-center gap-4 opacity-0 duration-300 ease-in-out hover:opacity-100",
-              isMenuOpen && "opacity-100"
+              "relative flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
+              "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
+              isMenuOpen ? "right-0 animate-in " : "-right-[200%] animate-out",
+              "md:right-0 md:hover:animate-in"
             )}
           >
             {actions}
@@ -89,8 +94,13 @@ const NavBar: FC = () => {
           size="icon"
           onClick={toggleMenu}
           ref={buttonRef}
+          className="size-10"
         >
-          {isMenuOpen ? <XIcon /> : <MenuIcon />}
+          {isMenuOpen ? (
+            <XIcon className="size-5.5" />
+          ) : (
+            <MenuIcon className="size-5" />
+          )}
         </Button>
       </div>
     </div>
