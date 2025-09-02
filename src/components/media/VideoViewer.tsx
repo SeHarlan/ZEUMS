@@ -72,6 +72,20 @@ const VideoViewer: FC<VideoViewerProps> = ({
     setIsMounted(true);
   }, []);
 
+  // Add mobile-specific video attributes after mount
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Set mobile-specific attributes that React doesn't recognize
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('x5-playsinline', 'true');
+    video.setAttribute('x5-video-player-type', 'h5');
+    video.setAttribute('x5-video-player-fullscreen', 'true');
+  }, [isMounted]);
+
   useEffect(() => {
     if (!isMounted) return;
     
@@ -108,6 +122,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       clearTimeout(bufferingTimeout);
       if (!video.paused || video.readyState >= 3) {
         setIsLoading(false);
+        setHasError(false);
       }
     };
 
@@ -117,6 +132,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
     const handleError = (e: Event) => {
       setIsLoading(false);
       setHasError(true);
+      setIsPlaying(false);
       console.error("Video loading error:", e);
       onError?.(e);
     };
@@ -289,11 +305,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
           muted={defaultMuted}
           loop={loop}
           playsInline
-          preload="metadata"
-          webkit-playsinline="true"
-          x5-playsinline="true"
-          x5-video-player-type="h5"
-          x5-video-player-fullscreen="true"
+          preload="metadata"  
           className={cn(
             "w-full",
             "object-contain transition-opacity duration-500",
