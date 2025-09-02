@@ -112,6 +112,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
     const handleError = (e: Event) => {
       setIsLoading(false);
       onError?.(e);
+      throw new Error(e.toString());
     };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -271,11 +272,13 @@ const VideoViewer: FC<VideoViewerProps> = ({
           isLoading ? "opacity-0" : "opacity-100",
           className
         )}
-        onClick={(e) => {
-          // Only trigger on mouse clicks, not touch events
-          if (e.type === 'click' && e.detail > 0) {
-            togglePlay(e)
-          }
+        onMouseDown={(e) => {
+          // Only trigger on mouse events, not touch
+          togglePlay(e)
+        }}
+        onTouchStart={(e) => {
+          // Prevent touch events from triggering click
+          e.preventDefault()
         }}
       />
 
