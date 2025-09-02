@@ -3,7 +3,6 @@
 import { use, useState } from 'react';
 import useSolanaAsset from '@/hooks/useSolanaAsset';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
-import { P } from '@/components/typography/Typography';
 import { Button } from '@/components/ui/button';
 import { NavBarActions } from '@/context/NavBarActionsProvider';
 import { SearchIcon } from 'lucide-react';
