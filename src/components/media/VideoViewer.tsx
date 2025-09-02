@@ -455,7 +455,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
         />
       )}
 
-      {(controls || minimalControls) && (
+      {!hasError && (controls || minimalControls) && (
         <div
           ref={controlsRef}
           className={cn(

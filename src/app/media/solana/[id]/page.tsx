@@ -10,6 +10,9 @@ import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import LoadingPage from '@/components/general/LoadingPage';
+import GlitchFeedback from '@/components/pages/landing/GlitchFeedback';
+import { TITLE_COPY } from '@/textCopy/mainCopy';
+import BasicNavDialog from '@/components/general/BasicNavDialog';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -34,22 +37,15 @@ export default function SolanaAssetPage({ params }: Props) {
       return <LoadingPage complete={false} loading={true} />
     }
 
-    // TODO style these better
-    if (isError) {
+    if (isError || !solanaAsset) {
+      let subtitle = "";
+      if (isError) subtitle = "Failed to load asset";
+      if (!solanaAsset) subtitle = "Asset not found";
       return (
-        <div className="text-center space-y-4">
-          <P className="text-3xl">Failed to load asset</P>
-          <P className="text-muted-foreground">Please try again later</P>
-        </div>
-      );
-    }
-
-    if (!solanaAsset) {
-      return (
-        <div className="text-center space-y-4">
-          <P className="text-3xl">Asset not found</P>
-          <P className="text-muted-foreground">The requested asset could not be found</P>
-        </div>
+        <>
+          <GlitchFeedback title={TITLE_COPY} subtitle={subtitle} />
+          <BasicNavDialog />
+        </>
       );
     }
 
