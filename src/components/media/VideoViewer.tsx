@@ -62,6 +62,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Set mounted state on client-side
   useEffect(() => {
@@ -82,6 +83,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     const handleLoadStart = () => {
       setIsLoading(true);
+      setHasError(false);
     };
 
     const handleWaiting = () => {
@@ -111,8 +113,9 @@ const VideoViewer: FC<VideoViewerProps> = ({
     const handlePause = () => setIsPlaying(false);
     const handleError = (e: Event) => {
       setIsLoading(false);
+      setHasError(true);
+      console.error("Video loading error:", e);
       onError?.(e);
-      throw new Error(e.toString());
     };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -258,29 +261,52 @@ const VideoViewer: FC<VideoViewerProps> = ({
       onMouseLeave={() => setShowControls(false)}
       onTouchEnd={() => setShowControls((prev) => !prev)}
     >
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        autoPlay={autoPlay}
-        muted={muted}
-        loop={loop}
-        playsInline
-        className={cn(
-          "w-full",
-          "object-contain transition-opacity duration-500",
-          isLoading ? "opacity-0" : "opacity-100",
-          className
-        )}
-        onMouseDown={(e) => {
-          // Only trigger on mouse events, not touch
-          togglePlay(e)
-        }}
-        onTouchStart={(e) => {
-          // Prevent touch events from triggering click
-          e.preventDefault()
-        }}
-      />
+      {hasError ? (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <P className="text-red-500 mb-4">Failed to load video</P>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setHasError(false);
+              setIsLoading(true);
+              if (videoRef.current) {
+                videoRef.current.load();
+              }
+            }}
+          >
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          autoPlay={autoPlay}
+          muted={muted}
+          loop={loop}
+          playsInline
+          preload="metadata"
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          className={cn(
+            "w-full",
+            "object-contain transition-opacity duration-500",
+            isLoading ? "opacity-0" : "opacity-100",
+            className
+          )}
+          onMouseDown={(e) => {
+            // Only trigger on mouse events, not touch
+            togglePlay(e)
+          }}
+          onTouchStart={(e) => {
+            // Prevent touch events from triggering click
+            e.preventDefault()
+          }}
+        />
+      )}
 
       {(controls || minimalControls) && (
         <div
