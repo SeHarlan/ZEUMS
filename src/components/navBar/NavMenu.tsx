@@ -41,16 +41,16 @@ const NavMenu: FC = () => {
   const noUserDisplayName = <P className="font-serif">Z</P>;
 
   return (
-    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2 max-w-[90vw]">
+    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] translate-y-0 lg:translate-y-2">
       <SearchAssetDialog
         open={searchAssetOpen}
         onOpenChange={setSearchAssetOpen}
       />
 
       <NavigationMenuList className="gap-0 lg:gap-1">
-        <NavigationMenuItem className="h-9 w-9">
-          <LinkButton href={HOME} size="icon" variant="link" className="p-0 overflow-hidden">
-            <Logo />
+        <NavigationMenuItem className="size-9">
+          <LinkButton href={HOME} size="icon" variant="link" className="size-fit overflow-hidden">
+            <Logo  className="size-fit" />
           </LinkButton>
         </NavigationMenuItem>
 
@@ -128,7 +128,7 @@ interface NavDropDownProps {
 const NavDropDown: FC<NavDropDownProps> = ({ children, trigger}) => { 
   return (
     <NavigationMenuItem>
-      <NavigationMenuTrigger className="rounded-sm">{trigger}</NavigationMenuTrigger>
+      <NavigationMenuTrigger className="rounded-sm text-md">{trigger}</NavigationMenuTrigger>
       <NavigationMenuContent >
         <div className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2">{children}</div>
       </NavigationMenuContent>

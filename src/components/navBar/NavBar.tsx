@@ -56,7 +56,7 @@ const NavBar: FC = () => {
       <div
         ref={menuRef}
         className={cn(
-          "w-fit p-0.25 lg:p-2 pl-1 lg:pl-2.5 z-100 border bg-popover",
+          "w-fit p-0.25 pl-0.5 lg:p-2 lg:pl-2.5 z-100 border bg-popover",
           "rounded-sm shadow-md",
           "transition-all duration-400 ease-in-out",
           "relative left-1/2 -translate-x-1/2",
