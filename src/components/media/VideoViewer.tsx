@@ -70,7 +70,6 @@ const VideoViewer: FC<VideoViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [hasError, setHasError] = useState(false);
 
   // Set mounted state on client-side
   useEffect(() => {
@@ -116,7 +115,6 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     const handleLoadStart = () => {
       setIsLoading(true);
-      setHasError(false);
     };
 
     const handleWaiting = () => {
@@ -138,7 +136,6 @@ const VideoViewer: FC<VideoViewerProps> = ({
       clearTimeout(bufferingTimeout);
       if (!video.paused || video.readyState >= 3) {
         setIsLoading(false);
-        setHasError(false);
       }
     };
 
@@ -146,12 +143,45 @@ const VideoViewer: FC<VideoViewerProps> = ({
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleError = (e: Event) => {
+      // Check if this is an autoplay error
+      const video = e.target as HTMLVideoElement;
+      
+      // Common autoplay error patterns
+      const isAutoplayError = 
+        // Safari: NotAllowedError or AbortError during autoplay
+        (video?.error?.message?.includes('NotAllowedError') && autoPlay) ||
+        (e instanceof Error && e.name === 'AbortError' && autoPlay) ||
+        // Chrome/Firefox autoplay policy errors
+        (video?.error?.message?.includes('play') && video?.error?.message?.includes('user')) ||
+        // General autoplay policy errors
+        (video?.error?.message?.includes('autoplay') || video?.error?.message?.includes('play'));
+
+      // Safari mobile specific format errors (often happen with arweave.net videos)
+      const isSafariFormatError = 
+        video?.error?.code === 4 && // MEDIA_ERR_SRC_NOT_SUPPORTED
+        /iPhone|iPad|iPod/.test(navigator?.userAgent || '') && 
+        /Safari/.test(navigator?.userAgent || '');
+      
+      if (isAutoplayError) {
+        console.log('Ignoring autoplay error:', video?.error?.message);
+        // Just set the video to paused state without showing error
+        setIsPlaying(false);
+        setIsLoading(false);
+        return; // Exit early, don't propagate autoplay errors
+      }
+      
+      // For Safari format errors, we still log but don't treat as fatal
+      if (isSafariFormatError) {
+        console.log('Safari format error - continuing playback attempt:', video?.error?.message);
+        setIsPlaying(false);
+        // Don't return - let the player try to recover
+      }
+      
+      // For other errors, continue with normal error handling
       setIsLoading(false);
-      setHasError(true);
       setIsPlaying(false);
       
-      // Log more detailed error information
-      const video = e.target as HTMLVideoElement;
+      // Log detailed error information for non-autoplay errors
       console.error("Video loading error:", {
         error: e,
         readyState: video?.readyState,
@@ -159,11 +189,12 @@ const VideoViewer: FC<VideoViewerProps> = ({
         error_code: video?.error?.code,
         error_message: video?.error?.message,
         src: video?.src,
-        currentSrc: video?.currentSrc
+        currentSrc: video?.currentSrc,
+        userAgent: navigator?.userAgent
       });
       
       onError?.(e);
-    };
+      };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("canplaythrough", handleCanPlayThrough);
@@ -420,42 +451,26 @@ const VideoViewer: FC<VideoViewerProps> = ({
         containerClassName
       )}
     >
-      {hasError ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <P className="text-red-500 mb-4">Failed to load video</P>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setHasError(false);
-              setIsLoading(true);
-              if (videoRef.current) {
-                videoRef.current.load();
-              }
-            }}
-          >
-            Retry
-          </Button>
-        </div>
-      ) : (
-        <video
-          ref={videoRef}
-          src={src}
-          poster={poster}
-          autoPlay={autoPlay}
-          muted={defaultMuted}
-          loop={loop}
-          playsInline
-          preload="metadata"  
-          className={cn(
-            "w-full",
-            "object-contain transition-opacity duration-500",
-            isLoading ? "opacity-0" : "opacity-100",
-            className
-          )}
-        />
-      )}
 
-      {!hasError && (controls || minimalControls) && (
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        autoPlay={autoPlay}
+        muted={defaultMuted}
+        loop={loop}
+        playsInline
+        preload="metadata"  
+        className={cn(
+          "w-full",
+          "object-contain transition-opacity duration-500",
+          isLoading ? "opacity-0" : "opacity-100",
+          className
+        )}
+      />
+
+
+      {(controls || minimalControls) && (
         <div
           ref={controlsRef}
           className={cn(

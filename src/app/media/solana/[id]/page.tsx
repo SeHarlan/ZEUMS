@@ -11,7 +11,7 @@ import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import LoadingPage from '@/components/general/LoadingPage';
 import GlitchFeedback from '@/components/pages/landing/GlitchFeedback';
 import { TITLE_COPY } from '@/textCopy/mainCopy';
-import BasicNavDialog from '@/components/general/BasicNavDialog';
+
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -40,12 +40,8 @@ export default function SolanaAssetPage({ params }: Props) {
       let subtitle = "";
       if (isError) subtitle = "Failed to load asset";
       if (!solanaAsset) subtitle = "Asset not found";
-      return (
-        <>
-          <GlitchFeedback title={TITLE_COPY} subtitle={subtitle} />
-          <BasicNavDialog />
-        </>
-      );
+
+      return <GlitchFeedback title={TITLE_COPY} subtitle={subtitle} />
     }
 
     return (
@@ -59,14 +55,14 @@ export default function SolanaAssetPage({ params }: Props) {
     <div className="w-full h-screen relative flex items-center justify-center">
       <NavBarActions>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           onClick={handleViewMetadata}
           className="h-10"
         >
           View Metadata
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size="icon"
           onClick={handleSearch}
           className="size-10"
