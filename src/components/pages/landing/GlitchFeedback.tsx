@@ -8,7 +8,7 @@ import * as THREE from "three";
 interface GlitchTextMeshProps {
   title: string;
   subtitle: string;
-  canvasRef?: React.RefObject<HTMLCanvasElement>;
+  canvasRef?: React.RefObject<HTMLCanvasElement | null>;
 }
 
 const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
