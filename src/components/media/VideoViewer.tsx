@@ -61,8 +61,16 @@ const VideoViewer: FC<VideoViewerProps> = ({
   const [showControls, setShowControls] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Set mounted state on client-side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!isMounted) return;
+    
     const video = videoRef.current;
     if (!video) return;
     let bufferingTimeout: NodeJS.Timeout;
@@ -127,7 +135,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("error", handleError);
     };
-  }, [onLoadedMetadata, onError]);
+  }, [isMounted, onLoadedMetadata, onError]);
 
   const togglePlay = async (
     e: MouseEvent<HTMLVideoElement | HTMLButtonElement>
@@ -193,7 +201,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
   };
 
   const toggleFullscreen = useCallback(() => {
-    if (!videoRef.current || typeof document === 'undefined') return;
+    if (!videoRef.current) return;
 
     const video = videoRef.current as FullscreenVideoElement;
     const doc = document as FullscreenDocument;
@@ -221,7 +229,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   // Listen for fullscreen changes
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (!isMounted) return;
 
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -236,7 +244,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [isMounted]);
 
   return (
     <div
@@ -264,7 +272,10 @@ const VideoViewer: FC<VideoViewerProps> = ({
           className
         )}
         onClick={(e) => {
-          if(e.detail < 1) togglePlay(e)
+          // Only trigger on mouse clicks, not touch events
+          if (e.type === 'click' && e.detail > 0) {
+            togglePlay(e)
+          }
         }}
       />
 
