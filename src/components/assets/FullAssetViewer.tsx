@@ -16,6 +16,7 @@ import { UserAssetEntry } from "@/types/entry";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { isBlockchainImage, isUserImage } from "@/types/media";
 import { ParsedBlockChainAsset } from "@/types/asset";
+import { P } from "../typography/Typography";
 
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
@@ -50,7 +51,8 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   }, [asset.title, media.category]);
 
   const renderContent = () => {
-    if(mediaError) {
+    if (mediaError) {
+      return <P>Failed to load media</P>
       return  <MonitorOffIcon className="size-14" />;
     }
 
