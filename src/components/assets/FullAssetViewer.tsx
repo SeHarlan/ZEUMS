@@ -63,10 +63,10 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           autoPlay
           loop
           controls
-          onError={(e) => {
-            console.error("Video error in FullAssetViewer:", e);
-            handleMediaError();
-          }}
+          // onError={(e) => {
+          //   console.error("Video error in FullAssetViewer:", e);
+          //   handleMediaError();
+          // }}
           className="max-h-screen w-fit"
           containerClassName="h-fit"
         />
