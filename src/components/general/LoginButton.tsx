@@ -23,7 +23,7 @@ const LoginButton: FC<LoginButtonProps> = ({ variant, size, className }) => {
   return (
     <Button
       onClick={handleClick}
-      disabled={userLoading}
+      loading={userLoading}
       variant={variant}
       size={size}
       className={className}

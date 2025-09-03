@@ -27,7 +27,12 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
 
-    const scale = 2;
+    let scale = 2;
+
+    if (size.width < 640) { 
+      // scale up for mobile
+      scale = 3
+    }
 
     canvas.width = size.width * scale;
     canvas.height = size.height * scale;
@@ -35,9 +40,9 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
     const pixelsInRem = 16;
 
     // Calculate responsive font sizes
-    const titleSize = Math.max(4.5, Math.min(8, canvas.width * 0.005)) * scale; // 7xl - 9xl range
+    const titleSize = Math.max(4.5, Math.min(8, canvas.width * (0.005))) * scale; // 7xl - 9xl range
     const subtitleSize =
-      Math.max(1.25, Math.min(1.5, canvas.width * 0.001)) * scale; // xl - 2xl
+      Math.max(1.25, Math.min(1.5, canvas.width * (0.001))) * scale; // xl - 2xl
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";

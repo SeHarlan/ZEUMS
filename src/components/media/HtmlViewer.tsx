@@ -6,7 +6,7 @@ interface HtmlViewerProps {
   src: string;
   containerClassName?: string;
   className?: string;
-  onError?: ReactEventHandler<HTMLIFrameElement>;
+  onError?: ReactEventHandler<HTMLIFrameElement> | ((e: unknown) => void);
 }
 
 const HtmlViewer: React.FC<HtmlViewerProps> = ({

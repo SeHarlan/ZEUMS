@@ -1,0 +1,5 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+Always use shadcn/ui components from /src/components/ui and custom typography components from /src/components/typography for all React UI. For additional styling, use Tailwind CSS v4 best practices and the cn() utility from /src/utils/ui-utils.

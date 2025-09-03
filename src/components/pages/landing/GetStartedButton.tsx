@@ -26,16 +26,16 @@ const GetStartedButton: FC = () => {
   
 //TODO change back to normal after timeline is ready
   if(loggedIn) return (
-    // <LinkButton href={EDIT_TIMELINE} disabled={userLoading}>
+    // <LinkButton href={EDIT_TIMELINE} loading={userLoading}>
     //   Manage Timeline
     // </LinkButton>
-    <LinkButton href={EDIT_PROFILE_DISPLAY} disabled={userLoading}>
+    <LinkButton href={EDIT_PROFILE_DISPLAY} loading={userLoading}>
       Edit Profile
     </LinkButton>
   );
 
   return (
-    <Button onClick={handleStartClicked} disabled={userLoading}>
+    <Button onClick={handleStartClicked} loading={userLoading}>
       {/* Get started */}
       Sign up
     </Button>

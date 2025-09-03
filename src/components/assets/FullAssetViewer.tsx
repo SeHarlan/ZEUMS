@@ -40,7 +40,6 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   const isImageLoading = isLoading && isImage;
 
   const handleMediaError = () => {
-    console.error("Media loading error in FullAssetViewer");
     setMediaError(true);
   };
 
@@ -54,58 +53,52 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       return  <MonitorOffIcon className="size-14" />;
     }
 
-    // Handle special media types first
-    if (media.category === MediaCategory.Video) {
-      return (
-        <VideoViewer
-          src={getMediaUrl(media)}
-          poster={imageUrl}
-          autoPlay
-          loop
-          controls
-          onError={handleMediaError}
-          className="max-h-screen w-fit"
-          containerClassName="h-fit"
-        />
-      );
-    }
-
-    if (media.category === MediaCategory.Html) {
-      return <HtmlViewer src={getMediaUrl(media)} onError={handleMediaError} />;
-    }
-
-    if (media.category === MediaCategory.Vr) {
-      return (
-        <ModelViewer
-          src={getMediaUrl(media)}
-          onError={handleMediaError}
-        />
-      );
-    }
-
-
-    if (isError) {
+    if (isError && isImage) {
       return <ImageOffIcon className="size-14" />;
     }
 
-    return (
-      <Image
-        unoptimized={true}
-        loading="eager"
-        priority
-        fill
-        sizes="100vw"
-        onError={onError}
-        onLoad={onLoad}
-        src={imageUrl}
-        alt={alt}
-        className={cn(
-          "object-contain",
-          "transition-opacity duration-200",
-          isLoaded ? "opacity-100" : "opacity-0"
-        )}
-      />
-    );
+    switch (media.category) {
+      case MediaCategory.Video:
+        return (
+          <VideoViewer
+            src={getMediaUrl(media)}
+            poster={imageUrl}
+            autoPlay
+            loop
+            controls
+            onError={handleMediaError}
+            className="max-h-screen w-fit"
+            containerClassName="h-fit"
+          />
+        );
+      case MediaCategory.Html:
+        return (
+          <HtmlViewer src={getMediaUrl(media)} onError={handleMediaError} />
+        );
+      case MediaCategory.Vr:
+        return (
+          <ModelViewer src={getMediaUrl(media)} onError={handleMediaError} />
+        );
+      default:
+        return (
+          <Image
+            unoptimized={true}
+            loading="eager"
+            priority
+            fill
+            sizes="100vw"
+            onError={onError}
+            onLoad={onLoad}
+            src={imageUrl}
+            alt={alt}
+            className={cn(
+              "object-contain",
+              "transition-opacity duration-200",
+              isLoaded ? "opacity-100" : "opacity-0"
+            )}
+          />
+        );
+    }   
   };
 
   return (
@@ -116,6 +109,8 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
         className
       )}
     >
+      {renderContent()}
+      
       {/* Blurred background image */}
       <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
         <Image
@@ -126,10 +121,9 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           src={imageUrl}
           alt="blurred background"
           aria-hidden="true"
-          className="object-cover scale-150 blur-3xl opacity-50"
+          className={cn("object-cover", !mediaError && "scale-150 blur-3xl opacity-50")}
         />
       </div>
-      {renderContent()}
     </div>
   );
 };

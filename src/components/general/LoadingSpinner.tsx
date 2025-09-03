@@ -11,7 +11,7 @@ const LoadingSpinner: FC<LoadingSpinnerProps> = ({
   iconClass,
   className,
 }) => (
-  <div className={cn("rounded-full bg-muted/50", className)}>
+  <div className={cn("rounded-full bg-background/50", className)}>
     <LoaderCircleIcon className={cn("animate-spin", iconClass)} />
   </div>
 );

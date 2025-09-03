@@ -19,6 +19,7 @@ export async function getUserHandler(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+
     // Return user data
     return NextResponse.json({
       user: user,

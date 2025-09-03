@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type NavBarActionsContextValue = {
   actions: React.ReactNode | null;
@@ -38,11 +38,19 @@ export const useSetNavBarActions = () => {
 
 export const NavBarActions: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const setActions = useSetNavBarActions();
+  const [isMounted, setIsMounted] = useState(false);
 
-  React.useEffect(() => {
+  //only setActions once mounted to avoid hydration errors
+  useEffect(() => { 
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    
     setActions(children);
     return () => setActions(null);
-  }, [children, setActions]);
+  }, [children, setActions, isMounted]);
 
   return null;
 };

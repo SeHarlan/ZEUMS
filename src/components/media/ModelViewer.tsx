@@ -1,8 +1,6 @@
 "use client";
 import { cn } from "@/utils/ui-utils";
 import React, { useEffect, useRef, useState } from "react";
-import "@google/model-viewer";
-
 import type { ModelViewerElement } from "@google/model-viewer";
 
 interface ModelViewerProps {
@@ -21,29 +19,34 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const modelViewerRef = useRef<ModelViewerElement>(null);
 
-  useEffect(() => {
-    const modelViewer = modelViewerRef.current;
-    // Add event listeners after the component mounts
-    if (modelViewer) {
-      const handleLoadEvent = () => {
-        console.log('Model loaded successfully');
+  // Register the web component on the client
+  useEffect(() => {    
+    let canceled = false;
+    (async () => {
+      await import("@google/model-viewer");
+      if (canceled) return;
+
+      const mv = modelViewerRef.current;
+      if (!mv) return;
+
+      const handleLoad = () => setIsLoading(false);
+      const handleError = (e: Event) => {
         setIsLoading(false);
-      };
-      
-      const handleErrorEvent = (event: Event) => {
-        console.error('Model viewer error:', event);
-        setIsLoading(false);
-        onError?.(event);
+        onError?.(e);
       };
 
-      modelViewer.addEventListener('load', handleLoadEvent);
-      modelViewer.addEventListener('error', handleErrorEvent);
-      
+      mv.addEventListener("load", handleLoad);
+      mv.addEventListener("error", handleError);
+
       return () => {
-        modelViewer.removeEventListener('load', handleLoadEvent);
-        modelViewer.removeEventListener('error', handleErrorEvent);
+        mv.removeEventListener("load", handleLoad);
+        mv.removeEventListener("error", handleError);
       };
-    }
+    })();
+
+    return () => {
+      canceled = true;
+    };
   }, [onError]);
 
   return (
