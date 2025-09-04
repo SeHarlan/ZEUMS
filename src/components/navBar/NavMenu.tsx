@@ -41,7 +41,7 @@ const NavMenu: FC = () => {
   const noUserDisplayName = <P className="font-serif">Z</P>;
 
   return (
-    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] translate-y-0 lg:translate-y-2">
+    <NavigationMenu viewportClassName="left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] translate-y-2">
       <SearchAssetDialog
         open={searchAssetOpen}
         onOpenChange={setSearchAssetOpen}

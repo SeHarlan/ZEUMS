@@ -47,7 +47,9 @@ const NavBar: FC = () => {
           href={returnPath}
           variant="outline"
           size="icon"
-          className={cn("fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-10")}
+          className={cn(
+            "fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-12 md:size-10"
+          )}
         >
           <ArrowLeft className="size-5" />
         </LinkButton>
@@ -56,7 +58,7 @@ const NavBar: FC = () => {
       <div
         ref={menuRef}
         className={cn(
-          "w-fit p-0.25 pl-1 md:p-2 md:pl-3 z-100 border bg-popover",
+          "w-fit p-1.25 pl-2 md:p-2 md:pl-3 z-100 border bg-popover",
           "rounded-sm shadow-md",
           "transition-all duration-400 ease-in-out",
           "relative left-1/2 -translate-x-1/2",
@@ -94,7 +96,7 @@ const NavBar: FC = () => {
           size="icon"
           onClick={toggleMenu}
           ref={buttonRef}
-          className="size-10"
+          className="size-12 md:size-10"
         >
           {isMenuOpen ? (
             <XIcon className="size-5.5" />
