@@ -34,6 +34,9 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "Zeums",
   description: "Celebrate your digital history",
+  icons: {
+    icon: "/icon.png"
+  }
 };
 
 export default function RootLayout({
