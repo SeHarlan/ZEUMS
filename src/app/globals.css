@@ -131,8 +131,15 @@
 
 
 @layer utilities {
+  
   .bg-popover-blur {
-    @apply bg-popover/50 backdrop-blur-sm;
+    @apply bg-popover/85 backdrop-blur-sm;
+  }
+
+  @media (min-width: 640px) {
+    .bg-popover-blur {
+      @apply bg-popover/50 backdrop-blur-sm
+    }
   }
 
   .absolute-center {
@@ -142,4 +149,3 @@
     .animate-skeleton-shimmer { animation: none; }
   }
 }
-

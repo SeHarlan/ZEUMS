@@ -6,7 +6,7 @@ import { FC, useState } from "react";
 import { getMediaUrl } from "@/utils/media";
 import { BoxIcon, Code2Icon, FullscreenIcon, ImageOffIcon, VideoOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
-import { MediaCategory } from "@/types/media";
+import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import VideoViewer from "../media/VideoViewer";
 import { LinkButton } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,7 +33,6 @@ const AssetViewer: FC<AssetViewerProps> = ({
   
   const [videoError, setVideoError] = useState(false);
 
-
   const media = asset.media;
   const alt = asset.title || "Asset Image";
 
@@ -43,7 +42,13 @@ const AssetViewer: FC<AssetViewerProps> = ({
   
   const isBlockchainAsset = asset.entryType === EntryTypes.BlockchainAsset;
 
+  const isImage = isBlockchainImage(media) || isUserImage(media);
+
+  //video will handle its own loading state
+  const isImageLoading = isLoading && isImage;
+
   const isVideoOrImage = media.category === MediaCategory.Video || media.category === MediaCategory.Image;
+
   const basePath = isBlockchainAsset
     ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
     : USER_MEDIA(asset._id.toString());
@@ -65,7 +70,8 @@ const AssetViewer: FC<AssetViewerProps> = ({
           poster={imageUrl}
           onError={() => setVideoError(true)}
           minimalControls
-          muted={false}
+          autoPlay
+          loop
         />
       );
     }
@@ -110,11 +116,10 @@ const AssetViewer: FC<AssetViewerProps> = ({
       ratio={aspectRatioValue}
       className={cn(
         "relative w-full flex justify-center items-center bg-muted text-muted-foreground rounded-md overflow-hidden group/media",
-        isLoading && "animate-skeleton-shimmer",
+        isImageLoading && "animate-skeleton-shimmer",
         "shadow-md"
       )}
     >
-
       {renderContent()}
 
       <LinkButton

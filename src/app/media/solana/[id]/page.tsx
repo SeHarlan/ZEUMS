@@ -52,7 +52,8 @@ export default function SolanaAssetPage({ params }: Props) {
   };
 
   return (
-    <div className="w-full h-screen relative flex items-center justify-center">
+    <div className="w-full h-screen relative flex items-center justify-center"
+    >
       <NavBarActions>
         <Button
           variant={"outline"}

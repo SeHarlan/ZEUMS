@@ -68,7 +68,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
             controls
             onError={handleMediaError}
             className="max-h-screen w-fit"
-            containerClassName="h-fit"
+            containerClassName="h-fit w-fit"
           />
         );
       case MediaCategory.Html:

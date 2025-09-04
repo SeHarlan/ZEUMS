@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/ui-utils";
 import { P } from "@/components/typography/Typography";
 import { Slider } from "@/components/ui/slider";
+import { useInView } from "@/hooks/useObserver";
 
 // Type definitions for fullscreen methods
 interface FullscreenVideoElement extends HTMLVideoElement {
@@ -21,13 +22,32 @@ interface FullscreenVideoElement extends HTMLVideoElement {
   webkitEnterFullscreen?: () => Promise<void>; // iOS Safari
   webkitEnterFullScreen?: () => Promise<void>; // Older iOS Safari (capitalization varies)
 }
-
 interface FullscreenDocument extends Document {
   webkitExitFullscreen?: () => Promise<void>;
   msExitFullscreen?: () => Promise<void>;
   webkitFullscreenElement?: Element;
   msFullscreenElement?: Element;
 }
+
+const VIDEO_STATE = {
+  HAVE_NOTHING: 0,
+  HAVE_METADATA: 1,
+  HAVE_CURRENT_DATA: 2,
+  HAVE_FUTURE_DATA: 3,
+  HAVE_ENOUGH_DATA: 4,
+} as const;
+
+const mimeTypes: Record<string, string> = {
+  mp4: "video/mp4",
+  webm: "video/webm",
+  ogg: "video/ogg",
+  ogv: "video/ogg",
+  avi: "video/x-msvideo",
+  mov: "video/quicktime",
+  wmv: "video/x-ms-wmv",
+};
+
+
 interface VideoViewerProps {
   src: string;
   poster?: string;
@@ -44,36 +64,41 @@ interface VideoViewerProps {
 }
 
 const BUFFERING_DELAY = 500;
-const LOADING_TIMEOUT = 20_000; //20 seconds
+const LOADING_TIMEOUT = 30_000; //30 seconds
 
 const VideoViewer: FC<VideoViewerProps> = ({
   src,
   poster,
   containerClassName,
   className,
-  controls = true,
-  minimalControls = false,
-  autoPlay = false,
+  controls = false,
+  minimalControls,
+  autoPlay = true,
   muted = true,
-  loop = false,
+  loop = true,
   onLoadedMetadata,
   onError,
 }) => {
   const defaultMuted = autoPlay ? true : muted;
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canPlayRef = useRef(false);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(defaultMuted);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
+  const [userPaused, setUserPaused] = useState(false);
+
+  const { inView } = useInView({ passedRef: containerRef });
 
   const useCurrentTime = controls && !minimalControls;
 
@@ -88,29 +113,20 @@ const VideoViewer: FC<VideoViewerProps> = ({
     if (!extMatch) return undefined; //let browser determine the mime type
 
     const extension = extMatch.toLowerCase();
-    const mimeTypes: Record<string, string> = {
-      'mp4': 'video/mp4',
-      'webm': 'video/webm',
-      'ogg': 'video/ogg',
-      'ogv': 'video/ogg',
-      'avi': 'video/x-msvideo',
-      'mov': 'video/quicktime',
-      'wmv': 'video/x-ms-wmv'
-    };
+
     
     return mimeTypes[extension];
   }, [src]);
 
   const handleAutoplayError = useCallback((error: unknown) => { 
-    console.info("Autoplay warning:", error);
-    //Render a big play button that calls togglePlay when clicked;
+    console.info("Autoplay blocked by browser policy:", error);
+    // Render a big play button that calls togglePlay when clicked
     setFailedToPlayMessage("autoplay");
   }, []);
 
   const handleVideoPlayError = useCallback((error: unknown) => {
     setIsLoading(false);
     setIsPlaying(false);
-    canPlayRef.current = false;
 
     // More comprehensive autoplay error detection
     const isAutoplayError = error &&
@@ -138,97 +154,10 @@ const VideoViewer: FC<VideoViewerProps> = ({
     setFailedToPlayMessage("loading-timeout");
   }, []);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    let bufferingTimeout: NodeJS.Timeout;
-    let loadingTimeout: NodeJS.Timeout;
 
-
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration);
-      onLoadedMetadata?.(video);
-    };
-
-    const handleLoadStart = () => {
-      setFailedToPlayMessage(null);
-      setIsLoading(true);
-      // Set a timeout to prevent infinite loading (especially on mobile)
-      clearTimeout(loadingTimeout);
-      loadingTimeout = setTimeout(handleLoadingTimeout, LOADING_TIMEOUT);
-    };
-
-    const handleWaiting = () => {
-      // Clear any existing timeout
-      clearTimeout(bufferingTimeout);
-      // Add a small delay before showing loading state
-      bufferingTimeout = setTimeout(() => {
-        setIsLoading(true);
-      }, BUFFERING_DELAY);
-    };
-
-    const handlePlaying = () => {
-      clearTimeout(bufferingTimeout);
-      clearTimeout(loadingTimeout);
-      setIsLoading(false);
-    };
-
-    const handleCanPlay = () => {
-      canPlayRef.current = true;
-    };
-
-    const handleCanPlayThrough = () => {
-      // Ensure loading is hidden when video can play through
-      clearTimeout(bufferingTimeout);
-      clearTimeout(loadingTimeout);
-      setIsLoading(false);
-
-      // Handle autoplay - check if we should start playing
-      if (autoPlay && video.paused) {
-        video.muted = true;
-        setIsMuted(true);
-        
-        video.play().catch(handleVideoPlayError);
-      }
-    };
-
-    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleError = (e: Event) => {
-      handleVideoPlayError(e);
-
-      const video = e.target as HTMLVideoElement;
-      console.error("Video error:", video?.error?.message || "Unknown error");
-    };
-
-    //only add event listeners if we need them
-    if (useCurrentTime) video.addEventListener("timeupdate", handleTimeUpdate);
-
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("canplaythrough", handleCanPlayThrough);
-    video.addEventListener("loadstart", handleLoadStart);
-    video.addEventListener("waiting", handleWaiting);
-    video.addEventListener("playing", handlePlaying);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("error", handleError);
-
-    return () => {
-      if (useCurrentTime) video.removeEventListener("timeupdate", handleTimeUpdate);
-
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      video.removeEventListener("canplay", handleCanPlay);
-      video.removeEventListener("canplaythrough", handleCanPlayThrough);
-      video.removeEventListener("loadstart", handleLoadStart);
-      video.removeEventListener("waiting", handleWaiting);
-      video.removeEventListener("playing", handlePlaying);
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("error", handleError);
-    };
-  }, [defaultMuted, onLoadedMetadata, onError, useCurrentTime, autoPlay, handleVideoPlayError, handleLoadingTimeout]);
+  const videoIsStopped = (video: HTMLVideoElement) => {
+    return video.readyState <= VIDEO_STATE.HAVE_CURRENT_DATA || video.paused || video.ended
+  };
 
   const togglePlay = async () => {
     const video = videoRef.current;
@@ -238,8 +167,10 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     if (isPlaying) {
       video.pause();
+      setUserPaused(true);
     } else {
       await video.play().catch(handleVideoPlayError);
+      setUserPaused(false);
     }
   };
 
@@ -276,12 +207,10 @@ const VideoViewer: FC<VideoViewerProps> = ({
     }
   };
 
-
-
   const toggleFullscreen = useCallback(() => {
-    if (!videoRef.current) return;
-
     const video = videoRef.current as FullscreenVideoElement;
+    if (!video) return;
+
     const doc = document as FullscreenDocument;
 
     // Check if we're in fullscreen mode
@@ -301,9 +230,9 @@ const VideoViewer: FC<VideoViewerProps> = ({
       } else if (!!video.webkitEnterFullScreen) {
         // Older iOS Safari (different capitalization)
         video
-          .webkitEnterFullScreen()
+          ?.webkitEnterFullScreen()
           .catch((err) => console.warn("iOS fullscreen failed:", err));
-      } else if (video.requestFullscreen) {
+      } else if (!!video.requestFullscreen) {
         // Standard method
         video
           .requestFullscreen()
@@ -330,6 +259,117 @@ const VideoViewer: FC<VideoViewerProps> = ({
       }
     }
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let bufferingTimeout: NodeJS.Timeout;
+    let loadingTimeout: NodeJS.Timeout;
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+      onLoadedMetadata?.(video);
+    };
+
+    const handleLoadStart = () => {
+      setFailedToPlayMessage(null);
+      setIsBuffering(false);
+      setIsLoading(true);
+      // Set a timeout to prevent infinite loading (especially on mobile)
+      clearTimeout(loadingTimeout);
+      loadingTimeout = setTimeout(handleLoadingTimeout, LOADING_TIMEOUT);
+    };
+
+    const handleWaiting = () => {
+      // Clear any existing timeout
+      clearTimeout(bufferingTimeout);
+      // Add a small delay before showing loading state
+      bufferingTimeout = setTimeout(() => {
+        setIsBuffering(true);
+      }, BUFFERING_DELAY);
+    };
+
+    const handlePlaying = () => {
+      clearTimeout(bufferingTimeout);
+      clearTimeout(loadingTimeout);
+      setFailedToPlayMessage(null);
+      setIsBuffering(false);
+      setIsLoading(false);
+    };
+
+    const handleCanPlayThrough = () => {
+      // Ensure loading is hidden when video can play through
+      clearTimeout(bufferingTimeout);
+      clearTimeout(loadingTimeout);
+      setFailedToPlayMessage(null);
+      setIsBuffering(false);
+      setIsLoading(false);
+
+      //commenting out for now because forced autoplay was causing issues on safari
+      // // Handle autoplay - only attempt if video is ready and not already playing
+      // if (autoPlay && videoIsStopped(video)) {       
+      //   video.play().catch(handleVideoPlayError);
+      // }
+    };
+
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+    const handlePlay = () => {setIsPlaying(true)};
+    const handlePause = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      handleVideoPlayError(e);
+
+      const video = e.target as HTMLVideoElement;
+      console.error("Video error:", video?.error?.message || "Unknown error");
+    };
+
+    //only add event listeners if we need them
+    if (useCurrentTime) video.addEventListener("timeupdate", handleTimeUpdate);
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("canplaythrough", handleCanPlayThrough);
+    video.addEventListener("loadstart", handleLoadStart);
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("playing", handlePlaying);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("error", handleError);
+
+    return () => {
+      clearTimeout(bufferingTimeout);
+      clearTimeout(loadingTimeout); 
+
+      if (useCurrentTime) video.removeEventListener("timeupdate", handleTimeUpdate);
+
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("canplaythrough", handleCanPlayThrough);
+      video.removeEventListener("loadstart", handleLoadStart);
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("error", handleError);
+    };
+  }, [defaultMuted, onLoadedMetadata, onError, useCurrentTime, autoPlay, handleVideoPlayError, handleLoadingTimeout]);
+
+  //pause when not in view and play when in view and not paused
+  //only autoplay again if autoPlay is true and the user hasnt manually paused
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Early return if the video cannot play through all the way
+    if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
+      return;
+    }
+
+    if (!inView) {
+      video?.pause();
+    } else if (autoPlay && !userPaused && videoIsStopped(video)) {
+      video?.play().catch(handleVideoPlayError);
+    }
+  }, [inView, autoPlay, handleVideoPlayError, userPaused]);
+  
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -390,7 +430,13 @@ const VideoViewer: FC<VideoViewerProps> = ({
     // Helpers
     const isDescendantOfControls = (target: EventTarget | null): boolean => {
       if (!controls || !(target instanceof Node)) return false;
+
       return controls.contains(target);
+    };
+
+    const isDescendantOfFeedback = (target: EventTarget | null): boolean => {
+      if (!feedbackRef.current || !(target instanceof Node)) return false;
+      return feedbackRef.current.contains(target);
     };
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -420,7 +466,9 @@ const VideoViewer: FC<VideoViewerProps> = ({
       } else if (e.pointerType === 'touch') {
         if (!showControls) {
           setShowControls(true);
-          e.preventDefault();
+          if (!isDescendantOfFeedback(e.target)) {
+            e.preventDefault();
+          }
         } else if (!isDescendantOfControls(e.target)) {
           setShowControls(false);
           e.preventDefault();
@@ -438,6 +486,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       container.removeEventListener('pointerleave', handlePointerLeave as EventListener);
       container.removeEventListener('pointerdown', handlePointerDown as EventListener);
     };
+
   }, [showControls, handleVideoPlayError]);  
 
   return (
@@ -445,23 +494,38 @@ const VideoViewer: FC<VideoViewerProps> = ({
       ref={containerRef}
       className={cn(
         "relative group/video w-full h-full flex justify-center items-center",
-        isLoading && "animate-skeleton-shimmer",
+        (isLoading || isBuffering) && "animate-skeleton-shimmer",
         containerClassName
       )}
     >
+      {!isPlaying && failedToPlayMessage && (
+        <div
+          ref={feedbackRef}
+          className=" z-50 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-2 rounded-md"
+        >
+          {failedToPlayMessage === "loading-timeout" && (
+            <div className="text-center">
+              <P>Video failed to load in a reasonable amount of time.</P>
+              <P>You may try again.</P>
+            </div>
+          )}
+          <Button onClick={togglePlay} size="lg" loading={isLoading}>
+            Play <PlayIcon className="" />
+          </Button>
+        </div>
+      )}
       <video
         ref={videoRef}
         poster={poster}
-        autoPlay={autoPlay}
-        crossOrigin="anonymous"
-        muted={defaultMuted}
         loop={loop}
-        preload="metadata"
+        autoPlay={autoPlay}
+        muted={defaultMuted}
         playsInline
         webkit-playsinline="true"
+        controls={false}
         className={cn(
           "w-full object-contain transition-opacity duration-500",
-          isLoading ? "opacity-0" : "opacity-100",
+          isLoading ? "opacity-0" : isBuffering ? "opacity-50" : "opacity-100",
           className
         )}
       >
@@ -479,31 +543,38 @@ const VideoViewer: FC<VideoViewerProps> = ({
           )}
         >
           {/* Progress bar */}
-          <div className={cn("p-4", minimalControls ? "hidden" : "block")}>
-            <Slider
-              value={[currentTime]}
-              max={duration}
-              reversed
-              step={0.1}
-              onValueChange={handleSeek}
-            />
-          </div>
+          {minimalControls ? null : (
+            <div className="p-4">
+              <Slider
+                value={[currentTime]}
+                max={duration}
+                reversed
+                step={0.1}
+                onValueChange={handleSeek}
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Button variant="secondary" size="icon" onClick={togglePlay}>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={togglePlay}
+                loading={isLoading}
+              >
                 {isPlaying ? (
-                  <PauseIcon className="h-4 w-4" />
+                  <PauseIcon className="size-4" />
                 ) : (
-                  <PlayIcon className="h-4 w-4" />
+                  <PlayIcon className="size-4" />
                 )}
               </Button>
 
               <Button variant="secondary" size="icon" onClick={toggleMute}>
                 {isMuted ? (
-                  <VolumeXIcon className="h-4 w-4" />
+                  <VolumeXIcon className="size-4" />
                 ) : (
-                  <Volume2Icon className="h-4 w-4" />
+                  <Volume2Icon className="size-4" />
                 )}
               </Button>
 
@@ -518,43 +589,28 @@ const VideoViewer: FC<VideoViewerProps> = ({
               </div>
             </div>
 
-            <div
-              className={cn(
-                "text-white text-sm",
-                minimalControls ? "hidden" : "block",
-                "flex items-center gap-4"
-              )}
-            >
-              <P>
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </P>
-
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={toggleFullscreen}
+            {minimalControls ? null : (
+              <div
+                className={cn("text-white text-sm", "flex items-center gap-4")}
               >
-                {isFullscreen ? (
-                  <Minimize2 className="h-4 w-4" />
-                ) : (
-                  <Maximize2 className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+                <P>
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </P>
+
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={toggleFullscreen}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-      {failedToPlayMessage && !isPlaying && (
-        <div className="absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-4 rounded-md">
-          {failedToPlayMessage === "loading-timeout" && (
-            <div className="text-center">
-              <P>Video failed to load in a reasonable amount of time.</P>
-              <P>You may try again.</P>
-            </div>
-          )}
-          <Button onClick={togglePlay} size="lg">
-            Play <PlayIcon className="" />
-          </Button>
         </div>
       )}
     </div>

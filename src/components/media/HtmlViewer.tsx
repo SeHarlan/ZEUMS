@@ -17,11 +17,12 @@ const HtmlViewer: React.FC<HtmlViewerProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
   useEffect(() => {
     const iframe = iframeRef.current;
 
     const preventScrollIfFrame = (event: TouchEvent) => {
-      const isCanvas = iframeRef && (event.target === iframeRef.current || iframeRef.current?.contains(event.target as Node));    if (isCanvas) event.preventDefault();
+      const isCanvas = iframeRef && (event.target === iframeRef.current || iframeRef.current?.contains(event.target as Node));
       if (isCanvas) event.preventDefault();
     };
     
