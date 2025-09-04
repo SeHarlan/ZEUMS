@@ -23,16 +23,14 @@ const BasicNavDialog = () => {
       if (!buttonRef.current) return false;
 
       const rect = buttonRef.current.getBoundingClientRect();
-      const buttonCenterX = rect.left + rect.width / 2;
-      const buttonCenterY = rect.top + rect.height / 2;
-
-      const distance = Math.sqrt(
-        Math.pow(touch.clientX - buttonCenterX, 2) +
-          Math.pow(touch.clientY - buttonCenterY, 2)
+      
+      // Check if touch is within button bounds
+      return (
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom
       );
-
-      const proximityThreshold = 150;
-      return distance < proximityThreshold;
     };
 
     const handleTouchStart = (event: TouchEvent) => {

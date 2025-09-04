@@ -8,11 +8,13 @@ import * as THREE from "three";
 interface GlitchTextMeshProps {
   title: string;
   subtitle: string;
+  canvasRef?: React.RefObject<HTMLCanvasElement | null>;
 }
 
 const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
   title,
-  subtitle
+  subtitle,
+  canvasRef
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport, size } = useThree();
@@ -25,7 +27,12 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
 
-    const scale = 2;
+    let scale = 2;
+
+    if (size.width < 640) { 
+      // scale up for mobile
+      scale = 3
+    }
 
     canvas.width = size.width * scale;
     canvas.height = size.height * scale;
@@ -33,9 +40,9 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
     const pixelsInRem = 16;
 
     // Calculate responsive font sizes
-    const titleSize = Math.max(4.5, Math.min(8, canvas.width * 0.005)) * scale; // 7xl - 9xl range
+    const titleSize = Math.max(4.5, Math.min(8, canvas.width * (0.005))) * scale; // 7xl - 9xl range
     const subtitleSize =
-      Math.max(1.25, Math.min(1.5, canvas.width * 0.001)) * scale; // xl - 2xl
+      Math.max(1.25, Math.min(1.5, canvas.width * (0.001))) * scale; // xl - 2xl
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -138,9 +145,12 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           float t = time * 0.001 * .4;
           float blockTime = floor(time * 20.);
 
-                   
+          float widthMult = max((1000. / resolution.x), 1.);
+          float smallWidthMult = 0.1 + min((resolution.x / 1000.), 1.) * 0.9;
+
           float radius = 1./6.; // Size of the mouses circle radius
           float fadeWidth = 0.3; // Width of the fade effect at the edges
+
 
           vec2 norm_mouse = mouse * .5 + .5;
 
@@ -165,7 +175,8 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           float centralDist = distance(vec2(0.5 * screenAspectRatio, 0.5), correctedUV);
 
           if(centralDist > 0.5 + (1.0 - glitchIntensity)) {
-            mouseDist += centralDist * centralDist + (centralDist * (.85 - glitchIntensity));
+            float reverseSize = .85;
+            mouseDist += centralDist * centralDist + (centralDist * (reverseSize - glitchIntensity));
             mouseDist = 1. - mouseDist * glitchSquared;
           }
           
@@ -182,21 +193,23 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           st = (posBlockFloor + posBlockOffset) * blockSize;
 
-          bool useGlitch = random(vec2(floor(time))) < 0.45 + glitchIntensity;
+          bool useGlitch = random(vec2(floor(time * 0.5))) < 0.33 + glitchIntensity;
 
           if(useGlitch) {
+          // static displace
             st.y += random(st * vec2(1000.01, .01) + blockTime * 0.1) * 0.002;
           }
 
 
-          st.x += random(posBlockFloor + t) * randomNegNeuPos(posBlockFloor + t, 0.5 * glitchSquared) *  glitchSquared * (0.01+mouseDisplacement) * 0.1;
-          st.y += random(posBlockFloor + 10. - t) * randomNegNeuPos(posBlockFloor - t + 10., 0.5 * glitchSquared) * glitchSquared * (0.01 + mouseDisplacement) * .1;
+          //blocky displace
+          st.x += random(posBlockFloor + t) * randomNegNeuPos(posBlockFloor + t, 0.5 * glitchSquared) *  glitchSquared * (0.01+mouseDisplacement) * 0.15;
+          st.y += random(posBlockFloor + 10. - t) * randomNegNeuPos(posBlockFloor - t + 10., 0.5 * glitchSquared) * glitchSquared * (0.01 + mouseDisplacement) * .15;
 
 
           //ZIGZAG
           ///////////
           float size = .025;
-          float strength = .01 + glitchIntensity;
+          float strength = .005 + glitchIntensity;
           float blockTimeZ = floor(1. + time * .5);
 
 
@@ -210,7 +223,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           float floorCord = blockFloor.y;
           
           float glitchRan = random(vec2(floorCord) + blockTimeZ);
-          bool useGlitchZ = glitchRan < 0.015 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
+          bool useGlitchZ = glitchRan < 0.02 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
 
 
           
@@ -251,7 +264,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
  
           vec3 color = 1.0 - text.rgb;
 
-          vec2 offset = vec2(0.006, -0.003) * (glitchIntensity * 1.5 + 0.5) * (0.5 + 0.8 * random(vec2(floor(time *  5.))));
+          vec2 offset = vec2(0.006, -0.003) * (glitchIntensity * 1.5 + 0.45) * (0.45 + 0.7 * random(vec2(floor(time *  5.)))) * widthMult;
 
 
           if (useGlitch) {
@@ -284,7 +297,9 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
             vec2 stDpr = floor(pixelCoord / vec2(dpr, 1.)) / resolution;
             vec2 ranSt = mix(stDpr * vec2(.005) - vec2(fract(time * 0.005), 0.), stDpr, 0.1);
 
-            float ranMult = 0.075 +  glitchSquared *  0.1 * (centralDist-0.1) * dpr;
+            float smallWidthMult = 0.2 + min((resolution.x / 1000.), 1.) * 0.8;
+
+            float ranMult = smallWidthMult * 0.075 +  glitchSquared *  0.1 * (centralDist-0.1) * dpr;
 
             color -= random(ranSt) * randomNegNeuPos(ranSt, 0.45) * ranMult;
           }
@@ -327,7 +342,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
   });
 
   // Mouse and touch tracking
-  useEffect(() => {
+  useEffect(() => {    
     const updatePosition = (clientX: number, clientY: number) => {
       // Convert screen coordinates to normalized device coordinates
       const x = (clientX / size.width) * 2 - 1;
@@ -345,26 +360,34 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
       updatePosition(event.clientX, event.clientY);
     };
 
+    const preventScrollIfCanvas = (event: TouchEvent) => {
+      const isCanvas = canvasRef && (event.target === canvasRef.current || canvasRef.current?.contains(event.target as Node));
+      if (isCanvas) event.preventDefault();
+    }
+
     //using preventDefault to stop scrolling in canvas
     const handleTouchMove = (event: TouchEvent) => {
-      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
       }
+
+      preventScrollIfCanvas(event);
     };
 
     const handleTouchStart = (event: TouchEvent) => {
-      event.preventDefault();
       if (event.touches.length > 0) {
         const touch = event.touches[0];
         updatePosition(touch.clientX, touch.clientY);
       }
+
+      preventScrollIfCanvas(event);
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
-      event.preventDefault();
-      updatePosition(-1, -1);
+      // updatePosition(-1, -1);
+
+      preventScrollIfCanvas(event);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -377,7 +400,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [size]);
+  }, [size, canvasRef]);
 
   return (
     <mesh ref={meshRef} material={shaderMaterial}>
@@ -421,6 +444,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   subtitle
 }) => {
   const [webglSupported, setWebglSupported] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     // Check WebGL support on mount
@@ -438,6 +462,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   return (
     <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10">
       <Canvas
+        ref={canvasRef}
         orthographic
         camera={{
           position: [0, 0, 1],
@@ -457,7 +482,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
         }}
         fallback={<FallbackText title={title} subtitle={subtitle} />}
       >
-        <GlitchTextMesh title={title} subtitle={subtitle} />
+        <GlitchTextMesh title={title} subtitle={subtitle} canvasRef={canvasRef} />
       </Canvas>
     </div>
   );

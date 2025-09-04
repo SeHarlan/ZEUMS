@@ -127,6 +127,7 @@
   body {
     @apply bg-background text-foreground;
   }
+
 }
 
 
@@ -134,7 +135,6 @@
   .bg-popover-blur {
     @apply bg-popover/50 backdrop-blur-sm;
   }
-
   .absolute-center {
     @apply absolute left-1/2 top-1/2 -translate-1/2;
   }
@@ -142,4 +142,3 @@
     .animate-skeleton-shimmer { animation: none; }
   }
 }
-

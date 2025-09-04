@@ -6,7 +6,7 @@ import WalletContextProvider from "@/context/WalletProvider";
 import UserContextProvider from "@/context/UserProvider";
 import NavBar from "@/components/navBar/NavBar";
 import NavBarActionsProvider from "@/context/NavBarActionsProvider";
-
+import { Analytics } from "@vercel/analytics/next";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
 import { cn } from "@/utils/ui-utils";
@@ -34,6 +34,9 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "Zeums",
   description: "Celebrate your digital history",
+  icons: {
+    icon: "/icon.png"
+  }
 };
 
 export default function RootLayout({
@@ -51,6 +54,7 @@ export default function RootLayout({
           "antialiased font-sans"
         )}
       >
+        <Analytics />
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>

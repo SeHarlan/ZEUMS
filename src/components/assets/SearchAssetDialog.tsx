@@ -86,8 +86,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleKeyPress}
           />
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-sm text-destructive bg-background/25 rounded-sm px-2.5 py-0.5 w-fit">{error}</p>}
         </div>
 
         <DialogFooter>

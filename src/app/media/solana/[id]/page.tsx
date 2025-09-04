@@ -3,13 +3,15 @@
 import { use, useState } from 'react';
 import useSolanaAsset from '@/hooks/useSolanaAsset';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
-import { P } from '@/components/typography/Typography';
 import { Button } from '@/components/ui/button';
 import { NavBarActions } from '@/context/NavBarActionsProvider';
 import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import LoadingPage from '@/components/general/LoadingPage';
+import GlitchFeedback from '@/components/pages/landing/GlitchFeedback';
+import { TITLE_COPY } from '@/textCopy/mainCopy';
+
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -34,23 +36,12 @@ export default function SolanaAssetPage({ params }: Props) {
       return <LoadingPage complete={false} loading={true} />
     }
 
-    // TODO style these better
-    if (isError) {
-      return (
-        <div className="text-center space-y-4">
-          <P className="text-3xl">Failed to load asset</P>
-          <P className="text-muted-foreground">Please try again later</P>
-        </div>
-      );
-    }
+    if (isError || !solanaAsset) {
+      let subtitle = "";
+      if (isError) subtitle = "Failed to load asset";
+      if (!solanaAsset) subtitle = "Asset not found";
 
-    if (!solanaAsset) {
-      return (
-        <div className="text-center space-y-4">
-          <P className="text-3xl">Asset not found</P>
-          <P className="text-muted-foreground">The requested asset could not be found</P>
-        </div>
-      );
+      return <GlitchFeedback title={TITLE_COPY} subtitle={subtitle} />
     }
 
     return (
@@ -61,17 +52,18 @@ export default function SolanaAssetPage({ params }: Props) {
   };
 
   return (
-    <div className="w-full h-screen relative flex items-center justify-center">
+    <div className="w-full h-screen relative flex items-center justify-center"
+    >
       <NavBarActions>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           onClick={handleViewMetadata}
           className="h-10"
         >
           View Metadata
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size="icon"
           onClick={handleSearch}
           className="size-10"
