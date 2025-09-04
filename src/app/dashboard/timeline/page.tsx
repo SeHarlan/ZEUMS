@@ -11,17 +11,17 @@ import { EntrySource } from "@/types/entry";
 import { EditTimelineTab } from "@/types/ui/dashboard";
 
 export default function EditTimelinePage() { 
-  // return (
-  //   <PageContainer maxWidth="large">
-  //     <PageHeading
-  //       title="Timeline"
-  //       subtitle="Create and edit timeline entries"
-  //     />
-  //     <PageTurnLeft path={EDIT_PROFILE} />
-  //     <PageTurnRight path={EDIT_GALLERIES} />
-  //     <GlitchFeedback title={"Timeline"} subtitle={"Coming very soon..."} />
-  //   </PageContainer>
-  // )
+  return (
+    <PageContainer maxWidth="large">
+      <PageHeading
+        title="Timeline"
+        subtitle="Create and edit timeline entries"
+      />
+      <PageTurnLeft path={EDIT_PROFILE} />
+      <PageTurnRight path={EDIT_GALLERIES} />
+      <GlitchFeedback title={"Timeline"} subtitle={"Coming very soon..."} />
+    </PageContainer>
+  )
   return (
     <PageContainer maxWidth="large">
       <PageHeading

@@ -133,12 +133,12 @@
 @layer utilities {
   
   .bg-popover-blur {
-    @apply bg-popover/85 backdrop-blur-sm;
+    @apply bg-popover/85;
   }
 
-  @media (min-width: 640px) {
+  @supports (backdrop-filter: blur(4px) or -webkit-backdrop-filter: blur(4px)) {
     .bg-popover-blur {
-      @apply bg-popover/50 backdrop-blur-sm
+      @apply bg-popover/50 backdrop-blur-sm;
     }
   }
 
