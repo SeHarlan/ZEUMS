@@ -6,7 +6,9 @@ declare module "next-auth" {
    */
   interface User extends DefaultSession["user"] {
     id: Schema.Types.ObjectId;
-    publicKey: string;
+    publicKey?: string;
+    account?: Account;
+    email?: string;
   } 
 
   interface Session {

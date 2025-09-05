@@ -34,7 +34,8 @@ const NavMenu: FC = () => {
     <P>{activeWallet}</P>
   ) : (
     <P>
-      {truncate(user?.username)}<span className="text-xs italic"> - {activeWallet}</span>
+        {truncate(user?.username)}
+        {activeWallet && <span className="text-xs italic"> - {activeWallet}</span>}
     </P>
   );
 

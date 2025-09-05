@@ -18,7 +18,12 @@ const UserSchema: Schema = new Schema<UserDocument>(
       facebook: { type: String },
       telegram: { type: String },
       discord: { type: String },
-    }
+    },
+    accounts: [{
+      provider: { type: String, required: true },
+      providerAccountId: { type: String, required: true },
+      type: { type: String , required: true },
+    }]
   },
   {
     timestamps: true,
@@ -26,6 +31,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
     toObject: { virtuals: true }, // Include virtuals in object output
   }
 );
+
 
 UserSchema.virtual(USER_WALLET_VIRTUAL, {
   ref: WALLET_MODEL_KEY,

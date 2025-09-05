@@ -193,7 +193,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           st = (posBlockFloor + posBlockOffset) * blockSize;
 
-          bool useGlitch = random(vec2(floor(time * 0.5))) < 0.33 + glitchIntensity;
+          bool useGlitch = random(vec2(floor(time * 1.))) < 0.3 + glitchIntensity;
 
           if(useGlitch) {
           // static displace
@@ -208,13 +208,15 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           //ZIGZAG
           ///////////
-          float size = .025;
-          float strength = .005 + glitchIntensity;
-          float blockTimeZ = floor(1. + time * .5);
-
-
-          float blockSizeMult = random(vec2(blockTimeZ));
+          float size = .015 + (floor(glitchIntensity * 10.) / 10.) * 0.075;
+          float largeTimeBlock = floor(10. + time * .1) * .5;
+          float blockTimeZ = floor(2. + time * 1. + largeTimeBlock);
           
+          
+          float blockSizeMult = max(random(vec2(blockTimeZ)), 0.25);
+          
+          float strength = .02 / blockSizeMult + glitchIntensity;
+
           float blockSizeZ = blockSizeMult * size;
 
           vec2 blockFloor = floor(st / blockSizeZ);
@@ -222,15 +224,15 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
           
           float floorCord = blockFloor.y;
           
-          float glitchRan = random(vec2(floorCord) + blockTimeZ);
-          bool useGlitchZ = glitchRan < 0.02 + blockSizeMult * blockSizeMult + glitchIntensity * 0.1;
+          float glitchRan = random(vec2(floorCord) - blockTimeZ);
+          bool useGlitchZ = glitchRan < blockSizeMult * 0.33 + glitchIntensity * 0.33;
 
-
+          float glitchRan2 = random(vec2(floorCord) - blockTimeZ);
+          bool useGlitchZ2 = glitchRan2 < 0.01 + glitchIntensity * 0.1;
           
           
-          if(useGlitchZ && useGlitch) {
-            
-            float fractCoord = blockFract.y ;
+          if(useGlitchZ2 || (useGlitchZ && useGlitch)) {
+            float fractCoord = blockFract.y;
             
             float directionRan = random(vec2(floorCord) + blockTimeZ + 12.);
             float multRan = random(vec2(floorCord) * blockTimeZ + 20.);
@@ -249,7 +251,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
             st.x += zagDirection * zagAmount ;
           }
             
-        ///////////
+          ///////////
           // Center and scale the texture coordinates to maintain aspect ratio
           vec2 centeredUV = st - 0.5;
           if (screenAspectRatio > textureAspect) {
@@ -300,7 +302,7 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
             float smallWidthMult = 0.2 + min((resolution.x / 1000.), 1.) * 0.8;
 
             float ranMult = smallWidthMult * 0.075 +  glitchSquared *  0.1 * (centralDist-0.1) * dpr;
-
+            ranMult += useGlitchZ2 ? 0.05 : 0.;
             color -= random(ranSt) * randomNegNeuPos(ranSt, 0.45) * ranMult;
           }
             

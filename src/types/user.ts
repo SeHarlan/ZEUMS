@@ -1,6 +1,7 @@
 import { USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
 import { TimelineEntry } from "./entry";
 import { WalletType } from "./wallet";
+import type { Account } from "next-auth";
 
 export type BaseUserType = {
   username: string;
@@ -8,6 +9,7 @@ export type BaseUserType = {
   email?: string;
   bio?: string;
   socialHandles: UserSocialHandles;
+  accounts?: Account[];
 };
 
 export const SOCIAL_HANDLE_KEYS = [

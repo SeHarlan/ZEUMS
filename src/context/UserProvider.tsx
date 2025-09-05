@@ -13,6 +13,10 @@ import { truncate } from "@/utils/ui-utils";
 import { handleClientError } from "@/utils/handleError";
 import { USER_ROUTE } from "@/constants/serverRoutes";
 import { parseEntryDates } from "@/utils/timeline";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
+import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
+import { OAuthProviderType } from "next-auth/providers/oauth-types";
+import { usePathname } from "next/navigation";
 
 type UserContextType = {
   user: UserType | null;
@@ -42,31 +46,47 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const { publicKey, signMessage, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const { status, data: session } = useSession();
+  const pathname = usePathname();
   
   const [user, setUser] = useState<UserType | null>(null);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
-
+  const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
   const signingInRef = useRef(false);
 
-  const userExists = Boolean(user);
-  const sessionIdExists = Boolean(session?.user && session.user.id);
+  const userExists = !!user;
+  const sessionIdExists = !!session?.user && !!session.user.id;
+
+  //users with oauth accounts have an email
+  const validOAuthAccountEmail = !!user?.accounts?.length ? user.email! : null;
 
   const userLoading = status === "loading"
     || (status === "authenticated" && !userExists);
   
 
-  const logInUser = useCallback(() => {
+  const logInWithWallet = () => {
     setVisible(true);
-  }, [setVisible]);
+    setAuthOptionsOpen(false);
+  }
+
+  const logInWithProvider = useCallback((provider: OAuthProviderType) => {
+    console.log("🚀 ~ UserContextProvider ~ pathname:", pathname)
+    signIn(provider, { callbackUrl: pathname });
+    setAuthOptionsOpen(false);
+  }, [pathname]);
+
+  const logInUser = useCallback(() => {
+    setAuthOptionsOpen(true);
+  }, []);
 
   const logOutUser = useCallback(async () => {
-    await disconnect();
+    await disconnect?.();
+    
     signOut();
     setUser(null);
     setHasLoggedIn(false);
   }, [disconnect]);
 
-  const handleAuthSignIn = useCallback(async () => {
+  const handleWalletAuthSignIn = useCallback(async () => {
     try {
       if (signingInRef.current) return;
       signingInRef.current = true;
@@ -77,7 +97,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const message = new SignInMessage({
         domain: window.location.host,
         publicKey: publicKey?.toBase58(),
-        statement: `Sign this message to sign in to zeums -- `,
+        statement: `Sign this message to sign in to ${TITLE_COPY} -- `,
         nonce: csrf,
       });
 
@@ -98,7 +118,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       
       handleClientError({
         error,
-        location: "useAuth_handleAuthSignIn",
+        location: "useAuth_handleWalletAuthSignIn",
       });
 
       await logOutUser();
@@ -113,9 +133,9 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // wallet is connected but user is not logged in
     if (status === "unauthenticated" && publicKey) {
-      handleAuthSignIn(); 
+      handleWalletAuthSignIn(); 
     }
-  }, [publicKey, status, handleAuthSignIn]);
+  }, [publicKey, status, handleWalletAuthSignIn]);
 
   useEffect(() => {
     // if auth session is authenticated but custom wallet auth failed (nextAuthOptions.ts)
@@ -132,12 +152,17 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
         description: `${truncate(publicKey.toString())} is connected`,
       });
       setHasLoggedIn(true);
+    } else if (validOAuthAccountEmail) {
+      toast.success("Logged in", {
+        description: `${validOAuthAccountEmail} is connected`,
+      });
+      setHasLoggedIn(true);
     } else {
       //auth is logged in but wallet is not connected
       //TODO consider prompting user to connect wallet instead.
       logOutUser();
     }
-  }, [publicKey, userExists, hasLoggedIn, logOutUser]);
+  }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthAccountEmail]);
 
   useEffect(() => {
     if (userExists) return;
@@ -149,11 +174,13 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
         .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
         .then((response) => {
           const userData = response.data.user;
+          console.log("🚀 ~ UserContextProvider ~ userData:", userData)
 
           // Convert date strings back to Date objects
           if (userData.createdTimelineEntries) {
             userData.createdTimelineEntries = parseEntryDates(userData.createdTimelineEntries);
           }
+          
           if (userData.collectedTimelineEntries) {
             userData.collectedTimelineEntries = parseEntryDates(userData.collectedTimelineEntries);
           }
@@ -188,6 +215,12 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <UserContext.Provider value={contextValue}>
+      <AuthOptionsDialog
+        open={authOptionsOpen}
+        onOpenChange={setAuthOptionsOpen}
+        loginWithWallet={logInWithWallet}
+        loginWithProvider={logInWithProvider}
+      />
       {children}
     </UserContext.Provider>
   );

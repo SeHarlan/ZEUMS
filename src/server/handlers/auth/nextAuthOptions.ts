@@ -4,10 +4,13 @@ import { getCsrfToken } from "next-auth/react";
 import { SignInMessage } from "../../../utils/auth";
 import connectToDatabase from "@/server/db/mongodb";
 import { findOrCreateUser } from "@/server/services/user";
-
 import { ChainIdsEnum } from "@/types/wallet";
 import { NextRequest, NextResponse } from "next/server";
 import { handleServerError } from "@/utils/handleError";
+import TwitterProvider from "next-auth/providers/twitter";
+import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
+// import GitHubProvider from "next-auth/providers/github";
 
 const getProvider = () => {
   return [
@@ -71,12 +74,28 @@ const getProvider = () => {
         } catch (e) {
           handleServerError({
             error: e,
-            location: "handlers-nextAuthOptions"
-          })
+            location: "handlers-nextAuthOptions",
+          });
           return null;
         }
       },
     }),
+    TwitterProvider({
+      clientId: process.env.TWITTER_CLIENT_ID || "",
+      clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+    AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID || "",
+      clientSecret: process.env.APPLE_CLIENT_SECRET || "",
+    }),
+    // GitHubProvider({
+    //   clientId: process.env.GITHUB_CLIENT_ID || "",
+    //   clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    // }),
   ];
 }
 
@@ -101,9 +120,49 @@ export const getAuthOptions = (req: NextRequest) => {
     },
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      async jwt({ token, user }) {
+      async signIn({ user, account}) {
+        // Only handle OAuth providers (not Solana credentials)
+        if (account?.provider && account.provider !== "credentials") {
+          try {
+            if (!user.email) {
+              // email is required for oauth based user creation
+              throw new Error("Email is required for proper authentication");
+            }
+
+            // Create or find user using your existing service
+            const dbUser = await findOrCreateUser({
+              account: account,
+              createData: {
+                username: user.name?.replaceAll(" ", "") || user.email.split('@')[0],
+                email: user.email,
+              },
+            });
+
+            if (!dbUser) {
+              return false; // Sign in failed
+            }
+
+            // Attach the database user ID to the NextAuth user object
+            user.id = dbUser._id;
+            return true;
+          } catch (error) {
+            handleServerError({
+              error,
+              location: "handlers-nextAuthOptions_signIn",
+            });
+            return false;
+          }
+        }
+
+        // For Solana credentials, let it proceed normally
+        return true;
+      },
+      async jwt({ token, user, account }) {
         if (user) {
           token.user = user;
+        }
+        if (account) {
+          token.account = account;
         }
         return token;
       },
