@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Wallet, AppleIcon} from "lucide-react";
+import { Wallet } from "lucide-react";
 import { FC } from "react";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { OAuthProviderType } from "next-auth/providers/oauth-types";
@@ -54,7 +54,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
             <span className="font-serif font-bold text-lg mr-2">G</span>
             Continue with Google
           </Button>
-
+{/* 
           <Button
             onClick={() => loginWithProvider("apple")}
             variant="outline"
@@ -71,7 +71,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
           >
             <span className="font-mono font-bold text-lg mr-2">𝕏</span>
             Continue with X (Twitter)
-          </Button>
+          </Button> */}
         </div>
       </DialogContent>
     </Dialog>

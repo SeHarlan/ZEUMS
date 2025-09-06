@@ -7,9 +7,9 @@ import { findOrCreateUser } from "@/server/services/user";
 import { ChainIdsEnum } from "@/types/wallet";
 import { NextRequest, NextResponse } from "next/server";
 import { handleServerError } from "@/utils/handleError";
-import TwitterProvider from "next-auth/providers/twitter";
 import GoogleProvider from "next-auth/providers/google";
-import AppleProvider from "next-auth/providers/apple";
+// import TwitterProvider from "next-auth/providers/twitter";
+// import AppleProvider from "next-auth/providers/apple";
 // import GitHubProvider from "next-auth/providers/github";
 
 const getProvider = () => {
@@ -80,18 +80,27 @@ const getProvider = () => {
         }
       },
     }),
-    TwitterProvider({
-      clientId: process.env.TWITTER_CLIENT_ID || "",
-      clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
-    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+      // Ensure proper callback URL handling
+      checks: ["state"],
     }),
-    AppleProvider({
-      clientId: process.env.APPLE_CLIENT_ID || "",
-      clientSecret: process.env.APPLE_CLIENT_SECRET || "",
-    }),
+    // TwitterProvider({
+    //   clientId: process.env.TWITTER_CLIENT_ID || "",
+    //   clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
+    // }),
+    // AppleProvider({
+    //   clientId: process.env.APPLE_CLIENT_ID || "",
+    //   clientSecret: process.env.APPLE_CLIENT_SECRET || "",
+    // }),
     // GitHubProvider({
     //   clientId: process.env.GITHUB_CLIENT_ID || "",
     //   clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
@@ -119,8 +128,13 @@ export const getAuthOptions = (req: NextRequest) => {
       strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET,
+    pages: {
+      signIn: "/api/auth/signin",
+      error: "/api/auth/error",
+    },
+    debug: process.env.NODE_ENV === "development",
     callbacks: {
-      async signIn({ user, account}) {
+      async signIn({ user, account }) {
         // Only handle OAuth providers (not Solana credentials)
         if (account?.provider && account.provider !== "credentials") {
           try {
