@@ -3,12 +3,15 @@
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { useUser } from "@/context/UserProvider";
+import { HOME } from "@/constants/clientRoutes";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const {logInUser} = useUser();
   
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
@@ -98,7 +101,7 @@ export default function AuthErrorPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 mb-2">
               If you are on mobile, try:
             </p>
             <ul className="text-sm text-gray-600 text-left space-y-1">
@@ -109,18 +112,11 @@ export default function AuthErrorPage() {
             </ul>
           </div>
           <div className="flex flex-col space-y-2">
-            <Button 
-              onClick={() => router.push('/')}
-              className="w-full"
-            >
+            <LinkButton href={HOME} className="w-full">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Home
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => router.back()}
-              className="w-full"
-            >
+            </LinkButton>
+            <Button variant="outline" onClick={logInUser} className="w-full">
               Try Again
             </Button>
           </div>
