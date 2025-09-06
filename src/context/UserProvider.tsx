@@ -68,9 +68,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     setAuthOptionsOpen(false);
   }
 
-  const logInWithProvider = useCallback((provider: OAuthProviderType) => {
-    console.log("🚀 ~ UserContextProvider ~ pathname:", pathname)
-    
+  const logInWithProvider = useCallback((provider: OAuthProviderType) => {    
     signIn(provider, { 
       callbackUrl: pathname,
       redirect: true, // Ensure redirect happens on mobile
@@ -228,7 +226,6 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
         .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
         .then((response) => {
           const userData = response.data.user;
-          console.log("🚀 ~ UserContextProvider ~ userData:", userData)
 
           // Convert date strings back to Date objects
           if (userData.createdTimelineEntries) {

@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, LinkButton } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useUser } from "@/context/UserProvider";
 import { HOME } from "@/constants/clientRoutes";
+import { PageContainer } from "@/components/general/PageContainer";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
-  const {logInUser} = useUser();
-  
+
+  const router = useRouter();
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
 
@@ -22,7 +22,7 @@ export default function AuthErrorPage() {
       url.searchParams.delete('error');
       url.searchParams.delete('error_description');
       window.history.replaceState({}, '', url.toString());
-    }, 10000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -85,25 +85,25 @@ export default function AuthErrorPage() {
   const errorInfo = getErrorMessage(error);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <PageContainer className="h-screen flex items-center justify-center bg-gray-50" maxWidth="full">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-6 h-6 text-red-600" />
+          <div className="mx-auto mb-4 w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-destructive" />
           </div>
-          <CardTitle className="text-xl text-gray-900">
+          <CardTitle className="text-x">
             {errorInfo.title}
           </CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-muted-foreground">
             {errorInfo.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-sm text-muted-foreground mb-2">
               If you are on mobile, try:
             </p>
-            <ul className="text-sm text-gray-600 text-left space-y-1">
+            <ul className="text-sm text text-left space-y-1">
               <li>• Using Chrome or Safari browser</li>
               <li>• Clearing your browser cache</li>
               <li>• Disabling popup blockers</li>
@@ -115,12 +115,12 @@ export default function AuthErrorPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Home
             </LinkButton>
-            <Button variant="outline" onClick={logInUser} className="w-full">
+            <Button variant="outline" onClick={() => router.back()} className="w-full">
               Try Again
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </PageContainer>
+  )
 }
