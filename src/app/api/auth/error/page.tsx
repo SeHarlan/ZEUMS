@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, LinkButton } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
@@ -10,7 +10,6 @@ import { HOME } from "@/constants/clientRoutes";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const {logInUser} = useUser();
   
   const error = searchParams.get('error');
