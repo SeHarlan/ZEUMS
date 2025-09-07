@@ -1,19 +1,67 @@
-import NextAuth, { NextAuthOptions, Session } from "next-auth";
+import NextAuth, { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import EmailProvider from "next-auth/providers/email";
 import { getCsrfToken } from "next-auth/react";
 import { SignInMessage } from "../../../utils/auth";
-import connectToDatabase from "@/server/db/mongodb";
+import connectToDatabase, { getMongoClient } from "@/server/db/mongodb";
 import { findOrCreateUser } from "@/server/services/user";
 import { ChainIdsEnum } from "@/types/wallet";
 import { NextRequest, NextResponse } from "next/server";
 import { handleServerError } from "@/utils/handleError";
 import GoogleProvider from "next-auth/providers/google";
+import { sendMagicLinkEmail } from "@/server/services/email";
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 // import TwitterProvider from "next-auth/providers/twitter";
 // import AppleProvider from "next-auth/providers/apple";
 // import GitHubProvider from "next-auth/providers/github";
 
-const getProvider = () => {
+const getProviders = () => {
+  const appName = TITLE_COPY;
+  const fromEmail =
+    process.env.NODE_ENV === "development"
+      ? "noreply@resend.dev"
+      : "noreply@" + process.env.EMAIL_DOMAIN;
+
+  const from = `${appName} <${fromEmail}>`;
+
   return [
+    EmailProvider({
+      from,
+      async sendVerificationRequest({ identifier: email, url }) {
+        await sendMagicLinkEmail({
+          to: email,
+          magicLink: url,
+          from,
+          appName,
+        });
+      },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+      // Ensure proper callback URL handling
+      checks: ["state"],
+    }),
+    // TwitterProvider({
+    //   clientId: process.env.TWITTER_CLIENT_ID || "",
+    //   clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
+    // }),
+    // AppleProvider({
+    //   clientId: process.env.APPLE_CLIENT_ID || "",
+    //   clientSecret: process.env.APPLE_CLIENT_SECRET || "",
+    // }),
+    // GitHubProvider({
+    //   clientId: process.env.GITHUB_CLIENT_ID || "",
+    //   clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    // }),
     CredentialsProvider({
       name: "Solana",
       credentials: {
@@ -55,7 +103,7 @@ const getProvider = () => {
           if (!validationResult)
             throw new Error("Could not validate the signed message");
 
-          const user = await findOrCreateUser({
+          const sessionUser = await findOrCreateUser({
             wallet: {
               type: ChainIdsEnum.SOLANA,
               address: signinMessage.publicKey,
@@ -65,12 +113,10 @@ const getProvider = () => {
             },
           });
 
-          if (!user) return null;
+          if (!sessionUser) return null;
+          console.log("🚀 ~ authorize ~ sessionUser:", sessionUser)
 
-          return {
-            id: user._id,
-            publicKey: signinMessage.publicKey,
-          };
+          return sessionUser;
         } catch (e) {
           handleServerError({
             error: e,
@@ -80,50 +126,16 @@ const getProvider = () => {
         }
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
-        },
-      },
-      // Ensure proper callback URL handling
-      checks: ["state"],
-    }),
-    // TwitterProvider({
-    //   clientId: process.env.TWITTER_CLIENT_ID || "",
-    //   clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
-    // }),
-    // AppleProvider({
-    //   clientId: process.env.APPLE_CLIENT_ID || "",
-    //   clientSecret: process.env.APPLE_CLIENT_SECRET || "",
-    // }),
-    // GitHubProvider({
-    //   clientId: process.env.GITHUB_CLIENT_ID || "",
-    //   clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-    // }),
   ];
 }
 
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getAuthOptions = (req: NextRequest) => {
-  const providers = getProvider();
-
-  // const isDefaultSigninPage =
-  // req.method === "GET" && req.query.nextauth?.includes("signin");
-
-  // // Hides Sign-In with Solana from the default sign page
-  // if (isDefaultSigninPage) {
-  //   providers.pop();
-  // }
-
+export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
   const config: NextAuthOptions = {
-    providers,
+    adapter: MongoDBAdapter(getMongoClient()),
+    providers: getProviders(),
     session: {
       strategy: "jwt",
     },
@@ -131,60 +143,55 @@ export const getAuthOptions = (req: NextRequest) => {
     pages: {
       signIn: "/api/auth/signin",
       error: "/api/auth/error",
+      verifyRequest: "/api/auth/verify-request",
     },
     debug: process.env.NODE_ENV === "development",
     callbacks: {
       async signIn({ user, account }) {
-        // Only handle OAuth providers (not Solana credentials)
-        if (account?.provider && account.provider !== "credentials") {
+        // Handle user creation/updates after successful OAuth authentication
+        //"credential" sign in is handled in the custom authorize callback
+        if (account && account.provider !== "credentials") {
           try {
-            if (!user.email) {
-              // email is required for oauth based user creation
-              throw new Error("Email is required for proper authentication");
+            const email = user.email;
+
+            if (!email) {
+              throw new Error("Email not found in user");
             }
 
-            // Create or find user using your existing service
-            const dbUser = await findOrCreateUser({
-              account: account,
+            const username =
+              user.name?.replaceAll(" ", "") || email.split("@")[0];
+
+            const sessionUser = await findOrCreateUser({
+              account,
               createData: {
-                username: user.name?.replaceAll(" ", "") || user.email.split('@')[0],
-                email: user.email,
+                username,
+                email,
               },
             });
 
-            if (!dbUser) {
-              return false; // Sign in failed
+            if (!sessionUser) {
+              throw new Error("Error creating user in provider authorization step");
             }
-
-            // Attach the database user ID to the NextAuth user object
-            user.id = dbUser._id;
-            return true;
+            user = sessionUser;
           } catch (error) {
             handleServerError({
               error,
-              location: "handlers-nextAuthOptions_signIn",
+              location: `handlers-nextAuthOptions_signIn_${account.provider}`,
             });
-            return false;
+            return false; // Prevent sign in if user creation fails
           }
         }
-
-        // For Solana credentials, let it proceed normally
         return true;
       },
-      async jwt({ token, user, account }) {
+      async jwt({ token, user }) {
         if (user) {
-          token.user = user;
-        }
-        if (account) {
-          token.account = account;
+          token.user = user
         }
         return token;
       },
       async session({ session, token }) {
-        if (token.user) {
-          session.user = token.user as Session["user"];
-        } else {
-          session.user = null;
+        if (isAuthUser(token.user)) {
+          session.user = token.user;
         }
         return session;
       },
@@ -194,6 +201,16 @@ export const getAuthOptions = (req: NextRequest) => {
   return config;
 };
 
+
+// Type guard to check if token.user exists and has the expected User shape
+const isAuthUser = (user: unknown): user is User => {
+  return (
+    user !== null &&
+    typeof user === 'object' &&
+    'id' in user &&
+    typeof user.id === 'string'
+  );
+};
 
 
 export async function authHandler(req: NextRequest, body: unknown): Promise<Response> {

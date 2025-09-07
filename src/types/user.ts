@@ -7,6 +7,8 @@ export type BaseUserType = {
   username: string;
   displayName?: string;
   email?: string;
+  name?: string; // Required by NextAuth
+  image?: string; // Required by NextAuth
   bio?: string;
   socialHandles: UserSocialHandles;
   accounts?: Account[];
@@ -43,6 +45,8 @@ export type UserType = BaseUserType & {
 export type CreateUserData = {
   username: string;
   email?: string;
+  name?: string;
+  image?: string;
 };
 
 // used to get for display name fallback

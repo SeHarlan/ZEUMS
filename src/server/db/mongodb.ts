@@ -58,13 +58,10 @@ async function connectToDatabase(): Promise<mongoose.Connection> {
 export default connectToDatabase;
 
 
-
-
 export async function getMongoClient(): Promise<MongoClient> {
   await connectToDatabase();
   return mongoose.connection.getClient();
 }
-
 
 export async function dropIndex(cb: (db: Db | undefined) => Promise<void>): Promise<void> {
   await connectToDatabase();

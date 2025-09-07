@@ -3,13 +3,15 @@ import { EntrySource } from "@/types/entry";
 import { UserType} from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 
-export interface UserDocument extends Document, UserType { }
+export interface UserDocument extends Document, UserType {
+  _id: Schema.Types.ObjectId;
+}
 
 const UserSchema: Schema = new Schema<UserDocument>(
   {
     username: { type: String, required: true, unique: true, minlength: 3 },
     displayName: { type: String },
-    email: { type: String },
+    email: { type: String, unique: true, sparse: true },
     bio: { type: String },
     socialHandles: {
       x: { type: String },

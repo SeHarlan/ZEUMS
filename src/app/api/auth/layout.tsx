@@ -1,4 +1,5 @@
 import Logo from "@/components/general/Logo";
+import { PageContainer } from "@/components/general/PageContainer";
 import { Suspense } from "react";
 
 export default function AuthLayout({
@@ -7,8 +8,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<Logo className="absolute-center size-16" />}>
-      {children}
-    </Suspense>
+    <PageContainer className="min-h-screen flex items-center justify-center bg-secondary" maxWidth="full">
+      <Suspense fallback={<Logo className="size-16" />}>
+        {children}
+      </Suspense>
+    </PageContainer>
   );
 }

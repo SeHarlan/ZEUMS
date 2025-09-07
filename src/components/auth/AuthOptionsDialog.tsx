@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Wallet } from "lucide-react";
+import { Button, LinkButton } from "@/components/ui/button";
+import { Mail, Wallet } from "lucide-react";
 import { FC } from "react";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { OAuthProviderType } from "next-auth/providers/oauth-types";
@@ -35,7 +35,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
             variant="outline"
             className="w-full justify-start"
           >
-            <Wallet className="mr-2 h-4 w-4" />
+            <Wallet className="mr-2" />
             Connect Solana Wallet
           </Button>
 
@@ -46,6 +46,23 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
             </P>
           </div>
 
+          {/* <Button
+            onClick={() => loginWithProvider("email")}
+            variant="outline"
+            className="w-full justify-start"
+          >
+            <Mail className="mr-2" />
+            Continue with Email
+          </Button> */}
+          <LinkButton
+            href="api/auth/signin"
+            variant="outline"
+            className="w-full justify-start"
+          >
+            <Mail className="mr-2" />
+            Continue with Email
+          </LinkButton>
+
           <Button
             onClick={() => loginWithProvider("google")}
             variant="outline"
@@ -54,7 +71,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
             <span className="font-serif font-bold text-lg mr-2">G</span>
             Continue with Google
           </Button>
-{/* 
+          {/* 
           <Button
             onClick={() => loginWithProvider("apple")}
             variant="outline"

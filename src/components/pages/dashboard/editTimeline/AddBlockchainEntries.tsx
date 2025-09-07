@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { EDIT_GALLERIES } from "@/constants/clientRoutes";
 import { ENTRY_ENTRIES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { ParsedBlockChainAsset } from "@/types/asset";
@@ -18,6 +19,7 @@ import { cn } from "@/utils/ui-utils";
 import axios from "axios";
 import { format } from "date-fns";
 import { CalendarIcon, CpuIcon, GalleryHorizontalEndIcon, ImagesIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +28,7 @@ interface AddBlockchainEntriesProps {
 } 
 const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => { 
   const { setUser } = useUser();
+  const router = useRouter();
 
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [pickedDate, setPickedDate] = useState<Date>(new Date());
@@ -105,7 +108,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
 
   const handleNewGalleryCreation = async () => {
     // TODO-important: Logic to create a new gallery
-
+    router.push(EDIT_GALLERIES);
   }
 
   return (

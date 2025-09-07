@@ -1,22 +1,27 @@
 import { CreateUserData } from "@/types/user";
-import User, { CompleteUserVirtuals, UserDocument } from "../models/User";
+import User from "../models/User";
 import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
 import mongoose from "mongoose";
-import { Account } from "next-auth";
+import { Account, User as NextAuthUser } from "next-auth";
 
 export type FindOrCreateProps = {
   createData: CreateUserData,
   wallet?: CreateWalletData
   account?: Account
 }
-
+/**
+ * @param createData - The data to create a user if not found
+ * @param wallet - The wallet to find or create a user for
+ * @param account - The account to find or create a user for
+ * @returns the id and publicKey or email of the user for auth purposes
+ */
 export async function findOrCreateUser({
   wallet,
   createData,
   account,
-}: FindOrCreateProps): Promise<UserDocument | null> {
+}: FindOrCreateProps): Promise<NextAuthUser | null> {
   const mongooseSession = await mongoose.startSession();
 
   try {
@@ -49,30 +54,77 @@ const handleWithAccount = async ({
   account,
   createData,
 }: HandleWithAccountProps) => {
-  // Find user by providerAccountId and provider for maximum reliability
-  const user = await User.findOne({
+  // First, check if user exists by email for maximum account unification
+  if (createData.email) {
+    //fetch the mongoose Model we need to add accounts
+    const existingUserByEmail = await User.findOne({
+      email: createData.email,
+    })
+      .select("_id email accounts")
+      .exec(); //
+    console.log("🚀 ~ handleWithAccount ~ existingUserByEmail:", existingUserByEmail)
+
+    if (existingUserByEmail) {
+      // Ensure accounts array exists
+      if (!existingUserByEmail.accounts) {
+        existingUserByEmail.accounts = [];
+      }
+
+      // Check if this provider account already exists for this user
+      const hasProviderAccount = existingUserByEmail.accounts.some(
+        (acc) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
+      );
+
+      if (!hasProviderAccount) {
+        // Add the new provider account to existing user
+        existingUserByEmail.accounts.push(account);
+        await existingUserByEmail.save();
+      }
+
+      const sessionUser: NextAuthUser = {
+        id: existingUserByEmail._id.toString(),
+        email: existingUserByEmail.email,
+      };
+
+      return sessionUser;
+    }
+  }
+
+  // If no email match, check if user exists by providerAccountId and provider for exact match
+  const existingUserByProvider = await User.findOne({
     accounts: {
       $elemMatch: {
         providerAccountId: account.providerAccountId,
         provider: account.provider,
       },
     },
-  });
-  
+  })
+    .select("_id email")
+    .lean()
+    .exec();
 
-  if (user) {
-    return user;
+  if (existingUserByProvider) {
+    const sessionUser: NextAuthUser = {
+      id: existingUserByProvider._id.toString(),
+      email: existingUserByProvider.email,
+    };
+    return sessionUser;
   }
 
-  // If user doesn't exist, create a new one
+  // If no user exists with this email or provider, create a new one
   const newUser = new User({
     ...createData,
     accounts: [account],
-  });
+  })
   //errors handled in parent function
 
   await newUser.save();
-  return newUser;
+
+  const sessionUser: NextAuthUser = {
+    id: newUser._id.toString(),
+    email: newUser.email,
+  };
+  return sessionUser;
 }
 interface HandleWithWalletProps {
   wallet: CreateWalletData;
@@ -87,19 +139,23 @@ const handleWithWallet = async ({
   const walletModel = await Wallet.findOne({ address: wallet.address });
 
   if (walletModel) {
-    const user = await User.findById(walletModel?.owner)
+    const user = await User.findById<NextAuthUser>(walletModel?.owner)
       .select("_id")
-      .populate(CompleteUserVirtuals)
+      .lean()
       .exec();
 
-      if (!user) {
+    if (!user) {
       //TODO: handle case where user is not found (shouldn't need this)
       // await walletModel.deleteOne();
-      
       throw new Error("User not found for the given wallet");
     }
 
-    return user;
+    const sessionUser: NextAuthUser = {
+      id: user._id.toString(),
+      publicKey: wallet.address,
+    };
+
+    return sessionUser;
   } else {
     // If wallet does not exist, create a new user and wallet within a transaction
     mongooseSession.startTransaction();
@@ -120,6 +176,10 @@ const handleWithWallet = async ({
 
     await mongooseSession.commitTransaction();
 
-    return user;
+    const sessionUser: NextAuthUser = {
+      id: user._id.toString(),
+      publicKey: wallet.address,
+    };
+    return sessionUser;
   }
 }

@@ -46,6 +46,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const { publicKey, signMessage, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const { status, data: session } = useSession();
+  console.log("🚀 ~ UserContextProvider ~ session:", session)
   const pathname = usePathname();
   
   const [user, setUser] = useState<UserType | null>(null);
@@ -57,7 +58,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const sessionIdExists = !!session?.user && !!session.user.id;
 
   //users with oauth accounts have an email
-  const validOAuthAccountEmail = !!user?.accounts?.length ? user.email! : null;
+  const validOAuthAccountEmail = !!user?.accounts?.length ? user.email : null;
 
   const userLoading = status === "loading"
     || (status === "authenticated" && !userExists);
@@ -80,12 +81,14 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     setAuthOptionsOpen(true);
   }, []);
 
-  const logOutUser = useCallback(async () => {
-    await disconnect?.();
-    
-    signOut();
+  const logOutUser = useCallback(async () => {  
+    if (disconnect) {
+      await disconnect();
+    }
+
     setUser(null);
     setHasLoggedIn(false);
+    signOut();
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
@@ -140,61 +143,12 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [publicKey, status, handleWalletAuthSignIn]);
 
   useEffect(() => {
-    // if auth session is authenticated but custom wallet auth failed (nextAuthOptions.ts)
+    // if auth session is authenticated but custom auth logic failed (nextAuthOptions.ts)
     if (status === "authenticated" && !sessionIdExists) {
+      console.log("🚀 ~ sessionIdExists check ~ status:", status);
       logOutUser(); //needed for custom auth setup
     }
   }, [status, logOutUser, sessionIdExists]);
-
-  // Handle OAuth errors
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error');
-    
-    if (error) {
-      let errorMessage = "Authentication failed. Please try again.";
-      
-      switch (error) {
-        case 'OAuthSignin':
-          errorMessage = "OAuth sign-in failed. Please try again.";
-          break;
-        case 'OAuthCallback':
-          errorMessage = "OAuth callback failed. Please try again.";
-          break;
-        case 'OAuthCreateAccount':
-          errorMessage = "Could not create account. Please try again.";
-          break;
-        case 'EmailCreateAccount':
-          errorMessage = "Could not create account with this email.";
-          break;
-        case 'Callback':
-          errorMessage = "Authentication callback failed. Please try again.";
-          break;
-        case 'OAuthAccountNotLinked':
-          errorMessage = "This account is already linked to another user.";
-          break;
-        case 'EmailSignin':
-          errorMessage = "Email sign-in failed. Please try again.";
-          break;
-        case 'CredentialsSignin':
-          errorMessage = "Sign-in failed. Please check your credentials.";
-          break;
-        case 'SessionRequired':
-          errorMessage = "Please sign in to access this page.";
-          break;
-        default:
-          errorMessage = `Authentication error: ${error}`;
-      }
-      
-      toast.error(errorMessage);
-      
-      // Clean up URL parameters
-      const url = new URL(window.location.href);
-      url.searchParams.delete('error');
-      url.searchParams.delete('error_description');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, []);
 
   useEffect(() => {
     if (hasLoggedIn || !userExists) return;
@@ -210,8 +164,9 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       setHasLoggedIn(true);
     } else {
-      //auth is logged in but wallet is not connected
-      //TODO consider prompting user to connect wallet instead.
+      console.log("🚀 ~ userExists check failed");
+      //auth is logged in but wallet is not connected and no oauth account
+      //TODO consider fallback options
       logOutUser();
     }
   }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthAccountEmail]);
