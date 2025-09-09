@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import EmailProvider from "next-auth/providers/email";
 import { getCsrfToken } from "next-auth/react";
 import { SignInMessage } from "../../../utils/auth";
 import connectToDatabase, { getMongoClient } from "@/server/db/mongodb";
@@ -9,9 +8,17 @@ import { ChainIdsEnum } from "@/types/wallet";
 import { NextRequest, NextResponse } from "next/server";
 import { handleServerError } from "@/utils/handleError";
 import GoogleProvider from "next-auth/providers/google";
+import EmailProvider from "next-auth/providers/email";
 import { sendMagicLinkEmail } from "@/server/services/email";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
+import {
+  AUTH_EMAIL_SIGNIN,
+  AUTH_ERROR_ROUTE,
+  AUTH_VERIFY_REQUEST_ROUTE,
+} from "@/constants/serverRoutes";
+import { AUTH_USER_COLLECTION_NAME } from "@/constants/databaseKeys";
+
 // import TwitterProvider from "next-auth/providers/twitter";
 // import AppleProvider from "next-auth/providers/apple";
 // import GitHubProvider from "next-auth/providers/github";
@@ -23,18 +30,40 @@ const getProviders = () => {
       ? "noreply@resend.dev"
       : "noreply@" + process.env.EMAIL_DOMAIN;
 
-  const from = `${appName} <${fromEmail}>`;
+  const fromHeader = `${appName} <${fromEmail}>`;
+
 
   return [
     EmailProvider({
-      from,
-      async sendVerificationRequest({ identifier: email, url }) {
-        await sendMagicLinkEmail({
-          to: email,
-          magicLink: url,
-          from,
-          appName,
-        });
+      from: fromEmail,
+      async sendVerificationRequest({
+        identifier: email,
+        url,
+        // token,
+        // provider: { server, from },
+      }) {
+        // For development, just log the magic link instead of sending email
+        if (process.env.NODE_ENV === "development") {
+          console.log("🔗 Magic Link for development:", url);
+          console.log("📧 Email would be sent to:", email);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } else {
+          // For production, use Resend API
+          try {
+            await sendMagicLinkEmail({
+              to: email,
+              magicLink: url,
+              from: fromHeader,
+              appName,
+            });
+          } catch (error) {
+            handleServerError({
+              error,
+              location: "handlers-nextAuthOptions_sendVerificationRequest",
+            });
+            throw error;
+          }
+        }
       },
     }),
     GoogleProvider({
@@ -45,10 +74,12 @@ const getProviders = () => {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
+          state: "linkingPublicKey",
         },
       },
       // Ensure proper callback URL handling
       checks: ["state"],
+      allowDangerousEmailAccountLinking: true,
     }),
     // TwitterProvider({
     //   clientId: process.env.TWITTER_CLIENT_ID || "",
@@ -114,7 +145,6 @@ const getProviders = () => {
           });
 
           if (!sessionUser) return null;
-          console.log("🚀 ~ authorize ~ sessionUser:", sessionUser)
 
           return sessionUser;
         } catch (e) {
@@ -134,23 +164,42 @@ const getProviders = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
   const config: NextAuthOptions = {
-    adapter: MongoDBAdapter(getMongoClient()),
+    adapter: MongoDBAdapter(getMongoClient(), {
+      collections: {
+        /** Schema defined in models/AuthUser.ts */
+        Users: AUTH_USER_COLLECTION_NAME,
+        Accounts: "authAccounts",
+        Sessions: "authSessions",
+        VerificationTokens: "authVerificationTokens",
+      },
+    }),
     providers: getProviders(),
     session: {
       strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET,
     pages: {
-      signIn: "/api/auth/signin",
-      error: "/api/auth/error",
-      verifyRequest: "/api/auth/verify-request",
+      signIn: AUTH_EMAIL_SIGNIN,
+      error: AUTH_ERROR_ROUTE,
+      verifyRequest: AUTH_VERIFY_REQUEST_ROUTE,
     },
     debug: process.env.NODE_ENV === "development",
     callbacks: {
-      async signIn({ user, account }) {
-        // Handle user creation/updates after successful OAuth authentication
-        //"credential" sign in is handled in the custom authorize callback
-        if (account && account.provider !== "credentials") {
+      async jwt({
+        token,
+        user,
+        account,
+      }) {
+        if (!user) {
+          return token;
+        }
+
+
+        const isProviderAuth = account && account.provider !== "credentials";
+        //"credentials" / blockchain wallet sign in is handled in the custom authorize callback
+
+        // Handle user creation/fetching after successful OAuth authentication
+        if (isProviderAuth) {
           try {
             const email = user.email;
 
@@ -162,7 +211,7 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
               user.name?.replaceAll(" ", "") || email.split("@")[0];
 
             const sessionUser = await findOrCreateUser({
-              account,
+              authUserId: user.id,
               createData: {
                 username,
                 email,
@@ -170,23 +219,26 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
             });
 
             if (!sessionUser) {
-              throw new Error("Error creating user in provider authorization step");
+              throw new Error(
+                "Error creating user in provider authorization step"
+              );
             }
-            user = sessionUser;
+            user = {
+              ...user,
+              ...sessionUser,
+            };
           } catch (error) {
             handleServerError({
               error,
-              location: `handlers-nextAuthOptions_signIn_${account.provider}`,
+              location: `handlers-nextAuthOptions_jwt`,
             });
-            return false; // Prevent sign in if user creation fails
+
+            //throw error to prevent sign in
+            throw error;
           }
         }
-        return true;
-      },
-      async jwt({ token, user }) {
-        if (user) {
-          token.user = user
-        }
+
+        token.user = user;
         return token;
       },
       async session({ session, token }) {
@@ -205,10 +257,9 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
 // Type guard to check if token.user exists and has the expected User shape
 const isAuthUser = (user: unknown): user is User => {
   return (
-    user !== null &&
-    typeof user === 'object' &&
-    'id' in user &&
-    typeof user.id === 'string'
+    user !== null && typeof user === 'object' &&
+    'id' in user && typeof user.id === 'string' &&
+    'dbUserId' in user && typeof user.dbUserId === 'string'
   );
 };
 
@@ -220,15 +271,11 @@ export async function authHandler(req: NextRequest, body: unknown): Promise<Resp
     const authOptions = getAuthOptions(req);
     const handler = NextAuth(authOptions);
 
-    const response = await handler(req, body);
-    const res = await response;
-    
-    return res;
-
+    return handler(req, body);
   } catch (error) {
     handleServerError({
       error,
-      location: "handlers-getUser",
+      location: "handlers-authHandler",
       report: true,
     });
 

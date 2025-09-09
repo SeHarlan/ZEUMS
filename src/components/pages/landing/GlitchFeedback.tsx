@@ -208,12 +208,12 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           //ZIGZAG
           ///////////
-          float size = .015 + (floor(glitchIntensity * 10.) / 10.) * 0.075;
+          float size = .01 + (floor(glitchIntensity * 10.) / 10.) * 0.075;
           float largeTimeBlock = floor(10. + time * .1) * .5;
           float blockTimeZ = floor(2. + time * 1. + largeTimeBlock);
           
           
-          float blockSizeMult = max(random(vec2(blockTimeZ)), 0.25);
+          float blockSizeMult = max(random(vec2(blockTimeZ)), 0.2);
           
           float strength = .02 / blockSizeMult + glitchIntensity;
 

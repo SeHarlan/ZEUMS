@@ -18,102 +18,156 @@ export function createMagicLinkEmailTemplate({
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Sign in to ${appName}</title>
       <style>
+        /* Design system variables matching shadcn/ui */
+        :root {
+          --background: #ffffff;
+          --foreground: #0a0a0a;
+          --card: #ffffff;
+          --card-foreground: #0a0a0a;
+          --primary: #0a0a0a;
+          --primary-foreground: #fafafa;
+          --secondary: #f5f5f5;
+          --secondary-foreground: #0a0a0a;
+          --muted: #f5f5f5;
+          --muted-foreground: #737373;
+          --accent: #f5f5f5;
+          --accent-foreground: #0a0a0a;
+          --border: #e5e5e5;
+          --radius: 0.625rem;
+        }
+
         body {
           margin: 0;
           padding: 0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background-color: #f8fafc;
-          color: #0f172a;
+          background-color: var(--background);
+          color: var(--foreground);
         }
+        
         .container {
           max-width: 600px;
           margin: 0 auto;
-          background-color: #ffffff;
-          border-radius: 10px;
+          background-color: var(--card);
+          color: var(--card-foreground);
+          border-radius: calc(var(--radius) + var(--radius));
           overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          border: 1px solid var(--border);
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
+        
         .header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background-color: var(--primary);
+          color: var(--primary-foreground);
           padding: 40px 30px;
           text-align: center;
         }
+        
         .header h1 {
-          color: #ffffff;
+          color: var(--primary-foreground);
           margin: 0;
           font-size: 28px;
           font-weight: 600;
           font-family: serif;
         }
+        
         .header p {
-          color: #e2e8f0;
+          color: var(--primary-foreground);
+          opacity: 0.8;
           margin: 8px 0 0 0;
           font-size: 16px;
         }
+        
         .content {
           padding: 40px 30px;
         }
+        
         .content p {
-          color: #374151;
+          color: var(--card-foreground);
           font-size: 16px;
           line-height: 1.6;
-          margin: 0 0 24px 0;
+          margin: 0 0 12px 0;
         }
+        
         .button-container {
           text-align: center;
           margin: 32px 0;
         }
+        
+        /* Button styling matching shadcn button default variant */
         .button {
-          display: inline-block;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #ffffff;
-          text-decoration: none;
-          padding: 16px 32px;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 16px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          white-space: nowrap;
+          border-radius: var(--radius);
+          font-size: 14px;
           transition: all 0.2s ease;
+          background-color: var(--primary);
+          color: var(--primary-foreground);
+          text-decoration: none;
+          padding: 8px 16px;
+          height: 24px;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          border: none;
+          cursor: pointer;
         }
+        
         .button:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+          background-color: color-mix(in srgb, var(--primary) 90%, transparent);
         }
+        
         .fallback {
           margin-top: 24px;
           padding: 16px;
-          background-color: #f8fafc;
-          border-radius: 6px;
-          border-left: 4px solid #667eea;
+          background-color: var(--muted);
+          border-radius: var(--radius);
         }
+        
         .fallback p {
-          color: #6b7280;
+          color: var(--muted-foreground);
           font-size: 14px;
           margin: 0 0 8px 0;
           font-weight: 500;
         }
+        
         .fallback a {
-          color: #667eea;
+          color: var(--primary);
           text-decoration: underline;
+          font-size: 10px;
           word-break: break-all;
         }
+        
         .footer {
-          background-color: #f8fafc;
+          background-color: var(--muted);
           padding: 24px 30px;
           text-align: center;
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid var(--border);
         }
+        
         .footer p {
-          color: #9ca3af;
+          color: var(--muted-foreground);
           font-size: 14px;
           margin: 0;
         }
+        
         .logo {
           width: 48px;
           height: 48px;
           margin: 0 auto 16px;
           display: block;
         }
+
+        .text-center {
+          width: 100%;
+          text-align: center;
+        }
+
+        .italic {
+          font-style: italic;
+          color: var(--muted-foreground);
+        }
+        
         @media (max-width: 600px) {
           .container {
             margin: 0 16px;
@@ -131,15 +185,14 @@ export function createMagicLinkEmailTemplate({
       <div class="container">
         <!-- Header -->
         <div class="header">
-          <img src="${process.env.NEXTAUTH_URL}/glitchz-small.gif" alt="${appName} Logo" class="logo" />
+          <img src="${process.env.NEXTAUTH_URL}/icon.png" alt="${appName} Logo" class="logo" />
           <h1>Welcome to ${appName}</h1>
-          <p>Sign in to your account</p>
         </div>
         
         <!-- Content -->
         <div class="content">
-          <p>
-            Click the button below to sign in to your account. This link will expire in 24 hours.
+          <p class="text-center">
+            Click the button below to sign in to your account.
           </p>
           
           <!-- CTA Button -->
@@ -148,10 +201,14 @@ export function createMagicLinkEmailTemplate({
               Sign In to ${appName}
             </a>
           </div>
+
+          <strong class="text-center italic">
+            This link will expire in 24 hours.
+          </strong>
           
           <!-- Fallback Link -->
           <div class="fallback">
-            <p><strong>Button not working?</strong></p>
+            <strong>Button not working?</strong>
             <p>
               Copy and paste this link into your browser:<br>
               <a href="${magicLink}">${magicLink}</a>

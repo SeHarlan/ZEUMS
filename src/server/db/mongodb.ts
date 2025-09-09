@@ -1,6 +1,5 @@
 import { handleServerError } from "@/utils/handleError";
 import mongoose from "mongoose";
-import type { MongoClient, Db } from "mongodb";
 import '../models'; // Ensures models are loaded
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -58,23 +57,7 @@ async function connectToDatabase(): Promise<mongoose.Connection> {
 export default connectToDatabase;
 
 
-export async function getMongoClient(): Promise<MongoClient> {
-  await connectToDatabase();
+export function getMongoClient() {
   return mongoose.connection.getClient();
 }
 
-export async function dropIndex(cb: (db: Db | undefined) => Promise<void>): Promise<void> {
-  await connectToDatabase();
-  const db = mongoose.connection.db;
-  try {
-    await cb(db)
-    console.log("Index email_1 dropped successfully");
-  } catch (error) {
-    console.error("Error dropping index email_1:", error);
-  }
-}
-
-
-  // await dropIndex((db) =>
-  //   db.collection("users").dropIndex("email_1")
-  // );

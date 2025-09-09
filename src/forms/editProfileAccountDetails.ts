@@ -32,17 +32,6 @@ export const profileAccountFormSchema = z.object({
         }
       }
     }),
-  // wallets: z.object({
-  //   [ChainIdsEnum.SOLANA]: z.array(z.string()).optional(),
-  //   [ChainIdsEnum.TEZOS]: z.array(z.string()).optional(),
-  //   // [ChainIdsEnum.ETHEREUM]: z.array(z.string()).optional(),
-  //   // [ChainIdsEnum.ORDINAL]: z.array(z.string()).optional(),
-  // }).optional(),
-  email: z.union([
-      z.string().email({ message: "Please enter a valid email address." }),
-      z.literal("") // Explicitly allow empty string
-    ])
-    .optional()
 });
 
 export type AccountDetailsFormValues = z.infer<typeof profileAccountFormSchema>;

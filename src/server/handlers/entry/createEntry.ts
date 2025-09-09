@@ -14,7 +14,7 @@ export async function createEntryHandler(req: NextRequest): Promise<NextResponse
     // Create entry based on entry type
     const entryCreationData = {
       ...newEntry,
-      owner: authSessionUser.id,
+      owner: authSessionUser.dbUserId,
     };
     
     // Create the entry directly through the base model

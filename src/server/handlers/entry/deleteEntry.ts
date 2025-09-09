@@ -17,7 +17,7 @@ export async function deleteEntryHandler(
 
     const deleteResult = await Entry.deleteOne({
       _id: entryToDeleteId,
-      owner: authSessionUser.id,
+      owner: authSessionUser.dbUserId,
     })
 
     if (!deleteResult.acknowledged || deleteResult.deletedCount === 0) {

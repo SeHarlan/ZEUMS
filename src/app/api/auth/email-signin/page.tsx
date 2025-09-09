@@ -17,18 +17,16 @@ import { handleClientError } from "@/utils/handleError";
 import { HOME } from "@/constants/clientRoutes";
 import { P } from "@/components/typography/Typography";
 
-
-
 export default function MagicLinkPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     setIsLoading(true);
-
+    //TODO-important - change callbackUrl to redirect to the page the user was on before signing in 
+    // (will need to set in context on emial signin button click)
     try {
       const result = await signIn("email", {
         email,
@@ -39,11 +37,10 @@ export default function MagicLinkPage() {
       if (result?.error) {
         throw new Error(result.error);
       }
-
     } catch (error: unknown) {
       handleClientError({
         error,
-        location: "signin-MagicLinkPage_handleSubmit",
+        location: "email-signin-MagicLinkPage_handleSubmit",
       });
       import("sonner").then(({ toast }) => {
         toast.error("Failed to send magic link. Please try again.");
@@ -83,12 +80,12 @@ export default function MagicLinkPage() {
           <Button type="submit" className="w-full" loading={isLoading}>
             Send magic link
           </Button>
+
           <P className="text-center text-sm text-muted-foreground">
-            The magic link will expire in 24 hours. If you don&apos;t receive the
-            email, check your spam folder.
+            The magic link will expire in 24 hours. If you don&apos;t receive
+            the email, check your spam folder.
           </P>
         </form>
-        
 
         <Button
           className="w-full"

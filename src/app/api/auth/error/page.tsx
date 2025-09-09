@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { HOME } from "@/constants/clientRoutes";
 import { P } from "@/components/typography/Typography";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
-
-  const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);
   const [errorDescription, setErrorDescription] = useState<string | null>(null);
@@ -105,7 +103,7 @@ export default function AuthErrorPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
+        <div className="md:hidden">
           <P className="text-sm text-center text-muted-foreground mb-2">
             If you are on mobile, try:
           </P>
@@ -121,9 +119,6 @@ export default function AuthErrorPage() {
             <ArrowLeft />
             Go Home
           </LinkButton>
-          <Button variant="outline" onClick={() => router.back()} className="w-full">
-            Try Again
-          </Button>
         </div>
       </CardContent>
     </Card>

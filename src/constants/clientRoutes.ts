@@ -14,7 +14,6 @@ export const EDIT_PROFILE_DISPLAY = `${EDIT_PROFILE}?${EditProfileTabQueryParam}
 export const EDIT_GALLERIES = `${DASHBOARD}/galleries`;
 export const EDIT_TIMELINE = `${DASHBOARD}/timeline`;
 
-
 export const MEDIA = '/media';
 export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
 export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
@@ -35,4 +34,6 @@ export const EDIT_GALLERIES_RETURN_KEY = "edit-galleries";
 export const EDIT_TIMELINE_RETURN_KEY = "edit-timeline";
 
 export const SOLANA_ASSET_RETURN_KEY = "solana";
+
+
 

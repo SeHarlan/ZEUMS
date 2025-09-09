@@ -21,7 +21,7 @@ export async function createBlockchainEntriesHandler(
     // Add user ID and timestamps to each entry
     const entriesWithUser = newEntries.map((entry) => ({
       ...entry,
-      owner: authSessionUser.id,
+      owner: authSessionUser.dbUserId,
     }));
   
     // Create multiple entries at once

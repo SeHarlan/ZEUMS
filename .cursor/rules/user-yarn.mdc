@@ -1,0 +1,5 @@
+---
+description: When running cli commands like npm
+alwaysApply: false
+---
+Replace "npm" commands with "yarn" commands

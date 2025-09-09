@@ -1,9 +1,11 @@
-import { USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
+import { USER_AUTH_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
 import { TimelineEntry } from "./entry";
 import { WalletType } from "./wallet";
-import type { Account } from "next-auth";
+import { Schema } from "mongoose";
+import { AuthUserType } from "./next-auth";
 
 export type BaseUserType = {
+  _id: Schema.Types.ObjectId;
   username: string;
   displayName?: string;
   email?: string;
@@ -11,7 +13,7 @@ export type BaseUserType = {
   image?: string; // Required by NextAuth
   bio?: string;
   socialHandles: UserSocialHandles;
-  accounts?: Account[];
+  authUserId?: Schema.Types.ObjectId;
 };
 
 export const SOCIAL_HANDLE_KEYS = [
@@ -35,18 +37,18 @@ export function isValidSocialHandleKey(
   return SOCIAL_HANDLE_KEYS.includes(key as (typeof SOCIAL_HANDLE_KEYS)[number]);
 }
 
-//extend base with mongoose virtuals
+/** extend UserType with virtuals populated */
 export type UserType = BaseUserType & {
   [USER_WALLET_VIRTUAL]: WalletType[];
   [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
+  [USER_AUTH_VIRTUAL]: AuthUserType;
 };
 
 export type CreateUserData = {
   username: string;
   email?: string;
-  name?: string;
-  image?: string;
+  authUserId?: string;
 };
 
 // used to get for display name fallback

@@ -23,7 +23,7 @@ export async function updateEntryDatesHandler(
       updateOne: {
         filter: {
           _id: update._id,
-          owner: authSessionUser.id,
+          owner: authSessionUser.dbUserId,
         },
         update: {
           $set: { date: update.date },
@@ -38,7 +38,7 @@ export async function updateEntryDatesHandler(
     const updatedIds = datesToUpdate.map((update) => update._id);
     const updatedEntryDates = await Entry.find({
       _id: { $in: updatedIds },
-      owner: authSessionUser.id,
+      owner: authSessionUser.dbUserId,
     }).select("_id date");
 
     return NextResponse.json({ updatedEntryDates, ...bulkWriteResult });

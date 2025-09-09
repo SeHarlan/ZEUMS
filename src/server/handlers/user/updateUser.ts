@@ -30,13 +30,9 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     // Format the update data to match the MongoDB schema
     const updateData: Partial<BaseUserType> = rawUpdateData;
 
-    //TODO: add wallet updates (get existing and add/delete based on submitted list)
-    // if updateing wallets use mongoose sessions = > const mongooseSession = = await mongoose.startSession();
-    // const walletUpdateData: WalletType = rawUpdateData.wallets || {};
-
     // Find the user and update with the provided fields
     const updatedUser = await User.findByIdAndUpdate<UserType>(
-      authSessionUser.id,
+      authSessionUser.dbUserId,
       { $set: updateData },
       {
         new: true,

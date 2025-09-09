@@ -31,7 +31,7 @@ export async function updateEntryHandler(
     const updatedEntry = await Entry.findOneAndUpdate(
       {
         _id: body._id,
-        owner: authSessionUser.id,
+        owner: authSessionUser.dbUserId,
       },
       {
         $set: updateData,

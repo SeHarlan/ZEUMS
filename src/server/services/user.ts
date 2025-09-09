@@ -4,23 +4,23 @@ import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
 import mongoose from "mongoose";
-import { Account, User as NextAuthUser } from "next-auth";
+import { User as NextAuthUser } from "next-auth";
 
 export type FindOrCreateProps = {
-  createData: CreateUserData,
-  wallet?: CreateWalletData
-  account?: Account
-}
+  createData: CreateUserData;
+  authUserId?: string; // NextAuth user ID
+  wallet?: CreateWalletData;
+};
 /**
  * @param createData - The data to create a user if not found
  * @param wallet - The wallet to find or create a user for
- * @param account - The account to find or create a user for
- * @returns the id and publicKey or email of the user for auth purposes
+ * @param userAuthId - The auth user id to find or create a db user for
+ * @returns the auth user id and standard user id;
  */
 export async function findOrCreateUser({
+  authUserId,
   wallet,
-  createData,
-  account,
+  createData
 }: FindOrCreateProps): Promise<NextAuthUser | null> {
   const mongooseSession = await mongoose.startSession();
 
@@ -29,12 +29,12 @@ export async function findOrCreateUser({
       return handleWithWallet({ wallet, createData, mongooseSession });
     }
 
-    if (account) {
-      return handleWithAccount({account, createData });
+    if (authUserId) {
+      return handleWithAuthId({ authUserId, createData });
     }
 
-    // If neither wallet nor account is provided throw an error, on catch null will be returned
-    throw new Error("No wallet or account provided");
+    // If neither wallet nor auth ID is provided throw an error, on catch null will be returned
+    throw new Error("No wallet or authUserId provided for findOrCreateUser");
   } catch (error: unknown) {
     await mongooseSession.abortTransaction();
 
@@ -45,84 +45,83 @@ export async function findOrCreateUser({
   }
 }
 
-interface HandleWithAccountProps {
-  account: Account;
+interface HandleWithAuthIdProps {
   createData: CreateUserData;
+  authUserId?: string;
 }
 
-const handleWithAccount = async ({
-  account,
+const handleWithAuthId = async ({
   createData,
-}: HandleWithAccountProps) => {
-  // First, check if user exists by email for maximum account unification
-  if (createData.email) {
-    //fetch the mongoose Model we need to add accounts
-    const existingUserByEmail = await User.findOne({
-      email: createData.email,
-    })
-      .select("_id email accounts")
-      .exec(); //
-    console.log("🚀 ~ handleWithAccount ~ existingUserByEmail:", existingUserByEmail)
+  authUserId,
+}: HandleWithAuthIdProps) => {
 
-    if (existingUserByEmail) {
-      // Ensure accounts array exists
-      if (!existingUserByEmail.accounts) {
-        existingUserByEmail.accounts = [];
-      }
-
-      // Check if this provider account already exists for this user
-      const hasProviderAccount = existingUserByEmail.accounts.some(
-        (acc) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
-      );
-
-      if (!hasProviderAccount) {
-        // Add the new provider account to existing user
-        existingUserByEmail.accounts.push(account);
-        await existingUserByEmail.save();
-      }
-
-      const sessionUser: NextAuthUser = {
-        id: existingUserByEmail._id.toString(),
-        email: existingUserByEmail.email,
-      };
-
-      return sessionUser;
-    }
+  if (!authUserId) {
+    throw new Error("authUserId not provided for handleWithAuthId Auth");
   }
 
-  // If no email match, check if user exists by providerAccountId and provider for exact match
-  const existingUserByProvider = await User.findOne({
-    accounts: {
-      $elemMatch: {
-        providerAccountId: account.providerAccountId,
-        provider: account.provider,
-      },
-    },
+  const existingUserByAuthId = await User.findOne({
+    authUserId: authUserId,
   })
-    .select("_id email")
+    .select("_id")
     .lean()
     .exec();
 
-  if (existingUserByProvider) {
+  if (existingUserByAuthId) {
     const sessionUser: NextAuthUser = {
-      id: existingUserByProvider._id.toString(),
-      email: existingUserByProvider.email,
+      id: authUserId,
+      dbUserId: existingUserByAuthId._id.toString(),
     };
     return sessionUser;
   }
 
-  // If no user exists with this email or provider, create a new one
+  // find pending auth verifications, if found, add this authId to that account and return the session user
+
+
+  // if (createData.email) {
+  //   //fetch the mongoose Model we need to add accounts
+  //   const existingUserByEmail = await User.findOne({
+  //     email: createData.email,
+  //   })
+  //     .select("_id email authUserId")
+  //     .exec();
+
+  //   if (existingUserByEmail) {
+  //     if (existingUserByEmail.authUserId && existingUserByEmail.authUserId.toString() !== authUserId) {
+  //       throw new Error("User already exists with this authentication id");
+  //     }
+
+
+  //     if (!existingUserByEmail.authUserId) {
+  //       // Add the new auth Id to existing user
+  //       existingUserByEmail.authUserId = new Schema.Types.ObjectId(authUserId);
+  //       await existingUserByEmail.save();
+  //     }
+
+  //     const sessionUser: NextAuthUser = {
+  //       id: authUserId,
+  //       dbUserId: existingUserByEmail._id.toString(),
+  //     };
+
+  //     return sessionUser;
+  //   }
+  // } else {
+  //   throw new Error("Email is required for user creation");
+  // }
+
+
+  // If no user exists with this email or auth id, create a new one
+  
   const newUser = new User({
     ...createData,
-    accounts: [account],
+    authUserId: authUserId,
   })
   //errors handled in parent function
 
   await newUser.save();
 
   const sessionUser: NextAuthUser = {
-    id: newUser._id.toString(),
-    email: newUser.email,
+    id: authUserId,
+    dbUserId: newUser._id.toString(),
   };
   return sessionUser;
 }
@@ -139,20 +138,21 @@ const handleWithWallet = async ({
   const walletModel = await Wallet.findOne({ address: wallet.address });
 
   if (walletModel) {
-    const user = await User.findById<NextAuthUser>(walletModel?.owner)
+    const user = await User.findById(walletModel?.owner)
       .select("_id")
       .lean()
       .exec();
 
     if (!user) {
-      //TODO: handle case where user is not found (shouldn't need this)
+      //shouldn't ever happen
+      //just in case we need to handle case where user is not found delete the wallet
       // await walletModel.deleteOne();
       throw new Error("User not found for the given wallet");
     }
 
     const sessionUser: NextAuthUser = {
       id: user._id.toString(),
-      publicKey: wallet.address,
+      dbUserId: user._id.toString(),
     };
 
     return sessionUser;
@@ -178,7 +178,7 @@ const handleWithWallet = async ({
 
     const sessionUser: NextAuthUser = {
       id: user._id.toString(),
-      publicKey: wallet.address,
+      dbUserId: user._id.toString(),
     };
     return sessionUser;
   }
