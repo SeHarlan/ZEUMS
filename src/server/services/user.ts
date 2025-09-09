@@ -3,8 +3,9 @@ import User from "../models/User";
 import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { User as NextAuthUser } from "next-auth";
+import PendingEmailVerification from "../models/PendingEmailVerification";
 
 export type FindOrCreateProps = {
   createData: CreateUserData;
@@ -22,11 +23,10 @@ export async function findOrCreateUser({
   wallet,
   createData
 }: FindOrCreateProps): Promise<NextAuthUser | null> {
-  const mongooseSession = await mongoose.startSession();
-
+  
   try {
     if (wallet) {
-      return handleWithWallet({ wallet, createData, mongooseSession });
+      return handleWithWallet({ wallet, createData });
     }
 
     if (authUserId) {
@@ -36,12 +36,8 @@ export async function findOrCreateUser({
     // If neither wallet nor auth ID is provided throw an error, on catch null will be returned
     throw new Error("No wallet or authUserId provided for findOrCreateUser");
   } catch (error: unknown) {
-    await mongooseSession.abortTransaction();
-
     handleServerError({ error, location: "services-user_findOrCreateUser" });
     return null;
-  } finally {
-    mongooseSession.endSession();
   }
 }
 
@@ -54,11 +50,10 @@ const handleWithAuthId = async ({
   createData,
   authUserId,
 }: HandleWithAuthIdProps) => {
-
   if (!authUserId) {
     throw new Error("authUserId not provided for handleWithAuthId Auth");
   }
-
+  //first check if the authId is already linked to a user (most likely case)
   const existingUserByAuthId = await User.findOne({
     authUserId: authUserId,
   })
@@ -75,48 +70,54 @@ const handleWithAuthId = async ({
   }
 
   // find pending auth verifications, if found, add this authId to that account and return the session user
+  const pendingAuthVerification = await PendingEmailVerification.findOne({
+    email: createData.email,
+  }).exec();
 
+  if (pendingAuthVerification) {
+    // Check if expired
+    if (pendingAuthVerification.expiresAt < new Date()) {
+      // Clean up expired verification (fallback in case mongodb doesn't auto delete)
+      await PendingEmailVerification.deleteOne({
+        _id: pendingAuthVerification._id,
+      }).exec();
 
-  // if (createData.email) {
-  //   //fetch the mongoose Model we need to add accounts
-  //   const existingUserByEmail = await User.findOne({
-  //     email: createData.email,
-  //   })
-  //     .select("_id email authUserId")
-  //     .exec();
+      throw new Error("Pending auth verification has expired");
+    }
 
-  //   if (existingUserByEmail) {
-  //     if (existingUserByEmail.authUserId && existingUserByEmail.authUserId.toString() !== authUserId) {
-  //       throw new Error("User already exists with this authentication id");
-  //     }
+    // Find the user for this pending verification
+    const existingUserByPendingId = await User.findOne({
+      _id: pendingAuthVerification.userId,
+    })
+      .select("_id authUserId")
+      .exec();
 
+    if (!existingUserByPendingId) {
+      throw new Error("User not found for the given pending auth verification");
+    }
 
-  //     if (!existingUserByEmail.authUserId) {
-  //       // Add the new auth Id to existing user
-  //       existingUserByEmail.authUserId = new Schema.Types.ObjectId(authUserId);
-  //       await existingUserByEmail.save();
-  //     }
+    // Check if user already has an authId (race condition protection)
+    if (existingUserByPendingId.authUserId) {
+      throw new Error("User already has an authentication account linked");
+    }
 
-  //     const sessionUser: NextAuthUser = {
-  //       id: authUserId,
-  //       dbUserId: existingUserByEmail._id.toString(),
-  //     };
+    // Link the authId to the existing user
+    existingUserByPendingId.authUserId = new Schema.Types.ObjectId(authUserId);
+    await existingUserByPendingId.save();
 
-  //     return sessionUser;
-  //   }
-  // } else {
-  //   throw new Error("Email is required for user creation");
-  // }
+    const sessionUser: NextAuthUser = {
+      id: authUserId,
+      dbUserId: existingUserByPendingId._id.toString(),
+    };
 
+    return sessionUser;
+  }
 
-  // If no user exists with this email or auth id, create a new one
-  
+  // No pending verification and no existing user - create new user
   const newUser = new User({
     ...createData,
     authUserId: authUserId,
-  })
-  //errors handled in parent function
-
+  });
   await newUser.save();
 
   const sessionUser: NextAuthUser = {
@@ -128,58 +129,68 @@ const handleWithAuthId = async ({
 interface HandleWithWalletProps {
   wallet: CreateWalletData;
   createData: CreateUserData;
-  mongooseSession: mongoose.mongo.ClientSession;
 }
 const handleWithWallet = async ({
   wallet,
   createData,
-  mongooseSession,
 }: HandleWithWalletProps) => {
-  const walletModel = await Wallet.findOne({ address: wallet.address });
-
-  if (walletModel) {
-    const user = await User.findById(walletModel?.owner)
-      .select("_id")
-      .lean()
-      .exec();
-
-    if (!user) {
-      //shouldn't ever happen
-      //just in case we need to handle case where user is not found delete the wallet
-      // await walletModel.deleteOne();
-      throw new Error("User not found for the given wallet");
+  const mongooseSession = await mongoose.startSession();
+  
+  try {
+    const walletModel = await Wallet.findOne({ address: wallet.address });
+  
+    if (walletModel) {
+      const user = await User.findById(walletModel?.owner)
+        .select("_id")
+        .lean()
+        .exec();
+  
+      if (!user) {
+        //shouldn't ever happen
+        //just in case we need to handle case where user is not found delete the wallet:
+        // await walletModel.deleteOne();
+        throw new Error("User not found for the given wallet");
+      }
+  
+      const sessionUser: NextAuthUser = {
+        id: user._id.toString(),
+        dbUserId: user._id.toString(),
+      };
+  
+      return sessionUser;
+    } else {
+      // If wallet does not exist, create a new user and wallet within a transaction
+      
+      mongooseSession.startTransaction();
+  
+      const user = new User(createData);
+      await user.save({ session: mongooseSession });
+  
+      await Wallet.create(
+        [
+          {
+            owner: user._id,
+            address: wallet.address,
+            type: wallet.type,
+          },
+        ],
+        { session: mongooseSession }
+      ) //errors handled in parent function
+  
+      await mongooseSession.commitTransaction();
+  
+      const sessionUser: NextAuthUser = {
+        id: user._id.toString(),
+        dbUserId: user._id.toString(),
+      };
+      return sessionUser;
     }
+  } catch (error: unknown) {
 
-    const sessionUser: NextAuthUser = {
-      id: user._id.toString(),
-      dbUserId: user._id.toString(),
-    };
-
-    return sessionUser;
-  } else {
-    // If wallet does not exist, create a new user and wallet within a transaction
-    mongooseSession.startTransaction();
-
-    const user = new User(createData);
-    await user.save({ session: mongooseSession });
-
-    await Wallet.create(
-      [
-        {
-          owner: user._id,
-          address: wallet.address,
-          type: wallet.type,
-        },
-      ],
-      { session: mongooseSession }
-    ) //errors handled in parent function
-
-    await mongooseSession.commitTransaction();
-
-    const sessionUser: NextAuthUser = {
-      id: user._id.toString(),
-      dbUserId: user._id.toString(),
-    };
-    return sessionUser;
+    await mongooseSession.abortTransaction();
+    
+    throw error; //throw error for parent function to handle
+  } finally {
+    mongooseSession.endSession();
   }
 }

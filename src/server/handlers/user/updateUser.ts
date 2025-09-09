@@ -15,9 +15,8 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     const authSessionUser = await getAuthSessionUser(req);
 
     // Parse the request body to get the update data
-    const rawUpdateData = (await req.json()) as
-      | ProfileDisplayFormValues
-      | AccountDetailsFormValues;
+    const rawUpdateData: ProfileDisplayFormValues
+      | AccountDetailsFormValues = (await req.json());
 
     // If no update data is provided, return an error
     if (!rawUpdateData || Object.keys(rawUpdateData).length === 0) {

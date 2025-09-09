@@ -116,6 +116,7 @@ const getProviders = () => {
           const signinMessage = new SignInMessage(
             JSON.parse(credentials?.message || "{}")
           );
+
           const nextAuthUrl = new URL(authUrl);
           if (signinMessage.domain !== nextAuthUrl.host) {
             return null;
@@ -193,12 +194,10 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
         if (!user) {
           return token;
         }
-
-
         const isProviderAuth = account && account.provider !== "credentials";
         //"credentials" / blockchain wallet sign in is handled in the custom authorize callback
 
-        // Handle user creation/fetching after successful OAuth authentication
+        // Handle user creation/fetching/linking after successful OAuth authentication
         if (isProviderAuth) {
           try {
             const email = user.email;
@@ -206,10 +205,10 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
             if (!email) {
               throw new Error("Email not found in user");
             }
-
+            
             const username =
               user.name?.replaceAll(" ", "") || email.split("@")[0];
-
+            
             const sessionUser = await findOrCreateUser({
               authUserId: user.id,
               createData: {
@@ -223,6 +222,7 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
                 "Error creating user in provider authorization step"
               );
             }
+
             user = {
               ...user,
               ...sessionUser,

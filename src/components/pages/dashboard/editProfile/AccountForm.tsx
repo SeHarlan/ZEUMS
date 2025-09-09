@@ -151,7 +151,7 @@ const ProfileAccountForm: FC = () => {
             </Button>
           </div>
         )}
-        <P className="text-sm text-muted-foreground">
+        <P className="text-sm text-muted-foreground mb-0">
           A verified email allows you to log in anywhere using accounts linked
           to your email.
         </P>

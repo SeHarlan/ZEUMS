@@ -15,17 +15,20 @@ import { EmailIcon, GoogleIcon } from "../icons/Social";
 import { usePathname, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
-import { useUser } from "@/context/UserProvider";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
 import { toast } from "sonner";
 import { PENDING_AUTH_VERIFICATION_ROUTE } from "@/constants/serverRoutes";
+import { P } from "../typography/Typography";
+import { InfoIcon } from "lucide-react";
 
 interface AuthLinkingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   email: string;
 }
+
+
 export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   open,
   onOpenChange,
@@ -34,13 +37,11 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { user } = useUser();
   
   const createPendingAuthVerification = async (cb: () => void) => {
     setLoading(true);
     axios
       .post(PENDING_AUTH_VERIFICATION_ROUTE, {
-        dbUserId: user?._id,
         email,
       })
       .then(() => {
@@ -79,31 +80,39 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Verifying Email</DialogTitle>
-          <DialogDescription>
-            Link this account to {email}
-          </DialogDescription>
+          <DialogDescription>Link this account to {email}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <Button
             onClick={handleVerifyWithEmail}
-            variant="outline"
             className={cn("w-full", !loading && "justify-start")}
             loading={loading}
+            variant="outline"
           >
             <EmailIcon />
             Verify with a Magic Link
           </Button>
 
-          <Button
-            onClick={() => handleVerifyWithProvider("google")}
-            variant="outline"
-            className={cn("w-full", !loading && "justify-start")}
-            loading={loading}
-          >
-            <GoogleIcon />
-            Verify with Google
-          </Button>
+          <div className="space-y-2">
+            <Button
+              onClick={() => handleVerifyWithProvider("google")}
+              className={cn("w-full", !loading && "justify-start")}
+              loading={loading}
+              variant="outline"
+            >
+              <GoogleIcon />
+              Verify with Google
+            </Button>
+
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <InfoIcon className="size-3 flex-shrink-0" />
+              <P className="text-sm">
+                You must use the account linked to {email}
+              </P>
+            </div>
+          </div>
+
           {/* 
           <Button
             onClick={() => handleVerifyWithProvider("apple")}
