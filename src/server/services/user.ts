@@ -3,7 +3,7 @@ import User from "../models/User";
 import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 import { User as NextAuthUser } from "next-auth";
 import PendingEmailVerification from "../models/PendingEmailVerification";
 
@@ -86,24 +86,19 @@ const handleWithAuthId = async ({
     }
 
     // Find the user for this pending verification
-    const existingUserByPendingId = await User.findOne({
-      _id: pendingAuthVerification.userId,
-    })
-      .select("_id authUserId")
-      .exec();
+    const existingUserByPendingId = await User.findByIdAndUpdate(
+      pendingAuthVerification.userId,
+      { authUserId: authUserId },
+      {
+        new: true,
+        // Only update if authUserId doesn't exist
+        conditions: { authUserId: { $exists: false } },
+      }
+    ).exec();
 
     if (!existingUserByPendingId) {
-      throw new Error("User not found for the given pending auth verification");
+      throw new Error("No user found for the given pending auth verification");
     }
-
-    // Check if user already has an authId (race condition protection)
-    if (existingUserByPendingId.authUserId) {
-      throw new Error("User already has an authentication account linked");
-    }
-
-    // Link the authId to the existing user
-    existingUserByPendingId.authUserId = new Schema.Types.ObjectId(authUserId);
-    await existingUserByPendingId.save();
 
     const sessionUser: NextAuthUser = {
       id: authUserId,
@@ -135,7 +130,7 @@ const handleWithWallet = async ({
   createData,
 }: HandleWithWalletProps) => {
   const mongooseSession = await mongoose.startSession();
-  
+
   try {
     const walletModel = await Wallet.findOne({ address: wallet.address });
   

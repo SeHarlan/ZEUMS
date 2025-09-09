@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import PendingEmailVerification from "@/server/models/PendingEmailVerification";
+import { MongoServerError } from "mongodb";
+
+const PENDING_VERIFICATION_EXPIRATION_TIME = 60 * 60 * 1000 * 24; //24 hrs
 
 export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResponse> {
   await connectToDatabase();
@@ -15,21 +18,39 @@ export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResp
       throw new Error("Email is required to create a pendingEmailVerification");
     }
 
+    const expirationDate = new Date(Date.now() + PENDING_VERIFICATION_EXPIRATION_TIME);
+
     const pendingVerificationCreationData = {
       userId: authSessionUser.dbUserId,
       email: newPendingVerification.email,
-      // expiresAt: new Date(Date.now() + hours * 60 * 60 * 1000)
+      expiresAt: expirationDate,
     };
 
-    const createdPendingVerification = await PendingEmailVerification.create(
-      pendingVerificationCreationData
-    );
+    try {
+      await PendingEmailVerification.create(
+        pendingVerificationCreationData
+      );
 
-    if (!createdPendingVerification) {
-      throw new Error("Failed to create new pendingEmailVerification");
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      if (error instanceof MongoServerError && error.code === 11000) {
+        // Duplicate key error - handle gracefully
+        // Update the users existing verification with new email and expires at
+        await PendingEmailVerification.findOneAndUpdate(
+          { userId: authSessionUser.dbUserId },
+          {
+            email: newPendingVerification.email,
+            expiresAt: expirationDate,
+          },
+          { new: true }
+        );
+      
+        return NextResponse.json({ success: true });
+      } else {
+        // Re-throw other errors
+        throw error;
+      }
     }
-
-    return NextResponse.json({ createdPendingVerification });
   } catch (error) {
     return standardErrorResponses({
       error,
