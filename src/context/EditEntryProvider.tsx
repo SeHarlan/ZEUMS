@@ -1,6 +1,6 @@
 "use client";
 
-import EditEntryForm from "@/components/pages/dashboard/editTimeline/editEntryForm/EditEntryForm";
+import EditEntryForm from "@/components/page-specific/dashboard/editTimeline/editEntryForm/EditEntryForm";
 import { TimelineEntry } from "@/types/entry";
 import { createContext, useContext, useState, ReactNode } from "react";
 
