@@ -51,16 +51,13 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { publicKey, signMessage, disconnect } = useWallet();
-
   const { status, data: session } = useSession();
-    console.log("🚀 ~ UserContextProvider ~ session:", session?.user)
 
   const [user, setUser] = useState<UserType | null>(null);
-  console.log("🚀 ~ UserContextProvider ~ user:", user)
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
   const signingInRef = useRef(false);
-
+  
   const userExists = !!user;
   const sessionIdExists = !!session?.user && !!session.user.id;
 

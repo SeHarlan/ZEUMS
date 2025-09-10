@@ -190,8 +190,6 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
         user,
         account,
       }) {
-        console.log("🚀 ~ jwt ~ user:", user)
-        console.log("🚀 ~ jwt ~ token:", token)
         if (!user) {
           return token;
         }
@@ -209,7 +207,6 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
             
             const username =
               user.name?.replaceAll(" ", "") || email.split("@")[0];
-            console.log("🚀 ~ jwt ~ username:", username)
             
             const sessionUser = await findOrCreateUser({
               authUserId: user.id,
@@ -244,14 +241,11 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
         return token;
       },
       async session({ session, token }) {
-        console.log("🚀 ~ session ~ token", token)
         if (isAuthUser(token.user)) {
           session.user = token.user;
         } else {
-          // console.log("🚨 Bad Token Format")
-          throw new Error("Bad Token format")
+          throw new Error("Bad session token, no auth user found")
         }
-        console.log("🚀 ~ session ~ session:", session)
         return session;
       },
     },
