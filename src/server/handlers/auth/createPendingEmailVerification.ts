@@ -6,7 +6,7 @@ import { MongoServerError } from "mongodb";
 
 const PENDING_VERIFICATION_EXPIRATION_TIME = 60 * 60 * 1000 * 24; //24 hrs
 
-export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResponse> {
+export async function createPendingEmailVerificationHandler(req: NextRequest): Promise<NextResponse> {
   await connectToDatabase();
 
   try {
@@ -34,7 +34,7 @@ export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResp
       return NextResponse.json({ success: true });
     } catch (error) {
       if (error instanceof MongoServerError && error.code === 11000) {
-        // Duplicate key error - handle gracefully
+        // 11000 = Duplicate key error - handle gracefully
         // Update the users existing verification with new email and expires at
         await PendingEmailVerification.findOneAndUpdate(
           { userId: authSessionUser.dbUserId },
@@ -44,7 +44,7 @@ export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResp
           },
           { new: true }
         );
-      
+
         return NextResponse.json({ success: true });
       } else {
         // Re-throw other errors
@@ -54,7 +54,7 @@ export async function linkAuthAccountHandler(req: NextRequest): Promise<NextResp
   } catch (error) {
     return standardErrorResponses({
       error,
-      location: "handlers-linkAuthAccount",
+      location: "handlers-createPendingEmailVerification",
       report: true,
     });
   }

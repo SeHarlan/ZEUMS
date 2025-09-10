@@ -6,7 +6,7 @@ import { ABOUT, LANDING_RETURN_KEY } from "@/constants/clientRoutes";
 import { makeReturnQueryParam } from "@/utils/navigation";
 import { H1, P } from "@/components/typography/Typography";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
-import GetStartedButton from "@/components/pages/landing/GetStartedButton";
+import GetStartedButton from "./GetStartedButton";
 
 const BasicNavDialog = () => { 
   const [buttonVisible, setButtonVisible] = useState(false);
@@ -71,7 +71,7 @@ const BasicNavDialog = () => {
   return (
     <div
       ref={buttonRef}
-      className={cn("absolute-center md:p-16 max-w-screen")}
+      className={cn("absolute-center md:px-16 md:py-8 max-w-screen")}
       onMouseEnter={() => setButtonVisible(true)}
       onMouseLeave={() => setButtonVisible(false)}
       onTouchStart={() => setButtonVisible(true)}
@@ -92,10 +92,10 @@ const BasicNavDialog = () => {
           <P className="text-sm text-muted-foreground ">{SUBTITLE_COPY}</P>
         </div>
 
-        <div className="flex flex-col gap-8">
-          <GetStartedButton />
+        <div className={cn("flex flex-col gap-8")}>
+          <GetStartedButton  disabled={!buttonVisible}/>
 
-          <LinkButton href={aboutPath} variant="secondary">
+          <LinkButton href={aboutPath} variant="secondary" disabled={!buttonVisible}>
             Learn More
           </LinkButton>
         </div>

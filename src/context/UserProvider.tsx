@@ -53,8 +53,10 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const { publicKey, signMessage, disconnect } = useWallet();
 
   const { status, data: session } = useSession();
+    console.log("🚀 ~ UserContextProvider ~ session:", session?.user)
 
   const [user, setUser] = useState<UserType | null>(null);
+  console.log("🚀 ~ UserContextProvider ~ user:", user)
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
   const signingInRef = useRef(false);
@@ -63,7 +65,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const sessionIdExists = !!session?.user && !!session.user.id;
 
   //users with oauth accounts have an email
-  const validOAuthEmail = !!user?.authUserId ? user.email : null;
+  const validOAuthEmail = !!user?.authUserId ? user.authUser.email : null;
 
   const userLoading =
     status === "loading" || (status === "authenticated" && !userExists);

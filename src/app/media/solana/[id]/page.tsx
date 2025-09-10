@@ -9,7 +9,7 @@ import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import LoadingPage from '@/components/general/LoadingPage';
-import GlitchFeedback from '@/components/pages/landing/GlitchFeedback';
+import GlitchFeedback from '@/components/general/GlitchFeedback';
 import { TITLE_COPY } from '@/textCopy/mainCopy';
 
 

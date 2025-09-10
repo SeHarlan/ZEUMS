@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -24,7 +25,7 @@ interface AuthOptionsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const LOADING_DELAY = 1000;
+const LOADING_DELAY = 500;
 
 export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChange }) => {
   const pathname = usePathname();
@@ -75,6 +76,9 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Sign in to {TITLE_COPY}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Sign in options
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -110,7 +114,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
             className={cn("w-full", !loading && "justify-start")}
             loading={loading}
           >
-            <GoogleIcon />
+            <GoogleIcon/>
             Continue with Google
           </Button>
           {/* 

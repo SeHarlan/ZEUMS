@@ -1,12 +1,13 @@
 "use client";
 
 import { useUser } from "@/context/UserProvider";
-import { EDIT_PROFILE_DISPLAY } from "@/constants/clientRoutes";
+import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 import { FC } from "react";
 // import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/ui/button";
 
-const GetStartedButton: FC = () => {
+
+const GetStartedButton: FC<{disabled?: boolean}> = ({disabled}) => {
   const { loggedIn, logInUser, userLoading } = useUser();
 
   // const router = useRouter();
@@ -29,15 +30,14 @@ const GetStartedButton: FC = () => {
     // <LinkButton href={EDIT_TIMELINE} loading={userLoading}>
     //   Manage Timeline
     // </LinkButton>
-    <LinkButton href={EDIT_PROFILE_DISPLAY} loading={userLoading}>
+    <LinkButton href={EDIT_PROFILE_ACCOUNT} loading={userLoading} disabled={disabled}>
       Edit Profile
     </LinkButton>
   );
 
   return (
-    <Button onClick={handleStartClicked} loading={userLoading}>
-      {/* Get started */}
-      Sign up
+    <Button onClick={handleStartClicked} loading={userLoading} disabled={disabled}>
+      Get started
     </Button>
   );
 }

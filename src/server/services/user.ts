@@ -36,7 +36,9 @@ export async function findOrCreateUser({
     // If neither wallet nor auth ID is provided throw an error, on catch null will be returned
     throw new Error("No wallet or authUserId provided for findOrCreateUser");
   } catch (error: unknown) {
-    handleServerError({ error, location: "services-user_findOrCreateUser" });
+
+    const method = !!wallet ? "handleWithWallet" : "handleWithAuthId";
+    handleServerError({ error, location: `services-user_findOrCreateUser_${method}` });
     return null;
   }
 }

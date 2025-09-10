@@ -4,7 +4,7 @@ import AuthContextProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import WalletContextProvider from "@/context/WalletProvider";
 import UserContextProvider from "@/context/UserProvider";
-import NavBar from "@/components/navBar/NavBar";
+import NavBar from "@/components/navigation/NavBar";
 import NavBarActionsProvider from "@/context/NavBarActionsProvider";
 import { Analytics } from "@vercel/analytics/next";
 import "@solana/wallet-adapter-react-ui/styles.css";
