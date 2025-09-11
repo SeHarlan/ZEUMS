@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getDisplayName } from "@/utils/user";
 import { UserType  } from "@/types/user";
 import { useForm } from "react-hook-form";
