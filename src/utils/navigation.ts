@@ -1,9 +1,7 @@
 import { 
-  DASHBOARD, 
   EDIT_PROFILE,
   EDIT_GALLERIES,
   EDIT_TIMELINE,
-  DASHBOARD_RETURN_KEY,
   EDIT_PROFILE_RETURN_KEY,
   EDIT_GALLERIES_RETURN_KEY,
   EDIT_TIMELINE_RETURN_KEY,
@@ -11,12 +9,14 @@ import {
   HOME,
   RETURN_QUERY_PARAM,
   SOLANA_MEDIA,
-  SOLANA_ASSET_RETURN_KEY
+  SOLANA_ASSET_RETURN_KEY,
+  ABOUT_RETURN_KEY,
+  ABOUT
 } from "@/constants/clientRoutes";
 
 export const getReturnPath = (returnKey: string): string => {
   const pathMap: Record<string, string> = {
-    [DASHBOARD_RETURN_KEY]: DASHBOARD,
+    [ABOUT_RETURN_KEY]: ABOUT,
     [EDIT_PROFILE_RETURN_KEY]: EDIT_PROFILE,
     [EDIT_GALLERIES_RETURN_KEY]: EDIT_GALLERIES,
     [EDIT_TIMELINE_RETURN_KEY]: EDIT_TIMELINE,
@@ -27,7 +27,7 @@ export const getReturnPath = (returnKey: string): string => {
     const id = returnKey.split("-")[1];
     return SOLANA_MEDIA(id);
   }
-  return pathMap[returnKey] || DASHBOARD;
+  return pathMap[returnKey] || HOME;
 };
 
 export const getReturnKey = (currentPath?: string, id?: string): string => {
@@ -40,6 +40,7 @@ export const getReturnKey = (currentPath?: string, id?: string): string => {
   if (currentPath.includes(EDIT_GALLERIES)) return EDIT_GALLERIES_RETURN_KEY;
   if (currentPath.includes(EDIT_TIMELINE)) return EDIT_TIMELINE_RETURN_KEY;
   if (currentPath.includes(EDIT_PROFILE)) return EDIT_PROFILE_RETURN_KEY;
+  if (currentPath.includes(ABOUT)) return ABOUT_RETURN_KEY;
   if (currentPath.includes(HOME)) return LANDING_RETURN_KEY;
   return LANDING_RETURN_KEY;
 };

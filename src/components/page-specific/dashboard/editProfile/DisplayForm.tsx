@@ -83,12 +83,12 @@ const ProfileDisplayForm: FC = () => {
         className="flex flex-col space-y-6"
       >
         <div className="w-full flex gap-6 flex-col sm:flex-row">
-          <Avatar className="w-24 h-24">
-            {/* <AvatarImage src={form.watch("profilePicture")} /> */}
+          {/* <Avatar className="w-24 h-24">
+            <AvatarImage src={form.watch("profilePicture")} />
             <AvatarFallback className="text-4xl font-serif">
               {form.watch("displayName")?.charAt(0) || "Z"}
             </AvatarFallback>
-          </Avatar>
+          </Avatar> */}
 
           <FormField
             control={form.control}

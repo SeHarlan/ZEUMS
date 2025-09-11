@@ -202,9 +202,9 @@ export function createMagicLinkEmailTemplate({
             </a>
           </div>
 
-          <strong class="text-center italic">
+          <p class="text-center italic">
             This link will expire in 24 hours.
-          </strong>
+          </p>
           
           <!-- Fallback Link -->
           <div class="fallback">

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { PENDING_AUTH_VERIFICATION_ROUTE } from "@/constants/serverRoutes";
 import { P } from "../typography/Typography";
 import { InfoIcon } from "lucide-react";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 
 interface AuthLinkingDialogProps {
   open: boolean;
@@ -37,6 +38,9 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  const returnKey = getReturnKey(pathname);
+  const emailSignInPath = AUTH_EMAIL_SIGNIN + makeReturnQueryParam(returnKey);
   
   const createPendingAuthVerification = async (cb: () => void) => {
     setLoading(true);
@@ -71,7 +75,7 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
 
   const handleVerifyWithEmail = async () => {
     createPendingAuthVerification(() => {
-      router.push(AUTH_EMAIL_SIGNIN);
+      router.push(emailSignInPath);
     })
   }; 
 

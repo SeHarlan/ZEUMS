@@ -152,12 +152,9 @@ const ProfileAccountForm: FC = () => {
           </div>
         )}
         <P className="text-sm text-muted-foreground mb-0">
-          A verified email allows you to log in anywhere using accounts linked
-          to your email.
+          A verified email allows you to log in anywhere using accounts linked to your email.
         </P>
-        <P className="text-sm text-muted-foreground">
-          This will never be shared or used for marketing without your consent.
-        </P>
+        <P className="text-sm text-muted-foreground italic">Never shared or used without consent</P>
         {error && <P className="text-sm text-destructive">{error}</P>}
       </div>
 

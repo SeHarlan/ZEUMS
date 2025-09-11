@@ -16,22 +16,25 @@ import { Mail, ArrowLeft } from "lucide-react";
 import { handleClientError } from "@/utils/handleError";
 import { HOME } from "@/constants/clientRoutes";
 import { P } from "@/components/typography/Typography";
+import { useReturnPath } from "@/hooks/useReturnPath";
 
 export default function MagicLinkPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const callbackUrl = useReturnPath();
+  console.log("🚀 ~ MagicLinkPage ~ callbackUrl:", callbackUrl)
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     setIsLoading(true);
-    //TODO-important - change callbackUrl to redirect to the page the user was on before signing in 
-    // (will need to set in context on emial signin button click)
+ 
     try {
       const result = await signIn("email", {
         email,
+        callbackUrl: callbackUrl || HOME,
         redirect: true,
-        callbackUrl: HOME,
       });
 
       if (result?.error) {

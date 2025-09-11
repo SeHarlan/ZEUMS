@@ -20,6 +20,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { signIn } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 interface AuthOptionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -33,7 +34,10 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
   const { setVisible } = useWalletModal();
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
+  const returnKey = getReturnKey(pathname);
+  const emailSignInPath = AUTH_EMAIL_SIGNIN + makeReturnQueryParam(returnKey);
+
   const handleLoginWithWallet = () => {
     setLoading(true);
 
@@ -58,7 +62,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
   const handleLoginWithEmail = () => {
     setLoading(true);
     timerRef.current = setTimeout(() => {
-      router.push(AUTH_EMAIL_SIGNIN);
+      router.push(emailSignInPath);
       onOpenChange(false);
     }, LOADING_DELAY);
   };
