@@ -126,7 +126,6 @@ const getProviders = () => {
           if (signinMessage.nonce !== csrfToken) {
             throw new Error("Could not validate the csrf token");
           }
-
         
           const validationResult = await signinMessage.validate(
             credentials?.signature || ""
@@ -149,7 +148,7 @@ const getProviders = () => {
           if (!sessionUser) {
             throw new Error("Could not find or create user");
           }
-          
+
           return sessionUser;
         } catch (e) {
           handleServerError({
