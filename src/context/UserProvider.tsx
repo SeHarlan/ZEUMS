@@ -24,6 +24,7 @@ import { USER_ROUTE } from "@/constants/serverRoutes";
 import { parseEntryDates } from "@/utils/timeline";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
+import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -60,6 +61,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   
   const userExists = !!user;
   const sessionIdExists = !!session?.user && !!session.user.id;
+
+  const walletIsVerified = activeSolanaWalletIsInUserWallets(user, publicKey);
 
   //users with oauth accounts have an email
   const validOAuthEmail = !!user?.authUserId ? user.authUser.email : null;
@@ -142,7 +145,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (hasLoggedIn || !userExists) return;
     //once userExists is true check to make sure the needed info is also there (publicKey or validOAuthEmail)
     //then set hasLoggedIn to true
-    if (publicKey) {
+    if (walletIsVerified && publicKey) {
       toast.success("Logged in", {
         description: `${truncate(publicKey.toString())} is connected`,
       });
@@ -157,7 +160,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       //TODO consider fallback options
       logOutUser();
     }
-  }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail]);
+  }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail, walletIsVerified]);
 
   useEffect(() => {
     if (userExists) return;

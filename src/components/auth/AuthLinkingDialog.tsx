@@ -12,7 +12,7 @@ import { FC, useState } from "react";
 import { OAuthProviderType } from "next-auth/providers/oauth-types";
 import { cn } from "@/utils/ui-utils";
 import { EmailIcon, GoogleIcon } from "../icons/Social";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
 import { handleClientError } from "@/utils/handleError";
@@ -40,8 +40,12 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   const [loading, setLoading] = useState(false);
 
   const returnKey = getReturnKey(pathname);
+  const searchParams = useSearchParams();
+
+  //tells the email sign in page with page to redirect to in the magic link
   const emailSignInPath = AUTH_EMAIL_SIGNIN + makeReturnQueryParam(returnKey);
-  
+  const providerSignInPath = `${pathname}?${searchParams.toString()}`;
+
   const createPendingAuthVerification = async (cb: () => void) => {
     setLoading(true);
     axios
@@ -62,22 +66,22 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
       .finally(() => {
         setLoading(false);
       });
-  }
+  };
 
   const handleVerifyWithProvider = (provider: OAuthProviderType) => {
     createPendingAuthVerification(() => {
       signIn(provider, {
-        callbackUrl: pathname,
+        callbackUrl: providerSignInPath,
         redirect: true, // Ensure redirect happens on mobile
       });
-    }) 
+    });
   };
 
   const handleVerifyWithEmail = async () => {
     createPendingAuthVerification(() => {
       router.push(emailSignInPath);
-    })
-  }; 
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
