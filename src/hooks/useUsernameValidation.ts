@@ -39,8 +39,8 @@ const usernameSchema = z
     }
   });
 
-export const useUsernameValidation = () => {
-  const [username, setUsername] = useState("");
+export const useUsernameValidation = (initUsername?: string) => {
+  const [username, setUsername] = useState(initUsername || "");
   const [error, setError] = useState<string | null>(null);
 
   const checkUsernameUniqueness = useCallback(async (value: string) => {

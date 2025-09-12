@@ -78,7 +78,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setUser(null);
     setHasLoggedIn(false);
-    signOut();
+    signingInRef.current = false;
+    signOut({ redirect: false });
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
@@ -108,13 +109,15 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (res?.error) {
         toast.error("Failed to sign in. Please try again.");
+        throw new Error(res.error);
       }
     } catch (error) {
+      
       handleClientError({
         error,
         location: "useAuth_handleWalletAuthSignIn",
       });
-
+      
       await logOutUser();
     } finally {
       signingInRef.current = false;

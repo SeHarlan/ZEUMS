@@ -118,21 +118,23 @@ const getProviders = () => {
 
           const nextAuthUrl = new URL(authUrl);
           if (signinMessage.domain !== nextAuthUrl.host) {
-            return null;
+            throw new Error("Could not validate the domain");
           }
 
           const csrfToken = await getCsrfToken({ req: { ...req, body: null } });
 
           if (signinMessage.nonce !== csrfToken) {
-            return null;
+            throw new Error("Could not validate the csrf token");
           }
 
+        
           const validationResult = await signinMessage.validate(
             credentials?.signature || ""
           );
 
           if (!validationResult)
             throw new Error("Could not validate the signed message");
+  
 
           const sessionUser = await findOrCreateUser({
             wallet: {
@@ -144,8 +146,10 @@ const getProviders = () => {
             },
           });
 
-          if (!sessionUser) return null;
-
+          if (!sessionUser) {
+            throw new Error("Could not find or create user");
+          }
+          
           return sessionUser;
         } catch (e) {
           handleServerError({

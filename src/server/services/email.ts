@@ -185,7 +185,6 @@ export function createMagicLinkEmailTemplate({
       <div class="container">
         <!-- Header -->
         <div class="header">
-          <img src="${process.env.NEXTAUTH_URL}/icon.png" alt="${appName} Logo" class="logo" />
           <h1>Welcome to ${appName}</h1>
         </div>
         

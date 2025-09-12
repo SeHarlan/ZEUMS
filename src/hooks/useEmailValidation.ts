@@ -8,14 +8,19 @@ import { useDebounce } from "./useDebounce";
 const emailSchema = z.string().email("Invalid email address");
 const DEBOUNCE_TIME = 500;
 
-interface UseEmailValidationProps { 
+interface UseEmailValidationOptions { 
   /** optional check for uniqueness in the AuthUser or User collection */
   uniquenessCheck?: "AuthUser" | "User"
 }
 
-export const useEmailValidation = ({ uniquenessCheck }: UseEmailValidationProps = {}) => {
-  const [email, setEmail] = useState("");
+export const useEmailValidation = (
+  initEmail?: string,
+  options: UseEmailValidationOptions = {}
+) => {
+  const [email, setEmail] = useState(initEmail || "");
   const [error, setError] = useState<string | null>(null);
+
+  const { uniquenessCheck } = options;
 
   const checkEmailUniqueness = useCallback(async (value: string) => {
     if (!uniquenessCheck) return;
