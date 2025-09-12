@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import User, { CompleteUserVirtuals } from "../../models/User";
-import { BaseUserType, UserType } from "@/types/user";
+import { UserType } from "@/types/user";
 import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { AccountDetailsFormValues } from "@/forms/editProfileAccountDetails";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
@@ -15,19 +15,16 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     const authSessionUser = await getAuthSessionUser(req);
 
     // Parse the request body to get the update data
-    const rawUpdateData: ProfileDisplayFormValues
+    const updateData: ProfileDisplayFormValues
       | AccountDetailsFormValues = (await req.json());
 
     // If no update data is provided, return an error
-    if (!rawUpdateData || Object.keys(rawUpdateData).length === 0) {
+    if (!updateData || Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No update data provided" },
         { status: 400 }
       );
     }
-
-    // Format the update data to match the MongoDB schema
-    const updateData: Partial<BaseUserType> = rawUpdateData;
 
     // Find the user and update with the provided fields
     const updatedUser = await User.findByIdAndUpdate<UserType>(

@@ -4,26 +4,29 @@ import { truncate } from "./ui-utils";
 import { PublicKey } from "@solana/web3.js";
 
 
-const defaultWallets: Record<ChainIdsEnum, string[]> = {
-  [ChainIdsEnum.SOLANA]: [],
-  [ChainIdsEnum.TEZOS]: [],
-};
-
 // Group users wallet addresses by blockchain 
-export const getWalletsByChain = (user: UserType | null) => { 
+export const getWalletsByChain = (
+  user: UserType | null
+): Record<ChainIdsEnum, string[]> => {
   if (!user?.wallets || user.wallets.length === 0) {
     //spread operator to create a shallow copy and avoid mutating the original
-    return defaultWallets;
+    return {
+      [ChainIdsEnum.SOLANA]: [],
+      [ChainIdsEnum.TEZOS]: [],
+    };
   }
-  
-  return user.wallets.reduce(
+
+  return user.wallets.reduce<Record<ChainIdsEnum, string[]>>(
     (acc, wallet) => {
       acc[wallet.type].push(wallet.address);
       return acc;
     },
-    defaultWallets
+    {
+      [ChainIdsEnum.SOLANA]: [],
+      [ChainIdsEnum.TEZOS]: [],
+    }
   );
-}
+};
 
 export const activeSolanaWalletIsInUserWallets = (user: UserType | null, publicKey: PublicKey | null) => {
   if (!user || !publicKey) return false;
