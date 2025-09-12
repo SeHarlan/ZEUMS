@@ -13,3 +13,4 @@ export type WalletType = {
   type: ChainIdsEnum;
 };
 
+export type CreateWalletData = Omit<WalletType, "owner">;

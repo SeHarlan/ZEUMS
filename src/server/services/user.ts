@@ -164,13 +164,11 @@ const handleWithWallet = async ({
       await user.save({ session: mongooseSession });
   
       await Wallet.create(
-        [
-          {
-            owner: user._id,
-            address: wallet.address,
-            type: wallet.type,
-          },
-        ],
+        {
+          owner: user._id,
+          address: wallet.address,
+          type: wallet.type,
+        },
         { session: mongooseSession }
       ) //errors handled in parent function
   
