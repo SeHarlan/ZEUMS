@@ -12,16 +12,14 @@ import { FC, useState } from "react";
 import { OAuthProviderType } from "next-auth/providers/oauth-types";
 import { cn } from "@/utils/ui-utils";
 import { EmailIcon, GoogleIcon } from "../icons/Social";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
 import { toast } from "sonner";
 import { PENDING_AUTH_VERIFICATION_ROUTE } from "@/constants/serverRoutes";
 import { P } from "../typography/Typography";
 import { InfoIcon } from "lucide-react";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 
 interface AuthLinkingDialogProps {
   open: boolean;
@@ -36,24 +34,22 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   email,
 }) => {
   const pathname = usePathname();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const returnKey = getReturnKey(pathname);
   const searchParams = useSearchParams();
 
   //tells the email sign in page with page to redirect to in the magic link
-  const emailSignInPath = AUTH_EMAIL_SIGNIN + makeReturnQueryParam(returnKey);
-  const providerSignInPath = `${pathname}?${searchParams.toString()}`;
 
-  const createPendingAuthVerification = async (cb: () => void) => {
+  const returnPath = `${pathname}?${searchParams.toString()}`;
+
+  const createPendingAuthVerification = async (cb: () => Promise<void>) => {
     setLoading(true);
     axios
       .post(PENDING_AUTH_VERIFICATION_ROUTE, {
         email,
       })
-      .then(() => {
-        cb();
+      .then(async () => {
+        await cb();
         onOpenChange(false);
       })
       .catch((error) => {
@@ -69,17 +65,29 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
   };
 
   const handleVerifyWithProvider = (provider: OAuthProviderType) => {
-    createPendingAuthVerification(() => {
-      signIn(provider, {
-        callbackUrl: providerSignInPath,
+    createPendingAuthVerification(async () => {
+      const result = await signIn(provider, {
+        callbackUrl: returnPath,
         redirect: true, // Ensure redirect happens on mobile
       });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
     });
   };
 
   const handleVerifyWithEmail = async () => {
-    createPendingAuthVerification(() => {
-      router.push(emailSignInPath);
+    createPendingAuthVerification(async () => {
+      const result = await signIn("email", {
+        email,
+        callbackUrl: returnPath,
+        redirect: true,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
     });
   };
 
