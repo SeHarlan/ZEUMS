@@ -24,13 +24,13 @@ const ProfileAccountForm: FC = () => {
     setEmail,
     error: emailError,
     isValid: emailIsValid,
-  } = useEmailValidation({ uniquenessCheck: "AuthUser" });
+  } = useEmailValidation(user?.authUser?.email, { uniquenessCheck: "AuthUser" });
   const {
     username,
     setUsername,
     error: usernameError,
     isValid: usernameIsValid,
-  } = useUsernameValidation();
+  } = useUsernameValidation(user?.username);
   const [verifyOpen, setVerifyOpen] = useState(false);
 
   const verifiedEmail = user?.authUser?.email;
