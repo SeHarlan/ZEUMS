@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,18 +14,20 @@ import {
 import { Mail, ArrowLeft } from "lucide-react";
 import { handleClientError } from "@/utils/handleError";
 import { HOME } from "@/constants/clientRoutes";
-import { P } from "@/components/typography/Typography";
 import { useReturnPath } from "@/hooks/useReturnPath";
+import { useEmailValidation } from "@/hooks/useEmailValidation";
+import { StatelessFormItem } from "@/components/general/StatelessFormItem";
 
 export default function MagicLinkPage() {
-  const [email, setEmail] = useState("");
+  const { email, setEmail, isValid, error } = useEmailValidation();
   const [isLoading, setIsLoading] = useState(false);
 
   const callbackUrl = useReturnPath();
-  console.log("🚀 ~ MagicLinkPage ~ callbackUrl:", callbackUrl)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!isValid) return;
 
     setIsLoading(true);
  
@@ -66,29 +67,23 @@ export default function MagicLinkPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              required
-            />
-          </div>
-
-          <Button type="submit" className="w-full" loading={isLoading}>
+        <StatelessFormItem
+          label="Email address"
+          description="The magic link will expire in 24 hours. If you don't receive
+            the email, check your spam folder."
+          errorMessage={error}
+        >
+          <Input
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
+            required
+          />
+          <Button onClick={handleSubmit} className="w-full" loading={isLoading}>
             Send magic link
           </Button>
-
-          <P className="text-center text-sm text-muted-foreground">
-            The magic link will expire in 24 hours. If you don&apos;t receive
-            the email, check your spam folder.
-          </P>
-        </form>
+        </StatelessFormItem>
 
         <Button
           className="w-full"

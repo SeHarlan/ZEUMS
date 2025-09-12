@@ -1,11 +1,47 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { z } from "zod";
+import axios from "axios";
+import { USER_EMAIL_ROUTE } from "@/constants/serverRoutes";
+import { handleClientError } from "@/utils/handleError";
+import { useDebounce } from "./useDebounce";
 
 const emailSchema = z.string().email("Invalid email address");
+const DEBOUNCE_TIME = 500;
 
-export const useEmailValidation = () => {
+interface UseEmailValidationProps { 
+  /** optional check for uniqueness in the AuthUser or User collection */
+  uniquenessCheck?: "AuthUser" | "User"
+}
+
+export const useEmailValidation = ({ uniquenessCheck }: UseEmailValidationProps = {}) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const checkEmailUniqueness = useCallback(async (value: string) => {
+    if (!uniquenessCheck) return;
+
+    try {
+      const response = await axios.post<{ isUnique: boolean }>(USER_EMAIL_ROUTE, {
+        email: value,
+        collection: uniquenessCheck,
+      });
+      
+      if (!response.data.isUnique) {
+        setError("Email is already taken");
+      } else {
+        // Clear error if email is unique and no other validation errors
+        setError(null);
+      }
+    } catch (err) {
+      handleClientError({
+        error: err,
+        location: "useEmailValidation_checkEmailUniqueness",
+      });
+      setError("Failed to check email availability");
+    }
+  }, [uniquenessCheck]);
+
+  const debouncedCheckUniqueness = useDebounce(checkEmailUniqueness, DEBOUNCE_TIME);
 
   const validateEmail = (value: string) => {
     try {
@@ -23,7 +59,11 @@ export const useEmailValidation = () => {
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (value) {
-      validateEmail(value);
+      const isValidFormat = validateEmail(value);
+      // Only check uniqueness if basic validation passes and uniqueness check is enabled
+      if (isValidFormat && uniquenessCheck) {
+        debouncedCheckUniqueness(value);
+      }
     } else {
       setError(null);
     }
