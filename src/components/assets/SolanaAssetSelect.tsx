@@ -15,6 +15,7 @@ import { PrefixInput } from "../ui/input";
 import AssetThumbnailCard from "./AssetThumbnailCard";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import LoadingSpinner from "../general/LoadingSpinner";
+import { ChainIdsEnum } from "@/types/wallet";
 
 interface SolanaAssetSelectProps {
   disabledAssetAddresses?: string[]; //prevent already saved tokens from being selected again
@@ -42,7 +43,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
   const { user } = useUser()  
 
-  const {solanaPublicKeys} = useMemo(() => getWalletsByChain(user), [user]);
+  const solanaPublicKeys = useMemo(() => getWalletsByChain(user)[ChainIdsEnum.SOLANA], [user]);
 
   const { solanaAssets, isLoading } = useSolanaAssets({
     publicKeys: solanaPublicKeys,

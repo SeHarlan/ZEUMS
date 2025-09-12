@@ -1,7 +1,7 @@
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import EditGalleries from "@/components/pages/dashboard/editGalleries/EditGalleries";
-import { PageTurnLeft } from "@/components/pages/dashboard/PageTurnButtons";
+import EditGalleries from "@/components/page-specific/dashboard/editGalleries/EditGalleries";
+import { PageTurnLeft } from "@/components/page-specific/dashboard/PageTurnButtons";
 import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 
 export default function EditGalleriesPage() {

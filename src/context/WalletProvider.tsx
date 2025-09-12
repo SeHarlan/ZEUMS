@@ -12,7 +12,7 @@ import React, { useMemo } from "react";
 const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
 
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 

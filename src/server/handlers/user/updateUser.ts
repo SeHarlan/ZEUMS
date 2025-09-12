@@ -15,9 +15,8 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     const authSessionUser = await getAuthSessionUser(req);
 
     // Parse the request body to get the update data
-    const rawUpdateData = (await req.json()) as
-      | ProfileDisplayFormValues
-      | AccountDetailsFormValues;
+    const rawUpdateData: ProfileDisplayFormValues
+      | AccountDetailsFormValues = (await req.json());
 
     // If no update data is provided, return an error
     if (!rawUpdateData || Object.keys(rawUpdateData).length === 0) {
@@ -30,13 +29,9 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     // Format the update data to match the MongoDB schema
     const updateData: Partial<BaseUserType> = rawUpdateData;
 
-    //TODO: add wallet updates (get existing and add/delete based on submitted list)
-    // if updateing wallets use mongoose sessions = > const mongooseSession = = await mongoose.startSession();
-    // const walletUpdateData: WalletType = rawUpdateData.wallets || {};
-
     // Find the user and update with the provided fields
     const updatedUser = await User.findByIdAndUpdate<UserType>(
-      authSessionUser.id,
+      authSessionUser.dbUserId,
       { $set: updateData },
       {
         new: true,

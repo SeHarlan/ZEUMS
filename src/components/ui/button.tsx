@@ -74,6 +74,7 @@ function Button({
 
 function LinkButton({
   disabled,
+  loading,
   href,
   target,
   rel,
@@ -82,14 +83,15 @@ function LinkButton({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     loading?: boolean;
+    disabled?: boolean;
     href: string;
     target?: string;
     rel?: string;
   }) {
   
-  if (disabled)
+  if (disabled || loading)
     return (
-      <Button {...props} disabled>
+      <Button {...props} disabled={disabled} loading={loading} >
         {props.children}
       </Button>
     );

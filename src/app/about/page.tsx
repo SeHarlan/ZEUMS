@@ -2,7 +2,7 @@
 
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import GetStartedButton from "@/components/pages/landing/GetStartedButton";
+import GetStartedButton from "@/components/navigation/GetStartedButton";
 import { Blockquote, H3, P } from "@/components/typography/Typography";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 

@@ -20,6 +20,9 @@ import { TITLE_COPY } from "@/textCopy/mainCopy";
 import SearchAssetDialog from "../assets/SearchAssetDialog";
 import { P } from "../typography/Typography";
 import Logo from "../general/Logo";
+import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
+import { InfoIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const NavMenu: FC = () => {
   const { loggedIn, user } = useUser();
@@ -34,9 +37,12 @@ const NavMenu: FC = () => {
     <P>{activeWallet}</P>
   ) : (
     <P>
-      {truncate(user?.username)}<span className="text-xs italic"> - {activeWallet}</span>
+        {truncate(user?.username)}
+        {activeWallet && <span className="text-xs italic"> - {activeWallet}</span>}
     </P>
   );
+
+  const walletMismatch = user && publicKey && !activeSolanaWalletIsInUserWallets(user, publicKey);
 
   const noUserDisplayName = <P className="font-serif">Z</P>;
 
@@ -112,6 +118,17 @@ const NavMenu: FC = () => {
             disabled={!loggedIn}
           >
             {loggedIn ? userDisplayName : noUserDisplayName}
+            
+            {walletMismatch && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <InfoIcon className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <P>You are currently connected to a wallet not associated with your account</P>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </LinkButton>
         </NavDropDown>
       </NavigationMenuList>

@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     ],
   },
   //allow ngrok-free.app domains for development
-  allowedDevOrigins: ["*.ngrok-free.app"],
+  allowedDevOrigins: ["*.ngrok-free.app", "*.ngrok.app"],
 };
 
 export default nextConfig;

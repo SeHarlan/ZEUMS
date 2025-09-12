@@ -30,6 +30,8 @@ const NavBar: FC = () => {
       const button = buttonRef.current;
       if (!menu?.contains(target) && !button?.contains(target)) {
         setIsMenuOpen(false);
+      } else {
+        event.preventDefault();
       }
     };
 

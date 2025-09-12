@@ -5,9 +5,16 @@ interface ServerErrorArgs {
 }
 
 
+const isErrorWithMessage = (error: unknown): error is { message: unknown } => {
+  return typeof error === "object" && error !== null && "message" in error;
+}
+
 export const handleServerError = ({ error, report, location } : ServerErrorArgs) => { 
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  console.error(`${location} -- ${errorMessage}`);
+  let errorMessage = isErrorWithMessage(error) ? error.message : error;
+  if (typeof errorMessage !== "string") {
+    errorMessage = JSON.stringify(errorMessage);
+  } 
+  console.error(`🚨💾 ${location} -- ${errorMessage}`);
 
   if (report) {
     //TODO report error
@@ -15,8 +22,11 @@ export const handleServerError = ({ error, report, location } : ServerErrorArgs)
 }
 
 export const handleClientError = ({ error, report, location } : ServerErrorArgs) => { 
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  console.error(`${location} -- ${errorMessage}`);
+  let errorMessage = isErrorWithMessage(error) ? error.message : error;
+  if (typeof errorMessage !== "string") {
+    errorMessage = JSON.stringify(errorMessage);
+  } 
+  console.error(`🚨💻 ${location} -- ${errorMessage}`);
 
   if (report) {
     //TODO report error

@@ -1,5 +1,5 @@
 import { FC } from "react";
-import GlitchFeedback from "../../landing/GlitchFeedback";
+import GlitchFeedback from "../../../general/GlitchFeedback";
 
 const EditGalleries: FC = () => { 
   return (

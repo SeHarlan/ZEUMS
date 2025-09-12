@@ -11,7 +11,7 @@ export async function getUserHandler(req: NextRequest): Promise<NextResponse> {
     // Get the session to check authentication
     const authSessionUser = await getAuthSessionUser(req);
 
-    const user = await User.findById<UserType>(authSessionUser.id)
+    const user = await User.findById<UserType>(authSessionUser.dbUserId)
       .populate(CompleteUserVirtuals)
       .exec();
     

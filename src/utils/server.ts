@@ -1,15 +1,15 @@
-import { getServerSession, User } from "next-auth";
+import { getServerSession, User as NextAuthUser } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthOptions } from "@/server/handlers/auth/nextAuthOptions";
 import { handleServerError } from "./handleError";
 
 
-const UNAUTHORIZED_ERROR = "Unauthorized";
-/** Throws error if no auth session user found */
-export async function getAuthSessionUser(req: NextRequest): Promise<User> {
+const UNAUTHORIZED_ERROR = "Unauthorized Session Request";
+export async function getAuthSessionUser(req: NextRequest): Promise<NextAuthUser> {
   const authSession = await getServerSession(getAuthOptions(req));
-
-  if (!authSession || !authSession.user) {
+  
+  if (!authSession?.user) {
+    /** Throws error if no auth session user found */
     throw new Error(UNAUTHORIZED_ERROR);
   }
 
