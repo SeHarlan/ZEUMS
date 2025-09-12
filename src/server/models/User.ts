@@ -9,9 +9,15 @@ export interface UserDocument extends Document, UserType {
 
 const UserSchema: Schema = new Schema<UserDocument>(
   {
-    username: { type: String, required: true, unique: true, minlength: 3 },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      minlength: 3,
+      trim: true,
+    },
     displayName: { type: String },
-    email: { type: String, unique: true, sparse: true },
+    email: { type: String },
     bio: { type: String },
     socialHandles: {
       x: { type: String },
