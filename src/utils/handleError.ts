@@ -14,7 +14,7 @@ export const handleServerError = ({ error, report, location } : ServerErrorArgs)
   if (typeof errorMessage !== "string") {
     errorMessage = JSON.stringify(errorMessage);
   } 
-  console.error(`🚨💾 ${location} -- ${errorMessage}`);
+  console.warn(`🚨💾 ${location} -- ${errorMessage}`);
 
   if (report) {
     //TODO report error
@@ -26,7 +26,7 @@ export const handleClientError = ({ error, report, location } : ServerErrorArgs)
   if (typeof errorMessage !== "string") {
     errorMessage = JSON.stringify(errorMessage);
   } 
-  console.error(`🚨💻 ${location} -- ${errorMessage}`);
+  console.warn(`🚨💻 ${location} -- ${errorMessage}`);
 
   if (report) {
     //TODO report error

@@ -54,6 +54,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
     "resend": "^6.0.2",
+    "shadcn": "^3.2.1",
     "sonner": "^2.0.3",
     "swr": "^2.3.3",
     "tailwind-merge": "^3.3.0",

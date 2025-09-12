@@ -5,6 +5,7 @@ export const SINGLE_ASSET_SOLANA_ROUTE = (mintAddress: string) => `${ASSETS_SOLA
 export const USER_ROUTE = "/api/user";
 export const USER_USERNAME_ROUTE = `${USER_ROUTE}/username`;
 export const USER_EMAIL_ROUTE = `${USER_ROUTE}/email`;
+export const USER_WALLET_ROUTE = `${USER_ROUTE}/wallet`;
 
 export const ENTRY_ROUTE = "/api/entry";
 export const ENTRY_DATES_ROUTE = `${ENTRY_ROUTE}/dates`;

@@ -24,7 +24,6 @@ import { USER_ROUTE } from "@/constants/serverRoutes";
 import { parseEntryDates } from "@/utils/timeline";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
-import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -56,6 +55,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserType | null>(null);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
+
   const signingInRef = useRef(false);
   
   const userExists = !!user;
@@ -210,16 +210,6 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [user, userLoading, userExists, logOutUser, logInUser]
   );
-
-  useEffect(() => {
-    if (!publicKey || !user) return;
-
-    if (!activeSolanaWalletIsInUserWallets(user, publicKey)) {
-      toast.info("Wallet Mismatch", {
-        description: "To login with this wallet, please log out and reconnect",
-      });
-    }
-  }, [publicKey, user]);
 
   return (
     <UserContext.Provider value={contextValue}>
