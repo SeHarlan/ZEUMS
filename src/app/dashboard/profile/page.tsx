@@ -9,14 +9,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 import { EditProfileTab, EditProfileTabQueryParam, isEditProfileTab } from "@/types/ui/dashboard";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
 export default function EditProfilePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<EditProfileTab>(EditProfileTab.DISPLAY);
-
+  
   // Set active tab based on URL query param
   useEffect(() => {
     const tab = searchParams.get(EditProfileTabQueryParam);
@@ -26,9 +27,18 @@ export default function EditProfilePage() {
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
+    //update the url query param
+
     // type guard to ensure value is EditProfileTab
     if (isEditProfileTab(value)) {
       setActiveTab(value);
+
+      // Update URL query parameter using modern Next.js 15 approach
+      const params = new URLSearchParams(searchParams);
+      params.set(EditProfileTabQueryParam, value);
+
+      // Use router.replace with scroll: false for better UX
+      router.replace(`?${params.toString()}`, { scroll: false });
     }
   };
 

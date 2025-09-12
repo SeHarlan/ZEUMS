@@ -10,10 +10,7 @@ export async function checkUsernameUniquenessHandler(req: NextRequest): Promise<
     const { username } = await req.json();
     
     if (!username || typeof username !== "string") {
-      return NextResponse.json(
-        { error: "Username is required" },
-        { status: 400 }
-      );
+      throw new Error("Username is required");
     }
     
     // Use case-insensitive regex for MongoDB query

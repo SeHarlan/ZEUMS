@@ -1,13 +1,14 @@
 "use client";
 
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { handleClientError } from "@/utils/handleError";
+import { WalletAdapterNetwork, WalletError } from "@solana/wallet-adapter-base";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -26,9 +27,16 @@ const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   //   [network]
   // );
 
+  const handleError = useCallback((error: WalletError) => {
+    handleClientError({
+      error,
+      location: "WalletContextProvider_handleError",
+    });
+  }, []);
+
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={[]} autoConnect>
+      <WalletProvider wallets={[]} autoConnect onError={handleError} >
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

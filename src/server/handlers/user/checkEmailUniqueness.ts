@@ -4,6 +4,7 @@ import User from "../../models/User";
 import AuthUser from "../../models/AuthUser";
 import { standardErrorResponses } from "@/utils/server";
 
+
 export async function checkEmailUniquenessHandler(req: NextRequest): Promise<NextResponse> {
   try {
     await connectToDatabase();
@@ -11,17 +12,11 @@ export async function checkEmailUniquenessHandler(req: NextRequest): Promise<Nex
     const { email, collection } = await req.json();
     
     if (!email || typeof email !== "string") {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      throw new Error("Email is required");
     }
 
     if (!collection || !["User", "AuthUser"].includes(collection)) {
-      return NextResponse.json(
-        { error: "Collection must be either 'User' or 'AuthUser'" },
-        { status: 400 }
-      );
+      throw new Error("Collection must be either 'User' or 'AuthUser'");
     }
     
     // Use case-insensitive regex for MongoDB query
