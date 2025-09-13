@@ -16,6 +16,7 @@ import AssetThumbnailCard from "./AssetThumbnailCard";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { ChainIdsEnum } from "@/types/wallet";
+import { ImageVariant } from "@/types/media";
 
 interface SolanaAssetSelectProps {
   disabledAssetAddresses?: string[]; //prevent already saved tokens from being selected again
@@ -27,6 +28,7 @@ interface SolanaAssetSelectProps {
   maxSelected?: number;
   withSearch?: boolean; // Optional prop to enable/disable search
   maxSelectWarningBody?: ReactNode; // Optional prop for custom max select warning body
+  imageVariant?: ImageVariant;
 }
 
 const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
@@ -37,6 +39,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   maxSelected = 1, // Default to 1 if not provided
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
+  imageVariant = "default",
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 300);
@@ -146,7 +149,14 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           </div>
         ) : null}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+        <div
+          className={cn(
+            "grid gap-4 h-full",
+            imageVariant === "banner"
+              ? "grid-cols-1 lg:grid-cols-2"
+              : "grid-cols-2 lg:grid-cols-4"
+          )}
+        >
           {assetsPage.map((asset) => {
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
@@ -156,8 +166,10 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
               <AssetThumbnailCard
                 key={asset.tokenAddress}
                 asset={asset}
-                
-                onClick={(aspectRatio) => handleAssetClick({ asset, isSelected, aspectRatio })}
+                imageVariant={imageVariant}
+                onClick={(aspectRatio) =>
+                  handleAssetClick({ asset, isSelected, aspectRatio })
+                }
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-300",
                   isSelected ? "border-primary" : "border-transparent",

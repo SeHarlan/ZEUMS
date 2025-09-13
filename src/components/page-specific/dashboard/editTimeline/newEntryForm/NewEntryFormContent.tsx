@@ -42,7 +42,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   setAspectRatio,
   source,
 }) => {
-  //TODO get timeline based on source and select tokens (use atom selector)
+  //TODO disabled double select -get timeline based on source and select tokens (use atom selector)
   // const disabledAssetAddresses =
   
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;

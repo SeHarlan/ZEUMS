@@ -26,7 +26,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const NavMenu: FC = () => {
   const { loggedIn, user } = useUser();
-  const {publicKey} = useWallet();
+  const { publicKey } = useWallet();
 
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
   const activeWallet = truncate(publicKey?.toString());
@@ -37,8 +37,8 @@ const NavMenu: FC = () => {
     <P>{activeWallet}</P>
   ) : (
     <P>
-        {truncate(user?.username)}
-        {activeWallet && <span className="text-xs italic"> - {activeWallet}</span>}
+      {truncate(user?.username)}
+      {activeWallet && <span className="text-xs italic"> - {activeWallet}</span>}
     </P>
   );
 

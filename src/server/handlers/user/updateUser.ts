@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import User, { CompleteUserVirtuals } from "../../models/User";
 import { UserType } from "@/types/user";
-import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
-import { AccountDetailsFormValues } from "@/forms/editProfileAccountDetails";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 
 
@@ -15,16 +13,14 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     const authSessionUser = await getAuthSessionUser(req);
 
     // Parse the request body to get the update data
-    const updateData: ProfileDisplayFormValues
-      | AccountDetailsFormValues = (await req.json());
+    const updateData: Partial<UserType> = (await req.json());
 
     // If no update data is provided, return an error
     if (!updateData || Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: "No update data provided" },
-        { status: 400 }
-      );
+      throw new Error("No update data provided");
     }
+
+
 
     // Find the user and update with the provided fields
     const updatedUser = await User.findByIdAndUpdate<UserType>(
@@ -39,7 +35,7 @@ export async function updateUserHandler(req: NextRequest): Promise<NextResponse>
     ).populate(CompleteUserVirtuals);
 
     if (!updatedUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new Error("User not found");
     }
 
     // Return the updated user data
