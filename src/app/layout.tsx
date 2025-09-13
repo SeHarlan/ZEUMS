@@ -12,6 +12,7 @@ import "./globals.css";
 import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense } from "react";
+import { AspectRatioProvider } from "@/context/AspectRatioProvider";
 
 
 const dmSerif = DM_Serif_Text({
@@ -59,13 +60,15 @@ export default function RootLayout({
           <AuthContextProvider>
             <UserContextProvider>
               <NavBarActionsProvider>
-                <ScrollArea className="h-screen">
-                  <Suspense fallback={<nav />}>
-                    <NavBar />
-                  </Suspense>
-                  {children}
-                  <Toaster />
-                </ScrollArea>
+                <AspectRatioProvider>
+                  <ScrollArea className="h-screen">
+                    <Suspense fallback={<nav />}>
+                      <NavBar />
+                    </Suspense>
+                    {children}
+                    <Toaster />
+                  </ScrollArea>
+                </AspectRatioProvider>
               </NavBarActionsProvider>
             </UserContextProvider>
           </AuthContextProvider>

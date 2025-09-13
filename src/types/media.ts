@@ -1,7 +1,9 @@
+export type ImageVariant = "default" | "profile" | "banner";
+
 export enum MediaOrigin {
   User = "user",
   Blockchain = "blockchain",
-} 
+}
 
 export type BaseMedia = {
   category: MediaCategory;
@@ -17,7 +19,7 @@ export enum MediaCategory {
 
 export enum CdnIdType {
   HELIUS_URL = "helius_image_url",
-  CLOUDINARY_ID = "cloudinary_id"
+  CLOUDINARY_ID = "cloudinary_id",
 }
 
 export type Cdn = {
@@ -30,7 +32,7 @@ export type UserImage = BaseMedia & {
   origin: MediaOrigin.User;
   category: MediaCategory.Image;
   imageCdn: Cdn;
-}
+};
 export type UserMedia = BaseMedia & {
   origin: MediaOrigin.User;
   category: Omit<MediaCategory, MediaCategory.Image>;
@@ -54,34 +56,56 @@ export type BlockchainMedia = BaseMedia & {
   mediaCdn?: Cdn;
 };
 
+export type MediaType =
+  | UserImage
+  | UserMedia
+  | BlockchainImage
+  | BlockchainMedia;
 
+export type ImageType = UserImage | BlockchainImage;
 
-export type MediaType = UserImage | UserMedia | BlockchainImage | BlockchainMedia;
+export type OtherMediaType = UserMedia | BlockchainMedia;
 
 // Type guard functions
+export function isImageType(media: MediaType): media is ImageType {
+  return media.category === MediaCategory.Image;
+}
+
 export function isUserImage(media: MediaType): media is UserImage {
-  return media.origin === MediaOrigin.User && media.category === MediaCategory.Image;
+  return (
+    media.origin === MediaOrigin.User && media.category === MediaCategory.Image
+  );
 }
 
 export function isUserMedia(media: MediaType): media is UserMedia {
-  return media.origin === MediaOrigin.User && media.category !== MediaCategory.Image;
+  return (
+    media.origin === MediaOrigin.User && media.category !== MediaCategory.Image
+  );
 }
 
 export function isBlockchainImage(media: MediaType): media is BlockchainImage {
-  return media.origin === MediaOrigin.Blockchain && media.category === MediaCategory.Image;
+  return (
+    media.origin === MediaOrigin.Blockchain &&
+    media.category === MediaCategory.Image
+  );
 }
 
 export function isBlockchainMedia(media: MediaType): media is BlockchainMedia {
-  return media.origin === MediaOrigin.Blockchain && media.category !== MediaCategory.Image;
+  return (
+    media.origin === MediaOrigin.Blockchain &&
+    media.category !== MediaCategory.Image
+  );
 }
 
 // media type resolver
-export function getMediaType(media: MediaType): UserImage | UserMedia | BlockchainImage | BlockchainMedia {
-  if (isUserImage(media)) return media
-  if (isUserMedia(media)) return media; 
-  if (isBlockchainImage(media)) return media; 
-  if (isBlockchainMedia(media)) return media; 
-  
+export function getMediaType(
+  media: MediaType
+): UserImage | UserMedia | BlockchainImage | BlockchainMedia {
+  if (isUserImage(media)) return media;
+  if (isUserMedia(media)) return media;
+  if (isBlockchainImage(media)) return media;
+  if (isBlockchainMedia(media)) return media;
+
   // should be unreachable
   throw new Error("Invalid media type combination") as never;
 }

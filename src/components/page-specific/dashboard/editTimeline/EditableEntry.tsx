@@ -75,7 +75,6 @@ const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
         <Button
           onClick={handleDelete}
           variant="destructive"
-          className=""
           disabled={disableButtons}
           size="icon"
         >
@@ -84,7 +83,6 @@ const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
         <Button
           onClick={handleEdit}
           variant="default"
-          className=""
           disabled={disableButtons}
           size="icon"
         >

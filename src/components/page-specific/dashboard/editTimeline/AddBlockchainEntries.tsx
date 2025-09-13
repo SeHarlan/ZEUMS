@@ -123,7 +123,8 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="w-fit">Select Blockchain Assets</DialogTitle>
           <DialogDescription className="sr-only">
-            This dialog allows you to select blockchain assets to add to your timeline.
+            This dialog allows you to select blockchain assets to add to your
+            timeline.
           </DialogDescription>
         </DialogHeader>
 

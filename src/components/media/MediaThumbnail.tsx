@@ -3,22 +3,27 @@ import { AspectRatio } from "../ui/aspect-ratio";
 import { FC, SyntheticEvent } from "react";
 import { ImageOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import { UserAssetEntry } from "@/types/entry";
+import { MediaType } from "@/types/media";
 import { useImageFallback } from "@/hooks/useImageFallback";
 
-interface AssetThumbnailProps {
-  asset: ParsedBlockChainAsset | UserAssetEntry;
+interface MediaThumbnailProps {
+  media: MediaType;
   onLoad?: (imageElement: HTMLImageElement) => void;
   objectFit?: "object-cover" | "object-contain";
-  size?: "sm" | "md";
+  rounding?: "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  ratio?: number;
+  className?: string;
+  alt?: string;
 }
 
-const AssetThumbnail: FC<AssetThumbnailProps> = ({
-  asset,
+const MediaThumbnail: FC<MediaThumbnailProps> = ({
+  media,
   onLoad,
-  objectFit = "object-cover",
-  size = "md",
+  objectFit = "object-contain",
+  rounding = "rounded-md",
+  ratio = 1,
+  className,
+  alt,
 }) => {
   const {
     isLoaded,
@@ -27,9 +32,7 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
     imageUrl,
     onError,
     onLoad: onImageLoad,
-  } = useImageFallback(asset.media);
-
-  const rounding = size === "sm" ? "rounded-sm" : "rounded-md";
+  } = useImageFallback(media);
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     onImageLoad();
@@ -48,12 +51,12 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
         onError={onError}
         onLoad={handleLoad}
         src={imageUrl}
-        alt={asset.title || "Asset Thumbnail"}
+        alt={alt || "Media Thumbnail"}
         className={cn(
           "w-full transition-opacity duration-200",
           isLoaded ? "opacity-100" : "opacity-0",
           objectFit,
-          objectFit === "object-contain" && "p-3"
+          objectFit === "object-contain" && "p-3",
         )}
       />
     );
@@ -61,11 +64,12 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
 
   return (
     <AspectRatio
-      ratio={1}
+      ratio={ratio}
       className={cn(
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
         rounding,
-        isLoading && "animate-skeleton-shimmer"
+        isLoading && "animate-skeleton-shimmer",
+        className
       )}
     >
       {renderContent()}
@@ -73,4 +77,4 @@ const AssetThumbnail: FC<AssetThumbnailProps> = ({
   );
 };
 
-export default AssetThumbnail;
+export default MediaThumbnail;

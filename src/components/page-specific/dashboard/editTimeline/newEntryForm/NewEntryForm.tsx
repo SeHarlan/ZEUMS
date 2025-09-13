@@ -99,6 +99,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
 
     data.date = addPreciseCurrentTime(data.date);
 
+
     let entryCreationData: TimelineEntryCreation = {
       ...data,
       source,
@@ -110,7 +111,8 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
         setSubmitting(false);
         return;
       }
-
+      
+      //TODO: refactor this to use the aspect Ratio provider
       const assetWithAspectRatio: ParsedBlockChainAsset = {
         ...blockchainAsset,
         media: {

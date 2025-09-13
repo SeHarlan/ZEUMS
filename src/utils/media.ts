@@ -1,8 +1,11 @@
 import {
   BlockchainMedia,
   CdnIdType,
+  ImageType,
   isBlockchainImage,
   isBlockchainMedia,
+  isImageType,
+  MediaCategory,
   MediaType,
   UserMedia,
 } from "@/types/media";
@@ -63,3 +66,25 @@ export const getVideoAspectRatio = (videoElement: HTMLVideoElement) => {
   return videoElement.videoWidth / videoElement.videoHeight;
 }
 
+export const convertMediaToImage = (media: MediaType): ImageType => { 
+  if (isImageType(media)) return media;
+
+  if (isBlockchainMedia(media)) {
+    const imageMedia: ImageType = {
+      imageUrl: media.imageUrl,
+      imageCdn: media.imageCdn,
+      origin: media.origin,
+      aspectRatio: media.aspectRatio,
+      category: MediaCategory.Image,
+    };
+    return imageMedia;
+  } else {
+    const imageMedia: ImageType = {
+      imageCdn: media.imageCdn,
+      origin: media.origin,
+      aspectRatio: media.aspectRatio,
+      category: MediaCategory.Image,
+    };
+    return imageMedia;
+  }
+}

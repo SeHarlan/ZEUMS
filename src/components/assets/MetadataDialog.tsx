@@ -11,7 +11,7 @@ import { cn, truncate } from "@/utils/ui-utils";
 import { EntrySource } from "@/types/entry";
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
-import AssetThumbnail from "./AssetThumbnail";
+import MediaThumbnail from "../media/MediaThumbnail";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
 import { ChainIdsEnum } from "@/types/wallet";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
@@ -219,12 +219,13 @@ const ChildrenAsset: FC<ChildrenAssetProps> = ({ childrenAsset, returnKey = "" }
     makeReturnQueryParam(returnKey);
   
   return (
-    <LinkButton
-      href={newPath}
-      className="gap-4 h-fit p-2 w-full justify-start"
-    >
+    <LinkButton href={newPath} className="gap-4 h-fit p-2 w-full justify-start">
       <div className="flex-shrink-0 w-12 h-12">
-        <AssetThumbnail asset={childrenAsset} size="sm" />
+        <MediaThumbnail
+          media={childrenAsset.media}
+          rounding="rounded-sm"
+          alt={childrenAsset.title}
+        />
       </div>
       <P className="font-bold line-clamp-1">{childrenAsset.title}</P>
     </LinkButton>

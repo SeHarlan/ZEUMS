@@ -1,7 +1,6 @@
 import { z } from "zod";
 // Form schema with Zod validation
 export const profileDisplayFormSchema = z.object({
-  // profilePicture: z.string().optional(),
   displayName: z
     .string()
     .min(2, {
