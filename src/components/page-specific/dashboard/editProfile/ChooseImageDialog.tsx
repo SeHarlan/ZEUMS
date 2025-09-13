@@ -35,7 +35,6 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
 
   const handleAssetAdd = () => {
     const media = convertMediaToImage(selectedAssets[0].media)
-    console.log("🚀 ~ handleAssetAdd ~ media:", media)
     setSelectedMedia(media);
     setOpen(false);
   };

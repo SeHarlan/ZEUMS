@@ -104,160 +104,51 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     }
   };
 
-  if(imageVariant === "profile") {
-    return (
-      <ProfileThumbnailCard
-        asset={asset}
-        className={className}
-        handleClick={handleClick}
-        handleLoad={handleLoad}
-        mediaIcon={useIcon ? renderMediaIcon() : null}
-      />
-    );
+  const profileImageProps = {
+    className: "border-3",
+    objectFit: "object-cover" as const,
+    rounding: "rounded-full" as const,
+  }
+  const bannerImageProps = {
+    ratio: BANNER_RATIO,
+    objectFit: "object-cover" as const,
+    rounding: "rounded-md" as const,
   }
 
-  if(imageVariant === "banner") {
-    return (
-      <BannerThumbnailCard
-        asset={asset}
-        className={className}
-        handleClick={handleClick}
-        handleLoad={handleLoad}
-        mediaIcon={useIcon ? renderMediaIcon() : null}
-      />
-    );
+  const propsMap = {
+    "profile": profileImageProps,
+    "banner": bannerImageProps,
+    "default": {},
   }
 
   return (
-    <DefaultThumbnailCard
-      asset={asset}
-      className={className}
-      handleClick={handleClick}
-      handleLoad={handleLoad}
-      mediaIcon={useIcon ? renderMediaIcon() : null}
-    />
-  );
+    <Card
+      className={cn(
+        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg",
+        className
+      )}
+      onClick={handleClick}
+    >
+      <CardContent className="p-0 relative">
+        {useIcon && (
+          <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
+            {renderMediaIcon()}
+          </div>
+        )}
+        <MediaThumbnail
+          media={asset.media}
+          alt={asset.title}
+          onLoad={handleLoad}
+          {...propsMap[imageVariant]}
+        />
+      </CardContent>
 
-};
+      <CardFooter className="pb-1 px-3">
+        <H4 className="text-lg font-semibold line-clamp-1">{asset.title}</H4>
+      </CardFooter>
+    </Card>
+  );
+};  
 
 export default AssetThumbnailCard;
 
-interface BaseThumbnailCardProps {
-  asset: ParsedBlockChainAsset;
-  className?: string;
-  handleClick: () => void;
-  handleLoad: (imageElement: HTMLImageElement) => void;
-  mediaIcon: React.ReactNode | null;
-}
-
-const DefaultThumbnailCard: FC<BaseThumbnailCardProps> = ({
-  asset,
-  className,
-  handleClick,
-  handleLoad,
-  mediaIcon,
-}) => {
-  return (
-    <Card
-      className={cn(
-        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg",
-        className
-      )}
-      onClick={handleClick}
-    >
-      <CardContent className="p-0 relative">
-        {mediaIcon && (
-          <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
-            {mediaIcon}
-          </div>
-        )}
-        <MediaThumbnail
-          media={asset.media}
-          alt={asset.title}
-          onLoad={handleLoad}
-        />
-      </CardContent>
-
-      <CardFooter className="pb-1 px-3">
-        <H4 className="text-lg font-semibold line-clamp-1">{asset.title}</H4>
-      </CardFooter>
-    </Card>
-  );
-};
-
-
-const ProfileThumbnailCard: FC<BaseThumbnailCardProps> = ({
-  asset,
-  className,
-  handleClick,
-  handleLoad,
-  mediaIcon,
-}) => {
-  return (
-    <Card
-      className={cn(
-        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg",
-        className
-      )}
-      onClick={handleClick}
-    >
-      <CardContent className="p-2 relative">
-        {mediaIcon && (
-          <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
-            {mediaIcon}
-          </div>
-        )}
-        <MediaThumbnail
-          media={asset.media}
-          alt={asset.title}
-          className="border-3"
-          onLoad={handleLoad}
-          objectFit="object-cover"
-          rounding="rounded-full"
-        />
-      </CardContent>
-
-      <CardFooter className="pb-1 px-3">
-        <H4 className="text-lg font-semibold line-clamp-1">{asset.title}</H4>
-      </CardFooter>
-    </Card>
-  );
-};
-
-const BannerThumbnailCard: FC<BaseThumbnailCardProps> = ({
-  asset,
-  className,
-  handleClick,
-  handleLoad,
-  mediaIcon,
-}) => {
-  return (
-    <Card
-      className={cn(
-        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg",
-        className
-      )}
-      onClick={handleClick}
-    >
-      <CardContent className="p-0 relative">
-        {mediaIcon && (
-          <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
-            {mediaIcon}
-          </div>
-        )}
-        <MediaThumbnail
-          media={asset.media}
-          alt={asset.title}
-          ratio={BANNER_RATIO}
-          onLoad={handleLoad}
-          objectFit="object-cover"
-          rounding="rounded-md"
-        />
-      </CardContent>
-
-      <CardFooter className="pb-1 px-3">
-        <H4 className="text-lg font-semibold line-clamp-1">{asset.title}</H4>
-      </CardFooter>
-    </Card>
-  );
-};

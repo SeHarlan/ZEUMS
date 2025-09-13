@@ -234,7 +234,7 @@ const ProfileDisplayForm: FC = () => {
         </form>
       </Form>
       <ChooseImageDialog
-        imageVariant={"profile"}
+        imageVariant={"default"}
         setSelectedMedia={setProfileImage}
         open={profileImageOpen}
         setOpen={setProfileImageOpen}
