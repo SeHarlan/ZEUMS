@@ -1,6 +1,7 @@
 import { SocialIconProps } from "@/types/generic";
 import { MailIcon } from "lucide-react";
 
+//mostly from https://icons8.com/icons
 
 export const EmailIcon = MailIcon;
 

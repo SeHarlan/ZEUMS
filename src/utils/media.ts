@@ -69,6 +69,8 @@ export const getVideoAspectRatio = (videoElement: HTMLVideoElement) => {
 export const convertMediaToImage = (media: MediaType): ImageType => { 
   if (isImageType(media)) return media;
 
+
+  // convert blockchain media to image (requires imageUrl)
   if (isBlockchainMedia(media)) {
     const imageMedia: ImageType = {
       imageUrl: media.imageUrl,
@@ -79,6 +81,7 @@ export const convertMediaToImage = (media: MediaType): ImageType => {
     };
     return imageMedia;
   } else {
+    // convert user media to image (no imageUrl)
     const imageMedia: ImageType = {
       imageCdn: media.imageCdn,
       origin: media.origin,
