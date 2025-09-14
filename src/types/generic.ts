@@ -3,4 +3,6 @@ export type HandlerError = {
   status : number
 }
 
-
+export interface SocialIconProps {
+  className?: string;
+}

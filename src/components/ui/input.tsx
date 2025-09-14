@@ -2,8 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/utils/ui-utils"
 import { P } from "../typography/Typography";
-
-
+import { ReactNode } from "react";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -23,7 +22,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
 
 interface PrefixInputProps extends React.ComponentProps<"input"> {
   prefix?: string ; 
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   wrapperClassName?: string;
 }
 
@@ -51,13 +50,15 @@ function PrefixInput({
       }}
     >
       {icon && (
-        <span className="flex justify-center items-center pl-3 pr-1 text-muted-foreground">
+        <span className="flex justify-center items-center pl-2 pr-1">
           {icon}
         </span>
       )}
       
       {prefix && (
-        <P className="flex items-center pl-3 relative top-[0.05rem] text-muted-foreground text-xs cursor-default italic">
+        <P className={cn("flex items-center relative top-[0.05rem] text-muted-foreground text-xs cursor-default italic",
+          !icon && "pl-3"
+        )}>
           {prefix}
         </P>
       )}

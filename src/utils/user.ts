@@ -3,7 +3,6 @@ import { ChainIdsEnum } from "@/types/wallet";
 import { truncate } from "./ui-utils";
 import { PublicKey } from "@solana/web3.js";
 
-
 // Group users wallet addresses by blockchain 
 export const getWalletsByChain = (
   user: UserType | null
@@ -57,3 +56,5 @@ export const getPrimaryWallet = (user: UserType | null) => {
     address: primaryWallet.address,
   };
 }
+
+

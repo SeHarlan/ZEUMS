@@ -12,7 +12,7 @@ import {
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getDisplayName } from "@/utils/user";
-import { UserSocialHandles, UserType  } from "@/types/user";
+import { UserType  } from "@/types/user";
 import { useForm } from "react-hook-form";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { useUser } from "@/context/UserProvider";
@@ -28,35 +28,9 @@ import { ImagePlusIcon } from "lucide-react";
 import ChooseImageDialog from "./ChooseImageDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { socialHandlesList } from "@/utils/ui-utils";
 
-const socialHandles: { key: keyof UserSocialHandles, label: string, prefix: string, placeholder?: string }[] = [
-  {
-    key: "x",
-    label: "X (Twitter)",
-    prefix: "x.com/",
-  },
-  {
-    key: "instagram",
-    label: "Instagram",
-    prefix: "instagram.com/",
-  },
-  {
-    key: "tiktok",
-    label: "TikTok",
-    prefix: "tiktok.com/@",
-  },
-  {
-    key: "telegram",
-    label: "Telegram",
-    prefix: "telegram.me/",
-  },
-  {
-    key: "discord",
-    label: "Discord Invite",
-    prefix: "discord.gg/",
-    placeholder: "invite-code",
-  }
-]
+
 
 const ProfileDisplayForm: FC = () => { 
   const { user, setUser } = useUser();
@@ -192,9 +166,14 @@ const ProfileDisplayForm: FC = () => {
               <FormItem>
                 <FormLabel>Bio</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Tell us about yourself" {...field} />
+                  <Textarea
+                    placeholder="This is my story..."
+                    {...field}
+                  />
                 </FormControl>
-                <FormDescription>Briefly describe yourself</FormDescription>
+                <FormDescription>
+                  A brief introduction to help others connect with you and your story
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -206,7 +185,7 @@ const ProfileDisplayForm: FC = () => {
                 Social Media Handles
               </AccordionTrigger>
               <AccordionContent className="space-y-4 sm:px-5">
-                {socialHandles.map((handle) => (
+                {socialHandlesList.map((handle) => (
                   <FormField
                     key={handle.key}
                     control={form.control}
@@ -216,7 +195,10 @@ const ProfileDisplayForm: FC = () => {
                         <FormLabel>{handle.label}</FormLabel>
                         <FormControl>
                           <PrefixInput
-                            prefix={handle.prefix}
+                            icon={
+                              <handle.Icon className="size-5 fill-muted-foreground/50" />
+                            }
+                            prefix={handle.baseUrl}
                             placeholder={handle.placeholder || "username"}
                             {...field}
                           />

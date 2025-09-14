@@ -153,7 +153,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       {withSearch ? (
         <PrefixInput
           wrapperClassName="max-w-sm"
-          icon={<SearchIcon className="max-w-4 max-h-4" />}
+          icon={<SearchIcon className="size-4 text-muted-foreground" />}
           placeholder="Search assets"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
