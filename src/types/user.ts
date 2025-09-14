@@ -28,9 +28,9 @@ export const SOCIAL_HANDLE_KEYS = [
   "x",
   "instagram",
   "tiktok",
-  "facebook",
   "telegram",
   "discord",
+  // "facebook",
 ] as const;
 
 // Define the type based on that const

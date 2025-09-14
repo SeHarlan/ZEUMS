@@ -57,7 +57,7 @@ function PrefixInput({
       )}
       
       {prefix && (
-        <P className="flex items-center pl-3 text-muted-foreground text-xs cursor-default italic">
+        <P className="flex items-center pl-3 relative top-[0.05rem] text-muted-foreground text-xs cursor-default italic">
           {prefix}
         </P>
       )}

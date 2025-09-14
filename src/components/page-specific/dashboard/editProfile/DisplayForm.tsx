@@ -12,7 +12,7 @@ import {
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getDisplayName } from "@/utils/user";
-import { UserType  } from "@/types/user";
+import { UserSocialHandles, UserType  } from "@/types/user";
 import { useForm } from "react-hook-form";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { useUser } from "@/context/UserProvider";
@@ -27,6 +27,36 @@ import { ProfileImage } from "@/components/timeline/ProfileImage";
 import { ImagePlusIcon } from "lucide-react";
 import ChooseImageDialog from "./ChooseImageDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const socialHandles: { key: keyof UserSocialHandles, label: string, prefix: string, placeholder?: string }[] = [
+  {
+    key: "x",
+    label: "X (Twitter)",
+    prefix: "x.com/",
+  },
+  {
+    key: "instagram",
+    label: "Instagram",
+    prefix: "instagram.com/",
+  },
+  {
+    key: "tiktok",
+    label: "TikTok",
+    prefix: "tiktok.com/@",
+  },
+  {
+    key: "telegram",
+    label: "Telegram",
+    prefix: "telegram.me/",
+  },
+  {
+    key: "discord",
+    label: "Discord Invite",
+    prefix: "discord.gg/",
+    placeholder: "invite-code",
+  }
+]
 
 const ProfileDisplayForm: FC = () => { 
   const { user, setUser } = useUser();
@@ -51,10 +81,10 @@ const ProfileDisplayForm: FC = () => {
     socialHandles: {
       x: user?.socialHandles?.x || "",
       instagram: user?.socialHandles?.instagram || "",
-      // tiktok: user?.socialHandles?.tiktok || "",
+      tiktok: user?.socialHandles?.tiktok || "",
+      telegram: user?.socialHandles?.telegram || "",
+      discord: user?.socialHandles?.discord || "",
       // facebook: user?.socialHandles?.facebook || "",
-      // telegram: user?.socialHandles?.telegram || "",
-      // discord: user?.socialHandles?.discord || "",
     },
     // websites: user?.websites || [],
   };
@@ -126,8 +156,10 @@ const ProfileDisplayForm: FC = () => {
               </Button>
               <ProfileImage
                 media={profileImage}
-                fallbackText={getDisplayName(user).charAt(0) || "Z"}
-                className="text-2xl sm:text-5xl border-3"
+                fallbackText={
+                  getDisplayName(user).charAt(0).toUpperCase() || "Z"
+                }
+                className="text-4xl sm:text-6xl border-3"
               />
             </div>
 
@@ -168,63 +200,35 @@ const ProfileDisplayForm: FC = () => {
             )}
           />
 
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Social Links</h3>
-
-            <FormField
-              control={form.control}
-              name="socialHandles.x"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>X (Twitter)</FormLabel>
-                  <FormControl>
-                    <PrefixInput
-                      prefix="x.com/"
-                      placeholder="username"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="socialHandles.instagram"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instagram</FormLabel>
-                  <FormControl>
-                    <PrefixInput
-                      prefix="instagram.com/"
-                      placeholder="username"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* <FormField
-            control={form.control}
-            name="socialHandles.tiktok"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TikTok</FormLabel>
-                <FormControl>
-                  <PrefixInput
-                    prefix="tiktok.com/@"
-                    placeholder="username"
-                    {...field}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="max-w-fit gap-2">
+                Social Media Handles
+              </AccordionTrigger>
+              <AccordionContent className="space-y-4 sm:px-5">
+                {socialHandles.map((handle) => (
+                  <FormField
+                    key={handle.key}
+                    control={form.control}
+                    name={`socialHandles.${handle.key}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{handle.label}</FormLabel>
+                        <FormControl>
+                          <PrefixInput
+                            prefix={handle.prefix}
+                            placeholder={handle.placeholder || "username"}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-          </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           <Separator />
 
@@ -234,7 +238,7 @@ const ProfileDisplayForm: FC = () => {
         </form>
       </Form>
       <ChooseImageDialog
-        imageVariant={"default"}
+        imageVariant={"profile"}
         setSelectedMedia={setProfileImage}
         open={profileImageOpen}
         setOpen={setProfileImageOpen}
