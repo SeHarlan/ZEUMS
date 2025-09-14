@@ -80,7 +80,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
         <div className="space-y-2">
           <PrefixInput
             wrapperClassName="bg-background"
-            icon={<SearchIcon className="max-w-4 max-h-4" />}
+            icon={<SearchIcon className="size-4 text-muted-foreground" />}
             placeholder="Enter Solana mint address"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

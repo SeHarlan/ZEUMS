@@ -1,4 +1,4 @@
-import AssetThumbnail from "@/components/assets/AssetThumbnail";
+import MediaThumbnail from "@/components/media/MediaThumbnail";
 import MediaPreviewViewer from "@/components/assets/MediaPreviewViewer";
 import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
     setBlockchainAsset(null);
   }
 
+  //TODO: refactor this to use the aspect Ratio provider
   const handleVideoAspectRatio = (videoElement: HTMLVideoElement) => { 
     if (setAspectRatio && blockchainAsset?.media.category === MediaCategory.Video) {
       const aspectRatio = getVideoAspectRatio(videoElement)
@@ -96,10 +97,10 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
         <Trash2Icon />
       </Button>
 
-      <AssetThumbnail
-        asset={blockchainAsset}
+      <MediaThumbnail
+        media={blockchainAsset.media}
+        alt={blockchainAsset.title}
         onLoad={handleImageAspectRatio}
-        objectFit="object-contain"
       />
 
       {blockchainAsset.media.category !== MediaCategory.Image ? (

@@ -2,25 +2,28 @@ import { FC, useState } from "react";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { H4 } from "../typography/Typography";
 import { cn } from "@/utils/ui-utils";
-import AssetThumbnail from "./AssetThumbnail";
+import MediaThumbnail from "../media/MediaThumbnail";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { useAspectRatio } from "@/context/AspectRatioProvider";
 import { getImageAspectRatio, getMediaUrl, getVideoAspectRatio } from "@/utils/media";
-import { MediaCategory } from "@/types/media";
+import { ImageVariant, MediaCategory } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
 import { toast } from "sonner";
 import { BoxIcon, Code2Icon } from "lucide-react";
+import { BANNER_RATIO } from "../timeline/BannerImage";
 
 interface AssetThumbnailCardProps {
   asset: ParsedBlockChainAsset;
   className?: string;
   onClick?: (aspectRatio: number) => void;
+  imageVariant?: ImageVariant;
 }
 
 const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
   asset,
   className,
   onClick,
+  imageVariant = "default",
 }) => {
 
   const { setAspectRatio, getAspectRatio } = useAspectRatio();
@@ -101,6 +104,23 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     }
   };
 
+  const profileImageProps = {
+    className: "border-3",
+    objectFit: "object-cover" as const,
+    rounding: "rounded-full" as const,
+  }
+  const bannerImageProps = {
+    ratio: BANNER_RATIO,
+    objectFit: "object-cover" as const,
+    rounding: "rounded-md" as const,
+  }
+
+  const propsMap = {
+    "profile": profileImageProps,
+    "banner": bannerImageProps,
+    "default": {},
+  }
+
   return (
     <Card
       className={cn(
@@ -110,13 +130,17 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
-
-        {useIcon &&
-          <div className="z-10 absolute top-3 right-3 bg-popover-blur p-1 rounded-full shadow-md text-muted-foreground">
+        {useIcon && (
+          <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
             {renderMediaIcon()}
           </div>
-        }
-        <AssetThumbnail asset={asset} onLoad={handleLoad} objectFit="object-contain"/>
+        )}
+        <MediaThumbnail
+          media={asset.media}
+          alt={asset.title}
+          onLoad={handleLoad}
+          {...propsMap[imageVariant]}
+        />
       </CardContent>
 
       <CardFooter className="pb-1 px-3">
@@ -124,6 +148,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       </CardFooter>
     </Card>
   );
-};
+};  
 
 export default AssetThumbnailCard;
+

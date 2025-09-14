@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getDisplayName } from "@/utils/user";
 import { UserType  } from "@/types/user";
 import { useForm } from "react-hook-form";
@@ -24,24 +23,42 @@ import axios from "axios";
 import { USER_ROUTE } from "@/constants/serverRoutes";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { ProfileImage } from "@/components/timeline/ProfileImage";
+import { ImagePlusIcon } from "lucide-react";
+import ChooseImageDialog from "./ChooseImageDialog";
+import { BannerImage } from "@/components/timeline/BannerImage";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { socialHandlesList } from "@/utils/ui-utils";
+
+
 
 const ProfileDisplayForm: FC = () => { 
   const { user, setUser } = useUser();
   const [submitting, setSubmitting] = useState(false);
+  const [profileImage, setProfileImage] = useState(user?.profileImage);
+  const [bannerImage, setBannerImage] = useState(user?.bannerImage);
+  const [profileImageOpen, setProfileImageOpen] = useState(false);
+  const [bannerImageOpen, setBannerImageOpen] = useState(false);
 
+  useEffect(() => {
+    if (user?.profileImage && !profileImage) setProfileImage(user.profileImage);
+  }, [user?.profileImage, profileImage]);
 
+  useEffect(() => {
+    if (user?.bannerImage && !bannerImage) setBannerImage(user.bannerImage);
+  }, [user?.bannerImage, bannerImage]);
+  
   // Default values for the form populated from user data
   const defaultValues: Partial<ProfileDisplayFormValues> = {
-    // profilePicture: user?.profilePicture,
     displayName: user?.displayName || "",
     bio: user?.bio || "",
     socialHandles: {
       x: user?.socialHandles?.x || "",
       instagram: user?.socialHandles?.instagram || "",
-      // tiktok: user?.socialHandles?.tiktok || "",
+      tiktok: user?.socialHandles?.tiktok || "",
+      telegram: user?.socialHandles?.telegram || "",
+      discord: user?.socialHandles?.discord || "",
       // facebook: user?.socialHandles?.facebook || "",
-      // telegram: user?.socialHandles?.telegram || "",
-      // discord: user?.socialHandles?.discord || "",
     },
     // websites: user?.websites || [],
   };
@@ -53,16 +70,17 @@ const ProfileDisplayForm: FC = () => {
 
   const onSubmit = (data: ProfileDisplayFormValues) => {
     setSubmitting(true);
-    axios
-      .patch<{ user: UserType }>(USER_ROUTE, data)
-      .then((response) => {
-        // Update the user context with the returned user data
-        if (response.data.user) {
-          setUser(response.data.user);
-        }
 
+    const userData: Partial<UserType> = {
+      ...data,
+      profileImage,
+      bannerImage,
+    }
+    axios
+      .patch<{ user: UserType }>(USER_ROUTE, userData)
+      .then((response) => {
         toast.success("Display information updated successfully!");
-        // Optionally, you can update the user context or show a success message
+        setUser(response.data.user);
       })
       .catch((error) => {
         handleClientError({
@@ -77,118 +95,143 @@ const ProfileDisplayForm: FC = () => {
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col space-y-6"
-      >
-        <div className="w-full flex gap-6 flex-col sm:flex-row">
-          {/* <Avatar className="w-24 h-24">
-            <AvatarImage src={form.watch("profilePicture")} />
-            <AvatarFallback className="text-4xl font-serif">
-              {form.watch("displayName")?.charAt(0) || "Z"}
-            </AvatarFallback>
-          </Avatar> */}
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col space-y-6"
+        >
+          <div className="relative w-full h-fit">
+            <Button
+              type="button"
+              variant={!!user?.bannerImage ? "outline" : "default"}
+              size="icon"
+              className="absolute -top-2 -right-2 z-10 "
+              onClick={() => setBannerImageOpen(true)}
+            >
+              <ImagePlusIcon />
+            </Button>
+            <BannerImage
+              media={bannerImage}
+              className="text-5xl"
+              fallbackText={getDisplayName(user) || "Z"}
+            />
+          </div>
+          <div className="w-full flex gap-6 flex-col sm:flex-row sm:items-center">
+            <div className="relative size-20 sm:size-36 flex-shrink-0">
+              <Button
+                type="button"
+                variant={!!user?.profileImage ? "outline" : "default"}
+                size="icon"
+                className="absolute top-0 right-0 z-10 "
+                onClick={() => setProfileImageOpen(true)}
+              >
+                <ImagePlusIcon />
+              </Button>
+              <ProfileImage
+                media={profileImage}
+                fallbackText={
+                  getDisplayName(user).charAt(0).toUpperCase() || "Z"
+                }
+                className="text-4xl sm:text-6xl border-3"
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="displayName"
+              render={({ field }) => (
+                <FormItem className="w-full h-fit">
+                  <FormLabel>Display Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={getDisplayName(user, true)}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    This is how your name will be displayed
+                    {!user?.displayName ? " (defaults to username)" : ""}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
-            name="displayName"
+            name="bio"
             render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Display Name</FormLabel>
+              <FormItem>
+                <FormLabel>Bio</FormLabel>
                 <FormControl>
-                  <Input placeholder={getDisplayName(user, true)} {...field} />
+                  <Textarea
+                    placeholder="This is my story..."
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
-                  This is how your name will be displayed
-                  {!user?.displayName ? " (defaults to username)" : ""}
+                  A brief introduction to help others connect with you and your story
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Tell us about yourself" {...field} />
-              </FormControl>
-              <FormDescription>Briefly describe yourself</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">Social Links</h3>
-
-          <FormField
-            control={form.control}
-            name="socialHandles.x"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>X (Twitter)</FormLabel>
-                <FormControl>
-                  <PrefixInput
-                    prefix="x.com/"
-                    placeholder="username"
-                    {...field}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="max-w-fit gap-2">
+                Social Media Handles
+              </AccordionTrigger>
+              <AccordionContent className="space-y-4 sm:px-5">
+                {socialHandlesList.map((handle) => (
+                  <FormField
+                    key={handle.key}
+                    control={form.control}
+                    name={`socialHandles.${handle.key}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{handle.label}</FormLabel>
+                        <FormControl>
+                          <PrefixInput
+                            icon={
+                              <handle.Icon className="size-5 fill-muted-foreground/50" />
+                            }
+                            prefix={handle.baseUrl}
+                            placeholder={handle.placeholder || "username"}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-          <FormField
-            control={form.control}
-            name="socialHandles.instagram"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Instagram</FormLabel>
-                <FormControl>
-                  <PrefixInput
-                    prefix="instagram.com/"
-                    placeholder="username"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <Separator />
 
-          {/* <FormField
-            control={form.control}
-            name="socialHandles.tiktok"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TikTok</FormLabel>
-                <FormControl>
-                  <PrefixInput
-                    prefix="tiktok.com/@"
-                    placeholder="username"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-        </div>
-
-        <Separator />
-
-        <Button type="submit" className="w-full" loading={submitting}>
-          Save Display Information
-        </Button>
-      </form>
-    </Form>
+          <Button type="submit" className="w-full" loading={submitting}>
+            Save Display Information
+          </Button>
+        </form>
+      </Form>
+      <ChooseImageDialog
+        imageVariant={"profile"}
+        setSelectedMedia={setProfileImage}
+        open={profileImageOpen}
+        setOpen={setProfileImageOpen}
+      />
+      <ChooseImageDialog
+        imageVariant={"banner"}
+        setSelectedMedia={setBannerImage}
+        open={bannerImageOpen}
+        setOpen={setBannerImageOpen}
+      />
+    </>
   );
 }
 

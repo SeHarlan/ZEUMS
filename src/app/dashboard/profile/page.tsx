@@ -51,13 +51,13 @@ export default function EditProfilePage() {
       {activeTab === EditProfileTab.DISPLAY ? (
         <PageTurnLeft
           useOnClick={true}
-          onClick={() => setActiveTab(EditProfileTab.ACCOUNT)}
+          onClick={() => handleTabChange(EditProfileTab.ACCOUNT)}
           path={""}
         />
       ) : null}
       <PageTurnRight
         useOnClick={activeTab === EditProfileTab.ACCOUNT}
-        onClick={() => setActiveTab(EditProfileTab.DISPLAY)}
+        onClick={() => handleTabChange(EditProfileTab.DISPLAY)}
         path={EDIT_TIMELINE}
       />
 

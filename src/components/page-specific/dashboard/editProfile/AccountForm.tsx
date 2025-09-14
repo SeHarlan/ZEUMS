@@ -58,15 +58,15 @@ const ProfileAccountForm: FC = () => {
   const onUsernameSubmit = () => {
     if (!usernameIsValid) return;
     setSubmitting(true);
+
+    const userData: Partial<UserType> = {
+      username,
+    }
     axios
-      .patch<{ user: UserType }>(USER_ROUTE, { username })
+      .patch<{ user: UserType }>(USER_ROUTE, userData)
       .then((response) => {
         toast.success("Username updated successfully!");
-
-        // Update the user context with the returned user data
-        if (response.data.user) {
-          setUser(response.data.user);
-        }
+        setUser(response.data.user);
       })
       .catch((error) => {
         toast.error("Failed to update username.");
@@ -117,34 +117,39 @@ const ProfileAccountForm: FC = () => {
         </StatelessFormItem>
       </div>
 
-      <StatelessFormItem
-        label="Verified Email"
-        description="A verified email allows you to log in anywhere using accounts linked to your email. Never shared or used without consent"
-        errorMessage={emailError}
-      >
-        {verifiedEmail ? (
-          <Button className="w-full justify-start" disabled>
-            <CircleCheckIcon />
-            {verifiedEmail}
-          </Button>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-x-4 gap-y-2">
-            <Input
-              placeholder="example@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Button
-              type="button"
-              className={cn("w-full")}
-              onClick={handleVerifyNewEmail}
-              disabled={!emailIsValid || submitting}
-            >
-              Verify your email address
+      <div>
+        <StatelessFormItem
+          label="Verified Email"
+          description="A verified email allows you to log in anywhere using accounts linked to your email."
+          errorMessage={emailError}
+        >
+          {verifiedEmail ? (
+            <Button className="w-full justify-start" disabled>
+              <CircleCheckIcon />
+              {verifiedEmail}
             </Button>
-          </div>
-        )}
-      </StatelessFormItem>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-x-4 gap-y-2">
+              <Input
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button
+                type="button"
+                className={cn("w-full")}
+                onClick={handleVerifyNewEmail}
+                disabled={!emailIsValid || submitting}
+              >
+                Verify your email address
+              </Button>
+            </div>
+          )}
+        </StatelessFormItem>
+        <P className="text-muted-foreground text-sm italic">
+          Never shared or used without consent
+        </P>
+      </div>
 
       <StatelessFormItem
         label="Verified Wallets"

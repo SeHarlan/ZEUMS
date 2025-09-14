@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
 import { FC,  useMemo, useState } from "react";
 import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
-import AssetThumbnail from "@/components/assets/AssetThumbnail";
+import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { useUser } from "@/context/UserProvider";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import {
@@ -249,7 +249,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
   
   const thumbnail = entry.entryType === EntryTypes.BlockchainAsset || entry.entryType === EntryTypes.UserAsset
     ? <div className="flex-shrink-0 w-10 h-10">
-      <AssetThumbnail asset={entry} size="sm" />
+      <MediaThumbnail media={entry.media} alt={entry.title} rounding="rounded-sm" />
     </div>
     : null
 

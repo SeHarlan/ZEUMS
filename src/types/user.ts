@@ -3,26 +3,34 @@ import { TimelineEntry } from "./entry";
 import { WalletType } from "./wallet";
 import { Schema } from "mongoose";
 import { AuthUserType } from "./next-auth";
+import { ImageType } from "./media";
+
+// export type Website = {
+//   url: string;
+//   name: string;
+//   image: ImageType;
+// };
 
 export type BaseUserType = {
   _id: Schema.Types.ObjectId;
   username: string;
   displayName?: string;
+  profileImage?: ImageType; 
+  bannerImage?: ImageType;
   email?: string;
-  name?: string; // Required by NextAuth
-  image?: string; // Required by NextAuth
   bio?: string;
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
+  // websites?: Website[];
 };
 
 export const SOCIAL_HANDLE_KEYS = [
   "x",
   "instagram",
   "tiktok",
-  "facebook",
   "telegram",
   "discord",
+  // "facebook",
 ] as const;
 
 // Define the type based on that const

@@ -9,13 +9,16 @@ import { cn } from "@/utils/ui-utils";
 import { P } from "../typography/Typography";
 import { useDebouncedState } from "@/hooks/useDebounce";
 import { ScrollArea } from "../ui/scroll-area";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, WalletIcon } from "lucide-react";
 
 import { PrefixInput } from "../ui/input";
 import AssetThumbnailCard from "./AssetThumbnailCard";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { ChainIdsEnum } from "@/types/wallet";
+import { ImageVariant } from "@/types/media";
+import { LinkButton } from "../ui/button";
+import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 
 interface SolanaAssetSelectProps {
   disabledAssetAddresses?: string[]; //prevent already saved tokens from being selected again
@@ -27,6 +30,7 @@ interface SolanaAssetSelectProps {
   maxSelected?: number;
   withSearch?: boolean; // Optional prop to enable/disable search
   maxSelectWarningBody?: ReactNode; // Optional prop for custom max select warning body
+  imageVariant?: ImageVariant;
 }
 
 const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
@@ -37,6 +41,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   maxSelected = 1, // Default to 1 if not provided
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
+  imageVariant = "default",
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 300);
@@ -125,12 +130,30 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       setSelectAssets([...(selectedAssets || []), mergeAspectRatio(asset, aspectRatio)]);
     }
   };
+
+  const renderFeedback = () => {
+    if (isLoading) {
+      return <LoadingSpinner iconClass="size-14" />
+    }
+
+    if (!solanaAssets?.length) { 
+      return <div className="flex flex-col items-center justify-center gap-4">
+        <P className="text-muted-foreground text-center">No verified wallet found</P>
+        <LinkButton href={EDIT_PROFILE_ACCOUNT}>
+          <WalletIcon />
+          Add wallet
+        </LinkButton>
+      </div>
+    }
+
+    return <P className="text-muted-foreground text-center">No assets found</P>
+  }
   return (
     <div className="h-full flex flex-col gap-4">
       {withSearch ? (
         <PrefixInput
           wrapperClassName="max-w-sm"
-          icon={<SearchIcon className="max-w-4 max-h-4" />}
+          icon={<SearchIcon className="size-4 text-muted-foreground" />}
           placeholder="Search assets"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -146,7 +169,14 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           </div>
         ) : null}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+        <div
+          className={cn(
+            "grid gap-4 h-full py-2",
+            imageVariant === "banner"
+              ? "grid-cols-1 lg:grid-cols-2"
+              : "grid-cols-2 lg:grid-cols-4"
+          )}
+        >
           {assetsPage.map((asset) => {
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
@@ -156,8 +186,10 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
               <AssetThumbnailCard
                 key={asset.tokenAddress}
                 asset={asset}
-                
-                onClick={(aspectRatio) => handleAssetClick({ asset, isSelected, aspectRatio })}
+                imageVariant={imageVariant}
+                onClick={(aspectRatio) =>
+                  handleAssetClick({ asset, isSelected, aspectRatio })
+                }
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-300",
                   isSelected ? "border-primary" : "border-transparent",
@@ -173,11 +205,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
       {assetsPage.length === 0 ? (
         <div className="w-full h-full flex items-center justify-center">
-          {isLoading ? (
-            <LoadingSpinner iconClass="size-14" />
-          ) : (
-            <P className="text-muted-foreground text-center">No assets found</P>
-          )}
+          {renderFeedback()}
         </div>
       ) : null}
 

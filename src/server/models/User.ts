@@ -2,6 +2,7 @@ import { AUTH_USER_MODEL_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, USER_AUTH_FORE
 import { EntrySource } from "@/types/entry";
 import { UserType} from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
+import { MediaSchema } from "./Entry/media";
 
 export interface UserDocument extends Document, UserType {
   _id: Schema.Types.ObjectId;
@@ -17,6 +18,8 @@ const UserSchema: Schema = new Schema<UserDocument>(
       trim: true,
     },
     displayName: { type: String },
+    profileImage: { type: MediaSchema },
+    bannerImage: { type: MediaSchema },
     email: { type: String },
     bio: { type: String },
     socialHandles: {

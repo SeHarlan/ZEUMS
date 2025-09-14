@@ -32,7 +32,7 @@ export const useEmailValidation = (
       });
       
       if (!response.data.isUnique) {
-        setError("Email is already taken");
+        setError("Email is already associated with another account");
       } else {
         // Clear error if email is unique and no other validation errors
         setError(null);
