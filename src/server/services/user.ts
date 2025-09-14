@@ -26,11 +26,11 @@ export async function findOrCreateUser({
   
   try {
     if (wallet) {
-      return handleWithWallet({ wallet, createData });
+      return await handleWithWallet({ wallet, createData });
     }
 
     if (authUserId) {
-      return handleWithAuthId({ authUserId, createData });
+      return await handleWithAuthId({ authUserId, createData });
     }
 
     // If neither wallet nor auth ID is provided throw an error, on catch null will be returned
@@ -38,7 +38,10 @@ export async function findOrCreateUser({
   } catch (error: unknown) {
 
     const method = !!wallet ? "handleWithWallet" : "handleWithAuthId";
-    handleServerError({ error, location: `services-user_findOrCreateUser_${method}` });
+    handleServerError({
+      error,
+      location: `services-user_findOrCreateUser_${method}`
+    });
     return null;
   }
 }
@@ -143,10 +146,12 @@ const handleWithWallet = async ({
         .exec();
   
       if (!user) {
-        //shouldn't ever happen
-        //just in case we need to handle case where user is not found delete the wallet:
-        // await walletModel.deleteOne();
-        throw new Error("User not found for the given wallet");
+        //shouldn't happen
+        //edge case where user is not means there is an orphan wallet
+        //Log and delete the wallet
+
+        await walletModel.deleteOne();
+        throw new Error("Orphaned Wallet - User not found for the given Wallet");
       }
   
       const sessionUser: NextAuthUser = {
@@ -164,11 +169,11 @@ const handleWithWallet = async ({
       await user.save({ session: mongooseSession });
   
       await Wallet.create(
-        {
+        [{
           owner: user._id,
           address: wallet.address,
           type: wallet.type,
-        },
+        }],
         { session: mongooseSession }
       ) //errors handled in parent function
   
@@ -181,8 +186,9 @@ const handleWithWallet = async ({
       return sessionUser;
     }
   } catch (error: unknown) {
-
-    await mongooseSession.abortTransaction();
+    if (mongooseSession.inTransaction()) {
+      await mongooseSession.abortTransaction();
+    }
     
     throw error; //throw error for parent function to handle
   } finally {

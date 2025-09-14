@@ -129,7 +129,7 @@ const getProviders = () => {
         
           const validationResult = await signinMessage.validate(
             credentials?.signature || ""
-          );
+          );          
 
           if (!validationResult)
             throw new Error("Could not validate the signed message");

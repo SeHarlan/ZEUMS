@@ -75,14 +75,14 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logOutUser = useCallback(async () => {
+    signingInRef.current = false;
     if (disconnect) {
       await disconnect();
     }
+    await signOut({ redirect: false });
 
     setUser(null);
     setHasLoggedIn(false);
-    signingInRef.current = false;
-    signOut({ redirect: false });
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
