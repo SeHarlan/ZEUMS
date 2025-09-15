@@ -63,15 +63,21 @@ export const parseMallowAssets = (
 
     // Determine blockchain (default to SOLANA if not specified)
     let blockchain = ChainIdsEnum.SOLANA;
+    
+    // TODO: Add support for other blockchains when they become available
+    // For now, only support SOLANA
     if (asset.blockchain) {
       switch (asset.blockchain.toLowerCase()) {
-        case "ethereum":
-        case "eth":
-          blockchain = ChainIdsEnum.ETHEREUM;
-          break;
-        case "polygon":
-          blockchain = ChainIdsEnum.POLYGON;
-          break;
+        // case "ethereum":
+        // case "eth":
+        //   blockchain = ChainIdsEnum.ETHEREUM;
+        //   break;
+        // case "polygon":
+        //   blockchain = ChainIdsEnum.POLYGON;
+        //   break;
+        // case "tezos":
+        //   blockchain = ChainIdsEnum.TEZOS;
+        //   break;
         default:
           blockchain = ChainIdsEnum.SOLANA;
       }
