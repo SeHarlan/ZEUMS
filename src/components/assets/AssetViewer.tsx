@@ -82,7 +82,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToExplorer}
-        unoptimized={true} //TODO: optimized images: for paying users
+        // unoptimized={true} //TODO: optimized images: for paying users
         loading="lazy"
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
