@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrefixInput } from "@/components/ui/input";
 import { GiftIcon, SearchIcon } from "lucide-react";
@@ -18,6 +18,7 @@ import { P } from "../typography/Typography";
 import { isValidSolanaAddress } from "@/utils/asset";
 import Link from "next/link";
 import { MallowIcon } from "../icons/Social";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 
 interface SearchAssetDialogProps {
   open: boolean;
@@ -32,7 +33,13 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   const [hasSearched, setHasSearched] = useState(false);
   const [total, setTotal] = useState(0);
   const router = useRouter();
+  const pathname = usePathname();
 
+  const resetSearch = () => { 
+    setSearchResults([]);
+    setHasSearched(false);
+    setTotal(0);
+  }
 
   const handleSearch = (search?: string) => {
     const searchTerm = search || searchInput.trim();
@@ -69,9 +76,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
           location: "SearchAssetDialog_handleSearch",
         });
         setError("Failed to search for assets. Please try again.");
-        setSearchResults([]);
-        setHasSearched(false);
-        setTotal(0);
+        resetSearch();
       })
       .finally(() => {
         setSearching(false);
@@ -79,7 +84,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   };
 
   const handleRandomAsset = () => {
-    setSearchInput(SEARCH_RANDOMIZE_KEY);
+    // setSearchInput(SEARCH_RANDOMIZE_KEY);
     handleSearch(SEARCH_RANDOMIZE_KEY);
   };
 
@@ -91,7 +96,12 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
 
   const handleAssetClick = (tokenAddress: string) => {
     // Navigate to the asset page when clicked
-    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](tokenAddress));
+    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](tokenAddress) + makeReturnQueryParam(getReturnKey(pathname)));
+    
+    setTimeout(() => {
+      onOpenChange(false)
+      resetSearch()
+    }, 500);
   };
 
   return (
@@ -171,7 +181,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
             ))}
           </div>
         ) : (
-          <div className="text-sm text-muted-foreground text-center py-8 ">
+          <div className="text-sm text-center py-8  ">
             No assets found. Try a different search term.
           </div>
         )

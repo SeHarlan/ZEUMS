@@ -14,7 +14,7 @@ export const ENTRY_ENTRIES_ROUTE = `${ENTRY_ROUTE}/entries`;
 
 export const SEARCH_ASSETS_ROUTE = "/api/search/assets";
 export const SEARCH_PARAM = "search";
-export const SEARCH_RANDOMIZE_KEY = '?!?!?!?!?!?!?!?!?'
+export const SEARCH_RANDOMIZE_KEY = 'EV3s-SECRET-RANDOMIZER'
 
 export const AUTH_ROUTE = "/api/auth";
 export const AUTH_VERIFY_REQUEST_ROUTE = `${AUTH_ROUTE}/verify-request`;

@@ -29,6 +29,7 @@ export const BLOCKCHAIN_MEDIA_PATHS = {
 export const RETURN_QUERY_PARAM = "from";
 
 export const LANDING_RETURN_KEY = "landing"; //HOME
+export const SEARCH_RETURN_KEY = "search";
 export const ABOUT_RETURN_KEY = "about";
 export const DASHBOARD_RETURN_KEY = "dashboard";
 export const EDIT_PROFILE_RETURN_KEY = "edit-profile";

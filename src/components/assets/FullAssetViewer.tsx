@@ -114,7 +114,6 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       {/* Blurred background image */}
       <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
         <Image
-          unoptimized={true}
           loading="eager"
           priority
           fill
