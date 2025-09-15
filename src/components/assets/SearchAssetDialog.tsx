@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrefixInput } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchIcon } from "lucide-react";
-import { PublicKey } from "@solana/web3.js";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
 import { ChainIdsEnum } from "@/types/wallet";
 import axios from "axios";
@@ -28,15 +27,6 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   const [hasSearched, setHasSearched] = useState(false);
   const router = useRouter();
 
-  // Basic Solana address validation (base58, 32-44 chars)
-  const isValidSolanaAddress = (address: string): boolean => {
-    try {
-      const pk = new PublicKey(address.trim());
-      return pk.toBase58() === address.trim(); // checks canonical base58 encoding
-    } catch {
-      return false;
-    }
-  };
 
   const handleSearch = async () => {
     const searchTerm = searchInput.trim();

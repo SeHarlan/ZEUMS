@@ -12,7 +12,7 @@ export async function searchAssetsHandler(req: NextRequest): Promise<NextRespons
 
     // TODO: Implement actual search logic here
     // For now, return empty array as requested
-    const searchResults: any[] = [];
+    const searchResults: unknown[] = [];
 
     return NextResponse.json(searchResults, { status: 200 });
   
