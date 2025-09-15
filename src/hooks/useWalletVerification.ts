@@ -6,7 +6,7 @@ import base58 from "bs58";
 import axios from "axios";
 import { toast } from "sonner";
 import { handleClientError } from "@/utils/handleError";
-import { USER_WALLET_ROUTE } from "@/constants/serverRoutes";
+import { USER_WALLET_ROUTE, WALLET_ADDRESS_PARAM } from "@/constants/serverRoutes";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { useUser } from "@/context/UserProvider";
 import { WalletType } from "@/types/wallet";
@@ -106,7 +106,7 @@ export const useSolanaWalletVerification = () => {
       const {
         acknowledged,
         deletedCount
-      } = await axios.delete<DeleteResult>(`${USER_WALLET_ROUTE}?walletAddress=${walletAddress}`)
+      } = await axios.delete<DeleteResult>(`${USER_WALLET_ROUTE}?${WALLET_ADDRESS_PARAM}=${walletAddress}`)
         .then((response) => response.data);
 
       if (acknowledged && deletedCount > 0) {

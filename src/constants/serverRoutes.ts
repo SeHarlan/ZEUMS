@@ -6,10 +6,15 @@ export const USER_ROUTE = "/api/user";
 export const USER_USERNAME_ROUTE = `${USER_ROUTE}/username`;
 export const USER_EMAIL_ROUTE = `${USER_ROUTE}/email`;
 export const USER_WALLET_ROUTE = `${USER_ROUTE}/wallet`;
+export const WALLET_ADDRESS_PARAM = "walletAddress";
 
 export const ENTRY_ROUTE = "/api/entry";
 export const ENTRY_DATES_ROUTE = `${ENTRY_ROUTE}/dates`;
 export const ENTRY_ENTRIES_ROUTE = `${ENTRY_ROUTE}/entries`;
+
+export const SEARCH_ASSETS_ROUTE = "/api/search/assets";
+export const SEARCH_PARAM = "search";
+export const SEARCH_RANDOMIZE_KEY = '?!?!?!?!?!?!?!?!?'
 
 export const AUTH_ROUTE = "/api/auth";
 export const AUTH_VERIFY_REQUEST_ROUTE = `${AUTH_ROUTE}/verify-request`;

@@ -4,15 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrefixInput } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SearchIcon } from "lucide-react";
+import { GiftIcon, SearchIcon } from "lucide-react";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
 import { ChainIdsEnum } from "@/types/wallet";
 import axios from "axios";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import AssetThumbnailCard from "./AssetThumbnailCard";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import LoadingSpinner from "../general/LoadingSpinner";
+import { handleServerError } from "@/utils/handleError";
+import { SEARCH_ASSETS_ROUTE, SEARCH_PARAM, SEARCH_RANDOMIZE_KEY } from "@/constants/serverRoutes";
+import { cn } from "@/utils/ui-utils";
+import ScrollableDialog from "../general/ScrollableDialog";
+import { P } from "../typography/Typography";
+import { isValidSolanaAddress } from "@/utils/asset";
+import Link from "next/link";
+import { MallowIcon } from "../icons/Social";
 
 interface SearchAssetDialogProps {
   open: boolean;
@@ -22,37 +27,60 @@ interface SearchAssetDialogProps {
 const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChange }) => {
   const [searchInput, setSearchInput] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<ParsedBlockChainAsset[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [total, setTotal] = useState(0);
   const router = useRouter();
 
 
-  const handleSearch = async () => {
-    const searchTerm = searchInput.trim();
+  const handleSearch = (search?: string) => {
+    const searchTerm = search || searchInput.trim();
 
     if (!searchTerm) {
       setError("Please enter a search term");
       return;
     }
 
-    setIsLoading(true);
-    setError("");
-    setSearchResults([]);
-    setHasSearched(true);
-
-    try {
-      // Call the API route to search for blockchain assets
-      const response = await axios.get(`/api/search/assets?q=${encodeURIComponent(searchTerm)}`);
-      const results = response.data.slice(0, 10); // Limit to 10 results
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search error:", error);
-      setError("Failed to search for assets. Please try again.");
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
+    if (isValidSolanaAddress(searchTerm)) {
+      handleAssetClick(searchTerm);
+      return;
     }
+
+    setSearching(true);
+    setError("");
+
+    // Call the API route to search for blockchain assets by name
+    axios
+      .get<{ searchResults: ParsedBlockChainAsset[]; total: number }>(
+        `${SEARCH_ASSETS_ROUTE}?${SEARCH_PARAM}=${encodeURIComponent(
+          searchTerm
+        )}`
+      )
+      .then((response) => {
+        setSearchResults(response.data.searchResults);
+        setTotal(response.data.total);
+        setHasSearched(true);
+        setTotal(response.data.total);
+      })
+      .catch((error) => {
+        handleServerError({
+          error,
+          location: "SearchAssetDialog_handleSearch",
+        });
+        setError("Failed to search for assets. Please try again.");
+        setSearchResults([]);
+        setHasSearched(false);
+        setTotal(0);
+      })
+      .finally(() => {
+        setSearching(false);
+      });
+  };
+
+  const handleRandomAsset = () => {
+    setSearchInput(SEARCH_RANDOMIZE_KEY);
+    handleSearch(SEARCH_RANDOMIZE_KEY);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -61,80 +89,94 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
     }
   };
 
-  const handleAssetClick = (asset: ParsedBlockChainAsset) => {
+  const handleAssetClick = (tokenAddress: string) => {
     // Navigate to the asset page when clicked
-    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](asset.tokenAddress));
-    onOpenChange(false);
-    setSearchInput("");
-    setSearchResults([]);
-    setHasSearched(false);
+    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](tokenAddress));
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl bg-popover-blur max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Search Blockchain Assets</DialogTitle>
-          <DialogDescription className="sr-only">
-            This dialog allows you to search for blockchain assets.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <PrefixInput
-              wrapperClassName="bg-background"
-              icon={<SearchIcon className="size-4 text-muted-foreground" />}
-              placeholder="Search for assets by name, address, or description"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-            />
-            {error && <p className="text-sm text-destructive bg-background/25 rounded-sm px-2.5 py-0.5 w-fit">{error}</p>}
-          </div>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSearch} loading={isLoading}>
-              Search
-            </Button>
-          </div>
-
-          {/* Search Results */}
-          {hasSearched && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
-                  {isLoading ? "Searching..." : `Found ${searchResults.length} assets`}
-                </h3>
-              </div>
-
-              {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <LoadingSpinner iconClass="size-8" />
-                </div>
-              ) : searchResults.length > 0 ? (
-                <ScrollArea className="max-h-96">
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                    {searchResults.map((asset) => (
-                      <AssetThumbnailCard
-                        key={asset.tokenAddress}
-                        asset={asset}
-                        onClick={() => handleAssetClick(asset)}
-                        className="cursor-pointer border-3 hover:shadow-md transition-shadow duration-300 border-transparent hover:border-primary"
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No assets found. Try a different search term.
-                </div>
-              )}
-            </div>
-          )}
+    <ScrollableDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={null}
+      title="Search Solana Blockchain Assets"
+      wrapperClassName="bg-popover-blur sm:max-w-2xl"
+    >
+      <div className="space-y-1">
+        <PrefixInput
+          wrapperClassName="bg-background"
+          icon={<SearchIcon className="size-4 text-muted-foreground" />}
+          placeholder="Search for assets by name or exact mint address"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={handleKeyPress}
+        />
+        {error && (
+          <p className="text-sm text-destructive bg-background/33 rounded-sm px-2 w-fit">
+            {error}
+          </p>
+        )}
+      <P className="text-sm mt-2">
+        <MallowIcon className="mr-2 mb-1 size-6 inline " />
+        Search engine powered by{" "}
+        <Link href="https://mallow.art" className="underline font-serif">
+          mallow.art
+        </Link>
+      </P>
+      </div>
+      <div className="flex justify-between items-end flex-wrap-reverse gap-2">
+        <div className="w-full sm:w-auto">
+          {searchResults.length && total > searchResults.length ? (
+            <P className="text-sm text-muted-foreground">
+              Showing the closest {searchResults.length} assets...
+            </P>
+          ) : null}
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div className="flex gap-2 flex-wrap-reverse w-full sm:w-auto">
+          <Button
+            onClick={handleRandomAsset}
+            loading={searching}
+            variant={"outline"}
+            className="w-full sm:w-43"
+          >
+            <GiftIcon />
+            Find random asset
+          </Button>
+          <Button
+            onClick={() => handleSearch()}
+            loading={searching}
+            className="w-full sm:w-20"
+          >
+            Search
+          </Button>
+        </div>
+      </div>
+
+      {/* Search Results */}
+      {hasSearched ? (
+        searchResults.length > 0 ? (
+          <div className="mt-4 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {searchResults.map((asset) => (
+              <AssetThumbnailCard
+                key={asset.tokenAddress}
+                asset={asset}
+                onClick={() => handleAssetClick(asset.tokenAddress)}
+                className={cn(
+                  "hover:shadow-lg transition-shadow duration-300 shrink-0",
+                  searchResults.length === 1 && "md:col-span-3 lg:col-span-4",
+                  searchResults.length === 2 && "md:col-span-1 lg:col-span-2"
+                )}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground text-center py-8 ">
+            No assets found. Try a different search term.
+          </div>
+        )
+      ) : null}
+    </ScrollableDialog>
   );
 };
 

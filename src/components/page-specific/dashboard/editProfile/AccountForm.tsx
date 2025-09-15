@@ -85,10 +85,6 @@ const ProfileAccountForm: FC = () => {
     setVerifyOpen(true);
   };
 
-  const handleRemoveWallet = (walletAddress: string) => {
-    removeWallet(walletAddress);
-  };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
@@ -176,7 +172,7 @@ const ProfileAccountForm: FC = () => {
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() => handleRemoveWallet(address)}
+                      onClick={() => removeWallet(address)}
                       className="rounded-full size-4"
                       disabled={isVerifying}
                     >

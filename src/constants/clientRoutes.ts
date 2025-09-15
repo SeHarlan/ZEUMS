@@ -2,6 +2,7 @@ import { EditProfileTab, EditProfileTabQueryParam } from "@/types/ui/dashboard";
 import { ChainIdsEnum } from "@/types/wallet";
 
 export const HOME = '/'; //landing page
+export const SEARCH = '/search';
 
 export const ABOUT = '/about';
 

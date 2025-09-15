@@ -13,8 +13,7 @@ const NavBar: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-
+  
   const returnPath = useReturnPath();
   const { actions } = useNavBarActions();
 

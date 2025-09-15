@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import Wallet from "../../models/Wallet";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
+import { WALLET_ADDRESS_PARAM } from "@/constants/serverRoutes";
 
 export async function removeWalletHandler(req: NextRequest): Promise<NextResponse> {
   try {
@@ -12,7 +13,7 @@ export async function removeWalletHandler(req: NextRequest): Promise<NextRespons
 
     // Parse params to get wallet address
     const { searchParams } = new URL(req.url);
-    const walletAddress = searchParams.get('walletAddress');
+    const walletAddress = searchParams.get(WALLET_ADDRESS_PARAM);
     
     if (!walletAddress) {
       throw new Error("Wallet address is required");
