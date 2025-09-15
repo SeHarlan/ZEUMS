@@ -164,7 +164,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
                 onClick={() => handleAssetClick(asset.tokenAddress)}
                 className={cn(
                   "hover:shadow-lg transition-shadow duration-300 shrink-0",
-                  searchResults.length === 1 && "md:col-span-3 lg:col-span-4",
+                  searchResults.length === 1 && "col-span-2 md:col-span-3 lg:col-span-4",
                   searchResults.length === 2 && "md:col-span-1 lg:col-span-2"
                 )}
               />
