@@ -126,13 +126,13 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
             {error}
           </p>
         )}
-      <P className="text-sm mt-2">
-        <MallowIcon className="mr-2 mb-1 size-6 inline " />
-        Search engine powered by{" "}
-        <Link href="https://mallow.art" className="underline font-serif">
-          mallow.art
-        </Link>
-      </P>
+        <P className="text-sm mt-2 mb-2 sm:mb-0 ">
+          <MallowIcon className="mr-2 mb-1 size-6 inline " />
+          Search engine powered by{" "}
+          <Link href="https://mallow.art" className="underline font-serif">
+            mallow.art
+          </Link>
+        </P>
       </div>
       <div className="flex justify-between items-end flex-wrap-reverse gap-2">
         <div className="w-full sm:w-auto">
@@ -166,7 +166,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
       {/* Search Results */}
       {hasSearched ? (
         searchResults.length > 0 ? (
-          <div className="mt-4 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="mt-4 w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-1">
             {searchResults.map((asset) => (
               <AssetThumbnailCard
                 key={asset.tokenAddress}
@@ -174,7 +174,8 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
                 onClick={() => handleAssetClick(asset.tokenAddress)}
                 className={cn(
                   "hover:shadow-lg transition-shadow duration-300 shrink-0",
-                  searchResults.length === 1 && "col-span-2 md:col-span-3 lg:col-span-4",
+                  searchResults.length === 1 &&
+                    "col-span-2 md:col-span-3 lg:col-span-4",
                   searchResults.length === 2 && "md:col-span-1 lg:col-span-2"
                 )}
               />

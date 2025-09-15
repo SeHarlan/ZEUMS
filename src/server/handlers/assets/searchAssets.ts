@@ -23,7 +23,11 @@ export async function searchAssetsHandler(req: NextRequest): Promise<NextRespons
     const rawAssets = response || [];
     
     const parsedResults = parseMallowAssets(rawAssets);
-    const limitedResults = parsedResults.slice(0, useRandom ? 1 : LIMIT);
+    
+    const randomIndex = Math.floor(Math.random() * parsedResults.length);
+    const limitedResults = useRandom
+      ? parsedResults.slice(randomIndex, randomIndex + 1  )
+      : parsedResults.slice(0, LIMIT);
 
     const total = useRandom ? 1 : parsedResults.length;
 
