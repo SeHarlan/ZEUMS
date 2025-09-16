@@ -4,7 +4,7 @@ import Wallet from "../../models/Wallet";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { WALLET_ADDRESS_PARAM } from "@/constants/serverRoutes";
 import User, { AuthUserVirtual } from "@/server/models/User";
-import { USER_AUTH_VIRTUAL } from "@/constants/databaseKeys";
+
 
 export async function removeWalletHandler(req: NextRequest): Promise<NextResponse> {
   try {
