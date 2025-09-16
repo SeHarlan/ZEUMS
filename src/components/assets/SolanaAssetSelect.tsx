@@ -37,7 +37,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   source,
   selectedAssets,
   setSelectAssets,
-  perPage = 20, // Default to 20 if not provided
+  perPage = 12, // Default to 20 if not provided
   maxSelected = 1, // Default to 1 if not provided
   withSearch, // Default to true to show search input
   maxSelectWarningBody,

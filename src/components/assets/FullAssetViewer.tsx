@@ -36,9 +36,9 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
 
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
-  const isGif = isBlockchainImage(media)
-    ? media.imageUrl.endsWith("gif")
-    : false;
+  // const isGif = isBlockchainImage(media)
+  //   ? media.imageUrl.endsWith("gif")
+  //   : false;
 
   //other media types handle their own loading states
   const isImageLoading = isLoading && isImage;
@@ -86,7 +86,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       default:
         return (
           <Image
-            unoptimized={isGif}
+            unoptimized={false}
             loading="eager"
             priority
             fill
@@ -118,7 +118,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       {/* Blurred background image */}
       <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
         <Image
-          unoptimized={isGif}
+          unoptimized={false}
           loading="eager"
           priority
           fill

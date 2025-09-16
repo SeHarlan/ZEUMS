@@ -138,7 +138,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
         <div className="w-full sm:w-auto">
           {searchResults.length && total > searchResults.length ? (
             <P className="text-sm text-muted-foreground">
-              Showing the closest {searchResults.length} assets...
+              Showing the most recent {searchResults.length} assets...
             </P>
           ) : null}
         </div>
