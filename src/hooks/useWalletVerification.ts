@@ -15,7 +15,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
 
 export const useSolanaWalletVerification = () => {
-  const { publicKey, signMessage } = useWallet();
+  const { publicKey, signMessage, disconnect } = useWallet();
   const { user, setUser } = useUser();
   const [isVerifying, setIsVerifying] = useState(false);
   const { setVisible } = useWalletModal();
@@ -26,24 +26,27 @@ export const useSolanaWalletVerification = () => {
 
   const verifiedPublicKey = isVerified ? publicKey!.toString() : null;
   
-  const verifyWallet = useCallback(async () => {
-    if (isVerifying) return;
 
-    if (!canVerify) {
-      setIntendsToVerify(true);
-      setVisible(true);
-      return;
-    }
+  const verifyWallet = useCallback(async () => {
+    if (isVerifying || !disconnect) return;
+    await disconnect(); //makes canVerify false
+    
+    setIsVerifying(false);
+    setIntendsToVerify(true);
+    setVisible(true);
+  }, [disconnect, isVerifying, setVisible]);
+
+  const finishVerifyWallet = useCallback(async () => {
+    if (isVerifying || !intendsToVerify || !canVerify) return;
+
+    setIsVerifying(true);
+    setIntendsToVerify(false);
 
     if (isVerified) {
       toast.info("Wallet already verified");
-      setIntendsToVerify(false);
-      setVisible(false);
+      setIsVerifying(false);
       return;
     }
- 
-    setIsVerifying(true);
-    setIntendsToVerify(false);
 
     try {
       const csrf = await getCsrfToken();
@@ -63,7 +66,7 @@ export const useSolanaWalletVerification = () => {
       const serializedSignature = base58.encode(signature);
 
       const { createdWallet, alreadyExists } = await axios
-        .post<{ createdWallet?: WalletType, alreadyExists?: boolean }>(
+        .post<{ createdWallet?: WalletType; alreadyExists?: boolean }>(
           USER_WALLET_ROUTE,
           {
             message: JSON.stringify(message),
@@ -80,7 +83,7 @@ export const useSolanaWalletVerification = () => {
       if (createdWallet) {
         toast.success("Wallet verified successfully");
 
-        setUser(prev => {
+        setUser((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
@@ -92,12 +95,12 @@ export const useSolanaWalletVerification = () => {
       toast.error("Failed to verify wallet");
       handleClientError({
         error,
-        location: "useWalletVerification_verifyWallet",
+        location: "useWalletVerification_finishVerifyWallet",
       });
     } finally {
       setIsVerifying(false);
     }
-  }, [canVerify, isVerifying, publicKey, setUser, setVisible, signMessage, isVerified]);
+  }, [canVerify, isVerifying, publicKey, setUser, signMessage, intendsToVerify, isVerified]);
 
   const removeWallet = useCallback(async (walletAddress: string) => {
     if (isVerifying) return;
@@ -134,9 +137,9 @@ export const useSolanaWalletVerification = () => {
 
   useEffect(() => {
     if (intendsToVerify && canVerify && !isVerified) {
-      verifyWallet();
+      finishVerifyWallet();
     }
-  }, [intendsToVerify, canVerify, verifyWallet, isVerified]);
+  }, [intendsToVerify, canVerify, finishVerifyWallet, isVerified]);
 
   return {
     verifyWallet,

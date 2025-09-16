@@ -3,6 +3,8 @@ import connectToDatabase from "../../db/mongodb";
 import Wallet from "../../models/Wallet";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { WALLET_ADDRESS_PARAM } from "@/constants/serverRoutes";
+import User, { AuthUserVirtual } from "@/server/models/User";
+import { USER_AUTH_VIRTUAL } from "@/constants/databaseKeys";
 
 export async function removeWalletHandler(req: NextRequest): Promise<NextResponse> {
   try {
@@ -25,7 +27,15 @@ export async function removeWalletHandler(req: NextRequest): Promise<NextRespons
     });
 
     if (walletCount <= 1) {
-      throw new Error("Cannot remove the last verified wallet. Users must have at least one verified wallet.");
+
+      const user = await User.findById(authSessionUser.dbUserId)
+        .populate(AuthUserVirtual)
+        .select("authUser authUserId")//needs authUserId to keep populated authUser
+        .exec();
+      
+      if (!user?.authUser?.email) {
+        throw new Error("Cannot remove the last verified wallet. Users must have at least one verified wallet or email.");
+      }
     }
 
       // Delete the wallet by address and owner

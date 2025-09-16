@@ -45,6 +45,8 @@ const ProfileAccountForm: FC = () => {
   const verifiedEmail = user?.authUser?.email;
   const verifiedSolanaWallets = getWalletsByChain(user)[ChainIdsEnum.SOLANA];
 
+  const canRemoveWallet = verifiedSolanaWallets.length > 1 || !!verifiedEmail
+
   const { verifyWallet, removeWallet, isVerifying, verifiedPublicKey } = useSolanaWalletVerification();
 
   const usernameIsWallet = useMemo(() => {
@@ -180,7 +182,7 @@ const ProfileAccountForm: FC = () => {
 
                   {truncate(address)}
 
-                  {verifiedSolanaWallets.length > 1 && (
+                  {canRemoveWallet && (
                     <Button
                       size="icon"
                       variant="ghost"
