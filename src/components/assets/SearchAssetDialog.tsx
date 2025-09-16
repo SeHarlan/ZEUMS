@@ -68,7 +68,6 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
         setSearchResults(response.data.searchResults);
         setTotal(response.data.total);
         setHasSearched(true);
-        setTotal(response.data.total);
       })
       .catch((error) => {
         handleServerError({
@@ -84,7 +83,6 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   };
 
   const handleRandomAsset = () => {
-    // setSearchInput(SEARCH_RANDOMIZE_KEY);
     handleSearch(SEARCH_RANDOMIZE_KEY);
   };
 
