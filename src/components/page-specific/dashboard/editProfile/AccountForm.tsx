@@ -31,12 +31,14 @@ const ProfileAccountForm: FC = () => {
     setEmail,
     error: emailError,
     isValid: emailIsValid,
+    checkEmailUniqueness,
   } = useEmailValidation(user?.authUser?.email, { uniquenessCheck: "AuthUser" });
   const {
     username,
     setUsername,
     error: usernameError,
     isValid: usernameIsValid,
+    checkUsernameUniqueness,
   } = useUsernameValidation(user?.username);
   const [verifyOpen, setVerifyOpen] = useState(false);
 
@@ -55,13 +57,18 @@ const ProfileAccountForm: FC = () => {
     }
   }, [user?.username]);
 
-  const onUsernameSubmit = () => {
+  const onUsernameSubmit = async () => {
     if (!usernameIsValid) return;
+
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkUsernameUniqueness(username);
+    if (!isUnique) return;
+
     setSubmitting(true);
 
-    const userData: Partial<UserType> = {
-      username,
-    }
+
+    const userData: Partial<UserType> = { username }
+
     axios
       .patch<{ user: UserType }>(USER_ROUTE, userData)
       .then((response) => {
@@ -80,8 +87,13 @@ const ProfileAccountForm: FC = () => {
       });
   };
 
-  const handleVerifyNewEmail = () => {
+  const handleVerifyNewEmail = async () => {
     if (!emailIsValid) return;
+
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkEmailUniqueness(email);
+    if (!isUnique) return;
+
     setVerifyOpen(true);
   };
 

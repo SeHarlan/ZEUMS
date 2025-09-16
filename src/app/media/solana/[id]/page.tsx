@@ -71,6 +71,7 @@ export default function SolanaAssetPage({ params }: Props) {
           <SearchIcon className="size-5" />
         </Button>
       </NavBarActions>
+      
       <SearchAssetDialog
         open={searchAssetOpen}
         onOpenChange={setSearchAssetOpen}

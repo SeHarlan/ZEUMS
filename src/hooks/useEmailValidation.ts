@@ -23,7 +23,7 @@ export const useEmailValidation = (
   const { uniquenessCheck } = options;
 
   const checkEmailUniqueness = useCallback(async (value: string) => {
-    if (!uniquenessCheck) return;
+    if (!uniquenessCheck) return true;
 
     try {
       const response = await axios.post<{ isUnique: boolean }>(USER_EMAIL_ROUTE, {
@@ -33,9 +33,11 @@ export const useEmailValidation = (
       
       if (!response.data.isUnique) {
         setError("Email is already associated with another account");
+        return false;
       } else {
         // Clear error if email is unique and no other validation errors
         setError(null);
+        return true;
       }
     } catch (err) {
       handleClientError({
@@ -43,6 +45,7 @@ export const useEmailValidation = (
         location: "useEmailValidation_checkEmailUniqueness",
       });
       setError("Failed to check email availability");
+      return false;
     }
   }, [uniquenessCheck]);
 
@@ -80,5 +83,6 @@ export const useEmailValidation = (
     error,
     isValid: !error && email.length > 0,
     validateEmail,
+    checkEmailUniqueness
   };
 };

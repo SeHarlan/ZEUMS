@@ -101,7 +101,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
     setTimeout(() => {
       onOpenChange(false)
       resetSearch()
-    }, 500);
+    }, 1000);
   };
 
   return (
@@ -134,7 +134,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
           </Link>
         </P>
       </div>
-      <div className="flex justify-between items-end flex-wrap-reverse gap-2">
+      <div className="flex justify-between items-start flex-wrap-reverse gap-2">
         <div className="w-full sm:w-auto">
           {searchResults.length && total > searchResults.length ? (
             <P className="text-sm text-muted-foreground">

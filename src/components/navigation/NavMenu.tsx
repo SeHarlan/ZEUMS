@@ -55,8 +55,13 @@ const NavMenu: FC = () => {
 
       <NavigationMenuList className="gap-0 md:gap-1">
         <NavigationMenuItem className="size-9">
-          <LinkButton href={HOME} size="icon" variant="link" className="size-fit overflow-hidden">
-            <Logo  className="size-fit" />
+          <LinkButton
+            href={HOME}
+            size="icon"
+            variant="link"
+            className="size-full overflow-hidden"
+          >
+            <Logo className="size-full" />
           </LinkButton>
         </NavigationMenuItem>
 
@@ -69,8 +74,8 @@ const NavMenu: FC = () => {
           >
             Search Assets
           </Button>
-          <NavLink label="Timelines" disabled href={COMING_SOON} />
-          <NavLink label="Galleries" disabled href={COMING_SOON} />
+          <NavLink label="Timelines" href={COMING_SOON} />
+          <NavLink label="Galleries" href={COMING_SOON} />
         </NavDropDown>
 
         <NavDropDown trigger={"Profile"}>
@@ -98,7 +103,7 @@ const NavMenu: FC = () => {
           <LinkButton
             href={COMING_SOON}
             className="md:col-span-2 w-full order-5"
-            disabled
+            disabled={!loggedIn}
           >
             Go to my timeline
           </LinkButton>
@@ -118,14 +123,17 @@ const NavMenu: FC = () => {
             disabled={!loggedIn}
           >
             {loggedIn ? userDisplayName : noUserDisplayName}
-            
+
             {walletMismatch && (
               <Tooltip>
                 <TooltipTrigger>
                   <InfoIcon className="size-4" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <P>You are currently connected to a wallet not associated with your account</P>
+                  <P>
+                    You are currently connected to a wallet not associated with
+                    your account
+                  </P>
                 </TooltipContent>
               </Tooltip>
             )}
