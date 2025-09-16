@@ -4,8 +4,8 @@ import { z } from "zod";
 export const profileAccountFormSchema = z.object({
   username: z
     .string()
-    .min(3, {
-      message: "Username must be at least 3 characters.",
+    .min(2, {
+      message: "Username must be at least 2 characters.",
     })
     .regex(/^[a-zA-Z0-9_-]+$/, {
       message:
