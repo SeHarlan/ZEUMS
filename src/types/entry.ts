@@ -50,6 +50,7 @@ export type BlockchainCreator = {
   address: string;
   /** Ownership/Royalty Percentage  */
   share: number;
+  verified?: boolean;
   /** User ID of the creator, if available */
   userId?: Schema.Types.ObjectId;
 };

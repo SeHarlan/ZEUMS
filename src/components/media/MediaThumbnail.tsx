@@ -46,7 +46,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     return (
       <Image
         fill
-        unoptimized
+        unoptimized //keep unoptimized, we use this for displaying hundreds of images as they are being selected in the search dialog
         loading="lazy"
         onError={onError}
         onLoad={handleLoad}

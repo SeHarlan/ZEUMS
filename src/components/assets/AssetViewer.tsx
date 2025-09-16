@@ -30,16 +30,19 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const router = useRouter();
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
     useImageFallback(asset.media);
-  
+
   const [videoError, setVideoError] = useState(false);
 
   const media = asset.media;
   const alt = asset.title || "Asset Image";
 
-  const aspectRatioValue = aspectRatio === "square"
-    ? 1
-    : (media.aspectRatio || 1);
-  
+  const isGif = isBlockchainImage(media)
+    ? media.imageUrl.endsWith("gif")
+    : false;
+
+  const aspectRatioValue =
+    aspectRatio === "square" ? 1 : media.aspectRatio || 1;
+
   const isBlockchainAsset = asset.entryType === EntryTypes.BlockchainAsset;
 
   const isImage = isBlockchainImage(media) || isUserImage(media);
@@ -47,18 +50,20 @@ const AssetViewer: FC<AssetViewerProps> = ({
   //video will handle its own loading state
   const isImageLoading = isLoading && isImage;
 
-  const isVideoOrImage = media.category === MediaCategory.Video || media.category === MediaCategory.Image;
+  const isVideoOrImage =
+    media.category === MediaCategory.Video ||
+    media.category === MediaCategory.Image;
 
   const basePath = isBlockchainAsset
     ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
     : USER_MEDIA(asset._id.toString());
-  
+
   const returnKey = getReturnKey(pathname);
   const newPagePath = basePath + makeReturnQueryParam(returnKey);
 
-  const goToExplorer = () => { 
+  const goToExplorer = () => {
     router.push(newPagePath);
-  }
+  };
 
   const renderContent = () => {
     if (media.category === MediaCategory.Video) {
@@ -82,7 +87,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToExplorer}
-        unoptimized={true} //TODO: optimized images: for paying users
+        unoptimized={isGif} //TODO: optimized images: for paying users
         loading="lazy"
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
@@ -102,14 +107,13 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const renderMediaIcon = () => {
     switch (media.category) {
       case MediaCategory.Vr:
-        return <BoxIcon />
+        return <BoxIcon />;
       case MediaCategory.Html:
         return <Code2Icon />;
       default: // Image and Video
         return <FullscreenIcon />;
     }
-  }
-
+  };
 
   return (
     <AspectRatio

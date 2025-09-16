@@ -31,17 +31,21 @@ const ProfileAccountForm: FC = () => {
     setEmail,
     error: emailError,
     isValid: emailIsValid,
+    checkEmailUniqueness,
   } = useEmailValidation(user?.authUser?.email, { uniquenessCheck: "AuthUser" });
   const {
     username,
     setUsername,
     error: usernameError,
     isValid: usernameIsValid,
+    checkUsernameUniqueness,
   } = useUsernameValidation(user?.username);
   const [verifyOpen, setVerifyOpen] = useState(false);
 
   const verifiedEmail = user?.authUser?.email;
   const verifiedSolanaWallets = getWalletsByChain(user)[ChainIdsEnum.SOLANA];
+
+  const canRemoveWallet = verifiedSolanaWallets.length > 1 || !!verifiedEmail
 
   const { verifyWallet, removeWallet, isVerifying, verifiedPublicKey } = useSolanaWalletVerification();
 
@@ -55,13 +59,18 @@ const ProfileAccountForm: FC = () => {
     }
   }, [user?.username]);
 
-  const onUsernameSubmit = () => {
+  const onUsernameSubmit = async () => {
     if (!usernameIsValid) return;
+
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkUsernameUniqueness(username);
+    if (!isUnique) return;
+
     setSubmitting(true);
 
-    const userData: Partial<UserType> = {
-      username,
-    }
+
+    const userData: Partial<UserType> = { username }
+
     axios
       .patch<{ user: UserType }>(USER_ROUTE, userData)
       .then((response) => {
@@ -80,13 +89,14 @@ const ProfileAccountForm: FC = () => {
       });
   };
 
-  const handleVerifyNewEmail = () => {
+  const handleVerifyNewEmail = async () => {
     if (!emailIsValid) return;
-    setVerifyOpen(true);
-  };
 
-  const handleRemoveWallet = (walletAddress: string) => {
-    removeWallet(walletAddress);
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkEmailUniqueness(email);
+    if (!isUnique) return;
+
+    setVerifyOpen(true);
   };
 
   return (
@@ -172,11 +182,11 @@ const ProfileAccountForm: FC = () => {
 
                   {truncate(address)}
 
-                  {verifiedSolanaWallets.length > 1 && (
+                  {canRemoveWallet && (
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() => handleRemoveWallet(address)}
+                      onClick={() => removeWallet(address)}
                       className="rounded-full size-4"
                       disabled={isVerifying}
                     >

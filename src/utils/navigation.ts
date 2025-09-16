@@ -15,12 +15,15 @@ import {
   EDIT_PROFILE_ACCOUNT,
   EDIT_PROFILE_ACCOUNT_RETURN_KEY,
   EDIT_PROFILE_DISPLAY,
-  EDIT_PROFILE_DISPLAY_RETURN_KEY
+  EDIT_PROFILE_DISPLAY_RETURN_KEY,
+  SEARCH,
+  SEARCH_RETURN_KEY
 } from "@/constants/clientRoutes";
 
 export const getReturnPath = (returnKey: string): string => {
   const pathMap: Record<string, string> = {
     [ABOUT_RETURN_KEY]: ABOUT,
+    [SEARCH_RETURN_KEY]: SEARCH,
     [EDIT_PROFILE_ACCOUNT_RETURN_KEY]: EDIT_PROFILE_ACCOUNT,
     [EDIT_PROFILE_DISPLAY_RETURN_KEY]: EDIT_PROFILE_DISPLAY,
     [EDIT_PROFILE_RETURN_KEY]: EDIT_PROFILE,
@@ -49,6 +52,7 @@ export const getReturnKey = (currentPath?: string, id?: string): string => {
   if (currentPath.includes(EDIT_PROFILE_DISPLAY)) return EDIT_PROFILE_DISPLAY_RETURN_KEY;
   if (currentPath.includes(EDIT_PROFILE)) return EDIT_PROFILE_RETURN_KEY; //less specific, so after other specific edit profile paths
   if (currentPath.includes(ABOUT)) return ABOUT_RETURN_KEY;
+  if (currentPath.includes(SEARCH)) return SEARCH_RETURN_KEY;
   if (currentPath.includes(HOME)) return LANDING_RETURN_KEY;
   return LANDING_RETURN_KEY;
 };

@@ -168,6 +168,7 @@ const handleWithWallet = async ({
       const user = new User(createData);
       await user.save({ session: mongooseSession });
   
+      //Needs to be an array to work with session transaction
       await Wallet.create(
         [{
           owner: user._id,

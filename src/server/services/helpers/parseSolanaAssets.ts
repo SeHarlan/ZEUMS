@@ -3,6 +3,7 @@ import { BlockchainAttribute, EntryTypes } from "@/types/entry";
 import { GetAssetResponse, File, Interface } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
+import { solanaSpamCreatorAddresses, solanaWhiteListedCollectionAddresses } from "./addressLists";
 
 
 export const parseSolanaAssets = (
@@ -12,25 +13,16 @@ export const parseSolanaAssets = (
   const editionMap: Record<string, ParsedBlockChainAsset> = {}; 
 
   for (const asset of rawAssets) {
-    const { content, creators, ownership, id, grouping, authorities } = asset;
+    const { content, creators, ownership, id } = asset;
 
 
     ///////FILTER OUT SPAM NFTs
-    if (!content || !content.files || !content.links || !content.metadata) continue;
-    const imageUrl = content.links?.image;
-
+    if (!content || isSpamNft(asset)) continue;
+    
     // Must have proper content
+    const imageUrl = content.links?.image;
     if (!imageUrl) continue;
     if (!content.metadata?.name) continue;
-
-    //TODO: find smarter way to handle this (or to filter out junk nfts in general)
-    // allowing no creators for now because some children nfts dont have creators (blame fubby and his ash)
-    const hasVerifiedCreator = creators?.some((c) => c.verified);
-    const hasCollection = !!grouping?.[0];
-    if (!hasVerifiedCreator && !hasCollection) continue;
-
-    // Must not have excessive authorities (spam indicator)
-    if (authorities && authorities.length > 5) continue;
     //////
 
     if(isCollectionNft(asset)) continue;
@@ -47,6 +39,7 @@ export const parseSolanaAssets = (
       creators?.map((creator) => ({
         address: creator.address,
         share: creator.share,
+        verified: creator.verified,
       })) || [];
 
     const onChainOwner = {
@@ -55,8 +48,8 @@ export const parseSolanaAssets = (
 
     //parse media and figure out category
     const { imageCdnUrl, videoUrl, htmlUrl, vrUrl } = parseSolanaMedia({
-      files: content.files,
-      animationUrl: content.links.animation_url,
+      files: content?.files || [],
+      animationUrl: content.links?.animation_url,
     });
 
     let category: MediaCategory = MediaCategory.Image;
@@ -172,3 +165,31 @@ function isCollectionNft(asset: GetAssetResponse): boolean {
   //TODO find way to handle legacy collection types
   return false;
 }
+
+function isSpamNft(asset: GetAssetResponse): boolean {
+  const { content, creators, grouping, authorities } = asset;
+  if (!content || !content.links || !content.metadata)
+    return true;
+
+  //TODO: find smarter way to handle this (or to filter out junk nfts in general)
+  // allowing no creators for now because some children nfts dont have creators (blame fubby and his ash)
+  const hasVerifiedCreator = creators?.some((c) => c.verified);
+  const whiteListedCollection =
+    grouping?.[0]?.group_value && solanaWhiteListedCollectionAddresses.has(
+      grouping[0].group_value
+    );
+
+  // no verified creator or whitelisted collection is spam
+  if (!hasVerifiedCreator && !whiteListedCollection) return true;
+
+  // Must not have excessive authorities (spam indicator)
+  if (authorities && authorities.length > 5) return true;
+
+
+  for (const creator of creators || []) {
+    if (solanaSpamCreatorAddresses.has(creator.address)) return true;
+  }
+
+  return false;
+}
+

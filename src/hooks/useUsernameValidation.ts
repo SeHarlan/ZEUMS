@@ -51,9 +51,11 @@ export const useUsernameValidation = (initUsername?: string) => {
       
       if (!response.data.isUnique) {
         setError("Username is already taken");
+        return false;
       } else {
         // Clear error if username is unique and no other validation errors
         setError(null);
+        return true;
       }
     } catch (err) {
       handleClientError({
@@ -61,6 +63,7 @@ export const useUsernameValidation = (initUsername?: string) => {
         location: "useUsernameValidation_checkUsernameUniqueness",
       });
       setError("Failed to check username availability");
+      return false;
     }
   }, []);
 
@@ -100,5 +103,6 @@ export const useUsernameValidation = (initUsername?: string) => {
     error,
     isValid,
     validateUsername,
+    checkUsernameUniqueness
   };
 };

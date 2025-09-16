@@ -2,25 +2,29 @@
 
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { Button, LinkButton } from "@/components/ui/button";
-import { MenuIcon, XIcon, ArrowLeft } from 'lucide-react';
+import { MenuIcon, XIcon, ArrowLeft, MessageCircleQuestionIcon } from 'lucide-react';
 
 import { cn } from '@/utils/ui-utils';
 import NavMenu from './NavMenu';
 import { useReturnPath } from '@/hooks/useReturnPath';
 import { useNavBarActions } from '@/context/NavBarActionsProvider';
+import SupportDialog from './SupportDialog';
 
 const NavBar: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-
+  const [supportOpen, setSupportOpen] = useState(false);
   const returnPath = useReturnPath();
   const { actions } = useNavBarActions();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const handleSupportClick = () => { 
+    setSupportOpen(true);
+  }
 
   useEffect(() => {
     // Close the menu when the user clicks outside of it
@@ -107,6 +111,29 @@ const NavBar: FC = () => {
           )}
         </Button>
       </div>
+
+      <div
+        className={cn(
+          "fixed z-90 right-4 lg:right-8 bottom-4 lg:bottom-8",
+          "flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
+          "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
+          isMenuOpen
+            ? "right-4 lg:right-8 animate-in "
+            : "-right-[200%] animate-out",
+          "md:hover:animate-in"
+        )}
+      >
+        <Button
+          onClick={handleSupportClick}
+          size="icon"
+          variant="outline"
+          className="size-12 md:size-10"
+        >
+          <MessageCircleQuestionIcon className="size-6" />
+        </Button>
+      </div>
+
+      <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
     </div>
   );
 };

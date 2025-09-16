@@ -1,5 +1,7 @@
 import { SocialIconProps } from "@/types/generic";
+import { cn } from "@/utils/ui-utils";
 import { MailIcon } from "lucide-react";
+import Image from "next/image";
 
 //mostly from https://icons8.com/icons
 
@@ -14,7 +16,7 @@ export const GoogleIcon = ({className}: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 30 30"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M 15.003906 3 C 8.3749062 3 3 8.373 3 15 C 3 21.627 8.3749062 27 15.003906 27 C 25.013906 27 27.269078 17.707 26.330078 13 L 25 13 L 22.732422 13 L 15 13 L 15 17 L 22.738281 17 C 21.848702 20.448251 18.725955 23 15 23 C 10.582 23 7 19.418 7 15 C 7 10.582 10.582 7 15 7 C 17.009 7 18.839141 7.74575 20.244141 8.96875 L 23.085938 6.1289062 C 20.951937 4.1849063 18.116906 3 15.003906 3 z"></path>
     </svg>
@@ -30,7 +32,7 @@ export const TwitterIcon = ({ className }: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 50 50"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M 11 4 C 7.134 4 4 7.134 4 11 L 4 39 C 4 42.866 7.134 46 11 46 L 39 46 C 42.866 46 46 42.866 46 39 L 46 11 C 46 7.134 42.866 4 39 4 L 11 4 z M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z"></path>
     </svg>
@@ -46,7 +48,7 @@ export const DiscordIcon = ({ className }: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 50 50"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M42.298,11.65c-0.676-1.021-1.633-1.802-2.768-2.256c-2.464-0.988-4.583-1.648-6.479-2.02	C31.721,7.114,30.404,7.768,29.771,9l-0.158,0.308c-1.404-0.155-2.895-0.207-4.593-0.164c-1.741-0.042-3.237,0.009-4.643,0.164	L20.22,9c-0.633-1.232-1.952-1.885-3.279-1.625c-1.896,0.371-4.016,1.031-6.479,2.02c-1.134,0.454-2.091,1.234-2.768,2.256	c-4.721,7.131-6.571,14.823-5.655,23.517c0.032,0.305,0.202,0.578,0.461,0.741c3.632,2.29,6.775,3.858,9.891,4.936	c1.303,0.455,2.748-0.054,3.517-1.229l1.371-2.101c-1.092-0.412-2.158-0.9-3.18-1.483c-0.479-0.273-0.646-0.884-0.373-1.363	c0.273-0.481,0.884-0.65,1.364-0.373c3.041,1.734,6.479,2.651,9.942,2.651s6.901-0.917,9.942-2.651	c0.479-0.277,1.09-0.108,1.364,0.373c0.273,0.479,0.106,1.09-0.373,1.363c-1.056,0.603-2.16,1.105-3.291,1.524l1.411,2.102	c0.581,0.865,1.54,1.357,2.528,1.357c0.322,0,0.647-0.053,0.963-0.161c3.125-1.079,6.274-2.649,9.914-4.944	c0.259-0.163,0.429-0.437,0.461-0.741C48.869,26.474,47.019,18.781,42.298,11.65z M18.608,28.983c-1.926,0-3.511-2.029-3.511-4.495	c0-2.466,1.585-4.495,3.511-4.495s3.511,2.029,3.511,4.495C22.119,26.954,20.534,28.983,18.608,28.983z M31.601,28.957	c-1.908,0-3.478-2.041-3.478-4.522s1.57-4.522,3.478-4.522c1.908,0,3.478,2.041,3.478,4.522S33.509,28.957,31.601,28.957z"></path>
     </svg>
@@ -62,7 +64,7 @@ export const TelegramIcon = ({ className }: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 50 50"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M25,2c12.703,0,23,10.297,23,23S37.703,48,25,48S2,37.703,2,25S12.297,2,25,2z M32.934,34.375	c0.423-1.298,2.405-14.234,2.65-16.783c0.074-0.772-0.17-1.285-0.648-1.514c-0.578-0.278-1.434-0.139-2.427,0.219	c-1.362,0.491-18.774,7.884-19.78,8.312c-0.954,0.405-1.856,0.847-1.856,1.487c0,0.45,0.267,0.703,1.003,0.966	c0.766,0.273,2.695,0.858,3.834,1.172c1.097,0.303,2.346,0.04,3.046-0.395c0.742-0.461,9.305-6.191,9.92-6.693	c0.614-0.502,1.104,0.141,0.602,0.644c-0.502,0.502-6.38,6.207-7.155,6.997c-0.941,0.959-0.273,1.953,0.358,2.351	c0.721,0.454,5.906,3.932,6.687,4.49c0.781,0.558,1.573,0.811,2.298,0.811C32.191,36.439,32.573,35.484,32.934,34.375z"></path>
     </svg>
@@ -79,7 +81,7 @@ export const InstagramIcon = ({ className }: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 50 50"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M 16 3 C 8.83 3 3 8.83 3 16 L 3 34 C 3 41.17 8.83 47 16 47 L 34 47 C 41.17 47 47 41.17 47 34 L 47 16 C 47 8.83 41.17 3 34 3 L 16 3 z M 37 11 C 38.1 11 39 11.9 39 13 C 39 14.1 38.1 15 37 15 C 35.9 15 35 14.1 35 13 C 35 11.9 35.9 11 37 11 z M 25 14 C 31.07 14 36 18.93 36 25 C 36 31.07 31.07 36 25 36 C 18.93 36 14 31.07 14 25 C 14 18.93 18.93 14 25 14 z M 25 16 C 20.04 16 16 20.04 16 25 C 16 29.96 20.04 34 25 34 C 29.96 34 34 29.96 34 25 C 34 20.04 29.96 16 25 16 z"></path>
     </svg>
@@ -95,7 +97,7 @@ export const TikTokIcon = ({ className }: SocialIconProps) => {
       width="100"
       height="100"
       viewBox="0 0 50 50"
-      className={className}
+      className={cn("fill-current", className)}
     >
       <path d="M41,4H9C6.243,4,4,6.243,4,9v32c0,2.757,2.243,5,5,5h32c2.757,0,5-2.243,5-5V9C46,6.243,43.757,4,41,4z M37.006,22.323 c-0.227,0.021-0.457,0.035-0.69,0.035c-2.623,0-4.928-1.349-6.269-3.388c0,5.349,0,11.435,0,11.537c0,4.709-3.818,8.527-8.527,8.527 s-8.527-3.818-8.527-8.527s3.818-8.527,8.527-8.527c0.178,0,0.352,0.016,0.527,0.027v4.202c-0.175-0.021-0.347-0.053-0.527-0.053 c-2.404,0-4.352,1.948-4.352,4.352s1.948,4.352,4.352,4.352s4.527-1.894,4.527-4.298c0-0.095,0.042-19.594,0.042-19.594h4.016 c0.378,3.591,3.277,6.425,6.901,6.685V22.323z"></path>
     </svg>
@@ -103,3 +105,15 @@ export const TikTokIcon = ({ className }: SocialIconProps) => {
  }
 
 // export const FacebookIcon = ({ className }: SocialIconProps) => {};
+
+export const MallowIcon = ({ className }: SocialIconProps) => { 
+  return (
+    <Image 
+      src="data:image/webp;base64,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"
+      alt="Mallow Logo"
+      width={100}
+      height={100}
+      className={cn("border-2 rounded-full",className)}
+    />
+  )
+}
