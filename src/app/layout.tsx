@@ -13,6 +13,7 @@ import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense } from "react";
 import { AspectRatioProvider } from "@/context/AspectRatioProvider";
+import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 
 
 const dmSerif = DM_Serif_Text({
@@ -32,12 +33,35 @@ const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
 });
 
+
 export const metadata: Metadata = {
-  title: "Zeums",
-  description: "Celebrate your digital history",
+  title: TITLE_COPY,
+  description: SUBTITLE_COPY,
   icons: {
-    icon: "/icon.png"
-  }
+    icon: "/icon.png",
+  },
+  openGraph: {
+    title: TITLE_COPY,
+    description: SUBTITLE_COPY,
+    url: "https://www.zeums.art",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${TITLE_COPY} - ${SUBTITLE_COPY}`,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE_COPY,
+    description: SUBTITLE_COPY,
+    images: ["/og-image.png"],
+    creator: "@ZEUMS_art",
+  },
 };
 
 export default function RootLayout({
