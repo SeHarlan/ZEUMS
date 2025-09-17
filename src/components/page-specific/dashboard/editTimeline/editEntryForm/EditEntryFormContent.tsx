@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import {  P } from "@/components/typography/Typography";
 import { ENTRY_TYPE_COPY } from "@/textCopy/entryTypes";
 import { EntryTypeIcons } from "@/components/icons/EntryTypes";
+import ButtonEditor from "@/components/timeline/ButtonEditor";
 
 interface EditEntryFormContentProps { 
   form: UseFormReturn<EntryFormValues>;
@@ -125,6 +126,8 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
           </FormItem>
         )}
       />
+
+      <ButtonEditor form={form} />
     </div>
   );
 }
