@@ -208,8 +208,9 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
               throw new Error("Email not found in user");
             }
             
-            const username =
-              user.name?.replaceAll(" ", "") || email.split("@")[0];
+            const username = (
+              user.name?.replaceAll(" ", "") || email.split("@")[0]
+            ).toLowerCase();
             
             const sessionUser = await findOrCreateUser({
               authUserId: user.id,

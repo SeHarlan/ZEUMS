@@ -16,6 +16,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
       unique: true,
       minlength: 3,
       trim: true,
+      lowercase: true, // Automatically convert to lowercase
     },
     displayName: { type: String },
     profileImage: { type: MediaSchema },
