@@ -23,7 +23,7 @@ const usernameSchema = z
     if (isUsernameBanned(val)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "This username is reserved and cannot be used. Please choose a different username.",
+        message: "This username is not available. Please choose another.",
       });
       return;
     }

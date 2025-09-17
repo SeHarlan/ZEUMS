@@ -18,7 +18,7 @@ export async function checkUsernameUniquenessHandler(req: NextRequest): Promise<
     if (isUsernameBanned(username)) {
       return NextResponse.json({ 
         isUnique: false, 
-        error: "This username is reserved and cannot be used. Please choose a different username." 
+        error: "This username is not available. Please choose another." 
       });
     }
     
