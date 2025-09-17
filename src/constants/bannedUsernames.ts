@@ -72,11 +72,11 @@ export const isUsernameBanned = (username: string): boolean => {
 };
 
 /**
- * Generate a fallback username for OAuth flow when the original username is banned
+ * Generate a random fallback prefix to username for OAuth flow when the original username is banned
  * @param originalUsername - The original username that was banned
  * @returns A fallback username with z_ prefix and 3 random numbers
  */
-export const generateFallbackUsername = (originalUsername: string): string => {
+export const generateRandomFallbackUsername = (originalUsername: string): string => {
   const randomNumbers = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `z_${randomNumbers}_${originalUsername}`;
+  return `z_${randomNumbers}_${originalUsername.toLowerCase().trim()}`;
 };

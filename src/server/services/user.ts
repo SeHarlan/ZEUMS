@@ -6,10 +6,10 @@ import Wallet from "../models/Wallet";
 import mongoose from "mongoose";
 import { User as NextAuthUser } from "next-auth";
 import PendingEmailVerification from "../models/PendingEmailVerification";
-import { isUsernameBanned, generateFallbackUsername } from "@/constants/bannedUsernames";
+import { isUsernameBanned, generateRandomFallbackUsername } from "@/constants/bannedUsernames";
 
 
-const MAX_USERNAME_FALLBACK_ATTEMPTS = 10;
+const MAX_USERNAME_FALLBACK_ATTEMPTS = 5;
 
 export type FindOrCreateProps = {
   createData: CreateUserData;
@@ -118,10 +118,10 @@ const handleWithAuthId = async ({
     return sessionUser;
   }
 
-  // No pending verification and no existing user - create new user
-  // Ensure username is unique and not banned (OAuth flow)
+  // No pending verification and no existing user - create new user  (OAuth flow)
+  //username comes from the provider, so we need to ensure it is unique and not banned
   const uniqueUsername = await ensureUniqueUsername(createData.username);
-  
+
   const newUser = new User({
     ...createData,
     username: uniqueUsername,
@@ -207,41 +207,40 @@ const handleWithWallet = async ({
 
 
 /**
- * Ensures username is unique and not banned for OAuth flows, generating fallback if needed
+ * Ensures username (taken from provider) is unique and not banned for OAuth flows, generating fallback if needed
  * @param username - The original username
  * @returns A unique, non-banned username with z_ prefix if needed
  */
 async function ensureUniqueUsername(username: string): Promise<string> {
-  let finalUsername = username;
+  let finalUsername = username.toLowerCase().trim();
+  
   
   // Check if username is banned - if so, generate fallback with z_ prefix
-  if (isUsernameBanned(username.toLowerCase())) {
-    finalUsername = generateFallbackUsername(username);
+  if (isUsernameBanned(finalUsername)) {
+    finalUsername = generateRandomFallbackUsername(username);
   }
   
   // Check if username is unique
-  let isUnique = false;
   let attempts = 0;
   const maxAttempts = MAX_USERNAME_FALLBACK_ATTEMPTS;
   
-  while (!isUnique && attempts < maxAttempts) {
+  while (attempts < maxAttempts) {
     // Use exact match with lowercase - much more efficient with unique index
-    const existingUser = await User.findOne({ username: finalUsername.toLowerCase() })
+    const existingUser = await User.findOne({ username: finalUsername })
       .select("_id")
       .lean();
     
     if (!existingUser) {
-      isUnique = true;
+      return finalUsername;
     } else {
-      // Generate a new fallback username with z_ prefix
-      finalUsername = generateFallbackUsername(username);
+      // try to generate a new fallback username with z_ prefix again
+      finalUsername = generateRandomFallbackUsername(username);
       attempts++;
     }
   }
   
-  if (!isUnique) {
-    throw new Error("Unable to generate unique username after multiple attempts");
-  }
-  
-  return finalUsername.toLowerCase();
+ 
+  // after max attempts add a uuid to the end to guarantee uniqueness 
+  const uniqueId = crypto.randomUUID().replace(/-/g, "").substring(0, 8);
+  return `${finalUsername}_${uniqueId}`;
 }
