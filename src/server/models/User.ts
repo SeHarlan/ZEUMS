@@ -14,7 +14,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
       type: String,
       required: true,
       unique: true,
-      minlength: 3,
+      minlength: 2,
       trim: true,
       lowercase: true, // Automatically convert to lowercase
     },
