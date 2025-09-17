@@ -5,6 +5,7 @@ import { useDebounce } from "./useDebounce";
 import axios from "axios";
 import { USER_USERNAME_ROUTE } from "@/constants/serverRoutes";
 import { handleClientError } from "@/utils/handleError";
+import { isUsernameBanned } from "@/constants/bannedUsernames";
 
 const DEBOUNCE_TIME = 500;
 
@@ -18,6 +19,15 @@ const usernameSchema = z
       "Username can only contain letters, numbers, underscores, and hyphens.",
   })
   .superRefine((val, ctx) => { 
+    // Check if username is banned
+    if (isUsernameBanned(val)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This username is not available. Please choose another.",
+      });
+      return;
+    }
+
     if (val.length > 30) {
       let isWalletAddress = false;
       try { 
@@ -45,12 +55,13 @@ export const useUsernameValidation = (initUsername?: string) => {
 
   const checkUsernameUniqueness = useCallback(async (value: string) => {
     try {
-      const response = await axios.post<{ isUnique: boolean }>(USER_USERNAME_ROUTE, {
-        username: value,
+      const response = await axios.post<{ isUnique: boolean; error?: string }>(USER_USERNAME_ROUTE, {
+        username: value.toLowerCase(), // Normalize to lowercase for consistency
       });
       
       if (!response.data.isUnique) {
-        setError("Username is already taken");
+        // Use server error message if available, otherwise default message
+        setError(response.data.error || "Username is already taken");
         return false;
       } else {
         // Clear error if username is unique and no other validation errors
