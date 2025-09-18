@@ -2,7 +2,6 @@ import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import EditTimeline from "@/components/page-specific/dashboard/editTimeline/EditTimeline";
 import { PageTurnLeft, PageTurnRight } from "@/components/page-specific/dashboard/PageTurnButtons";
-import GlitchFeedback from "@/components/general/GlitchFeedback";
 import { P } from "@/components/typography/Typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
