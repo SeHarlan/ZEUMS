@@ -5,3 +5,18 @@ export const removeUndefined = <T extends Record<string, unknown>>(
     Object.entries(withUndefined).filter(([, value]) => value !== undefined)
   ) as { [K in keyof T]: NonNullable<T[K]> };
 };
+
+/**
+ * Adds https:// prefix to URLs that don't already have a protocol
+ */
+export const addHttpsPrefix = (url: string): string => {
+  if (!url) return url;
+  
+  // If URL already has a protocol, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // Add https:// prefix
+  return `https://${url}`;
+};

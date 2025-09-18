@@ -16,6 +16,7 @@ import { useUser } from "@/context/UserProvider";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
+import { addHttpsPrefix } from "@/utils/general";
 import EditEntryFormContent from "./EditEntryFormContent";
 
 const formId = "edit-entry-form";
@@ -66,6 +67,14 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
     if (data.date.toISOString() !== editingEntry.date.toISOString()) {
       //new date was set
       data.date = addPreciseCurrentTime(data.date);
+    }
+    
+    // Add https:// prefix to button URLs if they don't have a protocol
+    if (data.buttons) {
+      data.buttons = data.buttons.map(button => ({
+        ...button,
+        url: addHttpsPrefix(button.url)
+      }));
     }
 
     const updatedEntryData: Partial<BaseEntry> = {

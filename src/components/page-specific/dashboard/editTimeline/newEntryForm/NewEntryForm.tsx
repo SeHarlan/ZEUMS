@@ -19,6 +19,7 @@ import { P } from "@/components/typography/Typography";
 import NewEntryFormContent from "./NewEntryFormContent";
 import { SquarePlusIcon } from "lucide-react";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
+import { addHttpsPrefix } from "@/utils/general";
 
 const formId = "new-entry-form";
 
@@ -98,6 +99,14 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
     setSubmitting(true);
 
     data.date = addPreciseCurrentTime(data.date);
+    
+    // Add https:// prefix to button URLs if they don't have a protocol
+    if (data.buttons) {
+      data.buttons = data.buttons.map(button => ({
+        ...button,
+        url: addHttpsPrefix(button.url)
+      }));
+    }
 
 
     let entryCreationData: TimelineEntryCreation = {

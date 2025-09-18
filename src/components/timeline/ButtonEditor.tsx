@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Plus, Trash2 } from "lucide-react";
+import { P } from "../typography/Typography";
 
 interface ButtonEditorProps {
   form: UseFormReturn<EntryFormValues>;
@@ -35,10 +36,10 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Buttons</h4>
+        <P className="text-sm font-medium">Buttons</P>
         <Button
           type="button"
-          variant="outline"
+          variant={!fields.length ? "default" : "outline"}
           size="sm"
           onClick={addButton}
           disabled={fields.length >= 3}
@@ -48,7 +49,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
           Add Button
         </Button>
       </div>
-      
+
       {fields.length === 0 && (
         <p className="text-sm text-muted-foreground">
           Add up to 3 buttons to your entry (optional)
@@ -58,7 +59,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
       <div className="space-y-3">
         {fields.map((field, index) => (
           <div key={field.id} className="flex gap-2 items-start">
-            <div className="flex-1 grid grid-cols-2 gap-2">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 items-start">
               <FormField
                 control={form.control}
                 name={`buttons.${index}.text`}
@@ -66,10 +67,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                   <FormItem>
                     <FormLabel className="text-xs">Button Text</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., View on OpenSea"
-                        {...field}
-                      />
+                      <Input placeholder="Button text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -82,11 +80,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                   <FormItem>
                     <FormLabel className="text-xs">URL</FormLabel>
                     <FormControl>
-                      <Input
-                        type="url"
-                        placeholder="https://example.com"
-                        {...field}
-                      />
+                      <Input type="url" placeholder="example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -100,17 +94,16 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
               onClick={() => removeButton(index)}
               className="mt-6 p-2 text-destructive hover:text-destructive"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="size-4" />
             </Button>
           </div>
         ))}
+        {fields.length == 3 && (
+          <p className="text-xs text-muted-foreground">
+            Maximum of 3 buttons allowed
+          </p>
+        )}
       </div>
-
-      {fields.length > 0 && (
-        <p className="text-xs text-muted-foreground">
-          {fields.length}/3 buttons added
-        </p>
-      )}
     </div>
   );
 };
