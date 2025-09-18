@@ -24,6 +24,7 @@ import SelectBlockchainAsset from "../SelectBlockchainAsset";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
 import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
+import ButtonEditor from "@/components/timeline/ButtonEditor";
 
 interface NewEntryFormContentProps { 
   form: UseFormReturn<EntryFormValues>;
@@ -184,6 +185,8 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
           </FormItem>
         )}
       />
+
+      <ButtonEditor form={form} />
     </div>
   );
 }
