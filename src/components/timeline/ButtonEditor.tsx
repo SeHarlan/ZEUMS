@@ -83,6 +83,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                     <FormLabel className="text-xs">URL</FormLabel>
                     <FormControl>
                       <Input
+                        type="url"
                         placeholder="https://example.com"
                         {...field}
                       />
