@@ -21,7 +21,7 @@ const ProfileHero: FC<ProfileHeroProps> = ({ publicUser }) => {
         fallbackText={displayName}
       />
       <div className={PAGE_PADDING_X}>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-wrap gap-2 justify-between items-center mb-4">
           <div className="flex gap-4 items-center">
             <div className="flex-shrink-0 size-16 sm:size-26">
               <ProfileImage
