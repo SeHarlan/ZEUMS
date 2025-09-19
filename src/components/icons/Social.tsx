@@ -2,13 +2,12 @@ import { SocialIconProps } from "@/types/generic";
 import { cn } from "@/utils/ui-utils";
 import { GlobeIcon, MailIcon } from "lucide-react";
 import Image from "next/image";
-import { FC } from "react";
 
 //mostly from https://icons8.com/icons
 
 export const EmailIcon = MailIcon;
 
-export const WebsiteIcon: FC<SocialIconProps> = ({ className }) => (
+export const WebsiteIcon = ({ className }: SocialIconProps) => (
   <div className={cn("flex justify-center items-center bg-current rounded-sm p-1", className)}>
     <GlobeIcon className="size-full text-background"/>
   </div>
