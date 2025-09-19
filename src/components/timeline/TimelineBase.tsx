@@ -5,6 +5,7 @@ import { FC, Fragment } from "react";
 import { H2, P } from "@/components/typography/Typography";
 import { cn } from "@/utils/ui-utils";
 import { EntryBaseProps } from "./EntryBase";
+import { Separator } from "../ui/separator";
 
 interface TimelineBaseProps {
   source: EntrySource;
@@ -85,11 +86,14 @@ const TimelineBase: FC<TimelineBaseProps> = ({ source, collectedTimelineEntries,
   };
 
   return (
-    <div className="relative pb-8">
-      <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
-      <div className="relative flex flex-col space-y-6">
-        {renderEntries()}
+    <div className="pb-4">
+      <div className="relative pb-8">
+        <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
+        <div className="relative flex flex-col space-y-6">
+          {renderEntries()}
+        </div>
       </div>
+      <Separator className="" />
     </div>
   );
 };
