@@ -36,10 +36,6 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
 
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
-  // const isGif = isBlockchainImage(media)
-  //   ? media.imageUrl.endsWith("gif")
-  //   : false;
-
   //other media types handle their own loading states
   const isImageLoading = isLoading && isImage;
 

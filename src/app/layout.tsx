@@ -35,6 +35,7 @@ const dmMono = DM_Mono({
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.zeums.art"),
   title: TITLE_COPY,
   description: SUBTITLE_COPY,
   icons: {

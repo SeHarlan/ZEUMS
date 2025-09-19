@@ -7,6 +7,8 @@ import useUserByUsername from "@/hooks/useUserByUsername";
 import { EntrySource } from "@/types/entry";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { useParams } from "next/navigation";
+import ProfileHero from "@/components/timeline/ProfileHero";
+import { PAGE_PADDING_X } from "@/components/general/PageContainer";
 
 
 export default function UserTimelinePage() {
@@ -14,19 +16,22 @@ export default function UserTimelinePage() {
   const { user, isLoading, isError } = useUserByUsername(username);
   
   return (
-    <PageContainer maxWidth="large">
+    <PageContainer maxWidth="large" noPadding>
       <FeedbackWrapper
         isLoading={isLoading}
         isError={isError}
         hasData={!!user}
         noDataSubtitle="User not found"
       >
-        <TimelineBase
-          source={EntrySource.Creator}
-          createdTimelineEntries={user?.createdTimelineEntries}
-          collectedTimelineEntries={[]}
-          EntryComponent={EntryBase}
-        />
+        <ProfileHero publicUser={user} />
+        <div className={PAGE_PADDING_X}>
+          <TimelineBase
+            source={EntrySource.Creator}
+            createdTimelineEntries={user?.createdTimelineEntries}
+            collectedTimelineEntries={[]}
+            EntryComponent={EntryBase}
+          />
+        </div>
       </FeedbackWrapper>
     </PageContainer>
   );

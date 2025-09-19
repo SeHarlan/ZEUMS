@@ -1,8 +1,9 @@
 import { MediaType } from "@/types/media";
-import { getImageUrlSources } from "@/utils/media";
+import { getImageOptions, getImageUrlSources } from "@/utils/media";
 import { useEffect, useState } from "react";
 
-export const useImageFallback = (media: MediaType) => {
+
+export const useImageFallback = (media: MediaType, options?: getImageOptions) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
 
@@ -17,7 +18,7 @@ export const useImageFallback = (media: MediaType) => {
   
   const onLoad = () => setLoaded(true);
   
-  const sources = getImageUrlSources(media);
+  const sources = getImageUrlSources(media, options);
   const imageUrl = sources[imageIndex] || "";
   const isFallbackActive = imageIndex > 0;
 

@@ -5,15 +5,18 @@ import { ImageOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 import { MediaType } from "@/types/media";
 import { useImageFallback } from "@/hooks/useImageFallback";
+import { isGif } from "@/utils/media";
 
 interface MediaThumbnailProps {
   media: MediaType;
   onLoad?: (imageElement: HTMLImageElement) => void;
   objectFit?: "object-cover" | "object-contain";
-  rounding?: "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  rounding?: "rounded-none" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full" | "rounded-b-md";
   ratio?: number;
   className?: string;
   alt?: string;
+  /** un-optimized by default, we use this for displaying hundreds of images as they are being browsed in search/selection dialogs */
+  optimize?: boolean;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -24,6 +27,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   ratio = 1,
   className,
   alt,
+  optimize = false,
 }) => {
   const {
     isLoaded,
@@ -32,7 +36,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError,
     onLoad: onImageLoad,
-  } = useImageFallback(media);
+  } = useImageFallback(media, { optimize });
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     onImageLoad();
@@ -46,7 +50,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     return (
       <Image
         fill
-        unoptimized //keep unoptimized, we use this for displaying hundreds of images as they are being selected in the search dialog
+        unoptimized={!optimize || isGif(media)} 
         loading="lazy"
         onError={onError}
         onLoad={handleLoad}

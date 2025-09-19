@@ -23,20 +23,21 @@ export const BannerImage: FC<BannerImageProps> = ({
         ratio={BANNER_RATIO}
         className={cn(
           "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
-          "rounded-md font-serif",
+          "rounded-b-md font-serif",
           className
         )}
       >
         {fallbackText}
       </AspectRatio>
     );
-
+  //TODO: figure out optimization with next js, it was failing too often)
   return (
     <MediaThumbnail
+      // optimize
       media={media}
       alt={"Banner Image"}
       objectFit="object-cover"
-      rounding="rounded-md"
+      rounding="rounded-b-md"
       ratio={BANNER_RATIO}
       className={className}
     />

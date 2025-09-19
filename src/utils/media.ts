@@ -10,7 +10,11 @@ import {
   UserMedia,
 } from "@/types/media";
 
-export const getImageUrlSources = (media: MediaType): string[] => {
+export interface getImageOptions {
+  optimize?: boolean;
+}
+
+export const getImageUrlSources = (media: MediaType, options?: getImageOptions): string[] => {
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -19,7 +23,9 @@ export const getImageUrlSources = (media: MediaType): string[] => {
   if (cdn) {
     const { type, cdnId } = cdn;
     if (type === CdnIdType.HELIUS_URL) {
-      sources.push(cdnId);
+      //helius cdn urls are too long for nextjs image optimization.
+      //only use when not using custom optimization
+      if (!options?.optimize) sources.push(cdnId);
     } else if (type === CdnIdType.CLOUDINARY_ID) {
       // TODO: Cloudinary, will need to construct this URL
       sources.push(cdnId);
@@ -90,4 +96,12 @@ export const convertMediaToImage = (media: MediaType): ImageType => {
     };
     return imageMedia;
   }
+}
+
+export const isGif = (media: MediaType) => {
+  const isGif = isBlockchainImage(media)
+    ? media.imageUrl.endsWith("gif")
+    : false;
+
+  return isGif;
 }

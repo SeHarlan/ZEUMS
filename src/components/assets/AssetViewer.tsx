@@ -29,16 +29,14 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback(asset.media);
+    useImageFallback(asset.media,
+      // { optimize: true } //TODO: figure out optimization with next js, it was failing too often)
+    );
 
   const [videoError, setVideoError] = useState(false);
 
   const media = asset.media;
   const alt = asset.title || "Asset Image";
-
-  const isGif = isBlockchainImage(media)
-    ? media.imageUrl.endsWith("gif")
-    : false;
 
   const aspectRatioValue =
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
@@ -87,7 +85,8 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToExplorer}
-        unoptimized={isGif} //TODO: optimized images: for paying users
+        //TODO: figure out optimization with next js, it was failing too often)
+        // unoptimized={isGif(media)}
         loading="lazy"
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
