@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import User from "../../models/User";
+import User, { UsernameCollation } from "../../models/User";
 import { standardErrorResponses } from "@/utils/server";
 import { isUsernameBanned } from "@/constants/bannedUsernames";
 
@@ -22,8 +22,9 @@ export async function checkUsernameUniquenessHandler(req: NextRequest): Promise<
       });
     }
     
-    // Use exact match with lowercase - much more efficient with unique index
-    const existingUser = await User.findOne({ username: username.toLowerCase() })
+    // Use case-insensitive username uniqueness check
+    const existingUser = await User.findOne({ username })
+      .collation(UsernameCollation)
       .select("_id")
       .lean();
     

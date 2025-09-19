@@ -18,10 +18,10 @@ const AssetEntryDisplay: FC<AssetEntryDisplayProps> = ({ entry, flip }) => {
       </div>
 
       <div
-        className={cn("flex flex-col space-y-2 order-2 bg-background py-4 px-2", flip && "lg:order-1")}
+        className={cn(" order-2 bg-background py-4 px-2", flip && "lg:order-1")}
       >
-        <H3>{entry.title}</H3>
-        <P className="text-muted-foreground line-clamp-12 whitespace-pre-line">
+        <H3 className="lg:mb-2">{entry.title}</H3>
+        <P className="text-muted-foreground line-clamp-12 whitespace-pre-line mb-2 lg:mb-4">
           {entry.description}
         </P>
         <EntryButtons buttons={entry.buttons} />

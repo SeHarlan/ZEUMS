@@ -7,6 +7,7 @@ export const SEARCH = '/search';
 export const ABOUT = '/about';
 
 export const COMING_SOON = '/coming-soon';
+export const NOT_FOUND = '/not-found';
 
 export const DASHBOARD = '/dashboard';
 export const EDIT_PROFILE = `${DASHBOARD}/profile`
@@ -19,6 +20,8 @@ export const MEDIA = '/media';
 export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
 export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
 export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
+
+export const USER_TIMELINE = (username: string) => `/${username}`;
 
 export const BLOCKCHAIN_MEDIA_PATHS = {
   [ChainIdsEnum.SOLANA]: SOLANA_MEDIA,
@@ -39,6 +42,7 @@ export const EDIT_GALLERIES_RETURN_KEY = "edit-galleries";
 export const EDIT_TIMELINE_RETURN_KEY = "edit-timeline";
 
 export const SOLANA_ASSET_RETURN_KEY = "solana";
+export const USER_TIMELINE_RETURN_KEY = "user-timeline";
 
 
 

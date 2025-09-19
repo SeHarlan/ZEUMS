@@ -3,6 +3,7 @@ import { EntrySource } from "@/types/entry";
 import { UserType} from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { MediaSchema } from "./Entry/media";
+import { websiteValidation } from "./Entry/Entry";
 
 export interface UserDocument extends Document, UserType {
   _id: Schema.Types.ObjectId;
@@ -13,10 +14,8 @@ const UserSchema: Schema = new Schema<UserDocument>(
     username: {
       type: String,
       required: true,
-      unique: true,
       minlength: 2,
       trim: true,
-      lowercase: true, // Automatically convert to lowercase
     },
     displayName: { type: String },
     profileImage: { type: MediaSchema },
@@ -30,6 +29,10 @@ const UserSchema: Schema = new Schema<UserDocument>(
       facebook: { type: String },
       telegram: { type: String },
       discord: { type: String },
+      website: {
+        type: String,
+        validate: websiteValidation
+      }
     },
     [USER_AUTH_FOREIGN_KEY]: {
       type: Schema.Types.ObjectId,
@@ -44,6 +47,23 @@ const UserSchema: Schema = new Schema<UserDocument>(
     toObject: { virtuals: true }, // Include virtuals in object output
   }
 );
+
+// Make the collection default to this collation at creation time:
+UserSchema.set('collation', {
+  locale: 'en_US',      // Most universal locale for international support
+  strength: 2,          // case-insensitive, accent-sensitive
+  normalization: true,  // normalize canonically (NFD/NFC issues handled)
+});
+
+// Unique index that uses the same collation:
+UserSchema.index(
+  { username: 1 },
+  {
+    unique: true,
+    collation: { locale: 'en_US', strength: 2, normalization: true },
+  }
+);
+
 
 
 UserSchema.virtual(USER_WALLET_VIRTUAL, {
@@ -85,6 +105,18 @@ export const CompleteUserVirtuals = [
   CollectedTimelineUserVirtual,
   AuthUserVirtual,
 ];
+
+export const PublicUserVirtuals = [
+  CreatedTimelineUserVirtual,
+  CollectedTimelineUserVirtual,
+]
+
+// Collation settings for case-insensitive username queries
+export const UsernameCollation = { 
+  locale: 'en_US', 
+  strength: 2, 
+  normalization: true 
+};
 
 const User: Model<UserDocument> =
   mongoose.models[USER_MODEL_KEY] ||

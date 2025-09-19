@@ -6,6 +6,7 @@ import {
   TelegramIcon,
   TikTokIcon,
   TwitterIcon,
+  WebsiteIcon,
 } from "@/components/icons/Social";
 import { UserSocialHandles } from "@/types/user";
 import { ReactNode } from "react";
@@ -69,6 +70,14 @@ export const socialHandlesList: {
     baseUrl: "discord.gg/",
     placeholder: "invite-code",
     Icon: DiscordIcon,
+    },
+  {
+    key: "website",
+    label: "Website",
+    baseUrl: "",
+    placeholder: "your-website.com",
+    Icon: WebsiteIcon,
   },
+  
 ];
 

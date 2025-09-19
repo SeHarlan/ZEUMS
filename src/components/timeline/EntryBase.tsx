@@ -17,7 +17,7 @@ const EntryBase: FC<EntryBaseProps> = ({ entry, flip }) => {
     return <AssetEntryDisplay entry={entry} flip={flip} />;
   }
 
-  //TODO Handle other entry types 
+  //TODO create and handle other entry types 
 };
 
 export default EntryBase;

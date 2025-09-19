@@ -36,9 +36,7 @@ export default function EditTimelinePage() {
           <Tabs defaultValue={EditTimelineTab.ARTIST}>
             <TabsList className="w-full justify-stretch">
               <TabsTrigger value={EditTimelineTab.ARTIST}>Artist</TabsTrigger>
-              <TabsTrigger value={EditTimelineTab.COLLECTOR}>
-                Collector
-              </TabsTrigger>
+              <TabsTrigger value={EditTimelineTab.COLLECTOR}>Collector</TabsTrigger>
               <TabsTrigger value={EditTimelineTab.CURATOR}>Curator</TabsTrigger>
             </TabsList>
 

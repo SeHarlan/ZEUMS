@@ -25,10 +25,17 @@ export interface UserAssetEntryDocument extends Document, Omit<UserAssetEntry, "
 export interface BlockchainAssetEntryDocument extends Document, Omit<BlockchainAssetEntry, "_id"> { }
 export interface GalleryEntryDocument extends Document, Omit<BaseGalleryEntry , "_id">{}
 
+export const websiteValidation = {
+  validator: function (v: string) {
+    return !v || /^https?:\/\//.test(v);
+  },
+  message: "Website URL must start with http:// or https://",
+};
+
 const EntryButtonSchema = new Schema<EntryButton>(
   {
     text: { type: String, required: true },
-    url: { type: String, required: true }
+    url: { type: String, required: true, validate: websiteValidation }
   },
   { _id: false }
 );

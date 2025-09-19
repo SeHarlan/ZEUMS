@@ -171,16 +171,15 @@ function isSpamNft(asset: GetAssetResponse): boolean {
   if (!content || !content.links || !content.metadata)
     return true;
 
-  //TODO: find smarter way to handle this (or to filter out junk nfts in general)
-  // allowing no creators for now because some children nfts dont have creators (blame fubby and his ash)
   const hasVerifiedCreator = creators?.some((c) => c.verified);
-  const whiteListedCollection =
-    grouping?.[0]?.group_value && solanaWhiteListedCollectionAddresses.has(
-      grouping[0].group_value
-    );
+  const hasVerifiedCollection =
+    grouping?.some((group) => group.verified);
+    const whiteListedCollection =
+      grouping?.[0]?.group_value &&
+      solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
 
-  // no verified creator or whitelisted collection is spam
-  if (!hasVerifiedCreator && !whiteListedCollection) return true;
+  // no verified creator,  or whitelisted/verified collection -> is spam
+  if (!hasVerifiedCreator && !hasVerifiedCollection && !whiteListedCollection) return true;
 
   // Must not have excessive authorities (spam indicator)
   if (authorities && authorities.length > 5) return true;

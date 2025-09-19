@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { urlSchema } from "./urlSchema";
 
 // Helper function to validate social media handles (not URLs)
 const validateSocialHandle = (value: string | undefined) => {
@@ -50,6 +51,7 @@ export const profileDisplayFormSchema = z.object({
     tiktok: socialHandleSchema,
     telegram: socialHandleSchema,
     discord: socialHandleSchema,
+    website: urlSchema,
     // facebook: socialHandleSchema,
   }),
   // websites: z.array(z.string().url()).optional().transform((val) => (val === "" ? undefined : val)),

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Plus, Trash2 } from "lucide-react";
 import { P } from "../typography/Typography";
+import { Badge } from "../ui/badge";
 
 interface ButtonEditorProps {
   form: UseFormReturn<EntryFormValues>;
@@ -64,8 +65,12 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                 control={form.control}
                 name={`buttons.${index}.text`}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Button Text</FormLabel>
+                  <FormItem className="gap-1">
+                    <FormLabel asChild>
+                      <Badge variant={index === 0 ? "default" : "outline"} className="text-xs">
+                        Button Text
+                      </Badge>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="Button text" {...field} />
                     </FormControl>
@@ -77,8 +82,12 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                 control={form.control}
                 name={`buttons.${index}.url`}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">URL</FormLabel>
+                  <FormItem className="gap-1">
+                    <FormLabel asChild>
+                      <Badge variant="outline" className="text-xs border-transparent pl-0">
+                        Url
+                      </Badge>
+                    </FormLabel>
                     <FormControl>
                       <Input type="url" placeholder="example.com" {...field} />
                     </FormControl>

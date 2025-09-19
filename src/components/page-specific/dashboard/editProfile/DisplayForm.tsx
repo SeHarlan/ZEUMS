@@ -29,6 +29,7 @@ import ChooseImageDialog from "./ChooseImageDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { socialHandlesList } from "@/utils/ui-utils";
+import { addHttpsPrefix } from "@/utils/general";
 
 
 
@@ -58,6 +59,7 @@ const ProfileDisplayForm: FC = () => {
       tiktok: user?.socialHandles?.tiktok || "",
       telegram: user?.socialHandles?.telegram || "",
       discord: user?.socialHandles?.discord || "",
+      website: user?.socialHandles?.website || "",
       // facebook: user?.socialHandles?.facebook || "",
     },
     // websites: user?.websites || [],
@@ -70,9 +72,15 @@ const ProfileDisplayForm: FC = () => {
 
   const onSubmit = (data: ProfileDisplayFormValues) => {
     setSubmitting(true);
+    const socialHandles = data.socialHandles;
+
+    if (socialHandles.website) {
+      socialHandles.website = addHttpsPrefix(socialHandles.website);
+    }
 
     const userData: Partial<UserType> = {
       ...data,
+      socialHandles,
       profileImage,
       bannerImage,
     }
@@ -196,7 +204,7 @@ const ProfileDisplayForm: FC = () => {
                         <FormControl>
                           <PrefixInput
                             icon={
-                              <handle.Icon className="size-5 fill-muted-foreground/50" />
+                              <handle.Icon className="size-5 text-muted-foreground/50" />
                             }
                             prefix={handle.baseUrl}
                             placeholder={handle.placeholder || "username"}

@@ -2,11 +2,23 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "cdn.helius-rpc.com",
-      "arweave.net",
-      "www.arweave.net",
-      "ipfs.io",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.helius-rpc.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'arweave.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.arweave.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+      },
     ],
   },
   //allow ngrok-free.app domains for development

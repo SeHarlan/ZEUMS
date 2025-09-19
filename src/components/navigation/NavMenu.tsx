@@ -9,7 +9,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from 'next/link';
-import { ABOUT, COMING_SOON, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
+import { ABOUT, COMING_SOON, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME, NOT_FOUND, USER_TIMELINE } from '@/constants/clientRoutes';
 import LoginButton from "../general/LoginButton"
 import { cn, truncate } from "@/utils/ui-utils";
 import { useUser } from "@/context/UserProvider";
@@ -101,7 +101,7 @@ const NavMenu: FC = () => {
           <Separator className="w-full md:col-span-2 order-4" />
 
           <LinkButton
-            href={COMING_SOON}
+            href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
             className="md:col-span-2 w-full order-5"
             disabled={!loggedIn}
           >

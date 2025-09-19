@@ -514,6 +514,12 @@ const VideoViewer: FC<VideoViewerProps> = ({
           </Button>
         </div>
       )}
+
+      {isBuffering && (
+        <div className="z-50 absolute-center bg-popover-blur px-3 py-2 rounded-md">
+          <P>Buffering...</P>
+        </div>
+      )}
       <video
         ref={videoRef}
         poster={poster}

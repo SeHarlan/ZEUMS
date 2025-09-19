@@ -8,6 +8,9 @@ export const USER_EMAIL_ROUTE = `${USER_ROUTE}/email`;
 export const USER_WALLET_ROUTE = `${USER_ROUTE}/wallet`;
 export const WALLET_ADDRESS_PARAM = "walletAddress";
 
+export const PUBLIC_ROUTE = "/api/public";
+export const PUBLIC_USER_BY_USERNAME_ROUTE = (username: string) => `${PUBLIC_ROUTE}/${username}`;
+
 export const ENTRY_ROUTE = "/api/entry";
 export const ENTRY_DATES_ROUTE = `${ENTRY_ROUTE}/dates`;
 export const ENTRY_ENTRIES_ROUTE = `${ENTRY_ROUTE}/entries`;

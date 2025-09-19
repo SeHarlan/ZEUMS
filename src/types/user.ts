@@ -30,6 +30,7 @@ export const SOCIAL_HANDLE_KEYS = [
   "tiktok",
   "telegram",
   "discord",
+  "website",
   // "facebook",
 ] as const;
 
@@ -51,6 +52,11 @@ export type UserType = BaseUserType & {
   [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_AUTH_VIRTUAL]: AuthUserType;
+};
+
+export type PublicUserType = BaseUserType & {
+  [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
+  [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
 };
 
 export type CreateUserData = {

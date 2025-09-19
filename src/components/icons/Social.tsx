@@ -1,11 +1,13 @@
 import { SocialIconProps } from "@/types/generic";
 import { cn } from "@/utils/ui-utils";
-import { MailIcon } from "lucide-react";
+import { GlobeIcon, MailIcon } from "lucide-react";
 import Image from "next/image";
 
 //mostly from https://icons8.com/icons
 
 export const EmailIcon = MailIcon;
+
+export const WebsiteIcon = GlobeIcon;
 
 export const GoogleIcon = ({className}: SocialIconProps) => {
   return (
