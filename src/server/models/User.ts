@@ -4,6 +4,7 @@ import { UserType} from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { MediaSchema } from "./Entry/media";
 import { websiteValidation } from "./Entry/Entry";
+import { EditTimelineTab } from "@/types/ui/dashboard";
 
 export interface UserDocument extends Document, UserType {
   _id: Schema.Types.ObjectId;
@@ -40,6 +41,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
       required: false,
       unique: true,
     },
+    primaryTimeline: { type: String, enum: Object.values(EditTimelineTab) },
   },
   {
     timestamps: true,

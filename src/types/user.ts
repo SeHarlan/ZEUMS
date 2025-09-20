@@ -4,6 +4,7 @@ import { WalletType } from "./wallet";
 import { Schema } from "mongoose";
 import { AuthUserType } from "./next-auth";
 import { ImageType } from "./media";
+import { EditTimelineTab } from "./ui/dashboard";
 
 // export type Website = {
 //   url: string;
@@ -21,6 +22,7 @@ export type BaseUserType = {
   bio?: string;
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
+  primaryTimeline?: EditTimelineTab;
   // websites?: Website[];
 };
 

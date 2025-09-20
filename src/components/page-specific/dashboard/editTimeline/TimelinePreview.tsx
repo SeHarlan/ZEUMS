@@ -3,7 +3,7 @@
 import { useUser } from "@/context/UserProvider";
 import { EntrySource } from "@/types/entry";
 import { FC } from "react";
-import EntryPreview from "./EditableEntry";
+import EditableEntry from "./EditableEntry";
 import EditEntryContextProvider from "@/context/EditEntryProvider";
 import TimelineBase from "@/components/timeline/TimelineBase";
 
@@ -13,13 +13,17 @@ interface TimelinePreviewProps {
 
 const TimelinePreview: FC<TimelinePreviewProps> = ({source}) => {
   const { user } = useUser();
+
+  const timelinesMap = {
+    [EntrySource.Creator]: user?.createdTimelineEntries,
+    [EntrySource.Collector]: user?.collectedTimelineEntries,
+  };
+  const entries = timelinesMap[source] || [];
   return (
     <EditEntryContextProvider>
       <TimelineBase
-        source={source}
-        createdTimelineEntries={user?.createdTimelineEntries}
-        collectedTimelineEntries={user?.collectedTimelineEntries}
-        EntryComponent={EntryPreview}
+        entries={entries}
+        EntryComponent={EditableEntry}
       />
     </EditEntryContextProvider>
   );

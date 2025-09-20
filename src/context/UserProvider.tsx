@@ -21,10 +21,9 @@ import { toast } from "sonner";
 import { truncate } from "@/utils/ui-utils";
 import { handleClientError } from "@/utils/handleError";
 import { USER_ROUTE } from "@/constants/serverRoutes";
-import { parseEntryDates } from "@/utils/timeline";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
-import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
+import { activeSolanaWalletIsInUserWallets, parseUserDates } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -171,21 +170,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       axios
         .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
         .then((response) => {
-          const userData = response.data.user;
-
-          // Convert date strings back to Date objects
-          if (userData.createdTimelineEntries) {
-            userData.createdTimelineEntries = parseEntryDates(
-              userData.createdTimelineEntries
-            );
-          }
-
-          if (userData.collectedTimelineEntries) {
-            userData.collectedTimelineEntries = parseEntryDates(
-              userData.collectedTimelineEntries
-            );
-          }
-
+          const userData = parseUserDates(response.data.user);
           setUser(userData);
         })
         .catch((error) => {

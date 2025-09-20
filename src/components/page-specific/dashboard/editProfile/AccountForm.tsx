@@ -19,7 +19,7 @@ import { useSolanaWalletVerification } from "@/hooks/useWalletVerification";
 import { Badge } from "@/components/ui/badge";
 import { truncate } from "@/utils/ui-utils";
 import { P } from "@/components/typography/Typography";
-import { getWalletsByChain } from "@/utils/user";
+import { getWalletsByChain, parseUserDates } from "@/utils/user";
 import { ChainIdsEnum } from "@/types/wallet";
 
 const ProfileAccountForm: FC = () => {
@@ -75,7 +75,8 @@ const ProfileAccountForm: FC = () => {
       .patch<{ user: UserType }>(USER_ROUTE, userData)
       .then((response) => {
         toast.success("Username updated successfully!");
-        setUser(response.data.user);
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
       })
       .catch((error) => {
         toast.error("Failed to update username.");

@@ -1,6 +1,6 @@
 "use client";
 
-import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
+import { EntryTypes, TimelineEntry } from "@/types/entry";
 import { FC, Fragment } from "react";
 import { H2, P } from "@/components/typography/Typography";
 import { cn } from "@/utils/ui-utils";
@@ -8,20 +8,11 @@ import { EntryBaseProps } from "./EntryBase";
 import { Separator } from "../ui/separator";
 
 interface TimelineBaseProps {
-  source: EntrySource;
-  createdTimelineEntries?: TimelineEntry[];
-  collectedTimelineEntries?: TimelineEntry[];
+  entries: TimelineEntry[];
   EntryComponent: React.FC<EntryBaseProps>;
 }
 
-const TimelineBase: FC<TimelineBaseProps> = ({ source, collectedTimelineEntries, createdTimelineEntries, EntryComponent}) => {
-
-  const timelinesMap = {
-    [EntrySource.Creator]: createdTimelineEntries,
-    [EntrySource.Collector]: collectedTimelineEntries,
-  };
-
-  const entries = timelinesMap[source] || [];
+const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
 
   const renderEntries = () => {
     let assetIndex = 0;

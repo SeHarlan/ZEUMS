@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { getDisplayName } from "@/utils/user";
+import { getDisplayName, parseUserDates } from "@/utils/user";
 import { UserType  } from "@/types/user";
 import { useForm } from "react-hook-form";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
@@ -30,6 +30,8 @@ import { BannerImage } from "@/components/timeline/BannerImage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { socialHandlesList } from "@/utils/ui-utils";
 import { addHttpsPrefix } from "@/utils/general";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EditTimelineTab } from "@/types/ui/dashboard";
 
 
 
@@ -62,6 +64,7 @@ const ProfileDisplayForm: FC = () => {
       website: user?.socialHandles?.website || "",
       // facebook: user?.socialHandles?.facebook || "",
     },
+    primaryTimeline: user?.primaryTimeline,
     // websites: user?.websites || [],
   };
 
@@ -88,7 +91,8 @@ const ProfileDisplayForm: FC = () => {
       .patch<{ user: UserType }>(USER_ROUTE, userData)
       .then((response) => {
         toast.success("Display information updated successfully!");
-        setUser(response.data.user);
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
       })
       .catch((error) => {
         handleClientError({
@@ -174,13 +178,47 @@ const ProfileDisplayForm: FC = () => {
               <FormItem>
                 <FormLabel>Bio</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="This is my story..."
-                    {...field}
-                  />
+                  <Textarea placeholder="This is my story..." {...field} />
                 </FormControl>
                 <FormDescription>
-                  A brief introduction to help others connect with you and your story
+                  A brief introduction to help others connect with you and your
+                  story
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="primaryTimeline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Primary Timeline</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="">
+                      <SelectValue placeholder="Primary Timeline" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem
+                      value={EditTimelineTab.ARTIST}
+                    >
+                      Created
+                    </SelectItem>
+                    <SelectItem
+                      value={EditTimelineTab.COLLECTOR}
+                    >
+                      Collected
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The timeline that will be displayed first when viewing your profile.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
