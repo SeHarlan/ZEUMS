@@ -14,6 +14,7 @@ import { BlockchainAssetEntry, EntryTypes, UserAssetEntry } from "@/types/entry"
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { useImageFallback } from "@/hooks/useImageFallback";
+import { imageBreakpoints } from "@/constants/ui";
 
 interface AssetViewerProps {
   asset: BlockchainAssetEntry | UserAssetEntry
@@ -29,9 +30,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback(asset.media,
-      // { optimize: true } //TODO: figure out optimization with next js, it was failing too often)
-    );
+    useImageFallback(asset.media);
 
   const [videoError, setVideoError] = useState(false);
 
@@ -40,6 +39,9 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
   const aspectRatioValue =
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
+  
+  const width = imageBreakpoints.full;
+  const height = width / aspectRatioValue;
 
   const isBlockchainAsset = asset.entryType === EntryTypes.BlockchainAsset;
 
@@ -85,11 +87,10 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToExplorer}
-        //TODO: figure out optimization with next js, it was failing too often)
-        // unoptimized={isGif(media)}
+        unoptimized={true}
+        width={width}
+        height={height}
         loading="lazy"
-        fill
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
         onError={onError}
         onLoad={onLoad}
         src={imageUrl}

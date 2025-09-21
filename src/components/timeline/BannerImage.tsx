@@ -3,15 +3,13 @@ import MediaThumbnail from "../media/MediaThumbnail";
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { AspectRatio } from "../ui/aspect-ratio";
+import { BANNER_RATIO } from "@/constants/ui";
 
 interface BannerImageProps {
   media?: MediaType;
   className?: string;
   fallbackText?: string;
 }
-
-export const BANNER_RATIO = 3 / 1;
-
 export const BannerImage: FC<BannerImageProps> = ({
   media,
   className,
@@ -30,10 +28,10 @@ export const BannerImage: FC<BannerImageProps> = ({
         {fallbackText}
       </AspectRatio>
     );
-  //TODO: figure out optimization with next js, it was failing too often)
+  
   return (
     <MediaThumbnail
-      // optimize
+      size="full"
       media={media}
       alt={"Banner Image"}
       objectFit="object-cover"

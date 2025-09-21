@@ -516,7 +516,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       )}
 
       {isBuffering && (
-        <div className="z-50 absolute-center bg-popover-blur px-3 py-2 rounded-md">
+        <div className="z-50 absolute-center bg-popover-blur px-3 py-1 rounded-md">
           <P>Buffering...</P>
         </div>
       )}

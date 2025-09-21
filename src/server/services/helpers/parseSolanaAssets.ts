@@ -168,22 +168,18 @@ function isCollectionNft(asset: GetAssetResponse): boolean {
 
 function isSpamNft(asset: GetAssetResponse): boolean {
   const { content, creators, grouping, authorities } = asset;
-  if (!content || !content.links || !content.metadata)
-    return true;
+  if (!content || !content.links || !content.metadata) return true;
 
   const hasVerifiedCreator = creators?.some((c) => c.verified);
-  const hasVerifiedCollection =
-    grouping?.some((group) => group.verified);
-    const whiteListedCollection =
-      grouping?.[0]?.group_value &&
-      solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
+  const whiteListedCollection =
+    grouping?.[0]?.group_value &&
+    solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
 
   // no verified creator,  or whitelisted/verified collection -> is spam
-  if (!hasVerifiedCreator && !hasVerifiedCollection && !whiteListedCollection) return true;
+  if (!hasVerifiedCreator && !whiteListedCollection) return true;
 
   // Must not have excessive authorities (spam indicator)
   if (authorities && authorities.length > 5) return true;
-
 
   for (const creator of creators || []) {
     if (solanaSpamCreatorAddresses.has(creator.address)) return true;

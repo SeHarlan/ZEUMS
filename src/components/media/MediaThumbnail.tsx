@@ -5,7 +5,7 @@ import { ImageOffIcon } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 import { MediaType } from "@/types/media";
 import { useImageFallback } from "@/hooks/useImageFallback";
-import { isGif } from "@/utils/media";
+import { imageBreakpoints } from "@/constants/ui";
 
 interface MediaThumbnailProps {
   media: MediaType;
@@ -15,8 +15,7 @@ interface MediaThumbnailProps {
   ratio?: number;
   className?: string;
   alt?: string;
-  /** un-optimized by default, we use this for displaying hundreds of images as they are being browsed in search/selection dialogs */
-  optimize?: boolean;
+  size?: "small" | "medium" | "full";
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -27,7 +26,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   ratio = 1,
   className,
   alt,
-  optimize = false,
+  size = "small",
 }) => {
   const {
     isLoaded,
@@ -36,7 +35,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError,
     onLoad: onImageLoad,
-  } = useImageFallback(media, { optimize });
+  } = useImageFallback(media);
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     onImageLoad();
@@ -47,10 +46,14 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     //broken image
     if (isError) return <ImageOffIcon className="size-8" />;
 
+    const width = imageBreakpoints[size];
+    const height = width / ratio;
+
     return (
       <Image
-        fill
-        unoptimized={!optimize || isGif(media)} 
+        height={height}
+        width={width}
+        unoptimized={true}
         loading="lazy"
         onError={onError}
         onLoad={handleLoad}
@@ -60,7 +63,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
           "w-full transition-opacity duration-200",
           isLoaded ? "opacity-100" : "opacity-0",
           objectFit,
-          objectFit === "object-contain" && "p-3",
+          objectFit === "object-contain" && "p-3"
         )}
       />
     );

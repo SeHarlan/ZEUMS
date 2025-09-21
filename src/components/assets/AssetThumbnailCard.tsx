@@ -10,7 +10,7 @@ import { ImageVariant, MediaCategory } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
 import { toast } from "sonner";
 import { BoxIcon, Code2Icon } from "lucide-react";
-import { BANNER_RATIO } from "../timeline/BannerImage";
+import { BANNER_RATIO } from "@/constants/ui";
 
 interface AssetThumbnailCardProps {
   asset: ParsedBlockChainAsset;
@@ -25,7 +25,6 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
   onClick,
   imageVariant = "default",
 }) => {
-
   const { setAspectRatio, getAspectRatio } = useAspectRatio();
   const [loading, setLoading]  = useState(false)
   
@@ -72,7 +71,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     videoElement.onloadedmetadata = () => {
       if (isProcessed) return;
       const ratio = getVideoAspectRatio(videoElement);
-      setAspectRatio(asset, ratio); //cache incase the video asset is unclicked and reclicked
+      setAspectRatio(asset, ratio); //cache in case the video asset is unclicked and reclicked
       onClick?.(ratio); //send immediately on click for main function
       cleanup(); // Stop here, don't load video data
     };

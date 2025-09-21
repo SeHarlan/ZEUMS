@@ -114,12 +114,13 @@ export const TikTokIcon = ({ className }: SocialIconProps) => {
 
 export const MallowIcon = ({ className }: SocialIconProps) => { 
   return (
-    <Image 
+    <Image
+      unoptimized={true}
       src="data:image/webp;base64,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"
       alt="Mallow Logo"
       width={100}
       height={100}
-      className={cn("border-2 rounded-full",className)}
+      className={cn("border-2 rounded-full", className)}
     />
-  )
+  );
 }

@@ -89,7 +89,7 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                       </Badge>
                     </FormLabel>
                     <FormControl>
-                      <Input type="url" placeholder="example.com" {...field} />
+                      <Input placeholder="example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

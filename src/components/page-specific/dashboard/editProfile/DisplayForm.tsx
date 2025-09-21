@@ -130,7 +130,7 @@ const ProfileDisplayForm: FC = () => {
             />
           </div>
           <div className="w-full flex gap-6 flex-col sm:flex-row sm:items-center">
-            <div className="relative size-20 sm:size-36 flex-shrink-0">
+            <div className="relative size-16 sm:size-26 flex-shrink-0">
               <Button
                 type="button"
                 variant={!!user?.profileImage ? "outline" : "default"}
@@ -189,42 +189,6 @@ const ProfileDisplayForm: FC = () => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="primaryTimeline"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Primary Timeline</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="">
-                      <SelectValue placeholder="Primary Timeline" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem
-                      value={EditTimelineTab.ARTIST}
-                    >
-                      Created
-                    </SelectItem>
-                    <SelectItem
-                      value={EditTimelineTab.COLLECTOR}
-                    >
-                      Collected
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  The timeline that will be displayed first when viewing your profile.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger className="max-w-fit gap-2">
@@ -257,6 +221,39 @@ const ProfileDisplayForm: FC = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+          <FormField
+            control={form.control}
+            name="primaryTimeline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Primary Timeline</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="">
+                      <SelectValue placeholder="Primary Timeline" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={EditTimelineTab.ARTIST}>
+                      Created
+                    </SelectItem>
+                    <SelectItem value={EditTimelineTab.COLLECTOR}>
+                      Collected
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The timeline that will be displayed first when viewing your
+                  profile.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Separator />
 

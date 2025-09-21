@@ -10,11 +10,7 @@ import {
   UserMedia,
 } from "@/types/media";
 
-export interface getImageOptions {
-  optimize?: boolean;
-}
-
-export const getImageUrlSources = (media: MediaType, options?: getImageOptions): string[] => {
+export const getImageUrlSources = (media: MediaType): string[] => {
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -23,9 +19,7 @@ export const getImageUrlSources = (media: MediaType, options?: getImageOptions):
   if (cdn) {
     const { type, cdnId } = cdn;
     if (type === CdnIdType.HELIUS_URL) {
-      //helius cdn urls are too long for nextjs image optimization.
-      //only use when not using custom optimization
-      if (!options?.optimize) sources.push(cdnId);
+      sources.push(cdnId);
     } else if (type === CdnIdType.CLOUDINARY_ID) {
       // TODO: Cloudinary, will need to construct this URL
       sources.push(cdnId);

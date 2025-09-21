@@ -29,10 +29,8 @@ export const ProfileImage = ({
       </AspectRatio>
     );
 
-  //TODO: figure out optimization with next js, it was failing too often)
   return (
     <MediaThumbnail
-      // optimize
       media={media}
       alt={"Profile Image"}
       objectFit="object-cover"

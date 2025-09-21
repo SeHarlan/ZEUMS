@@ -82,11 +82,10 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       default:
         return (
           <Image
-            unoptimized={false}
+            unoptimized={true}
             loading="eager"
             priority
             fill
-            sizes="100vw"
             onError={onError}
             onLoad={onLoad}
             src={imageUrl}
@@ -110,18 +109,21 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       )}
     >
       {renderContent()}
-      
+
       {/* Blurred background image */}
       <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
         <Image
-          unoptimized={false}
+          unoptimized={true}
           loading="eager"
           priority
           fill
           src={imageUrl}
           alt="blurred background"
           aria-hidden="true"
-          className={cn("object-cover", !mediaError && "scale-125 blur-3xl opacity-50")}
+          className={cn(
+            "object-cover",
+            !mediaError && "scale-125 blur-3xl opacity-50"
+          )}
         />
       </div>
     </div>
