@@ -1,21 +1,21 @@
 
-import { BlockchainAssetEntry, UserAssetEntry } from "./entry";
 import { Schema } from "mongoose";
-
-export type GalleryItem = UserAssetEntry | BlockchainAssetEntry;
+import { GalleryItem } from "./galleryItem";
+import { EntrySource } from "./entry";
 
 export enum GalleryDisplayTypes { 
-  Grid = "grid",
-  //TODO: figure out how to store which items go in which rows
-  // FitHorizontal = "fit_horizontal",
-  // Masonry = "masonry",
+  Justify = "justify",
+  // Grid = "grid",
 }
 
 export type BaseGalleryType = {
+  _id: Schema.Types.ObjectId;
+  owner: Schema.Types.ObjectId;
   title: string;
   description?: string;
   displayType: GalleryDisplayTypes;
-  itemIds: Schema.Types.ObjectId[];
+  /** Source of the galleryItems (creator or collector) */
+  source: EntrySource;
 };
 
 export type GalleryType = BaseGalleryType & {

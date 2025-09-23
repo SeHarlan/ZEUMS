@@ -20,7 +20,7 @@ export const parseMallowAssets = (
     // Parse attributes
     const attributes: BlockchainAttribute[] =
       asset.attributes?.map((attr) => ({
-        type: attr.trait_type,
+        trait_type: attr.trait_type,
         value: String(attr.value),
       })) || [];
 

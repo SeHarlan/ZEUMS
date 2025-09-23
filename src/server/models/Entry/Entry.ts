@@ -12,7 +12,7 @@ import type {
   BaseGalleryEntry,
 } from "@/types/entry";
 import { MediaSchema } from "./media";
-import { ENTRY_DISCRIMINATOR_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, GALLERY_ENTRY_LOCAL_FIELD, GALLERY_MODEL_KEY, USER_MODEL_KEY } from "@/constants/databaseKeys";
+import { ENTRY_DISCRIMINATOR_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, GALLERY_ENTRY_LOCAL_FIELD, GALLERY_ENTRY_VIRTUAL, GALLERY_MODEL_KEY, USER_MODEL_KEY } from "@/constants/databaseKeys";
 import { ChainIdsEnum } from "@/types/wallet";
 
 // Document interfaces
@@ -32,7 +32,7 @@ export const websiteValidation = {
   message: "Website URL must start with http:// or https://",
 };
 
-const EntryButtonSchema = new Schema<EntryButton>(
+export const EntryButtonSchema = new Schema<EntryButton>(
   {
     text: { type: String, required: true },
     url: { type: String, required: true, validate: websiteValidation }
@@ -95,7 +95,10 @@ const TextEntry = Entry.discriminators?.[EntryTypes.Text] ||
 
 // User Asset Entry Schema
 const UserAssetEntrySchema = new Schema<UserAssetEntryDocument>({
-  media: MediaSchema
+  media: {
+    type: MediaSchema,
+    required: true,
+  }
 });
 
 const UserAssetEntry = Entry.discriminators?.[EntryTypes.UserAsset] ||
@@ -103,7 +106,15 @@ const UserAssetEntry = Entry.discriminators?.[EntryTypes.UserAsset] ||
 
 // Blockchain Asset Entry Schemas
 const BlockchainAssetEntrySchema = new Schema<BlockchainAssetEntryDocument>({
-  media: MediaSchema,
+  // Title is required for blockchain assets
+  title: {
+    type: String,
+    required: true,
+  },
+  media: {
+    type: MediaSchema,
+    required: true,
+  },
   blockchain: {
     type: String,
     enum: Object.values(ChainIdsEnum),
@@ -111,23 +122,32 @@ const BlockchainAssetEntrySchema = new Schema<BlockchainAssetEntryDocument>({
   },
   tokenAddress: {
     type: String,
-    required: true
+    required: true,
   },
-  onChainCreators: [{
-    address: { type: String, required: true },
-    share: { type: Number, required: true },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: USER_MODEL_KEY
-    }
-  }],
+  onChainCreators: [
+    {
+      address: { type: String, required: true },
+      share: { type: Number, required: true },
+      userId: {
+        type: Schema.Types.ObjectId,
+        ref: USER_MODEL_KEY,
+      },
+    },
+  ],
   onChainOwner: {
     address: { type: String, required: true },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: USER_MODEL_KEY
-    }
-  }
+      ref: USER_MODEL_KEY,
+    },
+  },
+  attributes: [
+    {
+      trait_type: { type: String, required: true },
+      value: { type: Schema.Types.Mixed, required: true },
+      display_type: String,
+    },
+  ],
 });
 
 const BlockchainAssetEntry = Entry.discriminators?.[EntryTypes.BlockchainAsset] ||
@@ -147,12 +167,18 @@ const GalleryEntrySchema = new Schema<GalleryEntryDocument>({
 });
 
 // Add virtual for gallery
-GalleryEntrySchema.virtual("gallery", {
+GalleryEntrySchema.virtual(GALLERY_ENTRY_VIRTUAL, {
   ref: GALLERY_MODEL_KEY,
   foreignField: "_id",
   localField: GALLERY_ENTRY_LOCAL_FIELD,
   justOne: true,
 });
+
+export const GalleryEntryVirtual = {
+  path: GALLERY_ENTRY_VIRTUAL,
+  model: GALLERY_MODEL_KEY,
+};
+
 
 const GalleryEntry = Entry.discriminators?.[EntryTypes.Gallery] ||
   Entry.discriminator<GalleryEntryDocument>(EntryTypes.Gallery, GalleryEntrySchema);

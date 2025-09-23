@@ -30,7 +30,7 @@ export const parseSolanaAssets = (
     const attributes: BlockchainAttribute[] = content.metadata.attributes
       ?.length
       ? content.metadata.attributes?.map((a) => ({
-          type: a.trait_type,
+          trait_type: a.trait_type,
           value: a.value,
         }))
       : [];

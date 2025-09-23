@@ -3,7 +3,6 @@ import { GalleryType } from "./gallery";
 import { BlockchainImage, BlockchainMedia, UserImage, UserMedia } from "./media"
 import { ChainIdsEnum } from "./wallet";
 
-
 export enum EntryTypes {
   BlockchainAsset = "blockchain_asset",
   UserAsset = "user_asset",
@@ -63,7 +62,7 @@ export type BlockchainOwner = {
 }
 
 export type BlockchainAttribute = {
-  type: string;
+  trait_type: string;
   value: string;
 }
 

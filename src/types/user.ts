@@ -1,10 +1,11 @@
-import { USER_AUTH_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
+import { USER_AUTH_VIRTUAL, USER_COLLECTED_GALLERIES_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_GALLERIES_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
 import { TimelineEntry } from "./entry";
 import { WalletType } from "./wallet";
 import { Schema } from "mongoose";
 import { AuthUserType } from "./next-auth";
 import { ImageType } from "./media";
 import { EditTimelineTab } from "./ui/dashboard";
+import { GalleryType } from "./gallery";
 
 // export type Website = {
 //   url: string;
@@ -54,6 +55,8 @@ export type UserType = BaseUserType & {
   [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_AUTH_VIRTUAL]: AuthUserType;
+  [USER_CREATED_GALLERIES_VIRTUAL]: GalleryType[];
+  [USER_COLLECTED_GALLERIES_VIRTUAL]: GalleryType[];
 };
 
 export type PublicUserType = BaseUserType & {
