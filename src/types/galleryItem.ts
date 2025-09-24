@@ -68,6 +68,10 @@ export type GalleryItem =
   | UserAssetGalleryItem
   | GalleryReferenceGalleryItem;
 
+export type GalleryMediaItem =
+  | BlockchainAssetGalleryItem
+  | UserAssetGalleryItem;
+
 // Types related to entry CRUD
 export type GalleryItemCreation = Omit<GalleryItem, "owner" | "_id">;
 

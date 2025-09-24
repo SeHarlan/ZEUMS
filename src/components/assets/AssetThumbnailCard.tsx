@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { H4 } from "../typography/Typography";
+import { P } from "../typography/Typography";
 import { cn } from "@/utils/ui-utils";
 import MediaThumbnail from "../media/MediaThumbnail";
 import { ParsedBlockChainAsset } from "@/types/asset";
@@ -143,7 +143,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       </CardContent>
 
       <CardFooter className="pb-1 px-3">
-        <H4 className="text-lg font-semibold line-clamp-1">{asset.title}</H4>
+        <P className="text-lg font-semibold line-clamp-1">{asset.title}</P>
       </CardFooter>
     </Card>
   );

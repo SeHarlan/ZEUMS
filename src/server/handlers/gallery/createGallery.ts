@@ -9,7 +9,7 @@ export async function createGalleryHandler(req: NextRequest): Promise<NextRespon
 
   try {
     const authSessionUser = await getAuthSessionUser(req);
-    const { title, description } = (await req.json()) as Pick<GalleryType, "title" | "description">;
+    const { title, description, source } = (await req.json()) as Pick<GalleryType, "title" | "description" | "source">;
     
     // Validate required fields
     if (!title || title.trim().length === 0) {
@@ -20,17 +20,18 @@ export async function createGalleryHandler(req: NextRequest): Promise<NextRespon
     const galleryCreationData = {
       title: title,
       description: description,
+      source: source,
       owner: authSessionUser.dbUserId,
     };
     
     // Create the gallery
-    const createdGallery = await Gallery.create(galleryCreationData);
+    const newGallery = await Gallery.create(galleryCreationData);
 
-    if (!createdGallery) {
+    if (!newGallery) {
       throw new Error("Failed to create new gallery");
     }
 
-    return NextResponse.json({ createdGallery });
+    return NextResponse.json({ newGallery });
   } catch (error) {
     return standardErrorResponses({
       error,

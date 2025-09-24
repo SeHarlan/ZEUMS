@@ -13,6 +13,7 @@ export enum EntryTypes {
 export enum EntrySource {
   Creator = "creator",
   Collector = "collector",
+  // Curator = "curator",
 }
 
 export type EntryButton = {

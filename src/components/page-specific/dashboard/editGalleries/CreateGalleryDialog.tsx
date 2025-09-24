@@ -16,12 +16,19 @@ import axios from "axios";
 import { toast } from "sonner";
 import { handleClientError } from "@/utils/handleError";
 import { GALLERY_ROUTE } from "@/constants/serverRoutes";
-import { GalleryType } from "@/types/gallery";
+import { BaseGalleryType } from "@/types/gallery";
+import { EntrySource } from "@/types/entry";
+import { getGalleryKey } from "@/utils/gallery";
 
-const CreateGalleryDialog: FC = () => {
+interface CreateGalleryDialogProps {
+  source: EntrySource;
+}
+const CreateGalleryDialog: FC<CreateGalleryDialogProps> = ({ source }) => {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { setUser } = useUser();
+
+   const galleryKey = getGalleryKey(source);
 
   const form = useForm<CreateGalleryFormValues>({
     resolver: zodResolver(createGalleryFormSchema),
@@ -34,22 +41,26 @@ const CreateGalleryDialog: FC = () => {
   const onSubmit = (data: CreateGalleryFormValues) => {
     setSubmitting(true);
 
+    const createGalleryData = {
+      ...data,
+      source: source,
+    };
+
     axios
-      .post<{ createdGallery: GalleryType }>(GALLERY_ROUTE, data)
+      .post<{ newGallery: BaseGalleryType }>(GALLERY_ROUTE, createGalleryData)
       .then((response) => {
-        const { createdGallery } = response.data;
+        const { newGallery } = response.data;
         
         toast.success("Gallery created successfully!");
-        
         // Update user context with new gallery
-        setUser(prev => {
-          if (!prev) return prev;
+        setUser((prevUser) => {
+          if (!prevUser) return prevUser;
+          const prevGalleries = prevUser[galleryKey] || [];
           return {
-            ...prev,
-            createdGalleries: [...(prev.createdGalleries || []), createdGallery]
+            ...prevUser,
+            [galleryKey]: [...prevGalleries, newGallery],
           };
         });
-
         // Reset form and close dialog
         form.reset();
         setOpen(false);

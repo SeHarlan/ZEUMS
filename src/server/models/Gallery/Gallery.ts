@@ -3,6 +3,7 @@ import {
   BaseGalleryType, 
   GalleryDisplayTypes,
 } from "@/types/gallery";
+import { EntrySource } from "@/types/entry";
 import { 
   GALLERY_ITEM_MODEL_KEY,
   GALLERY_ITEMS_FOREIGN_KEY,
@@ -38,6 +39,12 @@ const GallerySchema = new Schema<GalleryDocument>(
       ref: USER_MODEL_KEY,
       required: true,
     },
+    source: {
+      type: String,
+      enum: Object.values(EntrySource),
+      default: EntrySource.Creator,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -52,6 +59,12 @@ GallerySchema.virtual(GALLERY_ITEMS_VIRTUAL, {
   localField: "_id",
   foreignField: GALLERY_ITEMS_FOREIGN_KEY,
 });
+
+export const GalleryWithItemsPopulate = {
+  path: GALLERY_ITEMS_VIRTUAL,
+  model: GALLERY_ITEM_MODEL_KEY,
+  options: { sort: { "position.1": 1, "position.0": 1 } },
+};
 
 // Create the model
 const Gallery: Model<GalleryDocument> =

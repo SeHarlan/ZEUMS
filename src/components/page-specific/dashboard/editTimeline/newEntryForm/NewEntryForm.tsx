@@ -178,7 +178,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
   return (
     <SideDrawer
       triggerButton={
-        <Button>
+        <Button className="w-full">
           <P>New Entry</P>
           <SquarePlusIcon />
         </Button>

@@ -16,6 +16,7 @@ export const ENTRY_DATES_ROUTE = `${ENTRY_ROUTE}/dates`;
 export const ENTRY_ENTRIES_ROUTE = `${ENTRY_ROUTE}/entries`;
 
 export const GALLERY_ROUTE = "/api/gallery";
+export const GALLERY_BY_ID_ROUTE = (id: string) => `${GALLERY_ROUTE}/${id}`;
 
 export const SEARCH_ASSETS_ROUTE = "/api/search/assets";
 export const SEARCH_PARAM = "search";

@@ -5,7 +5,7 @@ import { Schema } from "mongoose";
 import { AuthUserType } from "./next-auth";
 import { ImageType } from "./media";
 import { EditTimelineTab } from "./ui/dashboard";
-import { GalleryType } from "./gallery";
+import { UserVirtualGalleryType } from "./gallery";
 
 // export type Website = {
 //   url: string;
@@ -52,11 +52,13 @@ export function isValidSocialHandleKey(
 /** extend UserType with virtuals populated */
 export type UserType = BaseUserType & {
   [USER_WALLET_VIRTUAL]: WalletType[];
-  [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
-  [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
+  [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[];
+  [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[];
   [USER_AUTH_VIRTUAL]: AuthUserType;
-  [USER_CREATED_GALLERIES_VIRTUAL]: GalleryType[];
-  [USER_COLLECTED_GALLERIES_VIRTUAL]: GalleryType[];
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_CREATED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_COLLECTED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
 };
 
 export type PublicUserType = BaseUserType & {

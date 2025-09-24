@@ -1,6 +1,6 @@
 
 import { Schema } from "mongoose";
-import { GalleryItem } from "./galleryItem";
+import { GalleryItem, GalleryMediaItem } from "./galleryItem";
 import { EntrySource } from "./entry";
 
 export enum GalleryDisplayTypes { 
@@ -19,5 +19,9 @@ export type BaseGalleryType = {
 };
 
 export type GalleryType = BaseGalleryType & {
-  items: GalleryItem[];
+  items?: GalleryItem[];
 }
+
+export type UserVirtualGalleryType = BaseGalleryType & {
+  items?: GalleryMediaItem[];
+};

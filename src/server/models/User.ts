@@ -2,6 +2,7 @@ import {
   AUTH_USER_MODEL_KEY,
   ENTRY_FOREIGN_KEY,
   ENTRY_MODEL_KEY,
+  GALLERY_ITEMS_VIRTUAL,
   GALLERY_MODEL_KEY,
   GALLERY_OWNER_FOREIGN_KEY,
   USER_AUTH_FOREIGN_KEY,
@@ -16,6 +17,7 @@ import {
   WALLET_MODEL_KEY,
 } from "@/constants/databaseKeys";
 import { EntrySource } from "@/types/entry";
+import { GalleryItemTypes } from "@/types/galleryItem";
 import { UserType } from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { MediaSchema } from "./Entry/media";
@@ -100,7 +102,7 @@ UserSchema.virtual(USER_COLLECTED_TIMELINE_VIRTUAL, {
   match: { source: EntrySource.Collector },
 });
 
-// viurtual for users galleries
+// virtual for users galleries
 UserSchema.virtual(USER_CREATED_GALLERIES_VIRTUAL, {
   ref: GALLERY_MODEL_KEY,
   localField: "_id",
@@ -141,13 +143,40 @@ export const AuthUserVirtual = {
   path: USER_AUTH_VIRTUAL,
   model: AUTH_USER_MODEL_KEY,
 };
+
+/** populates only the first item with media */
 export const UserCreatedGalleriesVirtual = {
   path: USER_CREATED_GALLERIES_VIRTUAL,
   model: GALLERY_MODEL_KEY,
+  populate: {
+    path: GALLERY_ITEMS_VIRTUAL,
+    match: { 
+      itemType: { 
+        $in: [GalleryItemTypes.BlockchainAsset, GalleryItemTypes.UserAsset] 
+      } 
+    },
+    options: { 
+      limit: 1,
+      sort: { "position.1": 1, "position.0": 1 }
+    }
+  }
 };
+/** populates only the first item with media */
 export const UserCollectedGalleriesVirtual = {
   path: USER_COLLECTED_GALLERIES_VIRTUAL,
   model: GALLERY_MODEL_KEY,
+  populate: {
+    path: GALLERY_ITEMS_VIRTUAL,
+    match: { 
+      itemType: { 
+        $in: [GalleryItemTypes.BlockchainAsset, GalleryItemTypes.UserAsset] 
+      } 
+    },
+    options: { 
+      limit: 1,
+      sort: { "position.1": 1, "position.0": 1 }
+    }
+  }
 };
 
 export const CompleteUserVirtuals = [

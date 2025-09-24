@@ -14,6 +14,7 @@ export const EDIT_PROFILE = `${DASHBOARD}/profile`
 export const EDIT_PROFILE_ACCOUNT = `${EDIT_PROFILE}?${EditProfileTabQueryParam}=${EditProfileTab.ACCOUNT}`;
 export const EDIT_PROFILE_DISPLAY = `${EDIT_PROFILE}?${EditProfileTabQueryParam}=${EditProfileTab.DISPLAY}`;
 export const EDIT_GALLERIES = `${DASHBOARD}/galleries`;
+export const EDIT_GALLERY = (galleryId: string) => `${EDIT_GALLERIES}/${galleryId}`;
 export const EDIT_TIMELINE = `${DASHBOARD}/timeline`;
 
 export const MEDIA = '/media';

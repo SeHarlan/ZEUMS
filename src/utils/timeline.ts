@@ -1,9 +1,17 @@
 import { EntrySource, TimelineEntry } from "@/types/entry";
 
-export const getTimelineKey = (source: EntrySource) => source === EntrySource.Creator
-      ? "createdTimelineEntries"
-  : "collectedTimelineEntries";
-      
+export const getTimelineKey = (source: EntrySource) => {
+  switch (source) {
+    // case EntrySource.Curator:
+    //   return "curatedTimelineEntries";
+    case EntrySource.Collector:
+      return "collectedTimelineEntries";
+    case EntrySource.Creator:
+      return "createdTimelineEntries";
+  }
+}
+
+
 
 /** expects parsed Entries with date as a Date object */
 export const sortTimeline = (timelineEntries: TimelineEntry[]) => {
