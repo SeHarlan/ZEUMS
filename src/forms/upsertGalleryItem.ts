@@ -1,10 +1,10 @@
-import { EntryTypes } from "@/types/entry";
 import { z } from "zod";
 import { urlSchema } from "./urlSchema";
+import { GalleryItemTypes } from "@/types/galleryItem";
 
 // Form schema with Zod validation
-export const entryFormSchema = z.object({
-  entryType: z.nativeEnum(EntryTypes),
+export const galleryItemFormSchema = z.object({
+  itemType: z.nativeEnum(GalleryItemTypes),
   title: z
     .string()
     .max(100, {
@@ -19,9 +19,6 @@ export const entryFormSchema = z.object({
     })
     .or(z.literal(""))
     .optional(),
-  date: z.date({
-    message: "Please enter a valid date.",
-  }),
   buttons: z
     .array(
       z.object({
@@ -36,4 +33,4 @@ export const entryFormSchema = z.object({
     }),
 });
 
-export type EntryFormValues = z.infer<typeof entryFormSchema>;
+export type GalleryItemFormValues = z.infer<typeof galleryItemFormSchema>;

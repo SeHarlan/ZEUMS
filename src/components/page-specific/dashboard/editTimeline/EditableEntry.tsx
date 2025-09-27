@@ -39,7 +39,7 @@ const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
       .then((response) => {
         const {acknowledged, deletedCount} = response.data;
         if (acknowledged && deletedCount > 0) {
-          toast.success("Entry deleted successfully.");
+          toast.info("Entry deleted successfully.");
 
           setUser((prevUser) => {
             if (!prevUser) return prevUser;

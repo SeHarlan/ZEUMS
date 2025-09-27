@@ -1,103 +1,105 @@
 "use client";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryCreation } from "@/types/entry";
+import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { toast } from "sonner";
 import { handleClientError } from "@/utils/handleError";
-import { ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
-import NewEntryFormContent from "./NewEntryFormContent";
+import NewItemFormContent from "./NewItemFormContent";
 import { SquarePlusIcon } from "lucide-react";
-import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
 import { addHttpsPrefix } from "@/utils/general";
+import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
+import { getLastGalleryRowIndex } from "@/utils/gallery";
+import useGalleryById from "@/hooks/useGalleryById";
+import { EntrySource } from "@/types/entry";
+import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 
-const formId = "new-entry-form";
+const formId = "new-galleryItem-form";
 
-interface NewEntryFormProps { 
+interface NewItemFormProps { 
   source: EntrySource; 
+  galleryId: string;
 }
 
-const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
-  const { setUser } = useUser()
+const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
+  const { user } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
-  const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
-  const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
 
-  const defaultValues: EntryFormValues = useMemo(() => ({
-    entryType: EntryTypes.BlockchainAsset,
+  const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
+  const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(GalleryItemTypes.BlockchainAsset);
+  const { gallery, mutateGallery } = useGalleryById(galleryId);
+
+  const defaultValues: GalleryItemFormValues = useMemo(() => ({
+    itemType: GalleryItemTypes.BlockchainAsset,
     title: "",
     description: "",
-    date: new Date(),
     buttons: [],
   }), [])
 
-  const form = useForm<EntryFormValues>({
-    resolver: zodResolver(entryFormSchema),
+  const form = useForm<GalleryItemFormValues>({
+    resolver: zodResolver(galleryItemFormSchema),
     defaultValues,
-  
   });
 
   const { reset, watch } = form;
-  const { title, description, entryType: selectedEntryType } = watch();
+  const { title, description, itemType: selectedGalleryItemType } = watch();
 
   const disableSubmit =
-    selectedEntryType === EntryTypes.BlockchainAsset && !blockchainAsset;
-
-  const timelineKey = getTimelineKey(source);
-
+    selectedGalleryItemType === GalleryItemTypes.BlockchainAsset && !blockchainAsset
+    || !gallery
+    || !user
   
   useEffect(() => {
-    const isBlockchainAsset = selectedEntryType === EntryTypes.BlockchainAsset;
+    const isBlockchainAsset = selectedGalleryItemType === GalleryItemTypes.BlockchainAsset;
     const isDifferent = blockchainAsset?.tokenAddress !== prevBlockchainAssetRef.current?.tokenAddress;
 
     if (isBlockchainAsset && isDifferent) {
       // Only run if blockchainAsset changed
       reset({
         ...defaultValues,
-        entryType: EntryTypes.BlockchainAsset,
+        itemType: GalleryItemTypes.BlockchainAsset,
         title: blockchainAsset?.title || "",
         description: blockchainAsset?.description || "",
       });
       prevBlockchainAssetRef.current = blockchainAsset;
     }
-  }, [blockchainAsset, reset, title, description, defaultValues, selectedEntryType]);
+  }, [blockchainAsset, reset, title, description, defaultValues, selectedGalleryItemType]);
 
   useEffect(() => {
-    // Only reset if selectedEntryType changed
-    if (selectedEntryType !== prevEntryTypeRef.current) {
+    // Only reset if selectedGalleryItemType changed
+    if (selectedGalleryItemType !== prevGalleryItemTypeRef.current) {
       setBlockchainAsset(null);
       reset({
         ...defaultValues,
-        entryType: selectedEntryType,
+        itemType: selectedGalleryItemType,
       });
-      prevEntryTypeRef.current = selectedEntryType;
+      prevGalleryItemTypeRef.current = selectedGalleryItemType;
     }
-  }, [selectedEntryType, reset, defaultValues]);
+  }, [selectedGalleryItemType, reset, defaultValues]);
 
   const fullFormReset = () => {
     setBlockchainAsset(null);
     setAspectRatio(null);
     reset(defaultValues);
     prevBlockchainAssetRef.current = null;
-    prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
+    prevGalleryItemTypeRef.current = GalleryItemTypes.BlockchainAsset;
   }
 
-  const onSubmit = (data: EntryFormValues) => {
+  const onSubmit = (data: GalleryItemFormValues) => {
+    if (!gallery || !user) return;
+
     setSubmitting(true);
 
-    data.date = addPreciseCurrentTime(data.date);
-    
     // Add https:// prefix to button URLs if they don't have a protocol
     if (data.buttons) {
       data.buttons = data.buttons.map(button => ({
@@ -107,12 +109,16 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
     }
 
 
-    let entryCreationData: TimelineEntryCreation = {
+    const lastRowIndex = getLastGalleryRowIndex(gallery);
+
+    let itemCreationData: GalleryItemCreation = {
       ...data,
       source,
+      parentGalleryId: galleryId,
+      position: [lastRowIndex + 1, 0],
     };
 
-    if (data.entryType === EntryTypes.BlockchainAsset) {
+    if (data.itemType === GalleryItemTypes.BlockchainAsset) {
       if (!blockchainAsset || !aspectRatio) {
         toast.error("Please select a valid blockchain asset.");
         setSubmitting(false);
@@ -128,44 +134,37 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
         },
       };
 
-      entryCreationData = {
+      itemCreationData = {
         ...assetWithAspectRatio,
-        ...entryCreationData,
+        ...itemCreationData,
       };
     }
 
     axios
-      .post<{ createdEntry: TimelineEntry }>(ENTRY_ROUTE, entryCreationData)
+      .post<{ createdGalleryItem: GalleryItem }>(GALLERY_ITEM_ROUTE, itemCreationData)
       .then((response) => {
-        const { createdEntry } = response.data;
-        const parsedCreatedEntry = parseEntryDate(createdEntry);
+        const { createdGalleryItem } = response.data;
 
-        toast.success("New entry created!");
+        toast.success("New gallery item created!");
 
-        //Update the users timeline context with the new entry
-        setUser((prevUser) => {
-          if (!prevUser) return prevUser;
-
-          const prevTimeline = prevUser[timelineKey] || [];
-          
-          const newTimeline = sortTimeline([
-            parsedCreatedEntry,
-            ...prevTimeline,
-          ]);
-
+        // Update the gallery data using SWR mutation
+        mutateGallery((prev) => {   
+          if (!prev) return prev;
+          const prevItems = prev.items || [];
           return {
-            ...prevUser,
-            [timelineKey]: newTimeline,
+            ...prev,
+            items: [...prevItems, createdGalleryItem],
           };
-        });
+        }, false);
 
+        setFormOpen(false);
         fullFormReset();
       })
       .catch((error) => {
-        toast.error("Failed to create new entry.");
+        toast.error("Failed to create new Gallery Item.");
         handleClientError({
           error,
-          location: "NewEntryForm_onSubmit",
+          location: "NewItemForm_onSubmit",
         });
       })
       .finally(() => {
@@ -177,14 +176,14 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
     <SideDrawer
       triggerButton={
         <Button className="w-full">
-          <P>New Entry</P>
+          <P>New Gallery Item</P>
           <SquarePlusIcon />
         </Button>
       }
       open={formOpen}
       onOpenChange={setFormOpen}
-      title="Add New Entry"
-      description="Add a new entry to your artist timeline."
+      title="Add New Item"
+      description="Add a new item to your gallery."
       actionButton={
         <Button
           form={formId}
@@ -193,7 +192,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
           loading={submitting}
           disabled={disableSubmit}
         >
-          <P>Save New Entry</P>
+          <P>Save New Item</P>
         </Button>
       }
     >
@@ -202,9 +201,9 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
           onSubmit={form.handleSubmit(onSubmit)}
           id={formId}
         >
-          <NewEntryFormContent
+          <NewItemFormContent
             form={form}
-            selectedEntryType={selectedEntryType}
+            selectedItemType={selectedGalleryItemType}
             blockchainAsset={blockchainAsset}
             setBlockchainAsset={setBlockchainAsset}
             setAspectRatio={setAspectRatio}
@@ -216,4 +215,4 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
   );
 };
 
-export default NewEntryForm;
+export default NewItemForm;

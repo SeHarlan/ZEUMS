@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { createGalleryFormSchema, CreateGalleryFormValues } from "@/forms/createGallery";
 import { P } from "@/components/typography/Typography";
 import { SquarePlusIcon } from "lucide-react";
 import { useUser } from "@/context/UserProvider";
@@ -19,26 +18,30 @@ import { GALLERY_ROUTE } from "@/constants/serverRoutes";
 import { BaseGalleryType } from "@/types/gallery";
 import { EntrySource } from "@/types/entry";
 import { getGalleryKey } from "@/utils/gallery";
+import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { useRouter } from "next/navigation";
+import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
 
 interface CreateGalleryDialogProps {
   source: EntrySource;
 }
-const CreateGalleryDialog: FC<CreateGalleryDialogProps> = ({ source }) => {
+const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source }) => {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { setUser } = useUser();
+  const router = useRouter();
 
    const galleryKey = getGalleryKey(source);
 
-  const form = useForm<CreateGalleryFormValues>({
-    resolver: zodResolver(createGalleryFormSchema),
+  const form = useForm<UpsertGalleryFormValues>({
+    resolver: zodResolver(upsertGalleryFormSchema),
     defaultValues: {
       title: "",
       description: "",
     },
   });
 
-  const onSubmit = (data: CreateGalleryFormValues) => {
+  const onSubmit = (data: UpsertGalleryFormValues) => {
     setSubmitting(true);
 
     const createGalleryData = {
@@ -64,6 +67,8 @@ const CreateGalleryDialog: FC<CreateGalleryDialogProps> = ({ source }) => {
         // Reset form and close dialog
         form.reset();
         setOpen(false);
+        
+        router.push(EDIT_GALLERY(newGallery._id.toString()));
       })
       .catch((error) => {
         toast.error("Failed to create gallery.");
@@ -156,4 +161,4 @@ const CreateGalleryDialog: FC<CreateGalleryDialogProps> = ({ source }) => {
   );
 };
 
-export default CreateGalleryDialog;
+export default CreateGalleryDialogButton;

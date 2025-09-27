@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Form schema with Zod validation for gallery creation
-export const createGalleryFormSchema = z.object({
+export const upsertGalleryFormSchema = z.object({
   title: z
     .string()
     .min(1, {
@@ -19,4 +19,4 @@ export const createGalleryFormSchema = z.object({
     .optional(),
 });
 
-export type CreateGalleryFormValues = z.infer<typeof createGalleryFormSchema>;
+export type UpsertGalleryFormValues = z.infer<typeof upsertGalleryFormSchema>;

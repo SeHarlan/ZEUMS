@@ -1,6 +1,4 @@
-import { FC } from "react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
-import { EntryFormValues } from "@/forms/upsertEntry";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,13 +12,26 @@ import { Plus, Trash2 } from "lucide-react";
 import { P } from "../typography/Typography";
 import { Badge } from "../ui/badge";
 
-interface ButtonEditorProps {
-  form: UseFormReturn<EntryFormValues>;
+
+type FormWithButtons = {
+  buttons: {
+    text: string;
+    url: string;
+  }[];
+};
+interface ButtonEditorProps<T extends FormWithButtons> {
+  form: UseFormReturn<T>;
 }
 
-const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
+const ButtonEditor = <T extends FormWithButtons>({
+  form,
+}: ButtonEditorProps<T>) => {
+  //Needs type coercion for TS to get the correct ArrayPath type as "buttons"
+  //We can be certain the form thats passed has at least the correct buttons field because T extends FormWithButtons
+  const { control } = form as unknown as UseFormReturn<FormWithButtons>;
+
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: control,
     name: "buttons",
   });
 
@@ -62,12 +73,15 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
           <div key={field.id} className="flex gap-2 items-start">
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 items-start">
               <FormField
-                control={form.control}
+                control={control}
                 name={`buttons.${index}.text`}
                 render={({ field }) => (
                   <FormItem className="gap-1">
                     <FormLabel asChild>
-                      <Badge variant={index === 0 ? "default" : "outline"} className="text-xs">
+                      <Badge
+                        variant={index === 0 ? "default" : "outline"}
+                        className="text-xs"
+                      >
                         Button Text
                       </Badge>
                     </FormLabel>
@@ -79,12 +93,15 @@ const ButtonEditor: FC<ButtonEditorProps> = ({ form }) => {
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name={`buttons.${index}.url`}
                 render={({ field }) => (
                   <FormItem className="gap-1">
                     <FormLabel asChild>
-                      <Badge variant="outline" className="text-xs border-transparent pl-0">
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-transparent pl-0"
+                      >
                         Url
                       </Badge>
                     </FormLabel>

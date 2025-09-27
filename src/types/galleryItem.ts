@@ -73,7 +73,9 @@ export type GalleryMediaItem =
   | UserAssetGalleryItem;
 
 // Types related to entry CRUD
-export type GalleryItemCreation = Omit<GalleryItem, "owner" | "_id">;
+export type GalleryItemCreation = Omit<GalleryItem, "owner" | "_id" | "parentGalleryId"> & {
+  parentGalleryId: string
+};
 
 
 // Type guard functions

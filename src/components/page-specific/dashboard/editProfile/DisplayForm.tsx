@@ -189,6 +189,39 @@ const ProfileDisplayForm: FC = () => {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="primaryTimeline"
+            render={({ field }) => (
+              <FormItem className="mb-0">
+                <FormLabel>Primary Timeline</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="">
+                      <SelectValue placeholder="Primary Timeline" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={EditTimelineTab.ARTIST}>
+                      Created
+                    </SelectItem>
+                    <SelectItem value={EditTimelineTab.COLLECTOR}>
+                      Collected
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The timeline that will be displayed first when viewing your
+                  profile.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger className="max-w-fit gap-2">
@@ -221,39 +254,6 @@ const ProfileDisplayForm: FC = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          <FormField
-            control={form.control}
-            name="primaryTimeline"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Primary Timeline</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="">
-                      <SelectValue placeholder="Primary Timeline" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={EditTimelineTab.ARTIST}>
-                      Created
-                    </SelectItem>
-                    <SelectItem value={EditTimelineTab.COLLECTOR}>
-                      Collected
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  The timeline that will be displayed first when viewing your
-                  profile.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <Separator />
 

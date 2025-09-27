@@ -8,69 +8,67 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/utils/ui-utils";
-import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { EntryFormValues } from "@/forms/upsertEntry";
 import { FC } from "react";
-import { EntrySource, EntryTypes } from "@/types/entry";
-import { Button } from "@/components/ui/button";
+import { EntrySource } from "@/types/entry";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
+import { BLOCKCHAIN_ENTRY_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
 import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
 import ButtonEditor from "@/components/timeline/ButtonEditor";
+import { GalleryItemFormValues } from "@/forms/upsertGalleryItem";
+import { GalleryItemTypes } from "@/types/galleryItem";
 
-interface NewEntryFormContentProps { 
-  form: UseFormReturn<EntryFormValues>;
-  selectedEntryType: EntryTypes;
+interface NewItemFormContentProps { 
+  form: UseFormReturn<GalleryItemFormValues>;
+  selectedItemType: GalleryItemTypes;
   blockchainAsset: ParsedBlockChainAsset | null;
   setBlockchainAsset: (asset: ParsedBlockChainAsset | null) => void;
   setAspectRatio: (aspectRatio: number | null) => void; 
   source: EntrySource;
 }
 
-const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
+const NewItemFormContent: FC<NewItemFormContentProps> = ({
   form,
-  selectedEntryType,
+  selectedItemType,
   blockchainAsset,
   setBlockchainAsset,
   setAspectRatio,
   source,
 }) => {
-  //TODO disabled double select -get timeline based on source and select tokens (use atom selector)
+  //TODO disabled double select - get gallery items based on source and select tokens (use atom selector)
   // const disabledAssetAddresses =
   
-  const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
+  const isBlockchainEntry = selectedItemType === GalleryItemTypes.BlockchainAsset;
 
   return (
     <div className="flex flex-col gap-y-6">
       <FormField
         control={form.control}
-        name="entryType"
+        name="itemType"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Entry Type</FormLabel>
+            <FormLabel>Item Type</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger className="w-full text-md min-h-12">
-                  <SelectValue placeholder="Entry type" />
+                  <SelectValue placeholder="Item type" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 <SelectItem
-                  value={EntryTypes.BlockchainAsset}
+                  value={GalleryItemTypes.BlockchainAsset}
                   className="h-10 text-md"
                 >
                   <BlockchainAssetEntryIcon className="min-h-6 min-w-6" />
                   {BLOCKCHAIN_ENTRY_COPY.title}
                 </SelectItem>
-                <SelectItem value={EntryTypes.Text} className="h-10 text-md">
+                <SelectItem
+                  value={GalleryItemTypes.Text}
+                  className="h-10 text-md"
+                >
                   <TextEntryIcon className="min-h-6 min-w-6" />
                   {TEXT_ENTRY_COPY.title}
                 </SelectItem>
@@ -85,7 +83,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
               </SelectContent>
             </Select>
             <FormDescription>
-              {ENTRY_TYPE_COPY[selectedEntryType].description}
+              {GALLERY_ITEM_TYPE_COPY[selectedItemType].description}
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -93,50 +91,6 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
       />
 
       <Separator />
-
-      <FormField
-        control={form.control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      " pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>
-              This date determines the order of entries
-            </FormDescription>
-          </FormItem>
-        )}
-      />
 
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
@@ -167,14 +121,12 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              {selectedEntryType === EntryTypes.Text
-                ? "Content"
-                : "Description"}
+              {selectedItemType === GalleryItemTypes.Text ? "Content" : "Description"}
             </FormLabel>
             <FormControl>
               <Textarea
                 placeholder={
-                  selectedEntryType === EntryTypes.Text
+                  selectedItemType === GalleryItemTypes.Text
                     ? "Enter text content"
                     : "Enter description"
                 }
@@ -191,4 +143,4 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   );
 }
 
-export default NewEntryFormContent;
+export default NewItemFormContent;

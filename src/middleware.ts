@@ -22,11 +22,11 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  if (!token) {
+  if (!token?.user?.dbUserId) {
     return new NextResponse(
       JSON.stringify({
         success: false,
-        message: "Authentication required",
+        message: "Authentication for ZEUMS access is required",
       }),
       {
         status: 401,
