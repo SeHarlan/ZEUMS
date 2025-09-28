@@ -42,7 +42,6 @@ function Button({
   variant,
   size,
   children,
-  disabled,
   asChild = false,
   loading = false,
   ...props
@@ -52,21 +51,41 @@ function Button({
     loading?: boolean;
   }) {
   const Comp = asChild ? Slot : "button"
+  const hasPositionClass =
+    className?.includes("absolute") ||
+    className?.includes("fixed") ||
+    className?.includes("sticky") ||
+    className?.includes("static");
+  
+  if (loading) {
+    return (
+      <button
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          !hasPositionClass && "relative" //set position if it isn't so the loader can be centered
+        )}
+        disabled
+        {...props}
+      >
+        {children}
+        <div className="bg-inherit w-full h-full absolute inset-0 rounded-full flex items-center justify-center">
+          <Loader2Icon className="size-2/3 animate-spin" />
+        </div>
+      </button>
+    );
+  }
+
 
   return (
     <Comp
       data-slot="button"
       className={cn(
+        "cursor-pointer",
         buttonVariants({ variant, size, className }),
-        "cursor-pointer"
       )}
-      disabled={disabled || loading} // Disable button when loading
       {...props}
     >
-      {loading
-        ? <Loader2Icon className="size-4 animate-spin" />
-        : children
-      }
+      {children}
     </Comp>
   );
 }

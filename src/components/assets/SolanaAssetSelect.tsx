@@ -17,11 +17,11 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { ChainIdsEnum } from "@/types/wallet";
 import { ImageVariant } from "@/types/media";
-import { LinkButton } from "../ui/button";
+import { Button, LinkButton } from "../ui/button";
 import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 
 interface SolanaAssetSelectProps {
-  disabledAssetAddresses?: string[]; //prevent already saved tokens from being selected again
+  usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
   source: EntrySource;
   selectedAssets: ParsedBlockChainAsset[] | null;
   setSelectAssets: (assets: ParsedBlockChainAsset[]) => void;
@@ -42,13 +42,17 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
   imageVariant = "default",
+  usedAssetAddresses,
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 300);
 
-  const { user } = useUser()  
+  const { user } = useUser();
 
-  const solanaPublicKeys = useMemo(() => getWalletsByChain(user)[ChainIdsEnum.SOLANA], [user]);
+  const solanaPublicKeys = useMemo(
+    () => getWalletsByChain(user)[ChainIdsEnum.SOLANA],
+    [user]
+  );
 
   const { solanaAssets, isLoading } = useSolanaAssets({
     publicKeys: solanaPublicKeys,
@@ -56,14 +60,19 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   });
 
   const filteredAssets = useMemo(() => {
-    if (!solanaAssets || solanaAssets.length === 0) return [];  
+    if (!solanaAssets || solanaAssets.length === 0) return [];
     // No search term, return all assets
     if (!debouncedSearch) return solanaAssets;
 
-    return solanaAssets.filter(asset =>
-      asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      asset.tokenAddress.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      asset.collection?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    return solanaAssets.filter(
+      (asset) =>
+        asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        asset.tokenAddress
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase()) ||
+        asset.collection?.name
+          ?.toLowerCase()
+          .includes(debouncedSearch.toLowerCase())
     );
   }, [solanaAssets, debouncedSearch]);
 
@@ -79,11 +88,12 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   const totalItems = filteredAssets?.length || 0;
 
   const selectedAddresses = useMemo(() => {
-    return selectedAssets?.map(asset => asset.tokenAddress);
-  }, [selectedAssets])
+    return selectedAssets?.map((asset) => asset.tokenAddress);
+  }, [selectedAssets]);
 
   const isSingleSelect = maxSelected === 1;
-  const maxSelectReached = selectedAssets && selectedAssets?.length >= maxSelected;
+  const maxSelectReached =
+    selectedAssets && selectedAssets?.length >= maxSelected;
 
   const showMaxSelectWarning = !isSingleSelect && maxSelectReached;
 
@@ -93,7 +103,15 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     }
   }, [debouncedSearch, setPage]);
 
-  const mergeAspectRatio = (asset: ParsedBlockChainAsset, aspectRatio: number) => {
+  const handleClear = () => {
+    setSelectAssets([]);
+    setSearch("");
+  };
+
+  const mergeAspectRatio = (
+    asset: ParsedBlockChainAsset,
+    aspectRatio: number
+  ) => {
     return {
       ...asset,
       media: {
@@ -101,7 +119,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         aspectRatio,
       },
     };
-  }
+  };
 
   const handleAssetClick = ({
     asset,
@@ -128,43 +146,61 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       if (selectedAssets && selectedAssets?.length >= maxSelected) {
         return;
       }
-      setSelectAssets([...(selectedAssets || []), mergeAspectRatio(asset, aspectRatio)]);
+      setSelectAssets([
+        ...(selectedAssets || []),
+        mergeAspectRatio(asset, aspectRatio),
+      ]);
     }
   };
 
   const renderFeedback = () => {
     if (isLoading) {
-      return <LoadingSpinner iconClass="size-14" />
+      return <LoadingSpinner iconClass="size-14" />;
     }
 
-    if (!solanaAssets?.length) { 
-      return <div className="flex flex-col items-center justify-center gap-4">
-        <P className="text-muted-foreground text-center">No verified wallet found</P>
-        <LinkButton href={EDIT_PROFILE_ACCOUNT}>
-          <WalletIcon />
-          Add wallet
-        </LinkButton>
-      </div>
+    if (!solanaAssets?.length) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4">
+          <P className="text-muted-foreground text-center">
+            No verified wallet found
+          </P>
+          <LinkButton href={EDIT_PROFILE_ACCOUNT}>
+            <WalletIcon />
+            Add wallet
+          </LinkButton>
+        </div>
+      );
     }
 
-    return <P className="text-muted-foreground text-center">No assets found</P>
-  }
+    return <P className="text-muted-foreground text-center">No assets found</P>;
+  };
   return (
     <div className="h-full flex flex-col gap-4">
-      {withSearch ? (
-        <PrefixInput
-          wrapperClassName="max-w-sm"
-          icon={<SearchIcon className="size-4 text-muted-foreground" />}
-          placeholder="Search assets"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      ) : null}
+      <div className="flex justify-between flex-wrap gap-2">
+        {withSearch ? (
+          <PrefixInput
+            wrapperClassName="sm:max-w-sm"
+            icon={<SearchIcon className="size-4 text-muted-foreground" />}
+            placeholder="Search assets"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        ) : null}
+        {maxSelected > 1 ? (
+          <Button
+            onClick={handleClear}
+            variant={"outline"}
+            className="w-full sm:w-fit"
+          >
+            Clear
+          </Button>
+        ) : null}
+      </div>
       <ScrollArea className="flex-1 min-h-0 pr-3">
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
             <P className="text-lg font-bold">
-              You can only add up to {maxSelected} assets at a time.
+              You can add a max of {maxSelected} assets at a time.
             </P>
             {maxSelectWarningBody}
           </div>
@@ -183,18 +219,25 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
               asset.tokenAddress
             );
 
+            const isUsed = usedAssetAddresses?.has(
+              asset.tokenAddress
+            );
+
+            const isDisabled = (showMaxSelectWarning && !isSelected) || isUsed;
+
             return (
               <AssetThumbnailCard
                 key={asset.tokenAddress}
                 asset={asset}
                 imageVariant={imageVariant}
-                onClick={(aspectRatio) =>
+                onClick={(aspectRatio) => {
+                  if (isDisabled) return;
                   handleAssetClick({ asset, isSelected, aspectRatio })
-                }
+                }}
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-300",
                   isSelected ? "border-primary" : "border-transparent",
-                  showMaxSelectWarning && !isSelected
+                  isDisabled
                     ? "opacity-50 cursor-default"
                     : ""
                 )}
@@ -220,7 +263,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       />
     </div>
   );
-}
+};
 
 export default SolanaAssetSelect;
 

@@ -17,18 +17,18 @@ import { SquarePlusIcon } from "lucide-react";
 import { addHttpsPrefix } from "@/utils/general";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import { getLastGalleryRowIndex } from "@/utils/gallery";
-import useGalleryById from "@/hooks/useGalleryById";
-import { EntrySource } from "@/types/entry";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
+import { GalleryType } from "@/types/gallery";
+import { KeyedMutator } from "swr";
 
 const formId = "new-gallery-item-form";
 
-interface NewItemFormProps { 
-  source: EntrySource; 
-  galleryId: string;
+interface NewItemFormProps {
+  gallery: GalleryType;
+  mutateGallery: KeyedMutator<GalleryType | null>;
 }
 
-const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
+const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
   const { user } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +37,8 @@ const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
 
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
   const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(GalleryItemTypes.BlockchainAsset);
-  const { gallery, mutateGallery } = useGalleryById(galleryId);
+
+  const source = gallery.source;
 
   const defaultValues: GalleryItemFormValues = useMemo(() => ({
     itemType: GalleryItemTypes.BlockchainAsset,
@@ -56,7 +57,6 @@ const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
 
   const disableSubmit =
     selectedGalleryItemType === GalleryItemTypes.BlockchainAsset && !blockchainAsset
-    || !gallery
     || !user
   
   useEffect(() => {
@@ -96,7 +96,7 @@ const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
   }
 
   const onSubmit = (data: GalleryItemFormValues) => {
-    if (!gallery || !user) return;
+    if (!user) return;
 
     setSubmitting(true);
 
@@ -114,7 +114,7 @@ const NewItemForm: FC<NewItemFormProps> = ({source, galleryId}) => {
     let itemCreationData: GalleryItemCreation = {
       ...data,
       source,
-      parentGalleryId: galleryId,
+      parentGalleryId: gallery._id.toString(),
       position: [lastRowIndex + 1, 0],
     };
 

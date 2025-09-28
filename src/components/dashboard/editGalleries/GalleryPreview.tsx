@@ -1,21 +1,17 @@
-import useGalleryById from "@/hooks/useGalleryById";
-import { EntrySource } from "@/types/entry";
 import { FC } from "react";
 import EditableItem from "../editGalleryItems/EditableItem";
 import EditGalleryItemContextProvider from "@/context/EditGalleryItemProvider";
+import { GalleryType } from "@/types/gallery";
 
 interface GalleryPreviewProps {
-  source: EntrySource;
-  galleryId: string;
+  gallery: GalleryType;
 }
 
-const GalleryPreview: FC<GalleryPreviewProps> = ({ galleryId }) => {
-  const { gallery } = useGalleryById(galleryId);
-
+const GalleryPreview: FC<GalleryPreviewProps> = ({ gallery }) => {
   return (
     <EditGalleryItemContextProvider>
       <div className="grid grid-cols-4 gap-4">
-        {gallery?.items?.map((item) => (
+        {gallery.items?.map((item) => (
           <EditableItem key={item._id.toString()} item={item} />
         ))}
       </div>

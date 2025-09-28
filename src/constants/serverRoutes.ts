@@ -18,6 +18,7 @@ export const GALLERY_ROUTE = `${API_ROUTE}/gallery`;
 export const GALLERY_BY_ID_ROUTE = (id: string) => `${GALLERY_ROUTE}/${id}`;
 
 export const GALLERY_ITEM_ROUTE = `${API_ROUTE}/gallery-item`;
+export const GALLERY_ITEM_ITEMS_ROUTE = `${GALLERY_ITEM_ROUTE}/items`;
 
 //public routes
 export const PUBLIC_ROUTE = `${API_ROUTE}/public`;

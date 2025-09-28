@@ -6,28 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EDIT_GALLERIES } from "@/constants/clientRoutes";
 import { ENTRY_ENTRIES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { EntrySource, TimelineEntry } from "@/types/entry";
+import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
 import { handleClientError } from "@/utils/handleError";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
 import { cn } from "@/utils/ui-utils";
 import axios from "axios";
 import { format } from "date-fns";
-import { CalendarIcon, CpuIcon, GalleryHorizontalEndIcon, ImagesIcon } from "lucide-react";
+import { CalendarIcon, CpuIcon, ImagesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
+import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
 
 interface AddBlockchainEntriesProps {
   source: EntrySource;
 } 
 const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => { 
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
   const router = useRouter();
 
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
@@ -37,8 +37,15 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
 
 
   const timelineKey = getTimelineKey(source);
-  //TODO get timeline based on source and select tokens
-  // const disabledAssetAddresses = 
+  
+  const usedAssetAddresses = useMemo(() => {
+    const currentTimeline = user?.[timelineKey] || [];
+    const items =
+      currentTimeline
+        ?.filter((item) => item.entryType === EntryTypes.BlockchainAsset)
+        .map((item) => item.tokenAddress) || [];
+    return new Set(items);
+  }, [user, timelineKey]);
 
   const handleClear = () => {
     setSelectedAssets([]);
@@ -107,7 +114,6 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
   }
 
   const handleNewGalleryCreation = async () => {
-    // TODO-important: Logic to create a new gallery
     router.push(EDIT_GALLERIES);
   }
 
@@ -130,7 +136,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
 
         <div className="flex-1 min-h-0">
           <SolanaAssetSelect
-            // disabledAssetAddresses={disabledAssetAddresses}
+            usedAssetAddresses={usedAssetAddresses}
             selectedAssets={selectedAssets}
             setSelectAssets={setSelectedAssets}
             source={source}
@@ -142,24 +148,13 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
                   Timelines shine when they stay simple. Try adding these assets
                   to a gallery for a cleaner look.
                 </P>
-                <Button onClick={handleNewGalleryCreation}>
-                  Create New Gallery
-                  <GalleryHorizontalEndIcon />
-                </Button>
+                <CreateGalleryDialogButton source={source} />
               </div>
             }
           />
         </div>
 
-        <DialogFooter className="items-center justify-center sm:justify-between">
-          <Button
-            onClick={handleClear}
-            variant={"outline"}
-            className="w-full sm:w-fit"
-          >
-            Clear
-          </Button>
-          <Separator className="sm:hidden" />
+        <DialogFooter className="">
           <div className="flex gap-2 flex-wrap items-center w-full sm:w-fit">
             <Popover>
               <Tooltip>
