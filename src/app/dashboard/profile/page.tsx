@@ -2,9 +2,9 @@
 
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import ProfileAccountForm from "@/components/page-specific/dashboard/editProfile/AccountForm";
-import ProfileDisplayForm from "@/components/page-specific/dashboard/editProfile/DisplayForm";
-import { PageTurnLeft, PageTurnRight } from "@/components/page-specific/dashboard/PageTurnButtons";
+import ProfileAccountForm from "@/components/dashboard/editProfile/AccountForm";
+import ProfileDisplayForm from "@/components/dashboard/editProfile/DisplayForm";
+import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EDIT_TIMELINE } from "@/constants/clientRoutes";

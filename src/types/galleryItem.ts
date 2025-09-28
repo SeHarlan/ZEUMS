@@ -7,7 +7,7 @@ import {
   UserMedia,
 } from "./media";
 import { ChainIdsEnum } from "./wallet";
-import { BlockchainAttribute, BlockchainCreator, BlockchainOwner, EntryButton, EntrySource } from "./entry";
+import { BaseEntry, BlockchainAttribute, BlockchainCreator, BlockchainOwner, TimelineEntry } from "./entry";
 
 export enum GalleryItemTypes {
   BlockchainAsset = "gallery_blockchain_asset",
@@ -15,18 +15,10 @@ export enum GalleryItemTypes {
   Gallery = "gallery_reference",
   Text = "gallery_text",
 }
-// Base properties shared by all entry types
-export type BaseGalleryItem = {
-  _id: Schema.Types.ObjectId;
-  /** User ID of the galleryItem owner */
-  owner: Schema.Types.ObjectId;
-  parentGalleryId: Schema.Types.ObjectId;
-  /** Source of the galleryItem (creator or collector) */
-  source: EntrySource;
-  title?: string;
-  description?: string;
-  buttons?: EntryButton[];
+// Base properties shared by all item types
+export type BaseGalleryItem = Omit<BaseEntry, "date"> & {
   position: [number, number];
+  parentGalleryId: Schema.Types.ObjectId;
 };
 
 export type TextGalleryItem = BaseGalleryItem & {
@@ -72,14 +64,17 @@ export type GalleryMediaItem =
   | BlockchainAssetGalleryItem
   | UserAssetGalleryItem;
 
-// Types related to entry CRUD
+// Types related to item CRUD
 export type GalleryItemCreation = Omit<GalleryItem, "owner" | "_id" | "parentGalleryId"> & {
   parentGalleryId: string
 };
 
+export function isGalleryItem(itemOrEntry: GalleryItem | TimelineEntry): itemOrEntry is GalleryItem {
+  return "itemType" in itemOrEntry;
+}
 
 // Type guard functions
-export function isBlockchainGalleryItem(
+export function isBlockchainAssetGalleryItem(
   item: GalleryItem | GalleryItemCreation
 ): item is BlockchainAssetGalleryItem {
   return item.itemType === GalleryItemTypes.BlockchainAsset;

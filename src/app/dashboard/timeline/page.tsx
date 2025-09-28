@@ -1,9 +1,9 @@
 "use client";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import EditTimeline from "@/components/page-specific/dashboard/editTimeline/EditTimeline";
-import { PageTurnLeft, PageTurnRight } from "@/components/page-specific/dashboard/PageTurnButtons";
-import SourceTabs from "@/components/page-specific/dashboard/SourceTabs";
+import EditTimeline from "@/components/dashboard/editTimeline/EditTimeline";
+import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
+import SourceTabs from "@/components/dashboard/SourceTabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { EDIT_GALLERIES, EDIT_PROFILE } from "@/constants/clientRoutes";
 

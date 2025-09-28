@@ -3,10 +3,10 @@
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import EditGallerySettings from "@/components/page-specific/dashboard/editGalleries/EditGallerySettings";
-import GalleryPreview from "@/components/page-specific/dashboard/editGalleries/GalleryPreview";
-import NewItemForm from "@/components/page-specific/dashboard/editGalleryItems/newItemForm/NewItemForm";
-import { PageTurnLeft } from "@/components/page-specific/dashboard/PageTurnButtons";
+import EditGallerySettings from "@/components/dashboard/editGalleries/EditGallerySettings";
+import GalleryPreview from "@/components/dashboard/editGalleries/GalleryPreview";
+import NewItemForm from "@/components/dashboard/editGalleryItems/newItemForm/NewItemForm";
+import { PageTurnLeft } from "@/components/dashboard/PageTurnButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EDIT_GALLERIES } from "@/constants/clientRoutes";

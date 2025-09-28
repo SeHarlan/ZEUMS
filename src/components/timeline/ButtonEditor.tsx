@@ -64,7 +64,7 @@ const ButtonEditor = <T extends FormWithButtons>({
 
       {fields.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Add up to 3 buttons to your entry (optional)
+          Add up to 3 buttons
         </p>
       )}
 

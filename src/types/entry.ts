@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 import { GalleryType } from "./gallery";
 import { BlockchainImage, BlockchainMedia, UserImage, UserMedia } from "./media"
 import { ChainIdsEnum } from "./wallet";
+import { GalleryItem } from "./galleryItem";
 
 export enum EntryTypes {
   BlockchainAsset = "blockchain_asset",
@@ -26,12 +27,12 @@ export type BaseEntry = {
   _id: Schema.Types.ObjectId;
   /** User ID of the entry owner */
   owner: Schema.Types.ObjectId;
-  date: Date;
   /** Source of the entry (creator or collector) */
   source: EntrySource;
   title?: string;
   description?: string;
   buttons?: EntryButton[];
+  date: Date;
 };
 
 export type TextEntry = BaseEntry & {
@@ -90,10 +91,22 @@ export type GalleryEntry = BaseGalleryEntry & {
 }
 
 // Combined type using discriminated union
-export type TimelineEntry = TextEntry | BlockchainAssetEntry | UserAssetEntry | GalleryEntry;
+export type TimelineEntry =
+  | TextEntry
+  | BlockchainAssetEntry
+  | UserAssetEntry
+  | GalleryEntry;
+
+
 
 // Types related to entry CRUD
 export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id">
+
+export function isEntry(
+  entryOrItem: GalleryItem | TimelineEntry
+): entryOrItem is TimelineEntry {
+  return "entryType" in entryOrItem;
+}
 
 export type TimelineEntryDateUpdate = {
   _id: Schema.Types.ObjectId;

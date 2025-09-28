@@ -11,7 +11,6 @@ export const parseMallowAssets = (
   const editionMap: Record<string, ParsedBlockChainAsset> = {};
 
   for (const asset of rawAssets) {
-
     if (asset.source === "objkt") continue; //exclude objkt (tezos) nfts
      //must have at least image url and name
     if (!asset.imageUrl) continue;
@@ -35,6 +34,8 @@ export const parseMallowAssets = (
     const onChainOwner = {
       address: asset.owner,
     };
+
+
 
     // Parse media and determine category
     const { videoUrl, htmlUrl, vrUrl } = parseMallowMedia(asset);

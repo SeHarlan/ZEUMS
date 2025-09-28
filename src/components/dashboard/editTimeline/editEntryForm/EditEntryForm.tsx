@@ -2,9 +2,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { BaseEntry, EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +33,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
   const source = editingEntry?.source || EntrySource.Creator;
   const timelineKey = getTimelineKey(source);
 
-  const defaultValues: Partial<EntryFormValues> = useMemo(() => ({
+  const defaultValues: EntryFormValues = useMemo(() => ({
     entryType: selectedEntryType,
     title: editingEntry?.title || "",
     description: editingEntry?.description || "",

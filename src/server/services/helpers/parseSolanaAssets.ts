@@ -1,4 +1,4 @@
-import { ParsedBlockChainAsset } from "@/types/asset";
+import { BlockchainCollection, ParsedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
 import { GetAssetResponse, File, Interface } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
@@ -46,6 +46,17 @@ export const parseSolanaAssets = (
       address: ownership.owner,
     };
 
+    const assetGrouping = asset.grouping?.length ? asset.grouping[0] : null
+
+    const collection: BlockchainCollection | undefined = assetGrouping
+      ? {
+          address: assetGrouping.group_value,
+          name: assetGrouping.collection_metadata?.name,
+          image: assetGrouping.collection_metadata?.image,
+          description: assetGrouping.collection_metadata?.description,
+        }
+      : undefined;
+    
     //parse media and figure out category
     const { imageCdnUrl, videoUrl, htmlUrl, vrUrl } = parseSolanaMedia({
       files: content?.files || [],
@@ -85,6 +96,7 @@ export const parseSolanaAssets = (
       onChainOwner,
       attributes,
       media,
+      collection,
     };
 
     const isEdition =

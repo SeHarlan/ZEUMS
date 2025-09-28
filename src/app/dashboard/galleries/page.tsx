@@ -1,8 +1,8 @@
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import EditGalleries from "@/components/page-specific/dashboard/editGalleries/EditGalleries";
-import { PageTurnLeft } from "@/components/page-specific/dashboard/PageTurnButtons";
-import SourceTabs from "@/components/page-specific/dashboard/SourceTabs";
+import EditGalleries from "@/components/dashboard/editGalleries/EditGalleries";
+import { PageTurnLeft } from "@/components/dashboard/PageTurnButtons";
+import SourceTabs from "@/components/dashboard/SourceTabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 

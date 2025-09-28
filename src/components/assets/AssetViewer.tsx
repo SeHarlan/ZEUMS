@@ -10,14 +10,22 @@ import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import VideoViewer from "../media/VideoViewer";
 import { LinkButton } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
-import { BlockchainAssetEntry, EntryTypes, UserAssetEntry } from "@/types/entry";
+import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { imageBreakpoints } from "@/constants/ui";
+import { BlockchainAssetGalleryItem, isBlockchainAssetGalleryItem, isGalleryItem, UserAssetGalleryItem } from "@/types/galleryItem";
+
+
+type Asset =
+  | BlockchainAssetEntry
+  | UserAssetEntry
+  | BlockchainAssetGalleryItem
+  | UserAssetGalleryItem
 
 interface AssetViewerProps {
-  asset: BlockchainAssetEntry | UserAssetEntry
+  asset: Asset
   objectFit?: "object-cover" | "object-contain";
   aspectRatio?: "square" | "media-defined";
 }
@@ -43,8 +51,10 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const width = imageBreakpoints.full;
   const height = width / aspectRatioValue;
 
-  const isBlockchainAsset = asset.entryType === EntryTypes.BlockchainAsset;
+  const isBlockchainAsset = isEntry(asset) && isBlockchainAssetEntry(asset)
+    || isGalleryItem(asset) && isBlockchainAssetGalleryItem(asset);
 
+  
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
   //video will handle its own loading state

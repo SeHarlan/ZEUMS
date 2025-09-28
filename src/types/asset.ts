@@ -9,7 +9,16 @@ export interface GetSolanaAssetProps {
   mintAddress: string;
 }
 
+export type BlockchainCollection = {
+  address: string;
+  name?: string;
+  image?: string;
+  description?: string;
+};
+
 export type ParsedBlockChainAsset = Omit<
   BlockchainAssetEntry,
   "owner" | "source" | "date" | "_id"
->;
+> & {
+  collection?: BlockchainCollection;
+};

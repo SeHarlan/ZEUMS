@@ -21,7 +21,7 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { EntrySource } from "@/types/entry";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 
-const formId = "new-galleryItem-form";
+const formId = "new-gallery-item-form";
 
 interface NewItemFormProps { 
   source: EntrySource; 

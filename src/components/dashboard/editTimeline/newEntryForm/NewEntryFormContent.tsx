@@ -148,45 +148,51 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
         />
       ) : null}
 
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Title</FormLabel>
-            <FormControl>
-              <Input placeholder="Enter title" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              {selectedEntryType === EntryTypes.Text
-                ? "Content"
-                : "Description"}
-            </FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder={
-                  selectedEntryType === EntryTypes.Text
-                    ? "Enter text content"
-                    : "Enter description"
-                }
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {(isBlockchainEntry && !blockchainAsset)
+        ? null
+        : (
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {selectedEntryType === EntryTypes.Text
+                      ? "Content"
+                      : "Description"}
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={
+                        selectedEntryType === EntryTypes.Text
+                          ? "Enter text content"
+                          : "Enter description"
+                      }
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-      <ButtonEditor form={form} />
+            <ButtonEditor form={form} />
+          </>
+        )}
     </div>
   );
 }

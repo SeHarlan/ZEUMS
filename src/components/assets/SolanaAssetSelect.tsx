@@ -62,7 +62,8 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
     return solanaAssets.filter(asset =>
       asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      asset.tokenAddress.toLowerCase().includes(debouncedSearch.toLowerCase())
+      asset.tokenAddress.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      asset.collection?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
     );
   }, [solanaAssets, debouncedSearch]);
 
