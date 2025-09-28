@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense } from "react";
 import { AspectRatioProvider } from "@/context/AspectRatioProvider";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 
 
 const dmSerif = DM_Serif_Text({
@@ -86,7 +87,7 @@ export default function RootLayout({
             <UserContextProvider>
               <NavBarActionsProvider>
                 <AspectRatioProvider>
-                  <ScrollArea className="h-screen">
+                  <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
                     <Suspense fallback={<nav />}>
                       <NavBar />
                     </Suspense>

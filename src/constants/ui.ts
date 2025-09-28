@@ -5,3 +5,5 @@ export const imageBreakpoints = {
   medium: 800,
   full: 1200,
 }
+
+export const MAIN_SCROLL_AREA_ID = "main-scroll-area";

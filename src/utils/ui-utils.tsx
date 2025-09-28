@@ -11,6 +11,7 @@ import {
 import { UserSocialHandles } from "@/types/user";
 import { ReactNode } from "react";
 import { SocialIconProps } from "@/types/generic";
+import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(...inputs))
@@ -31,6 +32,14 @@ export function truncate(
   const first = text.slice(0, sectionLength);
   const last = text.slice(-sectionLength);
   return `${first}...${last}`;
+}
+
+export const getMainScrollAreaViewport = () => {
+  const mainScrollArea = document.getElementById(MAIN_SCROLL_AREA_ID);
+  if (mainScrollArea) {
+    return mainScrollArea.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+  }
+  return null;
 }
 
 export const socialHandlesList: {

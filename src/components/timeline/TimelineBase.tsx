@@ -3,9 +3,11 @@
 import { EntryTypes, TimelineEntry } from "@/types/entry";
 import { FC, Fragment } from "react";
 import { H2, P } from "@/components/typography/Typography";
-import { cn } from "@/utils/ui-utils";
+import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
 import { EntryBaseProps } from "./EntryBase";
 import { Separator } from "../ui/separator";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface TimelineBaseProps {
   entries: TimelineEntry[];
@@ -48,7 +50,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       return (
         <Fragment key={String(entry._id)}>
           {showYear && (
-            <H2 className="w-fit relative left-1/2 -translate-x-1/2 bg-background p-2 text-muted-foreground">
+            <H2 className="w-fit sticky top-0 z-20 left-1/2 -translate-x-1/2 bg-background px-6 py-2 rounded-b-md text-muted-foreground shadow">
               {lastYear}
             </H2>
           )}
@@ -76,15 +78,43 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
     });
   };
 
+  const handleScrollToBottom = () => {
+    const viewport = getMainScrollAreaViewport();
+    if (viewport) {
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: "smooth" });
+    }
+  };
+
+  const handleScrollToTop = () => {
+    const viewport = getMainScrollAreaViewport();
+    if (viewport) {
+      viewport.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="pb-4">
-      <div className="relative pb-8">
+    <div className="pb-4 space-y-2">
+      <Button
+        className="mx-auto flex font-serif text-muted-foreground"
+        variant="ghost"
+        onClick={handleScrollToBottom}
+      >
+        Start at the beginning <ArrowDownIcon />
+      </Button>
+      <div className="relative pb-8 mb-0">
         <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
         <div className="relative flex flex-col space-y-6">
           {renderEntries()}
         </div>
       </div>
-      <Separator className="" />
+      <Separator />
+      <Button
+        className="mx-auto flex font-serif text-muted-foreground"
+        variant="ghost"
+        onClick={handleScrollToTop}
+      >
+        Back to the top <ArrowUpIcon />
+      </Button>
     </div>
   );
 };
