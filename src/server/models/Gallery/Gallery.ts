@@ -63,7 +63,7 @@ GallerySchema.virtual(GALLERY_ITEMS_VIRTUAL, {
 export const GalleryWithItemsPopulate = {
   path: GALLERY_ITEMS_VIRTUAL,
   model: GALLERY_ITEM_MODEL_KEY,
-  options: { sort: { "position.1": 1, "position.0": 1 } },
+  options: { sort: { "position.0": 1, "position.1": 1 } },
 };
 
 // Create the model

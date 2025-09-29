@@ -8,6 +8,7 @@ interface GalleryPreviewProps {
 }
 
 const GalleryPreview: FC<GalleryPreviewProps> = ({ gallery }) => {
+        console.log("🚀 ~ GalleryPreview ~ gallery.items:", gallery.items)
   return (
     <EditGalleryItemContextProvider>
       <div className="grid grid-cols-4 gap-4">
