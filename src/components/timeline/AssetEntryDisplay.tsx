@@ -21,13 +21,15 @@ const AssetEntryDisplay: FC<AssetEntryDisplayProps> = ({ entry, flip }) => {
       <div
         className={cn("order-2 bg-background py-4 px-2", flip && "md:order-1")}
       >
-        <H3 className="md:mb-2">{entry.title}</H3>
-        <ExpandableText
-          textClassName="text-muted-foreground whitespace-pre-line"
-          className="mb-2 md:mb-4"
-          text={entry.description}
-          clamp="line-clamp-6"
-        />
+        <div className="relative mb-2">
+          <H3 className="">{entry.title}</H3>
+          <ExpandableText
+            className="md:mt-2"
+            textClassName="text-muted-foreground whitespace-pre-line"
+            text={entry.description}
+            clamp="line-clamp-6"
+          />
+        </div>
         <EntryButtons buttons={entry.buttons} />
       </div>
     </div>

@@ -11,13 +11,13 @@ interface AssetItemDisplayProps {
 
 const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item }) => {
   return (
-    <div className="space-y-4">
-      <AssetViewer asset={item} />
+    <div>
+      <AssetViewer asset={item} className="mb-4" />
 
       <div className="relative">
-        <H3 className="lg:mb-2">{item.title}</H3>
+        <H3 className="">{item.title}</H3>
         <ExpandableText
-          className="mb-2 lg:mb-4"
+          className="lg:mt-2"
           textClassName="text-muted-foreground whitespace-pre-line"
           text={item.description}
           clamp="line-clamp-2"

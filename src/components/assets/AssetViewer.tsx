@@ -28,12 +28,14 @@ interface AssetViewerProps {
   asset: Asset
   objectFit?: "object-cover" | "object-contain";
   aspectRatio?: "square" | "media-defined";
+  className?: string;
 }
 
 const AssetViewer: FC<AssetViewerProps> = ({
   asset,
   aspectRatio = "media-defined",
   objectFit = "object-contain",
+  className,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -131,7 +133,8 @@ const AssetViewer: FC<AssetViewerProps> = ({
       className={cn(
         "relative w-full flex justify-center items-center bg-muted text-muted-foreground rounded-md overflow-hidden group/media",
         isImageLoading && "animate-skeleton-shimmer",
-        "shadow-lg"
+        "shadow-lg",
+        className
       )}
     >
       {renderContent()}

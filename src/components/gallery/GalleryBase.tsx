@@ -11,20 +11,20 @@ interface GalleryBaseProps {
 
 interface GalleryRowItem {
   item: GalleryItem;
-  width: number;
-  height: number;
+  width: number | "100%";
+  height: number | "100%";
 }
 
 const GAP = 32 as const; //px
 const MAX_HEIGHT_RATIO = 0.75;
 const NON_MEDIA_ASPECT_RATIO = 1.5;
+const MD_BREAKPOINT = 768;
 
 const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => { 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [maxHeight, setMaxHeight] = useState<number>(0);
-
-
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
 
   useEffect(() => {
     const getDimensions = () => {
@@ -34,12 +34,14 @@ const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => {
       setContainerWidth(rowWidth);
 
       setMaxHeight(window.innerHeight * MAX_HEIGHT_RATIO);
+
+      setIsDesktop(window.innerWidth >= MD_BREAKPOINT);
     };
 
 
     getDimensions();
 
-    const debouncedGetDimensions = debounce(getDimensions, 250);
+    const debouncedGetDimensions = debounce(getDimensions, 100);
 
     window.addEventListener("resize", debouncedGetDimensions);
     return () => {
@@ -62,11 +64,12 @@ const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => {
         rows[y] = [item];
       }
     }
-
+    
     //calculate the width of each item
     // height of the images should be the same
     // use the height and aspect ratio for calculation (+ the gap)
     const galleryRowsWithWidth: GalleryRowItem[][] = rows.map((row) => {
+
       const totalAspectRatio = row.reduce((acc, item) => {
         const aspectRatio =
           isGalleryMediaItem(item)
@@ -75,7 +78,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => {
         return acc + aspectRatio;
       }, 0);
 
-      const rowGapOffset = GAP * (row.length - 1);
+      const rowGapOffset = GAP * (row.length - 2);
       const rowHeight = Math.min(
         (containerWidth - rowGapOffset) / totalAspectRatio,
         maxHeight
@@ -86,7 +89,11 @@ const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => {
           ? item.media?.aspectRatio || 1
           : NON_MEDIA_ASPECT_RATIO;
         
-        const width = aspectRatio * rowHeight;
+        const cellHeight = Math.min((containerWidth / aspectRatio), maxHeight);
+        
+        const height = isDesktop ? rowHeight : cellHeight;
+        
+        const width = aspectRatio * height;
 
         return {
           item,
@@ -96,25 +103,21 @@ const GalleryBase: FC<GalleryBaseProps> = ({ gallery, ItemComponent }) => {
       });
     });
     return galleryRowsWithWidth;
-  }, [gallery.items, containerWidth, maxHeight]);
+  }, [gallery.items, containerWidth, maxHeight, isDesktop]);
 
   return (
-    <div className="space-y-12" ref={containerRef}>
+    <div className="space-y-16" ref={containerRef}>
       {galleryRows.map((row, index) => (
         <div
           key={"row-" + index}
-          className={`flex items-start justify-center`}
-          style={{
-            gap: GAP,
-          }}
+          className={`flex flex-col md:flex-row items-center md:items-start justify-center`}
+          style={{ gap: GAP }}
         >
           {row.map((cell) => (
             <div
               key={cell.item._id.toString()}
-              className="relative"
-              style={{
-                width: cell.width,
-              }}
+              className="relative duration-200 w-full"
+              style={{ maxWidth: cell.width }}
             >
               <ItemComponent item={cell.item} />
             </div>
