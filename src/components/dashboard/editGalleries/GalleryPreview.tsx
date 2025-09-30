@@ -12,7 +12,7 @@ const GalleryPreview: FC<GalleryPreviewProps> = ({ gallery }) => {
 
   return (
     <EditGalleryItemContextProvider>
-      <GalleryBase gallery={gallery} ItemComponent={EditableItem} />
+      <GalleryBase gallery={gallery} ItemComponent={EditableItem} hideItemTitles={true}  />
     </EditGalleryItemContextProvider>
   );
 };

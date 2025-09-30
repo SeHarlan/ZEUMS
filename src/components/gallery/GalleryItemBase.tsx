@@ -5,9 +5,12 @@ import AssetItemDisplay from "./AssetItemDisplay";
 
 export interface GalleryItemBaseProps {
   item: GalleryItem;
+  /**passed to AssetItemDisplay*/
+  hideTitle?: boolean;
+  hideDescription?: boolean;
 }
 
-const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item }) => {
+const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription }) => {
   if (item.itemType === GalleryItemTypes.Text) {
     return <TextItemDisplay item={item} />;
   }
@@ -16,7 +19,7 @@ const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item }) => {
     item.itemType === GalleryItemTypes.BlockchainAsset ||
     item.itemType === GalleryItemTypes.UserAsset
   ) {
-    return <AssetItemDisplay item={item} />;
+    return <AssetItemDisplay item={item} hideTitle={hideTitle} hideDescription={hideDescription} />;
   }
 
   //TODO create and handle other item types

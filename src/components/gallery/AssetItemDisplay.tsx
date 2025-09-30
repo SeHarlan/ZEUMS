@@ -7,22 +7,29 @@ import ExpandableText from "../general/ExpandableText";
 
 interface AssetItemDisplayProps {
   item: BlockchainAssetGalleryItem | UserAssetGalleryItem;
+  /**also hides description */
+  hideTitle?: boolean;
+  hideDescription?: boolean;
 }
 
-const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item }) => {
+const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription }) => {
   return (
     <div>
       <AssetViewer asset={item} className="mb-4" />
 
-      <div className="relative">
-        <H3 className="">{item.title}</H3>
-        <ExpandableText
-          className="lg:mt-2"
-          textClassName="text-muted-foreground whitespace-pre-line"
-          text={item.description}
-          clamp="line-clamp-2"
-        />
-      </div>
+      {!hideTitle && (
+        <div className="relative mb-2 h-fit">
+          <H3 className="">{item.title}</H3>
+          {!hideDescription && (
+            <ExpandableText
+              className="md:mt-2"
+              textClassName="text-muted-foreground whitespace-pre-line"
+              text={item.description}
+              clamp="line-clamp-2"
+            />
+          )}
+        </div>
+      )}
       <EntryButtons buttons={item.buttons} />
     </div>
   );

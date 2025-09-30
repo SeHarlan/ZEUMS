@@ -40,6 +40,7 @@ export const EDIT_PROFILE_RETURN_KEY = "edit-profile";
 export const EDIT_PROFILE_ACCOUNT_RETURN_KEY = "edit-profile-account";
 export const EDIT_PROFILE_DISPLAY_RETURN_KEY = "edit-profile-display";
 export const EDIT_GALLERIES_RETURN_KEY = "edit-galleries";
+export const EDIT_GALLERY_ITEMS_RETURN_KEY = "gallery";
 export const EDIT_TIMELINE_RETURN_KEY = "edit-timeline";
 
 export const SOLANA_ASSET_RETURN_KEY = "solana";

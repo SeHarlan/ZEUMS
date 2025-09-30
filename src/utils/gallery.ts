@@ -28,6 +28,7 @@ export const convertToUserVirtualGallery = (
   return {
     ...gallery,
     items: firstItemWithMedia ? [firstItemWithMedia] : [],
+    totalItems: gallery.items?.length || 0,
   };
 };
 

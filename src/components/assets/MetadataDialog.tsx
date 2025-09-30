@@ -8,7 +8,7 @@ import ScrollableDialog from "../general/ScrollableDialog";
 import { P, H3 } from "../typography/Typography";
 import { Separator } from "@/components/ui/separator";
 import { cn, truncate } from "@/utils/ui-utils";
-import { EntrySource } from "@/types/entry";
+import { BlockchainAttribute, EntrySource } from "@/types/entry";
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
 import MediaThumbnail from "../media/MediaThumbnail";
@@ -93,7 +93,7 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
               <div className="grid grid-cols-1 gap-2">
                 {asset.attributes.map((attribute, index) => (
                   <AttributeItem
-                    key={`${attribute.type}-${attribute.value}-${index}`}
+                    key={`${attribute.trait_type}-${attribute.value}-${index}`}
                     attribute={attribute}
                   />
                 ))}
@@ -197,13 +197,13 @@ const AddressTag: FC<AddressTagProps> = ({
   );
 };
 
-interface AttributeItemProps {
-  attribute: { type: string; value: string };
+interface BlockchainAttributeItemProps {
+  attribute: BlockchainAttribute;
 }
-const AttributeItem: FC<AttributeItemProps> = ({ attribute }) => (
+const AttributeItem: FC<BlockchainAttributeItemProps> = ({ attribute }) => (
   <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
     <span className="text-sm font-medium text-muted-foreground">
-      {attribute.type}
+      {attribute.trait_type}
     </span>
     <span className="text-sm">{attribute.value}</span>
   </div>

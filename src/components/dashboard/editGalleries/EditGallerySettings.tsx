@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { GalleryType } from "@/types/gallery";
+import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -24,24 +24,29 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { useUser } from "@/context/UserProvider";
 import { convertToUserVirtualGallery, getGalleryKey } from "@/utils/gallery";
+import { useRouter } from "next/navigation";
+import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { Separator } from "@/components/ui/separator";
+import { ImagesIcon } from "lucide-react";
 
 const formId = "edit-gallery-form";
 
 interface EditGallerySettingsProps { 
-  isOpen: boolean;
-  galleryId: string | null;
+  editingGallery: UserVirtualGalleryType | null;
   onClose: () => void;
 }
 
-const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, onClose }) => {
+const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
-  const { gallery, mutateGallery, isLoading } = useGalleryById(galleryId);
+  const galleryId = editingGallery?._id?.toString() || "";
+  const { mutateGallery, isLoading } = useGalleryById(galleryId);
   const { setUser } = useUser();
+  const router = useRouter();
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
-    title: gallery?.title || "",
-    description: gallery?.description || "",
-  }), [gallery])
+    title: editingGallery?.title || "",
+    description: editingGallery?.description || "",
+  }), [editingGallery])
 
   const form = useForm<UpsertGalleryFormValues>({
     resolver: zodResolver(upsertGalleryFormSchema),
@@ -49,6 +54,8 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
   });
 
   const { reset } = form;
+
+  const isOpen = Boolean(editingGallery);
 
   useEffect(() => {
     //isOpen means there is a gallery to edit
@@ -60,12 +67,12 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
   }, [reset, defaultValues, isOpen]);
 
   const onSubmit = (data: UpsertGalleryFormValues) => {
-    if (!gallery) return;
+    if (!editingGallery) return;
 
     setSubmitting(true);
 
     const updatedGalleryData = {
-      _id: gallery._id,
+      _id: editingGallery._id,
       title: data.title,
       description: data.description,
     };
@@ -80,7 +87,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
         // Update the gallery data using SWR mutation
         mutateGallery(updatedGallery, false)
 
-        const galleryKey = getGalleryKey(gallery.source)
+        const galleryKey = getGalleryKey(editingGallery.source)
         //update the user context with the new gallery
         setUser((prevUser) => {
           if (!prevUser) return prevUser;
@@ -118,6 +125,10 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
   const handleOpenChange = (open: boolean) => { 
     if (!open) onClose()
   }
+  
+  const goToGalleryItems = () => {
+    router.push(EDIT_GALLERY(galleryId));
+  }
 
   return (
     <SideDrawer
@@ -131,12 +142,17 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
           onClick={() => form.handleSubmit(onSubmit)()} // Direct form submission
           className="w-full"
           loading={submitting || isLoading}
-          disabled={!gallery}
+          disabled={!editingGallery}
         >
           <P>Update Gallery</P>
         </Button>
       }
     >
+      <Button onClick={goToGalleryItems} className="w-full">
+        Manage Gallery Items
+        <ImagesIcon />
+      </Button>
+      <Separator className="my-6" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
           <div className="flex flex-col gap-y-6">
@@ -153,7 +169,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ isOpen, galleryId, 
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"

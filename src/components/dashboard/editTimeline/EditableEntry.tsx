@@ -1,11 +1,10 @@
 "use client";
 
-import EntryBase from "@/components/timeline/EntryBase";
+import EntryBase, { EntryBaseProps } from "@/components/timeline/EntryBase";
 import { Button } from "@/components/ui/button";
 import { ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useEditEntry } from "@/context/EditEntryProvider";
 import { useUser } from "@/context/UserProvider";
-import { TimelineEntry } from "@/types/entry";
 import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey } from "@/utils/timeline";
 import axios from "axios";
@@ -14,30 +13,26 @@ import { DeleteResult } from "mongoose";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 
-interface EditableEntryProps {
-  entry: TimelineEntry;
-  flip?: boolean; // Optional prop to flip the order of the entry display 
-}
 
-const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
-  const { setUser } = useUser()
-  const {openEditDrawer, isOpen} = useEditEntry();
+const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
+  const { setUser } = useUser();
+  const { openEditDrawer, isOpen } = useEditEntry();
 
   const [deleting, setDeleting] = useState(false);
 
   const disableButtons = deleting || isOpen;
 
-  const handleEdit = () => { 
+  const handleEdit = () => {
     openEditDrawer(entry);
-  }
+  };
 
-  const handleDelete = async () => { 
+  const handleDelete = async () => {
     setDeleting(true);
 
     axios
       .delete<DeleteResult>(`${ENTRY_ROUTE}?id=${entry._id}`)
       .then((response) => {
-        const {acknowledged, deletedCount} = response.data;
+        const { acknowledged, deletedCount } = response.data;
         if (acknowledged && deletedCount > 0) {
           toast.info("Entry deleted successfully.");
 
@@ -54,7 +49,9 @@ const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
             };
           });
         } else {
-          throw new Error(`Entry not deleted from server. Request acknowledged: ${acknowledged}`);
+          throw new Error(
+            `Entry not deleted from server. Request acknowledged: ${acknowledged}`
+          );
         }
       })
       .catch((error) => {
@@ -67,8 +64,8 @@ const EditableEntry: FC<EditableEntryProps> = ({ entry, flip }) => {
       .finally(() => {
         setDeleting(false);
       });
-  }
-  
+  };
+
   return (
     <div className="relative group/entry-preview">
       <div className="z-10 absolute -top-5 -right-5 flex gap-2 group-hover/entry-preview:opacity-100 opacity-100 sm:opacity-25 transition-opacity duration-200">

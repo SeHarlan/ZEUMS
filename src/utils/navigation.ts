@@ -17,8 +17,13 @@ import {
   EDIT_PROFILE_DISPLAY,
   EDIT_PROFILE_DISPLAY_RETURN_KEY,
   SEARCH,
-  SEARCH_RETURN_KEY
+  SEARCH_RETURN_KEY,
+  EDIT_GALLERY_ITEMS_RETURN_KEY,
+  EDIT_GALLERY
 } from "@/constants/clientRoutes";
+
+//a unique string that will never show up in a URL
+const specialSplitter = "~";
 
 export const getReturnPath = (returnKey: string): string => {
   const pathMap: Record<string, string> = {
@@ -33,8 +38,12 @@ export const getReturnPath = (returnKey: string): string => {
   };
 
   if (returnKey.includes(SOLANA_ASSET_RETURN_KEY)) {
-    const id = returnKey.split("-")[1];
+    const id = returnKey.split(specialSplitter)[1];
     return SOLANA_MEDIA(id);
+  }
+  if (returnKey.includes(EDIT_GALLERY_ITEMS_RETURN_KEY)) {
+    const id = returnKey.split(specialSplitter)[1];
+    return EDIT_GALLERY(id);
   }
   return pathMap[returnKey] || HOME;
 };
@@ -43,10 +52,26 @@ export const getReturnKey = (currentPath?: string, id?: string): string => {
   if (!currentPath) return LANDING_RETURN_KEY;
 
   if (id && currentPath.includes(SOLANA_MEDIA(id))) {
-    return SOLANA_ASSET_RETURN_KEY + "-" + id;
+    return SOLANA_ASSET_RETURN_KEY + specialSplitter + id;
+  }
+  if (id && currentPath.includes(EDIT_GALLERY(id))) {
+    return EDIT_GALLERY_ITEMS_RETURN_KEY + specialSplitter + id;
   }
   
-  if (currentPath.includes(EDIT_GALLERIES)) return EDIT_GALLERIES_RETURN_KEY;
+  if (currentPath.includes(EDIT_GALLERIES)) {
+    //remove query params
+    //split on EDIT_GALLERIES and get the last part
+    const editingGalleryId = currentPath
+      .split("?")[0]
+      .split(`${EDIT_GALLERIES}/`)
+      .pop();
+    // if it doesnt equal EDIT GALLERIES we can assume its an id
+
+    if (editingGalleryId && editingGalleryId !== EDIT_GALLERIES) {
+      return EDIT_GALLERY_ITEMS_RETURN_KEY + specialSplitter + editingGalleryId;
+    }
+    return EDIT_GALLERIES_RETURN_KEY;
+  }
   if (currentPath.includes(EDIT_TIMELINE)) return EDIT_TIMELINE_RETURN_KEY;
   if (currentPath.includes(EDIT_PROFILE_ACCOUNT)) return EDIT_PROFILE_ACCOUNT_RETURN_KEY;
   if (currentPath.includes(EDIT_PROFILE_DISPLAY)) return EDIT_PROFILE_DISPLAY_RETURN_KEY;

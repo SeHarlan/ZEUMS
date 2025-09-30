@@ -8,6 +8,7 @@ import {
   GALLERY_ITEM_MODEL_KEY,
   GALLERY_ITEMS_FOREIGN_KEY,
   GALLERY_ITEMS_VIRTUAL,
+  GALLERY_TOTAL_ITEMS_VIRTUAL,
   GALLERY_MODEL_KEY,
   GALLERY_OWNER_FOREIGN_KEY,
   USER_MODEL_KEY,
@@ -58,6 +59,14 @@ GallerySchema.virtual(GALLERY_ITEMS_VIRTUAL, {
   ref: GALLERY_ITEM_MODEL_KEY,
   localField: "_id",
   foreignField: GALLERY_ITEMS_FOREIGN_KEY,
+});
+
+// Add virtual for total items count - this will work when items are populated
+GallerySchema.virtual(GALLERY_TOTAL_ITEMS_VIRTUAL, {
+  ref: GALLERY_ITEM_MODEL_KEY,
+  localField: "_id",
+  foreignField: GALLERY_ITEMS_FOREIGN_KEY,
+  count: true
 });
 
 export const GalleryWithItemsPopulate = {

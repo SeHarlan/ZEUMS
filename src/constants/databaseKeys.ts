@@ -22,6 +22,7 @@ export const GALLERY_ENTRY_VIRTUAL = "gallery" as const;
 
 export const GALLERY_MODEL_KEY = "Gallery" as const;
 export const GALLERY_ITEMS_VIRTUAL = "items" as const;
+export const GALLERY_TOTAL_ITEMS_VIRTUAL = "totalItems" as const;
 export const GALLERY_ITEMS_FOREIGN_KEY = "parentGalleryId" as const;
 export const GALLERY_OWNER_FOREIGN_KEY = "owner" as const;
 

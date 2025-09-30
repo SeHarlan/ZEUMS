@@ -2,6 +2,9 @@ import { FC, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { P } from "../typography/Typography";
 import { cn } from "@/utils/ui-utils";
+import { PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Popover } from "../ui/popover";
+import { debounce } from "@/utils/general";
 
 interface ExpandableTextProps {
   text?: string;
@@ -27,12 +30,20 @@ const ExpandableText: FC<ExpandableTextProps> = ({
   const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    const setIsClamped = () => {
     if (textRef.current) {
       const element = textRef.current;
-      // Check if the element has scrollable content (indicating overflow)
-      const shouldShow = element.scrollHeight > element.clientHeight;
-      setShowButton(shouldShow);
-    }
+        // Check if the element has scrollable content (indicating overflow)
+        const shouldShow = element.scrollHeight - element.clientHeight >= 1;
+        setShowButton(shouldShow);
+      }
+    };
+    setIsClamped();
+
+    const debouncedSetIsClamped = debounce(setIsClamped, 100);
+
+    window.addEventListener("resize", debouncedSetIsClamped);
+    return () => window.removeEventListener("resize", debouncedSetIsClamped);
   }, [text, clamp]);
 
   if (!text) return null;
@@ -41,28 +52,31 @@ const ExpandableText: FC<ExpandableTextProps> = ({
     <div className={className}>
       <P
         ref={textRef}
-        className={cn(
-          textClassName,
-          !isExpanded && clamp
-        )}
+        className={cn(textClassName, clamp, isExpanded && "opacity-50")}
       >
         {text}
       </P>
       {showButton && (
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={cn(
-            "h-auto p-0 text-sm text-muted-foreground/50 mt-1 hover:text-muted-foreground duration-300 transition-colors",
-            "absolute -bottom-6 left-0",
-            buttonClassName
-          )}
-        >
-          {isExpanded ? showLessText : showMoreText}
-        </Button>
+        <Popover open={isExpanded} onOpenChange={setIsExpanded}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                "h-auto p-0 text-sm text-muted-foreground/50 mt-1 hover:text-muted-foreground duration-300 transition-colors",
+                "absolute -bottom-6 left-0",
+                buttonClassName
+              )}
+            >
+              {isExpanded ? showLessText : showMoreText}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[calc(100vw-3rem)] max-w-xl m-6 bg-popover-blur">
+            <P className={cn(textClassName, "text-foreground")}>{text}</P>
+          </PopoverContent>
+        </Popover>
       )}
-
     </div>
   );
 };

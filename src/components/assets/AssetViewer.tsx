@@ -39,6 +39,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
 }) => {
   const pathname = usePathname();
   const router = useRouter();
+
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
     useImageFallback(asset.media);
 
@@ -73,7 +74,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const returnKey = getReturnKey(pathname);
   const newPagePath = basePath + makeReturnQueryParam(returnKey);
 
-  const goToExplorer = () => {
+  const goToMediaPage = () => {
     router.push(newPagePath);
   };
 
@@ -98,7 +99,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
     return (
       <Image
-        onClick={goToExplorer}
+        onClick={goToMediaPage}
         unoptimized={true}
         width={width}
         height={height}

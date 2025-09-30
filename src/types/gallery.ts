@@ -24,4 +24,5 @@ export type GalleryType = BaseGalleryType & {
 
 export type UserVirtualGalleryType = BaseGalleryType & {
   items?: GalleryMediaItem[];
+  totalItems: number;
 };

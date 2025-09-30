@@ -1,11 +1,10 @@
 "use client";
 
-import GalleryItemBase from "@/components/gallery/GalleryItemBase";
+import GalleryItemBase, { GalleryItemBaseProps } from "@/components/gallery/GalleryItemBase";
 import { Button } from "@/components/ui/button";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 import { useEditGalleryItem } from "@/context/EditGalleryItemProvider";
 import useGalleryById from "@/hooks/useGalleryById";
-import { GalleryItem } from "@/types/galleryItem";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
 import { EditIcon, Trash2Icon } from "lucide-react";
@@ -13,15 +12,9 @@ import { DeleteResult } from "mongoose";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 
-interface EditableItemProps {
-  item: GalleryItem;
-  flip?: boolean; // Optional prop to flip the order of the entry display
-}
-
-const EditableItem: FC<EditableItemProps> = ({ item }) => {
+const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription }) => {
   const { openEditDrawer, isOpen } = useEditGalleryItem();
   const { mutateGallery } = useGalleryById(item.parentGalleryId.toString());
-
 
   const [deleting, setDeleting] = useState(false);
 
@@ -43,7 +36,9 @@ const EditableItem: FC<EditableItemProps> = ({ item }) => {
 
           mutateGallery((prev) => {
             if (!prev) return prev;
-            const updatedItems = prev.items?.filter((prevItem) => prevItem._id !== item._id);
+            const updatedItems = prev.items?.filter(
+              (prevItem) => prevItem._id !== item._id
+            );
             return {
               ...prev,
               items: updatedItems,
@@ -87,7 +82,7 @@ const EditableItem: FC<EditableItemProps> = ({ item }) => {
           <EditIcon />
         </Button>
       </div>
-      <GalleryItemBase item={item} />
+      <GalleryItemBase item={item} hideTitle={hideTitle} hideDescription={hideDescription} />
     </div>
   );
 };

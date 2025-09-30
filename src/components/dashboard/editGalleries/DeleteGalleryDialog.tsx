@@ -17,18 +17,16 @@ import { DeleteResult } from "mongoose";
 interface DeleteGalleryDialogProps {
   gallery: UserVirtualGalleryType | null;
   onClose: () => void;
-  source: EntrySource;
 }
 
 const DeleteGalleryDialog: FC<DeleteGalleryDialogProps> = ({ 
   gallery, 
   onClose, 
-  source 
 }) => {
   const [deleting, setDeleting] = useState(false);
   const { setUser } = useUser();
 
-  const galleryKey = getGalleryKey(source);
+  const galleryKey = getGalleryKey(gallery?.source || EntrySource.Creator);
 
   const handleDelete = () => {
     if (!gallery) return;
@@ -92,7 +90,7 @@ const DeleteGalleryDialog: FC<DeleteGalleryDialogProps> = ({
           <P className="text-sm text-muted-foreground">This will delete:</P>
           <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
             <li>• The gallery &ldquo;{gallery.title}&rdquo;</li>
-            <li>• All {gallery.items?.length || 0} items in the gallery</li>
+            <li>• All {gallery.totalItems} items in the gallery</li>
             <li>• All associated metadata and settings</li>
           </ul>
         </div>
