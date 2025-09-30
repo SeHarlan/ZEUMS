@@ -14,12 +14,13 @@ const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item }) => {
     <div className="space-y-4">
       <AssetViewer asset={item} />
 
-      <div>
+      <div className="relative">
         <H3 className="lg:mb-2">{item.title}</H3>
         <ExpandableText
           className="mb-2 lg:mb-4"
           textClassName="text-muted-foreground whitespace-pre-line"
           text={item.description}
+          clamp="line-clamp-2"
         />
       </div>
       <EntryButtons buttons={item.buttons} />

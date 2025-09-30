@@ -14,7 +14,7 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ gallery, mutateGallery })
   return (
     <div className="space-y-6">
       <NewItemForm gallery={gallery} mutateGallery={mutateGallery} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <AddBlockchainGalleryItems gallery={gallery} mutateGallery={mutateGallery} />
       </div>
       <GalleryPreview gallery={gallery} />

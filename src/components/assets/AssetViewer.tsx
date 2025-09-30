@@ -131,7 +131,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
       className={cn(
         "relative w-full flex justify-center items-center bg-muted text-muted-foreground rounded-md overflow-hidden group/media",
         isImageLoading && "animate-skeleton-shimmer",
-        "shadow-md"
+        "shadow-lg"
       )}
     >
       {renderContent()}

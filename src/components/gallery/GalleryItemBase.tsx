@@ -3,11 +3,11 @@ import { GalleryItem, GalleryItemTypes } from "@/types/galleryItem";
 import TextItemDisplay from "./TextItemDisplay";
 import AssetItemDisplay from "./AssetItemDisplay";
 
-export interface EntryBaseProps {
+export interface GalleryItemBaseProps {
   item: GalleryItem;
 }
 
-const GalleryItemBase: FC<EntryBaseProps> = ({ item }) => {
+const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item }) => {
   if (item.itemType === GalleryItemTypes.Text) {
     return <TextItemDisplay item={item} />;
   }

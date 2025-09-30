@@ -2,6 +2,7 @@ import { FC, ReactNode } from "react";
 import PageLoading from "./PageLoading";
 import GlitchFeedback from "./GlitchFeedback";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface FeedbackWrapperProps {
   isLoading: boolean;
@@ -11,6 +12,7 @@ interface FeedbackWrapperProps {
   errorSubtitle?: string;
   noDataSubtitle?: string;
   children: ReactNode;
+  useSpinner?: boolean;
 }
 
 const FeedbackWrapper: FC<FeedbackWrapperProps> = ({
@@ -21,9 +23,12 @@ const FeedbackWrapper: FC<FeedbackWrapperProps> = ({
   errorSubtitle = "Something went wrong",
   noDataSubtitle = "Nothing was found",
   children,
+  useSpinner = false,
 }) => {
   if (isLoading) {
-    return <PageLoading complete={hasData} loading={isLoading} />;
+    return useSpinner
+      ? <LoadingSpinner className="fixed-center" iconClass="size-14"/>
+      : <PageLoading complete={hasData} loading={isLoading} />;
   }
 
   //done loading but there's an error or no data

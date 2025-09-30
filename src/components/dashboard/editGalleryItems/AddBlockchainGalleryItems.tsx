@@ -121,13 +121,13 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <P>Add Blockchain Assets</P>
+          <P>Add Blockchain Gallery Items</P>
           <ImagesIcon />
         </Button>
       </DialogTrigger>
       <DialogContent className="lg:max-w-4xl h-full flex flex-col">
         <DialogHeader className="flex-row justify-between items-center">
-          <DialogTitle className="w-fit">Select Blockchain Assets</DialogTitle>
+          <DialogTitle className="w-fit">Select Blockchain Gallery Items</DialogTitle>
           <DialogDescription className="sr-only">
             This dialog allows you to select blockchain assets to add to your
             gallery.

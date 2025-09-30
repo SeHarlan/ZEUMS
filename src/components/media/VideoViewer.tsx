@@ -63,7 +63,7 @@ interface VideoViewerProps {
   onError?: ((e: unknown) => void);
 }
 
-const BUFFERING_DELAY = 500;
+const BUFFERING_DELAY = 1_000; //time before buffering message shows
 const LOADING_TIMEOUT = 30_000; //30 seconds
 
 const VideoViewer: FC<VideoViewerProps> = ({

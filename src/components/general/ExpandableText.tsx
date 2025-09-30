@@ -5,7 +5,7 @@ import { cn } from "@/utils/ui-utils";
 
 interface ExpandableTextProps {
   text?: string;
-  maxLines?: number;
+  clamp?: string;
   className?: string;
   textClassName?: string;
   buttonClassName?: string;
@@ -15,7 +15,7 @@ interface ExpandableTextProps {
 
 const ExpandableText: FC<ExpandableTextProps> = ({
   text,
-  maxLines = 3,
+  clamp = "line-clamp-2",
   className,
   textClassName,
   buttonClassName,
@@ -33,14 +33,16 @@ const ExpandableText: FC<ExpandableTextProps> = ({
       const shouldShow = element.scrollHeight > element.clientHeight;
       setShowButton(shouldShow);
     }
-  }, [text, maxLines]);
+  }, [text, clamp]);
+
+
   return (
     <div className={className}>
       <P
         ref={textRef}
         className={cn(
           textClassName,
-          !isExpanded && `line-clamp-${maxLines.toString()}`,
+          !isExpanded && clamp
         )}
       >
         {text}

@@ -20,3 +20,24 @@ export const addHttpsPrefix = (url: string): string => {
   // Add https:// prefix
   return `https://${url}`;
 };
+
+export const debounce = <T extends (...args: unknown[]) => unknown>(
+  func: T,
+  wait: number
+): T & { cancel: () => void } => {
+  let timeout: NodeJS.Timeout;
+  
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+  
+  const cancel = () => {
+    clearTimeout(timeout);
+  };
+  
+  // Add cancel method to the debounced function
+  Object.assign(debounced, { cancel });
+  
+  return debounced as T & { cancel: () => void };
+};
