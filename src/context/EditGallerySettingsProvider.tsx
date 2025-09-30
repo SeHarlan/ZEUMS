@@ -1,10 +1,9 @@
 "use client";
 
 import DeleteGalleryDialog from "@/components/dashboard/editGalleries/DeleteGalleryDialog";
-import EditGallerySettings from "@/components/dashboard/editGalleries/EditGallerySettings";
+import EditGallerySettings from "@/components/dashboard/editGalleries/editSettingsForm/EditSettingsForm";
 import { UserVirtualGalleryType } from "@/types/gallery";
 import { createContext, useContext, useState, ReactNode } from "react";
-
 interface EditGallerySettingsContextType {
   editingGallery: UserVirtualGalleryType | null;
   galleryToDelete: UserVirtualGalleryType | null;

@@ -46,6 +46,14 @@ const GallerySchema = new Schema<GalleryDocument>(
       default: EntrySource.Creator,
       required: true,
     },
+    hideItemTitles: {
+      type: Boolean,
+      default: false,
+    },
+    hideItemDescriptions: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

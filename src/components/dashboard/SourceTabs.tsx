@@ -55,7 +55,7 @@ const SourceTabs: FC<SourceTabsProps> = ({EditComponent}) => {
       </TabsList>
 
       {content.map((item) => (
-        <TabsContent key={item.value} value={item.value} className="flex flex-col space-y-8 mt-8">
+        <TabsContent key={item.value} value={item.value} className="flex flex-col space-y-8 mt-4">
           {item.source ? <EditComponent source={item.source} /> : <P className="italic text-center">Coming Soon...</P>}
         </TabsContent>
       ))}

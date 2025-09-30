@@ -16,11 +16,15 @@ export type BaseGalleryType = {
   displayType: GalleryDisplayTypes;
   /** Source of the galleryItems (creator or collector) */
   source: EntrySource;
+  hideItemTitles?: boolean;
+  hideItemDescriptions?: boolean;
 };
 
 export type GalleryType = BaseGalleryType & {
   items?: GalleryItem[];
 }
+
+export type GalleryCreation = Pick<BaseGalleryType, "title" | "description" | "source" | "hideItemTitles" | "hideItemDescriptions"> 
 
 export type UserVirtualGalleryType = BaseGalleryType & {
   items?: GalleryMediaItem[];

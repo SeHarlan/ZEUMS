@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import Gallery from "../../models/Gallery/Gallery";
-import { GalleryType } from "@/types/gallery";
+import { GalleryCreation } from "@/types/gallery";
+
 
 export async function createGalleryHandler(req: NextRequest): Promise<NextResponse> {
   await connectToDatabase();
 
   try {
     const authSessionUser = await getAuthSessionUser(req);
-    const { title, description, source } = (await req.json()) as Pick<GalleryType, "title" | "description" | "source">;
+    const { title, description, source, hideItemTitles, hideItemDescriptions } =
+      (await req.json()) as GalleryCreation;
     
     // Validate required fields
     if (!title || title.trim().length === 0) {
@@ -17,11 +19,13 @@ export async function createGalleryHandler(req: NextRequest): Promise<NextRespon
     }
 
     // Create gallery data
-    const galleryCreationData = {
+    const galleryCreationData: GalleryCreation & { owner: string } = {
       title: title,
       description: description,
       source: source,
       owner: authSessionUser.dbUserId,
+      hideItemTitles,
+      hideItemDescriptions,
     };
     
     // Create the gallery

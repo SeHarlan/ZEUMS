@@ -116,7 +116,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   }, [gallery.items, containerWidth, maxHeight, isDesktop]);
 
   return (
-    <div className="space-y-16" ref={containerRef}>
+    <div className="space-y-30 mb-30" ref={containerRef}>
       {isReady &&
         galleryRows.map((row, index) => (
           <div

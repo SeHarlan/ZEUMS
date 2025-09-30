@@ -73,7 +73,7 @@ const ExpandableText: FC<ExpandableTextProps> = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[calc(100vw-3rem)] max-w-xl m-6 bg-popover-blur">
-            <P className={cn(textClassName, "text-foreground")}>{text}</P>
+            <P className={"whitespace-pre-line"}>{text}</P>
           </PopoverContent>
         </Popover>
       )}

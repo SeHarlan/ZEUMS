@@ -17,6 +17,8 @@ export const upsertGalleryFormSchema = z.object({
     })
     .or(z.literal(""))
     .optional(),
+  hideItemTitles: z.boolean().optional(),
+  hideItemDescriptions: z.boolean().optional(),
 });
 
 export type UpsertGalleryFormValues = z.infer<typeof upsertGalleryFormSchema>;

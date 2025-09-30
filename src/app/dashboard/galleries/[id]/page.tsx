@@ -20,6 +20,7 @@ const EditGalleryPage = () => {
         title={`Edit ${gallery?.title}`}
         subtitle="Curate and manage your gallery content"
       />
+
       <PageTurnLeft path={EDIT_GALLERIES} />
       <FeedbackWrapper
         isLoading={isLoading}
@@ -30,7 +31,12 @@ const EditGalleryPage = () => {
       >
         <Card>
           <CardContent>
-            {gallery && <EditGalleryItems gallery={gallery} mutateGallery={mutateGallery} />}
+            {gallery && (
+              <EditGalleryItems
+                gallery={gallery}
+                mutateGallery={mutateGallery}
+              />
+            )}
           </CardContent>
         </Card>
       </FeedbackWrapper>

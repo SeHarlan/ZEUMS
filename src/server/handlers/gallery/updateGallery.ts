@@ -3,13 +3,22 @@ import connectToDatabase from "../../db/mongodb";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import Gallery, { GalleryWithItemsPopulate } from "../../models/Gallery/Gallery";
 import { GalleryType } from "@/types/gallery";
+import { removeUndefined } from "@/utils/general";
 
 export async function updateGalleryHandler(req: NextRequest): Promise<NextResponse> {
   await connectToDatabase();
 
   try {
     const authSessionUser = await getAuthSessionUser(req);
-    const { _id, title, description } = (await req.json()) as Pick<GalleryType, "_id" | "title" | "description">;
+    const { _id, title, description, hideItemTitles, hideItemDescriptions } =
+      (await req.json()) as Pick<
+        GalleryType,
+        | "_id"
+        | "title"
+        | "description"
+        | "hideItemTitles"
+        | "hideItemDescriptions"
+      >;
     
     // Validate required fields
     if (!_id) {
@@ -20,16 +29,20 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
       throw new Error("Title is required");
     }
 
+    const allowedUpdates = removeUndefined({
+      title,
+      description,
+      hideItemTitles,
+      hideItemDescriptions,
+    })
+
     // Update gallery data
     const updatedGallery = await Gallery.findOneAndUpdate(
       { 
         _id: _id,
         owner: authSessionUser.dbUserId 
       },
-      { 
-        title: title.trim(),
-        description: description?.trim() || undefined
-      },
+      allowedUpdates,
       { new: true }
     ).populate(GalleryWithItemsPopulate);
 

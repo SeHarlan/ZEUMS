@@ -1,16 +1,7 @@
 "use client";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,10 +15,11 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { useUser } from "@/context/UserProvider";
 import { convertToUserVirtualGallery, getGalleryKey } from "@/utils/gallery";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { EDIT_GALLERY } from "@/constants/clientRoutes";
 import { Separator } from "@/components/ui/separator";
 import { ImagesIcon } from "lucide-react";
+import EditSettingsContent from "./EditSettingsFormContent";
 
 const formId = "edit-gallery-form";
 
@@ -42,10 +34,15 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
   const { setUser } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
     description: editingGallery?.description || "",
+    hideItemTitles: editingGallery?.hideItemTitles || false,
+    hideItemDescriptions: editingGallery?.hideItemDescriptions || false,
   }), [editingGallery])
 
   const form = useForm<UpsertGalleryFormValues>({
@@ -75,16 +72,20 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       _id: editingGallery._id,
       title: data.title,
       description: data.description,
+      hideItemTitles: data.hideItemTitles,
+      hideItemDescriptions: data.hideItemDescriptions,
     };
+    console.log("🚀 ~ onSubmit ~ updatedGalleryData:", updatedGalleryData)
 
     axios
       .patch<{ updatedGallery: GalleryType }>(GALLERY_ROUTE, updatedGalleryData)
       .then((response) => {
         const { updatedGallery } = response.data;
+        console.log("🚀 ~ afterSubmit ~ updatedGallery:", updatedGallery)
 
         toast.success("Gallery updated!");
 
-        // Update the gallery data using SWR mutation
+        // Update the main gallery data using SWR mutation
         mutateGallery(updatedGallery, false)
 
         const galleryKey = getGalleryKey(editingGallery.source)
@@ -148,45 +149,18 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         </Button>
       }
     >
-      <Button onClick={goToGalleryItems} className="w-full">
-        Manage Gallery Items
-        <ImagesIcon />
-      </Button>
-      <Separator className="my-6" />
+      {notOnGalleryItemsPage && (
+        <>
+          <Button onClick={goToGalleryItems} className="w-full">
+            Manage Gallery Items
+            <ImagesIcon />
+          </Button>
+          <Separator className="my-6" />
+        </>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
-          <div className="flex flex-col gap-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter gallery title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter gallery description"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <EditSettingsContent form={form} />
         </form>
       </Form>
     </SideDrawer>
