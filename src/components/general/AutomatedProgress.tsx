@@ -29,7 +29,7 @@ const AutomatedProgress = ({
       interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 99) {
-            return 75; // Repeat at 75% to indicate continuing loading
+            return 50; // Repeat at 50% to indicate continuing loading
           }
           return prev + 1;
         });

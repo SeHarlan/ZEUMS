@@ -1,3 +1,5 @@
+import { GalleryItem } from "../galleryItem";
+
 export enum EditProfileTab {
   ACCOUNT = "account",
   DISPLAY = "display",
@@ -26,4 +28,10 @@ export const VALID_TIMELINE_TABS = new Set(Object.values(EditTimelineTab));
 
 export function isEditTimelineTab(value: string | null): value is EditTimelineTab {
   return value !== null && VALID_TIMELINE_TABS.has(value as EditTimelineTab);
+}
+
+export interface GalleryRowItem {
+  item: GalleryItem;
+  width: number
+  height: number
 }

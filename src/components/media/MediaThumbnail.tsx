@@ -16,6 +16,7 @@ interface MediaThumbnailProps {
   className?: string;
   alt?: string;
   size?: "small" | "medium" | "full";
+  priority?: boolean;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -27,6 +28,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   className,
   alt,
   size = "small",
+  priority,
 }) => {
   const {
     isLoaded,
@@ -54,16 +56,15 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         height={height}
         width={width}
         unoptimized={true}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
         onError={onError}
         onLoad={handleLoad}
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
-          "w-full transition-opacity duration-200",
-          isLoaded ? "opacity-100" : "opacity-0",
+          "w-full transition-opacity duration-200 rounded",
+          (isLoaded || priority) ? "opacity-100" : "opacity-0",
           objectFit,
-          objectFit === "object-contain" && "p-3"
         )}
       />
     );
@@ -76,6 +77,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
         rounding,
         isLoading && "animate-skeleton-shimmer",
+        objectFit === "object-contain" && "p-2",
         className
       )}
     >

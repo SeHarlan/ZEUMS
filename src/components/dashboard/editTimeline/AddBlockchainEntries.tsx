@@ -114,7 +114,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <P>Add Blockchain Assets</P>
+          <P className="hidden md:block">Add Blockchain Assets</P>
           <ImagesIcon />
         </Button>
       </DialogTrigger>

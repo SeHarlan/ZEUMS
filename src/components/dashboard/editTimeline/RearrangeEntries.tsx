@@ -4,7 +4,7 @@ import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
 import { FC,  useMemo, useState } from "react";
-import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
+import { EntrySource, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
 import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { useUser } from "@/context/UserProvider";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
@@ -14,14 +14,17 @@ import {
   useSortable,
   arrayMove,
 } from "@dnd-kit/sortable";
+import {
+  restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/utils/ui-utils";
-import ScrollableDialog from "@/components/general/ScrollableDialog";
 import axios from "axios";
 import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
 import { toast } from "sonner";
 import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
+import SideDrawer from "@/components/general/SideDrawer";
 
 interface RearrangeEntriesProps { 
   source: EntrySource;
@@ -31,7 +34,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
 
   const [submitting, setSubmitting] = useState(false);
   const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const timelineKey = getTimelineKey(source);
 
@@ -44,7 +47,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
   }, [source, user?.createdTimelineEntries, user?.collectedTimelineEntries]);
 
   const handleOpenChange = (open: boolean) => { 
-    setDialogOpen(open);
+    setDrawerOpen(open);
     if (open) {
       // Reset rearranged entries when dialog opens
       setRearrangedEntries([...originalEntries]);
@@ -65,7 +68,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
 
     // no changes Made
     if (!updatedEntries.length) {
-      setDialogOpen(false);
+      setDrawerOpen(false);
       return
     }
 
@@ -113,7 +116,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
           };
         });
 
-        setDialogOpen(false);
+        setDrawerOpen(false);
       })
       .catch((error) => {
         toast.error("Failed to update entry positions.");
@@ -158,14 +161,12 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
           ? olderEntry.date.getTime()
           : Number.NEGATIVE_INFINITY;
 
-        //TODO: handle edge case where time in milliseconds end up the same 
+        //TODO-probably-not: handle extreme edge case where time in milliseconds end up the same 
         
         // 60 seconds before the more recent entry to place it below but on the same day
         const beforeRecentTime = recentTime - 60_000;
 
         let activeTime = beforeRecentTime;
-
-
 
         if (!recentEntry) {
           // Dropped at the very top -> make it "now"
@@ -181,54 +182,67 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
         };
 
         return moved;
-        // ...existing code...
       });
     }
   }
 
   return (
-    <ScrollableDialog
-      title="Rearrange Entries"
-      description="Quickly update entry dates by changing their position."
-      open={dialogOpen}
-      onOpenChange={handleOpenChange}
-      trigger={
-        <Button variant="outline">
+    <SideDrawer
+      triggerButton={
+        <Button>
           <P>Rearrange Entries</P>
           <ArrowDownUpIcon />
         </Button>
       }
-      footerContent={
-        <Button type="button" className="w-full sm:w-16" onClick={saveRearrangement} loading={submitting} disabled={!rearrangedEntries.length}>
+      open={drawerOpen}
+      onOpenChange={handleOpenChange}
+      title="Rearrange Entries"
+      description="Quickly change the order of entries on the timeline."
+      actionButton={
+        <Button
+          type="button"
+          className="w-full"
+          onClick={saveRearrangement}
+          loading={submitting}
+          disabled={!rearrangedEntries.length}
+        >
           Save
         </Button>
       }
     >
-      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+      <DndContext
+        onDragEnd={handleDragEnd}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+      >
         <SortableContext
           items={rearrangedEntries.map((entry) => entry._id.toString())}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex flex-col gap-4">
-            {rearrangedEntries.length
-              ? rearrangedEntries.map((entry) => (
-              <SortableEntry key={entry._id.toString()} entry={entry} />
-              ))
-              : <P className="text-center">Add some entries to get started!</P>
-            }
+          <div className="flex flex-col gap-4 mt-2">
+            {rearrangedEntries.length ? (
+              rearrangedEntries.map((entry) => {
+                return (
+                  <SortableEntry key={entry._id.toString()} entry={entry} />
+                );
+              })
+            ) : (
+              <P className="text-center">Add some entries to get started!</P>
+            )}
           </div>
         </SortableContext>
       </DndContext>
-    </ScrollableDialog>
+    </SideDrawer>
   );
 }
 
 export default RearrangeEntries;
 
-interface SortableEntryProps { 
-  entry: TimelineEntry
+interface SortableEntryProps {
+  entry: TimelineEntry;
 }
 const SortableEntry: FC<SortableEntryProps> = ({entry}) => { 
+
   const {
     attributes,
     listeners,
@@ -247,18 +261,24 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
   };
   
   
-  const thumbnail = entry.entryType === EntryTypes.BlockchainAsset || entry.entryType === EntryTypes.UserAsset
-    ? <div className="flex-shrink-0 w-10 h-10">
-      <MediaThumbnail media={entry.media} alt={entry.title} rounding="rounded-sm" />
+  const thumbnail = isMediaEntry(entry) ? (
+    <div className="flex-shrink-0 w-10 h-10">
+      <MediaThumbnail
+        objectFit="object-cover"
+        media={entry.media}
+        alt={entry.title}
+        rounding="rounded-sm"
+        size="small"
+      />
     </div>
-    : null
+  ) : null;
 
   const useTitle = Boolean(entry.title);
   const text = entry.title || entry.description || "Untitled Entry";
 
   return (
     <div
-      className="relative z-10 flex items-center gap-4 w-full h-14 py-2 pl-2 pr-4 rounded-md bg-muted cursor-grab active:cursor-grabbing"
+      className="z-10 relative flex items-center gap-4 w-full h-14 py-2 pl-2 pr-4 rounded-md bg-muted cursor-grab active:cursor-grabbing"
       ref={setNodeRef}
       style={style}
       {...listeners}
@@ -266,11 +286,14 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
     >
       <GripVerticalIcon className="flex-shrink-0" />
       {thumbnail}
-      <P className={cn(
-        "flex-1 line-clamp-1 w-full",
-        useTitle ? "text-lg font-bold" : ""
-      )}
-      >{text}</P>
+      <P
+        className={cn(
+          "flex-1 line-clamp-1 w-full",
+          useTitle ? "text-lg font-bold" : ""
+        )}
+      >
+        {text}
+      </P>
       <P className="flex-shrink-0 text-sm text-muted-foreground">
         {entry.date.toLocaleDateString()}
       </P>

@@ -122,6 +122,10 @@ export function isUserAssetEntry(entry: TimelineEntry): entry is UserAssetEntry 
   return entry.entryType === EntryTypes.UserAsset
 }
 
+export function isMediaEntry(entry: TimelineEntry): entry is BlockchainAssetEntry | UserAssetEntry {
+  return isBlockchainAssetEntry(entry) || isUserAssetEntry(entry);
+}
+
 export function isTextEntry(entry: TimelineEntry): entry is TextEntry {
   return entry.entryType === EntryTypes.Text;
 }

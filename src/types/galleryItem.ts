@@ -86,7 +86,7 @@ export function isUserAssetGalleryItem(
   return item.itemType === GalleryItemTypes.UserAsset;
 }
 
-export function isGalleryMediaItem(
+export function isMediaGalleryItem(
   item: GalleryItem
 ): item is GalleryMediaItem {
   return item.itemType === GalleryItemTypes.BlockchainAsset || item.itemType === GalleryItemTypes.UserAsset;

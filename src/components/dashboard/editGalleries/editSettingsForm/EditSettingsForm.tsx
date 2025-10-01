@@ -75,13 +75,11 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       hideItemTitles: data.hideItemTitles,
       hideItemDescriptions: data.hideItemDescriptions,
     };
-    console.log("🚀 ~ onSubmit ~ updatedGalleryData:", updatedGalleryData)
 
     axios
       .patch<{ updatedGallery: GalleryType }>(GALLERY_ROUTE, updatedGalleryData)
       .then((response) => {
         const { updatedGallery } = response.data;
-        console.log("🚀 ~ afterSubmit ~ updatedGallery:", updatedGallery)
 
         toast.success("Gallery updated!");
 

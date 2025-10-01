@@ -9,9 +9,10 @@ interface AssetItemDisplayProps {
   item: BlockchainAssetGalleryItem | UserAssetGalleryItem;
   hideTitle?: boolean;
   hideDescription?: boolean;
+  hideButtons?: boolean;
 }
 
-const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription }) => {
+const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons }) => {
   return (
     <div>
       <AssetViewer asset={item} className="mb-3" />
@@ -29,7 +30,7 @@ const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDesc
           )}
         </div>
       )}
-      <EntryButtons buttons={item.buttons} />
+      {!hideButtons && <EntryButtons buttons={item.buttons} className="mt-2" />}
     </div>
   );
 };

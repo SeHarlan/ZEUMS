@@ -5,15 +5,16 @@ import { cn } from "@/utils/ui-utils";
 
 interface EntryButtonsProps {
   buttons?: EntryButton[];
+  className?: string;
 }
 
-const EntryButtons: FC<EntryButtonsProps> = ({ buttons }) => {
+const EntryButtons: FC<EntryButtonsProps> = ({ buttons, className }) => {
   if (!buttons || buttons.length === 0) return null;
 
   return (
     //Reverse so the primary button is last
     //Dont use row-reverse cause we want the primary button to drop down on wrap
-    <div className={cn("flex justify-end gap-2 flex-wrap w-full")}>
+    <div className={cn("flex justify-end gap-2 flex-wrap w-full", className)}>
       {buttons.toReversed().map((button, index) => (
         <LinkButton
           key={index + button.text}

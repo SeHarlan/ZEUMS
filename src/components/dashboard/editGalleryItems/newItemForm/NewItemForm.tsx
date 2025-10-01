@@ -109,7 +109,7 @@ const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
     }
 
 
-    const lastRowIndex = getLastGalleryRowIndex(gallery);
+    const lastRowIndex = getLastGalleryRowIndex(gallery.items);
 
     let itemCreationData: GalleryItemCreation = {
       ...data,

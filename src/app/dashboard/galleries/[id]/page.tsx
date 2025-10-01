@@ -17,7 +17,7 @@ const EditGalleryPage = () => {
   return (
     <PageContainer maxWidth="large">
       <PageHeading
-        title={`Edit ${gallery?.title}`}
+        title={`Edit ${gallery?.title || "Gallery Items"}`}
         subtitle="Curate and manage your gallery content"
       />
 

@@ -59,7 +59,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
   const handleAssetsAdd = async () => {
     if (!gallery) return;
     setSubmitting(true);
-    const startRowIndex = getLastGalleryRowIndex(gallery) + 1;
+    const startRowIndex = getLastGalleryRowIndex(gallery.items) + 1;
 
     const galleryItemsCreationData: GalleryItemCreation[] = selectedAssets.map((asset, index) => {
       const totalColumns = DEFAULT_COLUMNS;
@@ -121,7 +121,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <P>Add Blockchain Gallery Items</P>
+          <P className="hidden md:block">Add Blockchain Gallery Items</P>
           <ImagesIcon />
         </Button>
       </DialogTrigger>
