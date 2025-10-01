@@ -62,7 +62,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
-          "w-full transition-opacity duration-200 rounded",
+          "w-full h-full transition-opacity duration-200 rounded",
           (isLoaded || priority) ? "opacity-100" : "opacity-0",
           objectFit,
         )}

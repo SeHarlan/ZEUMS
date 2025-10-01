@@ -8,6 +8,6 @@ export const imageBreakpoints = {
 
 export const MAIN_SCROLL_AREA_ID = "main-scroll-area";
 
-export const NON_MEDIA_ASPECT_RATIO = 3 / 2;
+export const NON_MEDIA_ASPECT_RATIO = 1;
 
 export const MD_BREAKPOINT = 768;

@@ -13,8 +13,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { GALLERY_ITEM_ITEMS_ROUTE, } from "@/constants/serverRoutes";
+import useGalleryById from "@/hooks/useGalleryById";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { GalleryType } from "@/types/gallery";
+import { EntrySource } from "@/types/entry";
 import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
 import { getLastGalleryRowIndex } from "@/utils/gallery";
 import { handleClientError } from "@/utils/handleError";
@@ -25,27 +26,27 @@ import {
 } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { KeyedMutator } from "swr";
 
 const DEFAULT_COLUMNS = 3;
 
 interface AddBlockchainGalleryItemsProps {
-  gallery: GalleryType;
-  mutateGallery: KeyedMutator<GalleryType | null>;
+  galleryId: string
 }
-const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery, mutateGallery }) => {
+const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ galleryId }) => {
+  const { gallery, mutateGallery } = useGalleryById(galleryId);
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const source = gallery.source;
+  const source = gallery?.source || EntrySource.Creator;
 
   const usedAssetAddresses = useMemo(() => { 
-    const items = gallery.items
+
+    const items = gallery?.items
       ?.filter((item) => item.itemType === GalleryItemTypes.BlockchainAsset)
       .map((item) => item.tokenAddress) || [];
     return new Set(items);
-  }, [gallery.items]);
+  }, [gallery?.items]);
 
   const handleClear = () => {
     setSelectedAssets([]);

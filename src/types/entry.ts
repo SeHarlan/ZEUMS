@@ -102,18 +102,17 @@ export type TimelineEntry =
 // Types related to entry CRUD
 export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id">
 
+export type TimelineEntryDateUpdate = {
+  _id: string;
+  date: Date;
+}
+
+// Type guard functions
 export function isEntry(
   entryOrItem: GalleryItem | TimelineEntry
 ): entryOrItem is TimelineEntry {
   return "entryType" in entryOrItem;
 }
-
-export type TimelineEntryDateUpdate = {
-  _id: Schema.Types.ObjectId;
-  date: Date;
-}
-
-// Type guard functions
 export function isBlockchainAssetEntry(entry: TimelineEntry | TimelineEntryCreation): entry is BlockchainAssetEntry {
   return entry.entryType === EntryTypes.BlockchainAsset
 }

@@ -23,8 +23,9 @@ import axios from "axios";
 import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
 import { toast } from "sonner";
 import { handleClientError } from "@/utils/handleError";
-import { getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
+import { getTimelineKey, sortTimeline } from "@/utils/timeline";
 import SideDrawer from "@/components/general/SideDrawer";
+import type { BulkWriteResult } from "mongodb";
 
 interface RearrangeEntriesProps { 
   source: EntrySource;
@@ -73,19 +74,18 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
     }
 
     const updatesPayload : TimelineEntryDateUpdate[] = updatedEntries.map((e) => ({
-      _id: e._id,
+      _id: e._id.toString(),
       date: e.date,
     }));
 
     setSubmitting(true);
 
     axios
-      .patch<{ updatedEntryDates: TimelineEntryDateUpdate[] }>(ENTRY_DATES_ROUTE, updatesPayload)
+      .patch<{ bulkWriteResult: BulkWriteResult }>(ENTRY_DATES_ROUTE, updatesPayload)
       .then((response) => {
-        const { updatedEntryDates } = response.data;
-        const parsedUpdatedEntryDates = parseEntryDates(updatedEntryDates);
+        const { bulkWriteResult } = response.data;
 
-        if (parsedUpdatedEntryDates.length < updatesPayload.length) {
+        if (bulkWriteResult.modifiedCount < updatesPayload.length) {
           toast.info("Some entry positions could not be updated.");
         } else {
           toast.success("Entry positions updated!");
@@ -95,27 +95,14 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
         setUser((prevUser) => {
           if (!prevUser) return prevUser;
 
-          const prevTimeline = prevUser[timelineKey] || [];
+          const sortedTimelineEntries = sortTimeline(rearrangedEntries);
 
-          // Create a Map for lookup 
-          const updatedDatesMap = new Map(
-            parsedUpdatedEntryDates.map((entry) => [entry._id, entry.date])
-          );
-
-          // Update entries
-          const updatedTimeline = prevTimeline.map((entry) => {
-            const newDate = updatedDatesMap.get(entry._id);
-            return newDate ? { ...entry, date: newDate } : entry;
-          });
-
-          const newTimeline = sortTimeline(updatedTimeline);
-          
           return {
             ...prevUser,
-            [timelineKey]: newTimeline,
+            [timelineKey]: sortedTimelineEntries,
           };
-        });
-
+        })
+       
         setDrawerOpen(false);
       })
       .catch((error) => {

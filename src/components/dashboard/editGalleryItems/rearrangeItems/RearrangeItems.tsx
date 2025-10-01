@@ -2,17 +2,23 @@ import SideDrawer from "@/components/general/SideDrawer"
 import { P } from "@/components/typography/Typography"
 import { Button } from "@/components/ui/button"
 import useGalleryDimensions from "@/hooks/useGalleryDimensions"
-import { GalleryType } from "@/types/gallery"
 import { GalleryRowItem } from "@/types/ui/dashboard"
-import { cleanGalleryRows, initializeGalleryRows, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
+import { cleanGalleryRows, convertToUserVirtualGallery, getFirstItemWithMedia, getGalleryKey, initializeGalleryRows, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
 import { cn  } from "@/utils/ui-utils"
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
-import { SortableContext} from "@dnd-kit/sortable"
+import { rectSortingStrategy, SortableContext} from "@dnd-kit/sortable"
 import {  LayoutTemplateIcon, PlusSquare } from "lucide-react"
 import { FC, useEffect, useMemo,  useState } from "react"
-import { KeyedMutator } from "swr"
 import LoadingSpinner from "@/components/general/LoadingSpinner"
 import SortableItem, { OverlayItem } from "./SortableItem"
+import useGalleryById from "@/hooks/useGalleryById"
+import axios from "axios"
+import { GALLERY_ITEM_POSITIONS_ROUTE } from "@/constants/serverRoutes"
+import { toast } from "sonner"
+import { handleClientError } from "@/utils/handleError"
+import { GalleryItemPositionUpdate } from "@/types/galleryItem"
+import type { BulkWriteResult } from "mongodb"
+import { useUser } from "@/context/UserProvider"
 
 
 const GAP = 12;
@@ -21,22 +27,25 @@ const DROP_AREA_ID_BEFORE = "droppable-area-before";
 const MAX_HEIGHT_RATIO = 0.33;
 
 interface RearrangeItemsProps {
-  gallery: GalleryType;
-  mutateGallery: KeyedMutator<GalleryType | null>;
+  galleryId: string;
 }
 
 interface HoverData {
   id: string;
   side: "left" | "right";
 }
-const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => { 
+const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => { 
+  const { gallery, mutateGallery } = useGalleryById(galleryId);
+  const { setUser } = useUser();
+
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
   const [rearrangedRows, setRearrangedRows] = useState<GalleryRowItem[][]>([]);
-
-  const { containerRef, containerWidth, maxHeight, isReady, getDimensions } = useGalleryDimensions(false, MAX_HEIGHT_RATIO);
+  
+  const { containerRef, containerWidth, maxHeight, isReady, getDimensions } =
+    useGalleryDimensions(false, MAX_HEIGHT_RATIO);
 
   useEffect(() => {
     //because of form dom handling we need to manually set dimensions again for the initial render
@@ -49,7 +58,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => 
 
   useEffect(() => {
     //initial load of gallery items when the form is open
-    if (!gallery.items || !formOpen) return;
+    if (!gallery?.items || !formOpen) return;
     const initRows = initializeGalleryRows(gallery.items);
     //remove stray empty rows/cells and update positions
     const cleanedRows = cleanGalleryRows(initRows);
@@ -57,7 +66,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => 
 
     //reset rearrangedRows when the form is closed
     return () => setRearrangedRows([]);
-  }, [gallery.items, formOpen]);
+  }, [gallery?.items, formOpen]);
 
   const galleryRows = useMemo(() => {
     return processGalleryRows({
@@ -137,11 +146,102 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => 
     }
   }
 
-  const handleSaveRearrangement = () => {
+  const handleSaveRearrangement = async () => {
+    if (!gallery) return;
+    
+    // Get the current items from the original gallery
+    const originalItems = gallery.items || [];
+    const originalPositions = new Map(
+      originalItems.map((item) => [item._id.toString(), item.position])
+    );
+
+    // Get the rearranged items
+    const rearrangedItems = galleryRows.flat().map((item) => item.item);
+    
+    // Filter to just items with changed positions
+    const updatedItems = rearrangedItems.filter((item) => {
+      const originalPosition = originalPositions.get(item._id.toString());
+      if (!originalPosition) return false; //type safety
+
+      return (
+        item.position[0] !== originalPosition[0] || 
+        item.position[1] !== originalPosition[1]
+      );
+    });
+
+    // No changes made
+    if (!updatedItems.length) {
+      setFormOpen(false);
+      return;
+    }
+
+    const positionsPayload: GalleryItemPositionUpdate[] = updatedItems.map((item) => ({
+      _id: item._id.toString(),
+      position: item.position,
+    }));
+
     setSubmitting(true);
-    console.log("PLACEHOLDER:save rearrangement")
-    mutateGallery(gallery, false);
-    setSubmitting(false);
+
+    axios
+      .patch<{ bulkWriteResult: BulkWriteResult }>(GALLERY_ITEM_POSITIONS_ROUTE, positionsPayload)
+      .then((response) => {
+        const { bulkWriteResult } = response.data;
+          
+        if (bulkWriteResult.modifiedCount < positionsPayload.length) {
+          toast.info("Some gallery item positions could not be updated.");
+        } else {
+          toast.success("Gallery item positions updated!");
+        }
+
+        // Update the gallery context with the updated positions
+        mutateGallery(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            items: rearrangedItems,
+          };
+        }, false);
+
+        const firstGallery = getFirstItemWithMedia(gallery.items);
+        const firstRearranged = getFirstItemWithMedia(rearrangedItems);
+
+        //update the user if the first media item differs from the original
+        //since it will show up in the users gallery cards
+        if (firstGallery?._id !== firstRearranged?._id) { 
+          const updatedGallery = {
+            ...gallery,
+            items: rearrangedItems,
+          };
+          const galleryKey = getGalleryKey(gallery.source);
+          const updatedUserGallery = convertToUserVirtualGallery(updatedGallery);
+          setUser((prevUser) => {
+            if (!prevUser) return prevUser;
+            const prevGalleries = prevUser[galleryKey] || [];
+            const updatedGalleries = prevGalleries.map((gallery) => {
+              if (gallery._id.toString() === updatedUserGallery._id.toString()) {
+                return updatedUserGallery;
+              }
+              return gallery;
+            });
+            return {
+              ...prevUser,
+              [galleryKey]: updatedGalleries,
+            };
+          });
+        }
+         
+        setFormOpen(false);
+      })
+      .catch((error) => {
+        toast.error("Failed to update gallery item positions.");
+        handleClientError({
+          error,
+          location: "RearrangeItems_handleSaveRearrangement",
+        });
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   }
   return (
     <SideDrawer
@@ -176,23 +276,23 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => 
             onDragMove={onDragMove}
             onDragEnd={handleDragEnd}
             collisionDetection={closestCenter}
-            //dont add this back in unless you code a way to track the mouse position reliably
+            //don't add this back in unless you code a way to track the mouse position reliably
             //currently if restricted the mouse position gets stuck in the middle when the hover object is large
             // modifiers={[restrictToFirstScrollableAncestor]}
           >
             <Droppable id={DROP_AREA_ID_BEFORE} />
-            {galleryRows.map((row, rowIndex) => {
-              return (
-                <div
-                  key={rowIndex}
-                  className={cn("flex justify-center flex-row items-center")}
-                  style={{ gap: GAP }}
-                >
-                  <SortableContext
-                    items={row.map(
-                      (item) => `${rowIndex}-${item.item._id.toString()}`
-                    )}
+
+              {galleryRows.map((row, rowIndex) => {
+                return (
+                  <div
+                    key={rowIndex}
+                    className={cn("flex justify-center flex-row items-center")}
+                    style={{ gap: GAP }}
                   >
+                    <SortableContext
+                      items={row.map((item) => item.item._id.toString())}
+                      strategy={rectSortingStrategy}
+                    >
                     {row.map((cell) => {
                       const hoverSide =
                         hoverData?.id === cell.item._id.toString()
@@ -206,13 +306,13 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ gallery, mutateGallery }) => 
                         />
                       );
                     })}
-                  </SortableContext>
-                </div>
-              );
-            })}
+                    </SortableContext>
+                  </div>
+                );
+              })}
             <Droppable id={DROP_AREA_ID_AFTER} />
 
-            <DragOverlay >
+            <DragOverlay>
               {activeId ? (
                 <OverlayItem
                   activeId={activeId}
@@ -246,9 +346,9 @@ const  Droppable = ({ id }: { id: string }) => {
         isOver && "bg-muted text-muted-foreground border-muted-foreground shadow"
       )}
     >
-      <div className="absolute-center">
+      <div className="absolute-center w-full">
         <PlusSquare className="mx-auto size-8" />
-        <P className="text-center text-sm">New row</P>
+        <P className="text-center text-sm">Drop here to create a new row</P>
       </div>
     </div>
   );

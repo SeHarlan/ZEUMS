@@ -28,7 +28,16 @@ const EditTimeline: FC<EditTimelineProps> = ({ source }) => {
         <AddBlockchainEntriesButton source={source} />
         <RearrangeEntriesButton source={source} />
       </div>
-      <TimelineBase entries={entries} EntryComponent={EditableEntry} />
+      {entries.length === 0 ? (
+        <NewEntryFormButton
+          source={source}
+          buttonVariant="outline"
+          buttonClassName="h-40"
+          buttonText="Create First Entry"
+        />
+      ) : (
+        <TimelineBase entries={entries} EntryComponent={EditableEntry} />
+      )}
     </div>
   );
 } 

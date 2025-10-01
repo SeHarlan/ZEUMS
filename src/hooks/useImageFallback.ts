@@ -1,16 +1,11 @@
 import { MediaType } from "@/types/media";
 import { getImageUrlSources } from "@/utils/media";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 export const useImageFallback = (media: MediaType) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setImageIndex(0);
-    setLoaded(false);
-  }, [media]);
   
   const onError = () => {
     setImageIndex((prevIndex) => prevIndex + 1);

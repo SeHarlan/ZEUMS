@@ -18,17 +18,21 @@ import { addHttpsPrefix } from "@/utils/general";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import { getLastGalleryRowIndex } from "@/utils/gallery";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
-import { GalleryType } from "@/types/gallery";
-import { KeyedMutator } from "swr";
+import useGalleryById from "@/hooks/useGalleryById";
+import { EntrySource } from "@/types/entry";
+import { cn } from "@/utils/ui-utils";
 
 const formId = "new-gallery-item-form";
 
 interface NewItemFormProps {
-  gallery: GalleryType;
-  mutateGallery: KeyedMutator<GalleryType | null>;
+  galleryId: string;
+  buttonClassName?: string;
+  buttonVariant?: "default" | "outline" | "ghost" | "link";
+  buttonText?: string;
 }
 
-const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
+const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVariant = "default", buttonText = "Add New Gallery Item"}) => {
+  const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { user } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +42,7 @@ const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
   const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(GalleryItemTypes.BlockchainAsset);
 
-  const source = gallery.source;
+  const source = gallery?.source || EntrySource.Creator;
 
   const defaultValues: GalleryItemFormValues = useMemo(() => ({
     itemType: GalleryItemTypes.BlockchainAsset,
@@ -96,7 +100,7 @@ const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
   }
 
   const onSubmit = (data: GalleryItemFormValues) => {
-    if (!user) return;
+    if (!user || !gallery) return;
 
     setSubmitting(true);
 
@@ -175,8 +179,8 @@ const NewItemForm: FC<NewItemFormProps> = ({gallery, mutateGallery}) => {
   return (
     <SideDrawer
       triggerButton={
-        <Button className="w-full">
-          <P>New Gallery Item</P>
+        <Button variant={buttonVariant} className={cn("w-full", buttonClassName)}>
+          <P>{buttonText}</P>
           <SquarePlusIcon />
         </Button>
       }

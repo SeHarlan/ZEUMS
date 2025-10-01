@@ -20,10 +20,15 @@ const EditGalleries: FC<EditGalleriesProps> = ({ source }) => {
 
   const galleries = (galleriesMap[source] || [])
 
+  const buttonProps = galleries.length === 0 ? {
+    buttonText: "Add New Gallery",
+    buttonClassName: "h-40",
+  } : {};
+
   return (
     <EditGallerySettingsContextProvider>
       <div className="space-y-6">
-        <CreateGalleryDialogButton source={source} />
+        <CreateGalleryDialogButton source={source} {...buttonProps} />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {galleries.map((gallery) => (
             <EditableGalleryCard key={gallery._id.toString()} gallery={gallery} />

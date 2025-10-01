@@ -68,12 +68,15 @@ export type GalleryMediaItem =
 export type GalleryItemCreation = Omit<GalleryItem, "owner" | "_id" | "parentGalleryId"> & {
   parentGalleryId: string
 };
-
-export function isGalleryItem(itemOrEntry: GalleryItem | TimelineEntry): itemOrEntry is GalleryItem {
-  return "itemType" in itemOrEntry;
+export interface GalleryItemPositionUpdate {
+  _id: string;
+  position: [number, number];
 }
 
 // Type guard functions
+export function isGalleryItem(itemOrEntry: GalleryItem | TimelineEntry): itemOrEntry is GalleryItem {
+  return "itemType" in itemOrEntry;
+}
 export function isBlockchainAssetGalleryItem(
   item: GalleryItem | GalleryItemCreation
 ): item is BlockchainAssetGalleryItem {

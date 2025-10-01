@@ -21,11 +21,15 @@ import { getGalleryKey } from "@/utils/gallery";
 import { EDIT_GALLERY } from "@/constants/clientRoutes";
 import { useRouter } from "next/navigation";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
+import { cn } from "@/utils/ui-utils";
 
 interface CreateGalleryDialogProps {
   source: EntrySource;
+  buttonText?: string;
+  buttonClassName?: string;
+  buttonVariant?: "default" | "outline" | "ghost" | "link";
 }
-const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source }) => {
+const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, buttonText = "Add New Gallery", buttonClassName, buttonVariant = "default" }) => {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { setUser } = useUser();
@@ -94,8 +98,8 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source }) => 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="w-full">
-          <P>Create New Gallery</P>
+        <Button className={cn("w-full", buttonClassName)} variant={buttonVariant}>
+          <P>{buttonText}</P>
           <SquarePlusIcon />
         </Button>
       </DialogTrigger>

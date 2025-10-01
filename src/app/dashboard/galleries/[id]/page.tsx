@@ -12,7 +12,7 @@ import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 
 const EditGalleryPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { gallery, mutateGallery, isLoading, isError } = useGalleryById(id);
+  const { gallery, isLoading, isError } = useGalleryById(id);
 
   return (
     <PageContainer maxWidth="large">
@@ -31,12 +31,7 @@ const EditGalleryPage = () => {
       >
         <Card>
           <CardContent>
-            {gallery && (
-              <EditGalleryItems
-                gallery={gallery}
-                mutateGallery={mutateGallery}
-              />
-            )}
+            <EditGalleryItems galleryId={id} />
           </CardContent>
         </Card>
       </FeedbackWrapper>

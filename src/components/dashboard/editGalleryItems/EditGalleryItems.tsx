@@ -1,7 +1,5 @@
 import NewItemFormButton from "./newItemForm/NewItemForm";
-import { GalleryType } from "@/types/gallery";
 import { FC } from "react";
-import { KeyedMutator } from "swr";
 import AddBlockchainGalleryItemsButton from "./AddBlockchainGalleryItems";
 import GalleryBase from "@/components/gallery/GalleryBase";
 import EditableItem from "./EditableItem";
@@ -11,13 +9,17 @@ import { SettingsIcon } from "lucide-react";
 import { convertToUserVirtualGallery } from "@/utils/gallery";
 import { useEditGallerySettings } from "@/context/EditGallerySettingsProvider";
 import RearrangeItemsButton from "./rearrangeItems/RearrangeItems";
+import useGalleryById from "@/hooks/useGalleryById";
 
 interface EditGalleryItemsProps {
-  gallery: GalleryType;
-  mutateGallery: KeyedMutator<GalleryType | null>;
+  galleryId: string;
 }
 
-const EditGalleryItems: FC<EditGalleryItemsProps> = ({ gallery, mutateGallery }) => { 
+const EditGalleryItems: FC<EditGalleryItemsProps> = ({ galleryId }) => { 
+  const { gallery, isLoading } = useGalleryById(galleryId);
+
+  const isReady = !isLoading && !!gallery;
+
   const { openEditDrawer } = useEditGallerySettings();
   const handleOpenEditDrawer = () => {
     if (gallery) {
@@ -27,7 +29,7 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ gallery, mutateGallery })
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr] gap-6">
-        <NewItemFormButton gallery={gallery} mutateGallery={mutateGallery} />
+        <NewItemFormButton galleryId={galleryId} />
         <Button
           onClick={handleOpenEditDrawer}
           disabled={!gallery}
@@ -39,18 +41,25 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ gallery, mutateGallery })
         </Button>
       </div>
       <div className="grid grid-cols-[auto_1fr] md:grid-cols-[1fr_2fr] gap-6 mb-8">
-        <AddBlockchainGalleryItemsButton
-          gallery={gallery}
-          mutateGallery={mutateGallery}
-        />
-        <RearrangeItemsButton gallery={gallery} mutateGallery={mutateGallery} />
+        <AddBlockchainGalleryItemsButton galleryId={galleryId} />
+        <RearrangeItemsButton galleryId={galleryId} />
       </div>
-      <GalleryBase
-        gallery={gallery}
-        ItemComponent={EditableItem}
-        hideItemDescriptions={gallery.hideItemDescriptions}
-        hideItemTitles={gallery.hideItemTitles}
-      />
+
+      {isReady && !gallery?.items?.length ? (
+        <NewItemFormButton
+          galleryId={galleryId}
+          buttonVariant="outline"
+          buttonClassName="h-40"
+          buttonText="Create First Gallery Item"
+        />
+      ) : (
+        <GalleryBase
+          gallery={gallery}
+          ItemComponent={EditableItem}
+          hideItemDescriptions={gallery?.hideItemDescriptions}
+          hideItemTitles={gallery?.hideItemTitles}
+        />
+      )}
     </div>
   );
 }

@@ -15,18 +15,22 @@ export const getGalleryKey = (source: EntrySource) => {
   }
 };
 
-export const convertToUserVirtualGallery = (
-  gallery: GalleryType
-): UserVirtualGalleryType => {
-
-  //Find first item with media 
-  //Assumes gallery items are already sorted so that top left items are first
-  
-  const firstItemWithMedia = gallery.items?.find(
+/** Assumes gallery items are already sorted so that top left items are first*/
+export const getFirstItemWithMedia = (galleryItems?: GalleryItem[]) => {
+  return galleryItems?.find(
     (item) =>
       item.itemType === GalleryItemTypes.BlockchainAsset ||
       item.itemType === GalleryItemTypes.UserAsset
   );
+}
+
+export const convertToUserVirtualGallery = (
+  gallery: GalleryType
+): UserVirtualGalleryType => {
+
+  //Find first item with media
+  const firstItemWithMedia = getFirstItemWithMedia(gallery.items);
+
   return {
     ...gallery,
     items: firstItemWithMedia ? [firstItemWithMedia] : [],
@@ -232,9 +236,19 @@ export const swapToExistingRow = ({rows, activeRowItem, newPosition}: SwapToExis
     if (isOldRow) {
       updatedRow = removeFromRow(updatedRow, activeRowItem);
     }
+
     //insert the new item and update the row positions accordingly
     if (isNewRow) {
-      const newX = newPosition[1]
+      let newX = newPosition[1]
+
+      // if we just removed from this row and are placing the item after the active items previous spot
+      // we need to subtract 1 from the modifier to account for the empty space
+      const needToModifyX = isOldRow && newX > activeRowItem.item.position[1];
+      if (needToModifyX) {
+        newX -= 1;
+        //update the x position of the updated row item too
+        updatedRowItem.item.position[1] = newX;
+      }
       const firstHalf = updatedRow.slice(0, newX);
       const lastHalf = updateXPositions({
         rowSection: updatedRow.slice(newX),
@@ -243,6 +257,7 @@ export const swapToExistingRow = ({rows, activeRowItem, newPosition}: SwapToExis
       })
       updatedRow = [...firstHalf, updatedRowItem, ...lastHalf]
     }
+
     return updatedRow;
   })
 

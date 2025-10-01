@@ -18,14 +18,18 @@ import NewEntryFormContent from "./NewEntryFormContent";
 import { SquarePlusIcon } from "lucide-react";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
 import { addHttpsPrefix } from "@/utils/general";
+import { cn } from "@/utils/ui-utils";
 
 const formId = "new-entry-form";
 
 interface NewEntryFormProps { 
   source: EntrySource; 
+  buttonClassName?: string;
+  buttonVariant?: "default" | "outline" | "ghost" | "link";
+  buttonText?: string;
 }
 
-const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
+const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVariant = "default", buttonText = "Add New Entry"}) => {
   const { setUser } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -176,8 +180,8 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source}) => {
   return (
     <SideDrawer
       triggerButton={
-        <Button className="w-full">
-          <P>New Entry</P>
+        <Button className={cn("w-full", buttonClassName)} variant={buttonVariant}>
+          <P>{buttonText}</P>
           <SquarePlusIcon />
         </Button>
       }

@@ -6,7 +6,7 @@ import { cleanGalleryRows, initializeGalleryRows, processGalleryRows } from "@/u
 import useGalleryDimensions from "@/hooks/useGalleryDimensions";
 
 interface GalleryBaseProps {
-  gallery: GalleryType;
+  gallery?: GalleryType | null;
   ItemComponent: React.FC<GalleryItemBaseProps>;
   hideItemTitles?: boolean;
   hideItemDescriptions?: boolean;
@@ -32,7 +32,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   } = useGalleryDimensions(true, MAX_HEIGHT_RATIO);
 
   const galleryRows = useMemo(() => {
-    if (!gallery.items?.length) return [];
+    if (!gallery?.items?.length) return [];
     const galleryRows = initializeGalleryRows(gallery.items);
     const processedRows = processGalleryRows({
       galleryRows,
@@ -42,7 +42,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
       maxHeight,
     });
     return cleanGalleryRows(processedRows);
-  }, [gallery.items, containerWidth, maxHeight, isDesktop]);
+  }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
 
   return (
     <div className="space-y-30 mb-30" ref={containerRef}>
@@ -52,14 +52,14 @@ const GalleryBase: FC<GalleryBaseProps> = ({
             key={"row-" + index}
             className={cn(
               "flex justify-center",
-              "flex-col md:flex-row items-center md:items-start"  
+              "flex-col md:flex-row items-center"  
             )}
             style={{ gap: GAP }}
           >
             {row.map((cell) => (
               <div
                 key={cell.item._id.toString()}
-                className="relative duration-200 w-full"
+                className="relative duration-200 w-full h-fit"
                 style={{ maxWidth: cell.width }}
               >
                 <ItemComponent

@@ -1,6 +1,5 @@
 import { MiniGalleryItemBase } from "@/components/gallery/GalleryItemBase";
 import { GripVerticalIcon } from "lucide-react";
-import { CSS } from "@dnd-kit/utilities";
 import { GalleryRowItem } from "@/types/ui/dashboard";
 import { FC } from "react";
 import { useSortable } from "@dnd-kit/sortable";
@@ -17,16 +16,15 @@ const SortableItem: FC<SortableItemProps> = ({ processedItem, hoverSide }) => {
     attributes,
       listeners,
       setNodeRef,
-      transform,
       transition,
       isDragging,
       isOver,
     } = useSortable({
       id: item._id.toString(),
     });
-
+ 
+  //dont use transform cause we have a custom position indicator that works better for the multi row layout
   const style = {
-    transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.25 : 1,
     maxWidth: width,
@@ -56,8 +54,8 @@ const SortableItem: FC<SortableItemProps> = ({ processedItem, hoverSide }) => {
         <div
           className={cn(
             "h-full absolute z-30 w-1 bg-muted-foreground rounded-md top-1/2 -translate-y-1/2",
-            hoverSide === "left" && "-left-2",
-            hoverSide === "right" && "-right-2"
+            hoverSide === "left" && "-left-1",
+            hoverSide === "right" && "-right-1"
           )}
         />
       )}
