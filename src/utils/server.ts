@@ -8,8 +8,9 @@ const UNAUTHORIZED_ERROR = "Unauthorized Session Request";
 export async function getAuthSessionUser(req: NextRequest): Promise<NextAuthUser> {
   const authSession = await getServerSession(getAuthOptions(req));
   
-  if (!authSession?.user) {
-    /** Throws error if no auth session user found */
+  if (!authSession?.user?.dbUserId) {
+    //VERY IMPORTANT! - never remove this check, it is crucial for database integrity
+    /** Throws error if no auth session user found or if token doesn't match our custom format */
     throw new Error(UNAUTHORIZED_ERROR);
   }
 

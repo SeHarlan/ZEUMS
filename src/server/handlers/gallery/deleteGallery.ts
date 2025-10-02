@@ -24,6 +24,10 @@ export async function deleteGalleryHandler(
         throw new Error("Gallery ID is required");
       }
 
+      if (!authSessionUser.dbUserId) {
+        throw new Error("Safety fallback: main User Id is required");
+      }
+
       // First, delete all gallery items associated with this gallery
       const galleryItemsDeleteResult = await GalleryItem.deleteMany(
         {

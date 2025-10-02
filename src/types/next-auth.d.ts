@@ -5,8 +5,11 @@ import type { JWT as NextAuthJWT } from "next-auth/jwt"
 interface BaseAuthUser {
   /** The id of the user from the auth database */
   id: string;
-  /** The id of the user from the main database */
-  dbUserId: string;
+  /** 
+   * The id of main user model, 
+   * It will be found in valid JWT tokens and ServerSession objects 
+   **/
+  dbUserId?: string;
 } 
 
 declare module "next-auth" {
