@@ -18,6 +18,10 @@ export async function createGalleryHandler(req: NextRequest): Promise<NextRespon
       throw new Error("Title is required");
     }
 
+    if (!authSessionUser.dbUserId) {
+      throw new Error("Safety fallback: main User Id is required");
+    }
+
     // Create gallery data
     const galleryCreationData: GalleryCreation & { owner: string } = {
       title: title,
