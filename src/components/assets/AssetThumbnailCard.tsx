@@ -166,6 +166,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     "default": {},
   }
 
+
   return (
     <Card
       className={cn(
@@ -175,7 +176,15 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
-        {optimisticClick && <LoadingSpinner className="z-20 absolute-center"/>}
+        <LoadingSpinner
+          className={cn(
+            "z-20 absolute-center transition-all duration-500 fill-mode-forwards",
+            !loading && "opacity-0",
+            optimisticClick
+              ? "animate-in zoom-in-90 fade-in-0"
+              : "animate-out zoom-out-90 fade-out-0"
+          )}
+        />
         {useIcon && (
           <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
             {renderMediaIcon()}
