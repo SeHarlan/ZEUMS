@@ -90,8 +90,9 @@ export function isUserAssetGalleryItem(
 }
 
 export function isMediaGalleryItem(
-  item: GalleryItem
+  item?: GalleryItem
 ): item is GalleryMediaItem {
+  if(!item) return false;
   return item.itemType === GalleryItemTypes.BlockchainAsset || item.itemType === GalleryItemTypes.UserAsset;
 }
 

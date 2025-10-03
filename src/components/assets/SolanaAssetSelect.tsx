@@ -250,7 +250,10 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
                   handleAssetClick({ asset, isSelected, aspectRatio })
                 }}
                 optimisticClick={isOptimisticallySelected}
-                setOptimisticClick={(click) => handleOptimisticClick(asset.tokenAddress, click)}
+                setOptimisticClick={(click) => {
+                  if (isDisabled) return;
+                  handleOptimisticClick(asset.tokenAddress, click)
+                }}
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-200",
                   isSelected
@@ -259,7 +262,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
                       ? "border-primary/90"
                       : "border-transparent",
                   isDisabled
-                    ? "opacity-50 cursor-default"
+                    ? "opacity-50 cursor-default pointer-events-none"
                     : ""
                 )}
               />

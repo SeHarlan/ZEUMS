@@ -22,17 +22,21 @@ import { EntrySource, EntryTypes } from "@/types/entry";
 import { Button } from "@/components/ui/button";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
-import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
+import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, GALLERY_ENTRY_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
+import { BlockchainAssetEntryIcon, GalleryEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
 import ButtonEditor from "@/components/timeline/ButtonEditor";
+import SelectGalleryEntry from "../../SelectGalleryEntry";
+import { UserVirtualGalleryType } from "@/types/gallery";
 
-interface NewEntryFormContentProps { 
+interface NewEntryFormContentProps {
   form: UseFormReturn<EntryFormValues>;
   selectedEntryType: EntryTypes;
   blockchainAsset: ParsedBlockChainAsset | null;
   setBlockchainAsset: (asset: ParsedBlockChainAsset | null) => void;
-  setAspectRatio: (aspectRatio: number | null) => void; 
+  setAspectRatio: (aspectRatio: number | null) => void;
   source: EntrySource;
+  gallery: UserVirtualGalleryType | null;
+  setGallery: (gallery: UserVirtualGalleryType | null) => void;
 }
 
 const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
@@ -42,11 +46,13 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   setBlockchainAsset,
   setAspectRatio,
   source,
+  gallery,
+  setGallery,
 }) => {
-  //TODO disabled double select -get timeline based on source and select tokens (use atom selector)
-  // const disabledAssetAddresses =
-  
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
+  const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
+
+  const hideTitleAndDescription = (isBlockchainEntry && !blockchainAsset) || isGalleryEntry && !gallery;
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -58,7 +64,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
             <FormLabel>Entry Type</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger className="w-full text-md min-h-12">
+                <SelectTrigger className="w-full text-md min-h-12 bg-muted">
                   <SelectValue placeholder="Entry type" />
                 </SelectTrigger>
               </FormControl>
@@ -77,11 +83,11 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
                 {/* <SelectItem value={EntryTypes.UserAsset}>
                   <UserAssetEntryIcon className="min-h-6 min-w-6"/>
                   {USER_ASSET_ENTRY_COPY.title}
-                </SelectItem>
-                <SelectItem value={EntryTypes.Gallery}>
-                  <GalleryEntryIcon className="min-h-6 min-w-6"/>
-                  {GALLERY_ENTRY_COPY.title}
                 </SelectItem> */}
+                <SelectItem value={EntryTypes.Gallery}>
+                  <GalleryEntryIcon className="min-h-6 min-w-6" />
+                  {GALLERY_ENTRY_COPY.title}
+                </SelectItem>
               </SelectContent>
             </Select>
             <FormDescription>
@@ -140,7 +146,6 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
 
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
-          // disabledAssetAddresses={disabledAssetAddresses}
           blockchainAsset={blockchainAsset}
           setBlockchainAsset={setBlockchainAsset}
           source={source}
@@ -148,51 +153,58 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
         />
       ) : null}
 
-      {(isBlockchainEntry && !blockchainAsset)
-        ? null
-        : (
-          <>
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {selectedEntryType === EntryTypes.Text
-                      ? "Content"
-                      : "Description"}
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={
-                        selectedEntryType === EntryTypes.Text
-                          ? "Enter text content"
-                          : "Enter description"
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      {isGalleryEntry ? (
+        <SelectGalleryEntry
+          entryGallery={gallery}
+          setEntryGallery={setGallery}
+          source={source}
+        />
+      ) : null}
 
-            <ButtonEditor form={form} />
-          </>
-        )}
+
+      {hideTitleAndDescription ? null : (
+        <>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {selectedEntryType === EntryTypes.Text
+                    ? "Content"
+                    : "Description"}
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={
+                      selectedEntryType === EntryTypes.Text
+                        ? "Enter text content"
+                        : "Enter description"
+                    }
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <ButtonEditor form={form} />
+        </>
+      )}
     </div>
   );
 }

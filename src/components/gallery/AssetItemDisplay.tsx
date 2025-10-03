@@ -2,11 +2,11 @@ import { FC } from "react";
 import { H4 } from "../typography/Typography";
 import AssetViewer from "../assets/AssetViewer";
 import EntryButtons from "../timeline/EntryButtons";
-import { BlockchainAssetGalleryItem, UserAssetGalleryItem } from "@/types/galleryItem";
+import { GalleryMediaItem} from "@/types/galleryItem";
 import ExpandableText from "../general/ExpandableText";
 
 interface AssetItemDisplayProps {
-  item: BlockchainAssetGalleryItem | UserAssetGalleryItem;
+  item: GalleryMediaItem;
   hideTitle?: boolean;
   hideDescription?: boolean;
   hideButtons?: boolean;
@@ -15,14 +15,14 @@ interface AssetItemDisplayProps {
 const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons }) => {
   return (
     <div>
-      <AssetViewer asset={item} className="mb-3" />
+      <AssetViewer asset={item} />
 
       {(!hideTitle || !hideDescription) && (
-        <div className="relative mb-2 h-fit">
+        <div className="relative h-fit mt-3">
           {!hideTitle && <H4>{item.title}</H4>}
           {!hideDescription && (
             <ExpandableText
-              className="md:mt-2"
+              className="md:mt-1"
               textClassName="text-muted-foreground text-sm whitespace-pre-line"
               text={item.description}
               clamp="line-clamp-2"

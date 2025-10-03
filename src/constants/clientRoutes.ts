@@ -23,7 +23,7 @@ export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddr
 export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
 
 export const USER_TIMELINE = (username: string) => `/${username}`;
-
+export const GALLERY = (galleryId: string) => `/gallery/${galleryId}`;
 export const BLOCKCHAIN_MEDIA_PATHS = {
   [ChainIdsEnum.SOLANA]: SOLANA_MEDIA,
   [ChainIdsEnum.TEZOS]: TEZOS_MEDIA,

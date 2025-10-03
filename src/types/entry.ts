@@ -100,7 +100,9 @@ export type TimelineEntry =
 
 
 // Types related to entry CRUD
-export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id">
+export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id"> & {
+  galleryId?: string;
+}
 
 export type TimelineEntryDateUpdate = {
   _id: string;
@@ -129,6 +131,7 @@ export function isTextEntry(entry: TimelineEntry): entry is TextEntry {
   return entry.entryType === EntryTypes.Text;
 }
 
-export function isGalleryEntry(entry: TimelineEntry): entry is GalleryEntry {
+export function isGalleryEntry(entry?: TimelineEntry | null): entry is GalleryEntry {
+  if(!entry) return false;
   return entry.entryType === EntryTypes.Gallery;
 }

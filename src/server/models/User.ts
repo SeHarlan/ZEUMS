@@ -22,7 +22,7 @@ import { GalleryItemTypes } from "@/types/galleryItem";
 import { UserType } from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { MediaSchema } from "./Entry/media";
-import { websiteValidation } from "./Entry/Entry";
+import { GalleryEntryVirtual, websiteValidation } from "./Entry/Entry";
 import { EditTimelineTab } from "@/types/ui/dashboard";
 
 export interface UserDocument extends Document<Schema.Types.ObjectId>, UserType {}
@@ -130,15 +130,19 @@ export const WalletUserVirtual = {
   path: USER_WALLET_VIRTUAL,
   model: WALLET_MODEL_KEY,
 };
+
+
 export const CreatedTimelineUserVirtual = {
   path: USER_CREATED_TIMELINE_VIRTUAL,
   model: ENTRY_MODEL_KEY,
   options: { sort: { date: "descending" } },
+  populate: [GalleryEntryVirtual],
 };
 export const CollectedTimelineUserVirtual = {
   path: USER_COLLECTED_TIMELINE_VIRTUAL,
   model: ENTRY_MODEL_KEY,
   options: { sort: { date: "descending" } },
+  populate: [GalleryEntryVirtual],
 };
 export const AuthUserVirtual = {
   path: USER_AUTH_VIRTUAL,
@@ -165,6 +169,7 @@ const UserGalleriesPopulate = [
     path: GALLERY_TOTAL_ITEMS_VIRTUAL
   }
 ]
+
 export const UserCreatedGalleriesVirtual = {
   path: USER_CREATED_GALLERIES_VIRTUAL,
   model: GALLERY_MODEL_KEY,

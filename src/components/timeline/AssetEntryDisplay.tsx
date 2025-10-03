@@ -21,7 +21,7 @@ const AssetEntryDisplay: FC<AssetEntryDisplayProps> = ({ entry, flip }) => {
       <div
         className={cn("order-2 bg-background py-4 px-2", flip && "md:order-1")}
       >
-        <div className="relative mb-2">
+        <div className="relative mb-2 text-center">
           <H3 className="">{entry.title}</H3>
           <ExpandableText
             className="md:mt-2"

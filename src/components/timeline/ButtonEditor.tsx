@@ -8,7 +8,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Plus, Trash2 } from "lucide-react";
+import { PlusIcon, Trash2 } from "lucide-react";
 import { P } from "../typography/Typography";
 import { Badge } from "../ui/badge";
 
@@ -55,10 +55,9 @@ const ButtonEditor = <T extends FormWithButtons>({
           size="sm"
           onClick={addButton}
           disabled={fields.length >= 3}
-          className="flex items-center gap-2"
         >
-          <Plus className="h-4 w-4" />
           Add Button
+          <PlusIcon />
         </Button>
       </div>
 

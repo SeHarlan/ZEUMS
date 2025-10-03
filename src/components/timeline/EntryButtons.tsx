@@ -14,7 +14,7 @@ const EntryButtons: FC<EntryButtonsProps> = ({ buttons, className }) => {
   return (
     //Reverse so the primary button is last
     //Dont use row-reverse cause we want the primary button to drop down on wrap
-    <div className={cn("flex justify-end gap-2 flex-wrap w-full", className)}>
+    <div className={cn("flex justify-center gap-2 flex-wrap w-full", className)}>
       {buttons.toReversed().map((button, index) => (
         <LinkButton
           key={index + button.text}

@@ -15,6 +15,7 @@ import { P } from "@/components/typography/Typography";
 import { addHttpsPrefix } from "@/utils/general";
 import EditGalleryItemFormContent from "@/components/dashboard/editGalleryItems/editItemForm/EditItemFormContent";
 import useGalleryById from "@/hooks/useGalleryById";
+import { useUser } from "@/context/UserProvider";
 
 const formId = "edit-gallery-item-form";
 
@@ -30,6 +31,7 @@ const EditGalleryItemForm: FC<EditGalleryItemFormProps> = ({ isOpen, editingItem
   const selectedItemType = editingItem?.itemType || GalleryItemTypes.BlockchainAsset;
   const galleryId = editingItem?.parentGalleryId?.toString() || "";
   const { mutateGallery } = useGalleryById(galleryId);
+  const { revalidateUser } = useUser();
 
   const defaultValues: GalleryItemFormValues = useMemo(() => ({
     itemType: selectedItemType,
@@ -93,6 +95,13 @@ const EditGalleryItemForm: FC<EditGalleryItemFormProps> = ({ isOpen, editingItem
             items: updatedItems,
           };
         }, false);
+
+
+        // Revalidate user if the first two rows changed
+        // Will effect user gallery cards and gallery entries
+        if (updatedGalleryItem.position[0] < 2) {
+          revalidateUser();
+        }
 
         onClose();
       })

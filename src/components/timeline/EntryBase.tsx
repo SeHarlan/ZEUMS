@@ -2,6 +2,7 @@ import { EntryTypes, TimelineEntry } from "@/types/entry";
 import { FC } from "react";
 import TextEntryDisplay from "./TextEntryDisplay";
 import AssetEntryDisplay from "./AssetEntryDisplay";
+import GalleryEntryDisplay from "./GalleryEntryDisplay";
 
 export interface EntryBaseProps { 
   entry: TimelineEntry;
@@ -17,7 +18,9 @@ const EntryBase: FC<EntryBaseProps> = ({ entry, flip }) => {
     return <AssetEntryDisplay entry={entry} flip={flip} />;
   }
 
-  //TODO create and handle other entry types 
+  if (entry.entryType === EntryTypes.Gallery) {
+    return <GalleryEntryDisplay entry={entry} flip={flip} />;
+  }
 };
 
 export default EntryBase;

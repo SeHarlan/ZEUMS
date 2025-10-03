@@ -33,7 +33,7 @@ interface NewItemFormProps {
 
 const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVariant = "default", buttonText = "Add New Gallery Item"}) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
-  const { user } = useUser()
+  const { user, revalidateUser } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
@@ -152,7 +152,7 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
         toast.success("New gallery item created!");
 
         // Update the gallery data using SWR mutation
-        mutateGallery((prev) => {   
+        mutateGallery((prev) => {
           if (!prev) return prev;
           const prevItems = prev.items || [];
           return {
@@ -160,6 +160,12 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
             items: [...prevItems, createdGalleryItem],
           };
         }, false);
+
+        // Revalidate user if the first two rows changed
+        // Will effect user gallery cards and gallery entries
+        if (createdGalleryItem.position[0] < 2) {
+          revalidateUser();
+        }
 
         setFormOpen(false);
         fullFormReset();

@@ -8,7 +8,7 @@ import { EntrySource } from "@/types/entry";
 import { MediaCategory } from "@/types/media";
 import { getImageAspectRatio, getVideoAspectRatio } from "@/utils/media";
 
-import { CpuIcon, Trash2Icon } from "lucide-react";
+import { CpuIcon, TrashIcon } from "lucide-react";
 import { FC, useState } from "react";
 
 interface SelectBlockchainAssetProps {
@@ -63,8 +63,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
           <DialogHeader className="flex-row justify-between items-center">
             <DialogTitle className="w-fit">Select Blockchain Asset</DialogTitle>
             <DialogDescription className="sr-only">
-              This dialog allows you to select a blockchain asset to add to your
-              timeline.
+              This dialog allows you to select a blockchain asset to add to your timeline.
             </DialogDescription>
           </DialogHeader>
 
@@ -81,14 +80,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
 
           {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
           <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
-            <Button
-              type="button"
-              onClick={handleAssetAdd}
-              disabled={
-                selectedAssets.length === 0 ||
-                optimisticallySelectedAssets.size > 0
-              }
-            >
+            <Button type="button" onClick={handleAssetAdd} disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}>
               Select
               <CpuIcon />
             </Button>
@@ -105,7 +97,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
         size="sm"
         className="absolute -top-2 -left-2 z-2"
       >
-        <Trash2Icon />
+        <TrashIcon />
       </Button>
 
       <MediaThumbnail

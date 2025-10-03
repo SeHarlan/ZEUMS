@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { GALLERY_ITEM_ITEMS_ROUTE, } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
 import useGalleryById from "@/hooks/useGalleryById";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
@@ -34,6 +35,7 @@ interface AddBlockchainGalleryItemsProps {
 }
 const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ galleryId }) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
+  const { revalidateUser } = useUser();
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -105,6 +107,12 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
             items: [...prevItems, ...createdGalleryItems],
           };
         }, false);
+
+        // Revalidate user if the first two rows changed
+        // Will effect user gallery cards and gallery entries
+        if (createdGalleryItems.some((item) => item.position[0] < 2)) {
+          revalidateUser();
+        }
 
         handleOpenChange(false);
       })

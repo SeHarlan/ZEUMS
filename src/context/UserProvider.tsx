@@ -32,6 +32,7 @@ type UserContextType = {
   logOutUser: () => Promise<void>;
   userLoading: boolean;
   loggedIn: boolean;
+  revalidateUser: () => void;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -41,6 +42,7 @@ const UserContext = createContext<UserContextType>({
   logOutUser: async () => {},
   userLoading: false,
   loggedIn: false,
+  revalidateUser: () => {},
 });
 
 export const useUser = () => useContext(UserContext);
@@ -161,31 +163,37 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail, walletIsVerified]);
 
+  const fetchUser = useCallback((controller?: AbortController) => {
+    axios
+      .get<{ user: UserType }>(USER_ROUTE, { signal: controller?.signal })
+      .then((response) => {
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
+      })
+      .catch((error) => {
+        //if no controller, don't log out user on error (will be the case for revalidating user)
+        if (!controller) return;
+        
+        if (controller?.signal.aborted) return;
+        logOutUser();
+        handleClientError({
+          error,
+          location: "useAuth_fetchUser",
+        });
+      });
+
+  }, [logOutUser]);
+
   useEffect(() => {
     if (userExists) return;
 
     if (status === "authenticated" && sessionIdExists) {
       const controller = new AbortController();
-
-      axios
-        .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
-        .then((response) => {
-          const userData = parseUserDates(response.data.user);
-          setUser(userData);
-        })
-        .catch((error) => {
-          if (controller.signal.aborted) return;
-
-          logOutUser();
-          handleClientError({
-            error,
-            location: "useAuth_get(USER_ROUTE)",
-          });
-        });
+      fetchUser(controller);
 
       return () => controller.abort();
     }
-  }, [logOutUser, sessionIdExists, status, userExists]);
+  }, [fetchUser, userExists, sessionIdExists, status]);
 
   const contextValue = useMemo(
     () => ({
@@ -195,8 +203,9 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       logInUser,
       userLoading,
       loggedIn: userExists,
+      revalidateUser: fetchUser,
     }),
-    [user, userLoading, userExists, logOutUser, logInUser]
+    [user, userLoading, userExists, logOutUser, logInUser, fetchUser]
   );
 
   return (

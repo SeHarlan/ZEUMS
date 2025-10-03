@@ -4,6 +4,7 @@ import GalleryItemBase, { GalleryItemBaseProps } from "@/components/gallery/Gall
 import { Button } from "@/components/ui/button";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 import { useEditGalleryItem } from "@/context/EditGalleryItemProvider";
+import { useUser } from "@/context/UserProvider";
 import useGalleryById from "@/hooks/useGalleryById";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
@@ -15,7 +16,8 @@ import { toast } from "sonner";
 const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription }) => {
   const { openEditDrawer, isOpen } = useEditGalleryItem();
   const { mutateGallery } = useGalleryById(item.parentGalleryId.toString());
-
+  const { revalidateUser } = useUser();
+  
   const [deleting, setDeleting] = useState(false);
 
   const disableButtons = deleting || isOpen;
@@ -44,6 +46,12 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
               items: updatedItems,
             };
           }, false);
+
+          // Revalidate user if the first two rows changed
+          // Will effect user gallery cards and gallery entries
+          if (item.position[0] < 2) {
+            revalidateUser();
+          }
         } else {
           throw new Error(
             `Item not deleted from server. Request acknowledged: ${acknowledged}`

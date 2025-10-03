@@ -13,6 +13,7 @@ import type {
 } from "@/types/entry";
 import { MediaSchema } from "./media";
 import { ENTRY_DISCRIMINATOR_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, GALLERY_ENTRY_LOCAL_FIELD, GALLERY_ENTRY_VIRTUAL, GALLERY_MODEL_KEY, USER_MODEL_KEY } from "@/constants/databaseKeys";
+import { GalleryWithFirstTwoRowsPopulate } from "../Gallery/Gallery";
 import { ChainIdsEnum } from "@/types/wallet";
 
 // Document interfaces
@@ -73,8 +74,12 @@ const EntrySchema = new Schema<EntryDocument>(
   {
     discriminatorKey: ENTRY_DISCRIMINATOR_KEY,
     timestamps: true,
+    toJSON: { virtuals: true }, // Include virtuals in JSON output
+    toObject: { virtuals: true }, // Include virtuals in object output
   }
 );
+
+
 
 // Create the base model
 const Entry: Model<EntryDocument> =
@@ -166,7 +171,6 @@ const GalleryEntrySchema = new Schema<GalleryEntryDocument>({
   }
 });
 
-// Add virtual for gallery
 GalleryEntrySchema.virtual(GALLERY_ENTRY_VIRTUAL, {
   ref: GALLERY_MODEL_KEY,
   foreignField: "_id",
@@ -177,6 +181,7 @@ GalleryEntrySchema.virtual(GALLERY_ENTRY_VIRTUAL, {
 export const GalleryEntryVirtual = {
   path: GALLERY_ENTRY_VIRTUAL,
   model: GALLERY_MODEL_KEY,
+  populate: GalleryWithFirstTwoRowsPopulate,
 };
 
 

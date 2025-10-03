@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, EditIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/utils/ui-utils";
 import { format } from "date-fns";
@@ -17,30 +17,45 @@ import { UseFormReturn } from "react-hook-form";
 import { EntryFormValues } from "@/forms/upsertEntry";
 import { EntryTypes } from "@/types/entry";
 import { FC } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import {  P } from "@/components/typography/Typography";
 import { ENTRY_TYPE_COPY } from "@/textCopy/entryTypes";
 import { EntryTypeIcons } from "@/components/icons/EntryTypes";
 import ButtonEditor from "@/components/timeline/ButtonEditor";
+import { EDIT_GALLERY } from "@/constants/clientRoutes";
 
 interface EditEntryFormContentProps { 
   form: UseFormReturn<EntryFormValues>;
   selectedEntryType: EntryTypes;
+  galleryId?: string;
+  handleOpenChange: (open: boolean) => void;
 }
 
 const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
   form,
   selectedEntryType,
+  galleryId,
+  handleOpenChange,
 }) => { 
   const { title, description } = ENTRY_TYPE_COPY[selectedEntryType]
   const Icon = EntryTypeIcons[selectedEntryType];
 
+  const isGalleryEntry = galleryId && selectedEntryType === EntryTypes.Gallery;
+
   return (
     <div className="flex flex-col gap-y-6">
-      <div>
-        <div className="flex gap-2 items-center">
-          <Icon className="min-w-6 min-h-6" />
-          <P>{title}</P>
+      <div className="mt-3 space-y-1">
+        <div className="bg-muted rounded-md p-3 flex items-center justify-between">
+          <div className="flex gap-2 items-center">
+            <Icon className="min-w-6 min-h-6 text-muted-foreground" />
+            <P>{title}</P>
+          </div>
+          {isGalleryEntry && (
+            <LinkButton href={EDIT_GALLERY(galleryId)} className="h-6" onClick={() => handleOpenChange(false)}>
+              Edit Gallery Items
+              <EditIcon  />
+            </LinkButton>
+          )}
         </div>
         <P className="text-muted-foreground">{description}</P>
       </div>

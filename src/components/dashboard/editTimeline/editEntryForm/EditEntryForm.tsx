@@ -3,7 +3,7 @@ import { FC, useEffect, useMemo, useState } from "react";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { BaseEntry, EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
+import { BaseEntry, EntrySource, EntryTypes, isGalleryEntry, TimelineEntry } from "@/types/entry";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -33,6 +33,8 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
   const source = editingEntry?.source || EntrySource.Creator;
   const timelineKey = getTimelineKey(source);
 
+  const galleryId = isGalleryEntry(editingEntry) ? editingEntry.galleryId.toString() : undefined;
+  
   const defaultValues: EntryFormValues = useMemo(() => ({
     entryType: selectedEntryType,
     title: editingEntry?.title || "",
@@ -143,8 +145,10 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
           <EditEntryFormContent
+            galleryId={galleryId}
             form={form}
             selectedEntryType={selectedEntryType}
+            handleOpenChange={handleOpenChange}
           />
         </form>
       </Form>

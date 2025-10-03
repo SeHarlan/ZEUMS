@@ -3,7 +3,7 @@ import { P } from "@/components/typography/Typography"
 import { Button } from "@/components/ui/button"
 import useGalleryDimensions from "@/hooks/useGalleryDimensions"
 import { GalleryRowItem } from "@/types/ui/dashboard"
-import { cleanGalleryRows, convertToUserVirtualGallery, getFirstItemWithMedia, getGalleryKey, initializeGalleryRows, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
+import { cleanGalleryRows, initializeGalleryRows, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
 import { cn  } from "@/utils/ui-utils"
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
 import { rectSortingStrategy, SortableContext} from "@dnd-kit/sortable"
@@ -36,7 +36,7 @@ interface HoverData {
 }
 const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => { 
   const { gallery, mutateGallery } = useGalleryById(galleryId);
-  const { setUser } = useUser();
+  const { revalidateUser } = useUser();
 
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -186,7 +186,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
       .patch<{ bulkWriteResult: BulkWriteResult }>(GALLERY_ITEM_POSITIONS_ROUTE, positionsPayload)
       .then((response) => {
         const { bulkWriteResult } = response.data;
-          
+
         if (bulkWriteResult.modifiedCount < positionsPayload.length) {
           toast.info("Some gallery item positions could not be updated.");
         } else {
@@ -194,7 +194,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
         }
 
         // Update the gallery context with the updated positions
-        mutateGallery(prev => {
+        mutateGallery((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
@@ -202,34 +202,12 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
           };
         }, false);
 
-        const firstGallery = getFirstItemWithMedia(gallery.items);
-        const firstRearranged = getFirstItemWithMedia(rearrangedItems);
-
-        //update the user if the first media item differs from the original
-        //since it will show up in the users gallery cards
-        if (firstGallery?._id !== firstRearranged?._id) { 
-          const updatedGallery = {
-            ...gallery,
-            items: rearrangedItems,
-          };
-          const galleryKey = getGalleryKey(gallery.source);
-          const updatedUserGallery = convertToUserVirtualGallery(updatedGallery);
-          setUser((prevUser) => {
-            if (!prevUser) return prevUser;
-            const prevGalleries = prevUser[galleryKey] || [];
-            const updatedGalleries = prevGalleries.map((gallery) => {
-              if (gallery._id.toString() === updatedUserGallery._id.toString()) {
-                return updatedUserGallery;
-              }
-              return gallery;
-            });
-            return {
-              ...prevUser,
-              [galleryKey]: updatedGalleries,
-            };
-          });
+        // Revalidate user if the first two rows changed
+        // Will effect user gallery cards and gallery entries
+        if (positionsPayload.some((payloadItem) => payloadItem.position[0] < 2)) {
+          revalidateUser();
         }
-         
+
         setFormOpen(false);
       })
       .catch((error) => {

@@ -83,6 +83,18 @@ export const GalleryWithItemsPopulate = {
   options: { sort: { "position.0": 1, "position.1": 1 } },
 };
 
+// Populate configuration for gallery entries that includes only the first two rows of items
+export const GalleryWithFirstTwoRowsPopulate = {
+  path: GALLERY_ITEMS_VIRTUAL,
+  model: GALLERY_ITEM_MODEL_KEY,
+  match: { 
+    "position.0": { $in: [0, 1] }
+  },
+  options: { 
+    sort: { "position.0": 1, "position.1": 1 } 
+  },
+};
+
 // Create the model
 const Gallery: Model<GalleryDocument> =
   mongoose.models[GALLERY_MODEL_KEY] || 

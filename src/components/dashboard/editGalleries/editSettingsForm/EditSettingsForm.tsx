@@ -14,7 +14,6 @@ import { P } from "@/components/typography/Typography";
 import useGalleryById from "@/hooks/useGalleryById";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { useUser } from "@/context/UserProvider";
-import { convertToUserVirtualGallery, getGalleryKey } from "@/utils/gallery";
 import { usePathname, useRouter } from "next/navigation";
 import { EDIT_GALLERY } from "@/constants/clientRoutes";
 import { Separator } from "@/components/ui/separator";
@@ -32,7 +31,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   const [submitting, setSubmitting] = useState(false);
   const galleryId = editingGallery?._id?.toString() || "";
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
-  const { setUser } = useUser();
+  const { revalidateUser } = useUser();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -86,26 +85,10 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         // Update the main gallery data using SWR mutation
         mutateGallery(updatedGallery, false)
 
-        const galleryKey = getGalleryKey(editingGallery.source)
-        //update the user context with the new gallery
-        setUser((prevUser) => {
-          if (!prevUser) return prevUser;
-
-          const prevGalleries = prevUser[galleryKey] || [];
-
-          //update and keep in the same order
-          const updatedGalleries = prevGalleries.map((gallery) => {
-            if (gallery._id.toString() === updatedGallery._id.toString()) {
-              // convert to user virtual gallery so its consistent with what the user state galleries usually have (only one item with media)
-              return convertToUserVirtualGallery(updatedGallery);
-            }
-            return gallery;
-          });
-          return {
-            ...prevUser,
-            [galleryKey]: updatedGalleries,
-          };
-        });
+        //update user if the gallery title or description changed for gallery Cards
+        if (updatedGallery.title !== editingGallery.title || updatedGallery.description !== editingGallery.description) {
+          revalidateUser();
+        }
 
         onClose();
       })

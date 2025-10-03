@@ -4,7 +4,7 @@ import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
 import { FC,  useMemo, useState } from "react";
-import { EntrySource, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
+import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
 import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { useUser } from "@/context/UserProvider";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
@@ -26,6 +26,7 @@ import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey, sortTimeline } from "@/utils/timeline";
 import SideDrawer from "@/components/general/SideDrawer";
 import type { BulkWriteResult } from "mongodb";
+import { isMediaGalleryItem } from "@/types/galleryItem";
 
 interface RearrangeEntriesProps { 
   source: EntrySource;
@@ -247,12 +248,14 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
     opacity: isDragging ? 0.5 : 1,
   };
   
-  
-  const thumbnail = isMediaEntry(entry) ? (
+  const media = isMediaEntry(entry) && entry.media
+    || isGalleryEntry(entry) && isMediaGalleryItem(entry.gallery.items?.[0]) && entry.gallery.items?.[0]?.media;
+    
+  const thumbnail = media ? (
     <div className="flex-shrink-0 w-10 h-10">
       <MediaThumbnail
         objectFit="object-cover"
-        media={entry.media}
+        media={media}
         alt={entry.title}
         rounding="rounded-sm"
         size="small"

@@ -5,26 +5,30 @@ import { useCallback, useEffect, useState } from "react";
 import { useRef } from "react";
 
 
-const useGalleryDimensions = (useResponsive = true, maxHeightRatio = 0.75) => {
+const useGalleryDimensions = (useResponsive = true, maxHeightRatio = 0.75, useRowWidthMaxHeight = false) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [maxHeight, setMaxHeight] = useState<number>(0);
   const [isDesktop, setIsDesktop] = useState<boolean>(true);
 
-  const isReady = !!containerWidth && !!maxHeight;
+  const isReady = !!containerWidth || !!maxHeight;
 
   const getDimensions = useCallback(() => {
     if (!containerRef?.current) return;
     const rowWidth = containerRef.current.offsetWidth;
     setContainerWidth(rowWidth);
 
-    setMaxHeight(window.innerHeight * maxHeightRatio);
-    
+    if (useRowWidthMaxHeight) {
+      setMaxHeight(rowWidth * maxHeightRatio);
+    } else {
+      setMaxHeight(window.innerHeight * maxHeightRatio);
+    }
+
     if (useResponsive) {
       const desktop = window.innerWidth >= MD_BREAKPOINT;
       setIsDesktop(desktop);
     } 
-  }, [containerRef, maxHeightRatio, useResponsive]);
+  }, [containerRef, maxHeightRatio, useResponsive, useRowWidthMaxHeight]);
   
   useEffect(() => {
     

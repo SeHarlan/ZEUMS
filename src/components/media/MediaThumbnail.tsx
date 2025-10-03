@@ -24,6 +24,7 @@ interface MediaThumbnailProps {
   alt?: string;
   size?: "small" | "medium" | "full";
   priority?: boolean;
+  noPadding?: boolean;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -37,6 +38,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   alt,
   size = "small",
   priority,
+  noPadding,
 }) => {
   const {
     isLoaded,
@@ -85,7 +87,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
         rounding,
         isLoading && "animate-skeleton-shimmer",
-        objectFit === "object-contain" && "p-2",
+        (objectFit === "object-contain" && !noPadding) && "p-2",
         className
       )}
     >

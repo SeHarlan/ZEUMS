@@ -19,6 +19,7 @@ import { SquarePlusIcon } from "lucide-react";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
 import { addHttpsPrefix } from "@/utils/general";
 import { cn } from "@/utils/ui-utils";
+import { UserVirtualGalleryType } from "@/types/gallery";
 
 const formId = "new-entry-form";
 
@@ -34,8 +35,10 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
+  const [gallery, setGallery] = useState<UserVirtualGalleryType | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
+  const prevGalleryRef = useRef<UserVirtualGalleryType | null>(null);
   const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
 
   const defaultValues: EntryFormValues = useMemo(() => ({
@@ -49,24 +52,21 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
   const form = useForm<EntryFormValues>({
     resolver: zodResolver(entryFormSchema),
     defaultValues,
-  
   });
 
   const { reset, watch } = form;
-  const { title, description, entryType: selectedEntryType } = watch();
+  const { entryType: selectedEntryType } = watch();
 
   const disableSubmit =
-    selectedEntryType === EntryTypes.BlockchainAsset && !blockchainAsset;
+    (selectedEntryType === EntryTypes.BlockchainAsset && !blockchainAsset) ||
+    (selectedEntryType === EntryTypes.Gallery && !gallery);
 
   const timelineKey = getTimelineKey(source);
 
   
   useEffect(() => {
-    const isBlockchainAsset = selectedEntryType === EntryTypes.BlockchainAsset;
-    const isDifferent = blockchainAsset?.tokenAddress !== prevBlockchainAssetRef.current?.tokenAddress;
-
-    if (isBlockchainAsset && isDifferent) {
-      // Only run if blockchainAsset changed
+    //initialize existing title and description if they exist
+    if (selectedEntryType === EntryTypes.BlockchainAsset) {
       reset({
         ...defaultValues,
         entryType: EntryTypes.BlockchainAsset,
@@ -75,7 +75,17 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
       });
       prevBlockchainAssetRef.current = blockchainAsset;
     }
-  }, [blockchainAsset, reset, title, description, defaultValues, selectedEntryType]);
+
+    if (selectedEntryType === EntryTypes.Gallery) {
+      reset({
+        ...defaultValues,
+        entryType: EntryTypes.Gallery,
+        title: gallery?.title || "",
+        description: gallery?.description || "",
+      });
+      prevGalleryRef.current = gallery;
+    }
+  }, [blockchainAsset, reset, defaultValues, selectedEntryType, gallery]);
 
   useEffect(() => {
     // Only reset if selectedEntryType changed
@@ -91,11 +101,21 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
 
   const fullFormReset = () => {
     setBlockchainAsset(null);
+    setGallery(null);
     setAspectRatio(null);
     reset(defaultValues);
     prevBlockchainAssetRef.current = null;
     prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
   }
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!submitting) {
+      setFormOpen(newOpen);
+      if (!newOpen) {
+        fullFormReset();
+      }
+    }
+  };
 
   const onSubmit = (data: EntryFormValues) => {
     setSubmitting(true);
@@ -138,6 +158,13 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
       };
     }
 
+    if (data.entryType === EntryTypes.Gallery && gallery) {
+      entryCreationData = {
+        ...entryCreationData,
+        galleryId: gallery._id.toString(),
+      };
+    }
+
     axios
       .post<{ createdEntry: TimelineEntry }>(ENTRY_ROUTE, entryCreationData)
       .then((response) => {
@@ -163,6 +190,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
           };
         });
 
+        setFormOpen(false);
         fullFormReset();
       })
       .catch((error) => {
@@ -186,7 +214,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
         </Button>
       }
       open={formOpen}
-      onOpenChange={setFormOpen}
+      onOpenChange={handleOpenChange}
       title="Add New Entry"
       description="Add a new entry to your artist timeline."
       actionButton={
@@ -211,6 +239,8 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
             selectedEntryType={selectedEntryType}
             blockchainAsset={blockchainAsset}
             setBlockchainAsset={setBlockchainAsset}
+            gallery={gallery}
+            setGallery={setGallery}
             setAspectRatio={setAspectRatio}
             source={source}
           />
