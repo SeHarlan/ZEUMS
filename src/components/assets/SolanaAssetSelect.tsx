@@ -25,6 +25,8 @@ interface SolanaAssetSelectProps {
   source: EntrySource;
   selectedAssets: ParsedBlockChainAsset[] | null;
   setSelectAssets: (assets: ParsedBlockChainAsset[]) => void;
+  optimisticallySelectedAssets: Set<string>;
+  setOptimisticallySelectedAssets: (assets: Set<string>) => void;
   perPage?: number;
   /** @defaults 1 */
   maxSelected?: number;
@@ -43,9 +45,11 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   maxSelectWarningBody,
   imageVariant = "default",
   usedAssetAddresses,
+  optimisticallySelectedAssets,
+  setOptimisticallySelectedAssets,
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
-  const [search, debouncedSearch, setSearch] = useDebouncedState("", 300);
+  const [search, debouncedSearch, setSearch] = useDebouncedState("", 200);
 
   const { user } = useUser();
 
@@ -105,6 +109,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
   const handleClear = () => {
     setSelectAssets([]);
+    setOptimisticallySelectedAssets(new Set()); 
     setSearch("");
   };
 
@@ -139,8 +144,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     if (isSelected) {
       //delete from list
       setSelectAssets(
-        selectedAssets?.filter((a) => a.tokenAddress !== asset.tokenAddress) ||
-          []
+        selectedAssets?.filter((a) => a.tokenAddress !== asset.tokenAddress) || []
       );
     } else {
       if (selectedAssets && selectedAssets?.length >= maxSelected) {
@@ -151,6 +155,16 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         mergeAspectRatio(asset, aspectRatio),
       ]);
     }
+  };
+
+  const handleOptimisticClick = (assetId: string, isSelected: boolean) => {
+    const newSet = new Set(optimisticallySelectedAssets);
+    if (isSelected) {
+      newSet.add(assetId);
+    } else {
+      newSet.delete(assetId);
+    }
+    setOptimisticallySelectedAssets(newSet);
   };
 
   const renderFeedback = () => {
@@ -218,6 +232,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
             );
+            const isOptimisticallySelected = optimisticallySelectedAssets.has(asset.tokenAddress);
 
             const isUsed = usedAssetAddresses?.has(
               asset.tokenAddress
@@ -234,9 +249,15 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
                   if (isDisabled) return;
                   handleAssetClick({ asset, isSelected, aspectRatio })
                 }}
+                optimisticClick={isOptimisticallySelected}
+                setOptimisticClick={(click) => handleOptimisticClick(asset.tokenAddress, click)}
                 className={cn(
-                  "cursor-pointer border-3 hover:shadow-md transition-shadow duration-300",
-                  isSelected ? "border-primary" : "border-transparent",
+                  "cursor-pointer border-3 hover:shadow-md transition-shadow duration-200",
+                  isSelected
+                    ? "border-primary"
+                    : isOptimisticallySelected
+                      ? "border-primary/90"
+                      : "border-transparent",
                   isDisabled
                     ? "opacity-50 cursor-default"
                     : ""

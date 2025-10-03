@@ -29,10 +29,9 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
   setOpen,
   imageVariant,
 }) => {
-  const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>(
-    []
-  );
+  const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
 
+  const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
   const handleAssetAdd = () => {
     const media = convertMediaToImage(selectedAssets[0].media)
     setSelectedMedia(media);
@@ -59,6 +58,8 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
             source={EntrySource.Collector}
             withSearch
             imageVariant={imageVariant}
+            optimisticallySelectedAssets={optimisticallySelectedAssets}
+            setOptimisticallySelectedAssets={setOptimisticallySelectedAssets}
           />
         </div>
 
@@ -67,7 +68,7 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
           <Button
             type="button"
             onClick={handleAssetAdd}
-            disabled={!selectedAssets.length}
+            disabled={!selectedAssets.length || optimisticallySelectedAssets.size > 0}
           >
             Select
             <CpuIcon />

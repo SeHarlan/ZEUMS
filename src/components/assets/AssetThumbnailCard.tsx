@@ -1,22 +1,26 @@
-import { FC, useState } from "react";
+import { FC, useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { P } from "../typography/Typography";
 import { cn } from "@/utils/ui-utils";
 import MediaThumbnail from "../media/MediaThumbnail";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { useAspectRatio } from "@/context/AspectRatioProvider";
-import { getImageAspectRatio, getMediaUrl, getVideoAspectRatio } from "@/utils/media";
+import { getImageAspectRatio, getMediaUrl } from "@/utils/media";
 import { ImageVariant, MediaCategory } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
 import { toast } from "sonner";
 import { BoxIcon, Code2Icon } from "lucide-react";
 import { BANNER_RATIO } from "@/constants/ui";
+import { videoMetadataPool } from "@/utils/videoMetadataPool";
+import LoadingSpinner from "../general/LoadingSpinner";
 
 interface AssetThumbnailCardProps {
   asset: ParsedBlockChainAsset;
   className?: string;
   onClick?: (aspectRatio: number) => void;
   imageVariant?: ImageVariant;
+  setOptimisticClick?: (optimisticClick: boolean) => void;
+  optimisticClick?: boolean;
 }
 
 const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
@@ -24,11 +28,16 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
   className,
   onClick,
   imageVariant = "default",
+  setOptimisticClick,
+  optimisticClick,
 }) => {
   const { setAspectRatio, getAspectRatio } = useAspectRatio();
-  const [loading, setLoading]  = useState(false)
+  const [loading, setLoading] = useState(false);
+  const abortControllerRef = useRef<(() => void) | null>(null);
+  const [error, setError] = useState(false)
   
   const handleLoad = (imageElement: HTMLImageElement) => { 
+    setError(false);
     const ratioExists = !!getAspectRatio(asset);
 
     //video aspect ratios are only fetched once clicked
@@ -36,58 +45,95 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
 
     const ratio = getImageAspectRatio(imageElement);
     setAspectRatio(asset, ratio);
+    if (optimisticClick) {
+      onClick?.(ratio);
+      setOptimisticClick?.(false);
+    }
   }
 
-  const handleClick = () => {
-    if (loading) return;
+  const handleError = () => {
+    if (optimisticClick) {
+      toast.error("Failed to load selected image.");
+    }
+    
+    setError(true);
+    handleAbort();
+  }
+
+  const handleAbort = () => {
+    setOptimisticClick?.(false);
+    setLoading(false);
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current();
+      abortControllerRef.current = null;
+    }
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current();
+      }
+    };
+  }, []);
+
+  const handleClick = async () => {
+    if (loading) {
+      handleAbort();
+      return;
+    }
+    if (error) {
+      const assetType = asset.media.category === MediaCategory.Video ? "video" : "image";
+      toast.error(`Failed to load selected ${assetType}.`);
+      return;
+    }
+
     // If the selected asset is a video, we want to load the video metadata to get the aspect ratio before allowing the click to go through
     const aspectRatio = getAspectRatio(asset);
     if (aspectRatio) {
       onClick?.(aspectRatio);
+      handleAbort();
       return;
     }
-    //no aspect ratio and no aspectRatio (meaning image never loaded)
-    if (asset.media.category !== MediaCategory.Video) {
-      toast.error("Failed to load image metadata.");
-      return
-    }
-
-    const videoElement = document.createElement("video");
-  
-    videoElement.preload = "metadata"; // Only load metadata
-    videoElement.muted = true; // Prevent autoplay issues
-    videoElement.crossOrigin = "anonymous";
-
-    //prevent new reloads and error catches once the first src has been tried and cleaned up
-    let isProcessed = false;
-
-    const cleanup = () => {
-      isProcessed = true;
-      setLoading(false)
-      videoElement.src = "" //clear to stop loading
-      videoElement.remove(); // Remove from memory
-    };
     
-    videoElement.onloadedmetadata = () => {
-      if (isProcessed) return;
-      const ratio = getVideoAspectRatio(videoElement);
-      setAspectRatio(asset, ratio); //cache in case the video asset is unclicked and reclicked
-      onClick?.(ratio); //send immediately on click for main function
-      cleanup(); // Stop here, don't load video data
-    };
+    setLoading(true);
+    setOptimisticClick?.(true);
 
-    videoElement.onerror = (e) => {
-      if(isProcessed) return
-      cleanup();
-      toast.error("Failed to load video metadata.");
+    //no aspect ratio and no aspectRatio (meaning image hasnt loaded yet)
+    if (asset.media.category !== MediaCategory.Video) {
+      // if not using optimistic click show an error
+      if (setOptimisticClick === undefined) {
+        toast.error("Failed to load image.");
+      }
+
+      //if optimistic wait for image to load then handle click
+      return;
+    }
+    try {
+      const { promise, abort } = videoMetadataPool.getVideoMetadata(getMediaUrl(asset.media));
+      abortControllerRef.current = abort;
+      
+      const ratio = await promise;
+      setAspectRatio(asset, ratio);
+      onClick?.(ratio);
+    } catch (error) {
+      // Don't show error if it was aborted
+      if (error instanceof Error && error.message === 'Request aborted') {
+        return;
+      }
+      setError(true);
+      toast.error("Failed to load video.");
       handleClientError({
-        error: e,
+        error,
         location: "AssetThumbnailCard_handleClick",
       });
-    };
-
-    videoElement.src = getMediaUrl(asset.media);
-    setLoading(true)
+    } finally {
+      handleAbort();
+      setLoading(false);
+      abortControllerRef.current = null;
+    }
   }
 
   const useIcon = asset.media.category === MediaCategory.Vr || asset.media.category === MediaCategory.Html;
@@ -129,6 +175,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
+        {optimisticClick && <LoadingSpinner className="z-20 absolute-center"/>}
         {useIcon && (
           <div className="z-10 absolute top-3 right-3 bg-muted p-1 rounded-full shadow-md text-muted-foreground">
             {renderMediaIcon()}
@@ -138,6 +185,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
           media={asset.media}
           alt={asset.title}
           onLoad={handleLoad}
+          onError={handleError}
           {...propsMap[imageVariant]}
         />
       </CardContent>

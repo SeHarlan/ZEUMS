@@ -100,7 +100,9 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   const { inView } = useInView({ passedRef: containerRef });
 
+  //these prevent unneeded event listeners and other checks
   const useCurrentTime = controls && !minimalControls;
+  const isSimpleVideo = !controls && !minimalControls;
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -209,7 +211,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   const toggleFullscreen = useCallback(() => {
     const video = videoRef.current as FullscreenVideoElement;
-    if (!video) return;
+    if (!video || isSimpleVideo) return;
 
     const doc = document as FullscreenDocument;
 
@@ -258,7 +260,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
         doc.msExitFullscreen();
       }
     }
-  }, []);
+  }, [isSimpleVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -305,12 +307,6 @@ const VideoViewer: FC<VideoViewerProps> = ({
       setFailedToPlayMessage(null);
       setIsBuffering(false);
       setIsLoading(false);
-
-      //commenting out for now because forced autoplay was causing issues on safari
-      // // Handle autoplay - only attempt if video is ready and not already playing
-      // if (autoPlay && videoIsStopped(video)) {       
-      //   video.play().catch(handleVideoPlayError);
-      // }
     };
 
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
@@ -373,6 +369,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   // Listen for fullscreen changes
   useEffect(() => {
+    if (isSimpleVideo) return;
     const doc = document as FullscreenDocument;
     const video = videoRef.current;
 
@@ -418,10 +415,11 @@ const VideoViewer: FC<VideoViewerProps> = ({
         video.removeEventListener("webkitendfullscreen", handleExitFullscreen);
       }
     };
-  }, []);
+  }, [isSimpleVideo]);
 
   // Unified pointer/touch/mouse behavior
   useEffect(() => {
+    if (isSimpleVideo) return;
     const container = containerRef.current;
     const video = videoRef.current;
     const controls = controlsRef.current;
@@ -487,7 +485,8 @@ const VideoViewer: FC<VideoViewerProps> = ({
       container.removeEventListener('pointerdown', handlePointerDown as EventListener);
     };
 
-  }, [showControls, handleVideoPlayError]);  
+  }, [showControls, handleVideoPlayError, isSimpleVideo]);  
+
 
   return (
     <div

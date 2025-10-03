@@ -37,6 +37,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
 
   const source = gallery?.source || EntrySource.Creator;
 
@@ -50,6 +51,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
 
   const handleClear = () => {
     setSelectedAssets([]);
+    setOptimisticallySelectedAssets(new Set());
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -141,8 +143,10 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
             selectedAssets={selectedAssets}
             setSelectAssets={setSelectedAssets}
             source={source}
-            maxSelected={33}
+            maxSelected={20}
             withSearch
+            optimisticallySelectedAssets={optimisticallySelectedAssets}
+            setOptimisticallySelectedAssets={setOptimisticallySelectedAssets}
           />
         </div>
 
@@ -151,7 +155,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
             type="button"
             onClick={handleAssetsAdd}
             loading={submitting}
-            disabled={selectedAssets.length === 0}
+            disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}
             className="w-full lg:w-fit"
           >
             Create Gallery Items

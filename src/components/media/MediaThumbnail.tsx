@@ -10,8 +10,15 @@ import { imageBreakpoints } from "@/constants/ui";
 interface MediaThumbnailProps {
   media: MediaType;
   onLoad?: (imageElement: HTMLImageElement) => void;
+  onError?: () => void;
   objectFit?: "object-cover" | "object-contain";
-  rounding?: "rounded-none" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full" | "rounded-b-md";
+  rounding?:
+    | "rounded-none"
+    | "rounded-sm"
+    | "rounded-md"
+    | "rounded-lg"
+    | "rounded-full"
+    | "rounded-b-md";
   ratio?: number;
   className?: string;
   alt?: string;
@@ -22,6 +29,7 @@ interface MediaThumbnailProps {
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
   media,
   onLoad,
+  onError,
   objectFit = "object-contain",
   rounding = "rounded-md",
   ratio = 1,
@@ -35,13 +43,13 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     isLoading,
     isError,
     imageUrl,
-    onError,
-    onLoad: onImageLoad,
-  } = useImageFallback(media);
+    onError: handleFallbackError,
+    onLoad: handleFallbackLoad,
+  } = useImageFallback(media, onError);
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
-    onImageLoad();
-    if (onLoad) onLoad(event.currentTarget);
+    handleFallbackLoad();
+    onLoad?.(event.currentTarget);
   };
 
   const renderContent = () => {
@@ -57,14 +65,14 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         width={width}
         unoptimized={true}
         loading={priority ? "eager" : "lazy"}
-        onError={onError}
+        onError={handleFallbackError}
         onLoad={handleLoad}
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
           "w-full h-full transition-opacity duration-200 rounded",
-          (isLoaded || priority) ? "opacity-100" : "opacity-0",
-          objectFit,
+          isLoaded || priority ? "opacity-100" : "opacity-0",
+          objectFit
         )}
       />
     );

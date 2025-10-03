@@ -28,6 +28,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
   const { setUser, user } = useUser();
 
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
+  const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
   const [pickedDate, setPickedDate] = useState<Date>(new Date());
   const [submitting, setSubmitting] = useState(false)
   const [open, setOpen] = useState(false);
@@ -47,6 +48,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
   const handleClear = () => {
     setSelectedAssets([]);
     setPickedDate(new Date());
+    setOptimisticallySelectedAssets(new Set());
   }
 
   const handleOpenChange = (open: boolean) => { 
@@ -144,6 +146,8 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
                 <CreateGalleryDialogButton source={source} />
               </div>
             }
+            optimisticallySelectedAssets={optimisticallySelectedAssets}
+            setOptimisticallySelectedAssets={setOptimisticallySelectedAssets}
           />
         </div>
 
@@ -195,7 +199,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
               type="button"
               onClick={handleAssetsAdd}
               loading={submitting}
-              disabled={selectedAssets.length === 0}
+              disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}
               className="w-full sm:w-36"
             >
               Create Entries
