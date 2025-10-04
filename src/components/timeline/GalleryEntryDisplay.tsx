@@ -6,9 +6,10 @@ import ExpandableText from "../general/ExpandableText";
 import EntryButtons from "./EntryButtons";
 import { LinkButton } from "../ui/button";
 import { ArrowRightIcon} from "lucide-react";
-import { GALLERY } from "@/constants/clientRoutes";
-import { useRouter } from "next/navigation";
+import { USER_GALLERY } from "@/constants/clientRoutes";
+import { usePathname, useRouter } from "next/navigation";
 import MiniGalleryBase from "../gallery/MiniGalleryBase";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 interface GalleryEntryDisplayProps {
   entry: GalleryEntry;
   flip?: boolean;
@@ -16,10 +17,16 @@ interface GalleryEntryDisplayProps {
 
 const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const returnKey = getReturnKey(pathname);
+  const galleryLink =
+    USER_GALLERY(entry.galleryId.toString()) + makeReturnQueryParam(returnKey); ;
 
   const handleClick = () => {
-    router.push(GALLERY(entry.galleryId.toString()));
+    router.push(galleryLink);
   }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-center pb-4">
       <div
@@ -45,8 +52,8 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
             clamp="line-clamp-6"
           />
           <LinkButton
-            href={GALLERY(entry.galleryId.toString())}
-            variant="ghost"
+            href={galleryLink}
+            variant="link"
           >
             View Gallery
             <ArrowRightIcon />

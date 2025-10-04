@@ -30,7 +30,7 @@ const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDesc
           )}
         </div>
       )}
-      {!hideButtons && <EntryButtons buttons={item.buttons} className="mt-2" />}
+      {!hideButtons && <EntryButtons buttons={item.buttons} className="mt-2 justify-start" />}
     </div>
   );
 };

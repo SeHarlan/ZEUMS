@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import { standardErrorResponses } from "@/utils/server";
-import Gallery, { GalleryWithItemsPopulate } from "../../models/Gallery/Gallery";
+import Gallery, { GalleryWithBasicOwnerPopulate, GalleryWithItemsPopulate } from "../../models/Gallery/Gallery";
 
 export async function getGalleryByIdHandler(galleryId: string): Promise<NextResponse> {
   await connectToDatabase();
@@ -13,7 +13,7 @@ export async function getGalleryByIdHandler(galleryId: string): Promise<NextResp
 
     // Fetch gallery with populated items
     const gallery = await Gallery.findById(galleryId)
-      .populate(GalleryWithItemsPopulate)
+      .populate([GalleryWithItemsPopulate, GalleryWithBasicOwnerPopulate])
       .exec();
 
     if (!gallery) {

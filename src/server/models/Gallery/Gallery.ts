@@ -10,6 +10,7 @@ import {
   GALLERY_ITEMS_VIRTUAL,
   GALLERY_TOTAL_ITEMS_VIRTUAL,
   GALLERY_MODEL_KEY,
+  GALLERY_OWNER_DATA_FOREIGN_KEY,
   GALLERY_OWNER_FOREIGN_KEY,
   USER_MODEL_KEY,
 } from "@/constants/databaseKeys";
@@ -77,10 +78,23 @@ GallerySchema.virtual(GALLERY_TOTAL_ITEMS_VIRTUAL, {
   count: true
 });
 
+GallerySchema.virtual(GALLERY_OWNER_DATA_FOREIGN_KEY, {
+  ref: USER_MODEL_KEY,
+  localField: GALLERY_OWNER_FOREIGN_KEY,
+  foreignField: "_id",
+  justOne: true,
+});
+
 export const GalleryWithItemsPopulate = {
   path: GALLERY_ITEMS_VIRTUAL,
   model: GALLERY_ITEM_MODEL_KEY,
   options: { sort: { "position.0": 1, "position.1": 1 } },
+};
+
+export const GalleryWithBasicOwnerPopulate = {
+  path: GALLERY_OWNER_DATA_FOREIGN_KEY,
+  model: USER_MODEL_KEY,
+  select: "username displayName profileImage",
 };
 
 // Populate configuration for gallery entries that includes only the first two rows of items

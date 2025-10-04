@@ -13,9 +13,9 @@ interface GalleryBaseProps {
   hideItemDescriptions?: boolean;
 }
 
-const GAP = 48; //px
+const GAP = 50; //px
 const MAX_HEIGHT_RATIO = 0.75;
-const PADDING = 24;
+const PADDING = 25;
 
 
 const GalleryBase: FC<GalleryBaseProps> = ({
@@ -42,7 +42,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
 
   return (
-    <div className="space-y-30 mb-30" ref={containerRef}>
+    <div className="space-y-25 mb-30" ref={containerRef}>
       {isReady &&
         galleryRows.map((row, index) => (
           <div
@@ -50,9 +50,9 @@ const GalleryBase: FC<GalleryBaseProps> = ({
             className={cn(
               "flex justify-center",
               "flex-col md:flex-row items-center md:items-start",
-              index % 2 === 0 && "bg-secondary rounded-md shadow"
+              index % 2 !== 0 && "bg-secondary rounded-md shadow"
             )}
-            style={{ gap: GAP, padding: PADDING, paddingBottom: PADDING * 2 }}
+            style={{ gap: GAP, padding: PADDING, paddingBottom: index % 2 !== 0 ? PADDING : 0 }}
           >
             {row.map((cell) => (
               <div

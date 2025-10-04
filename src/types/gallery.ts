@@ -2,6 +2,7 @@
 import { Schema } from "mongoose";
 import { GalleryItem, GalleryMediaItem } from "./galleryItem";
 import { EntrySource } from "./entry";
+import { UserType } from "./user";
 
 export enum GalleryDisplayTypes { 
   Justify = "justify",
@@ -22,6 +23,7 @@ export type BaseGalleryType = {
 
 export type GalleryType = BaseGalleryType & {
   items?: GalleryItem[];
+  ownerData?: Pick<UserType, "username" | "displayName" | "profileImage">;
 }
 
 export type GalleryCreation = Pick<BaseGalleryType, "title" | "description" | "source" | "hideItemTitles" | "hideItemDescriptions"> 

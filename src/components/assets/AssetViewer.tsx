@@ -57,15 +57,14 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const isBlockchainAsset = isEntry(asset) && isBlockchainAssetEntry(asset)
     || isGalleryItem(asset) && isBlockchainAssetGalleryItem(asset);
 
+  const isVideo = media.category === MediaCategory.Video;
   
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
   //video will handle its own loading state
   const isImageLoading = isLoading && isImage;
 
-  const isVideoOrImage =
-    media.category === MediaCategory.Video ||
-    media.category === MediaCategory.Image;
+  const isVideoOrImage = isVideo || isImage;
 
   const basePath = isBlockchainAsset
     ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
@@ -146,6 +145,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
         variant="secondary"
         className={cn(
           isVideoOrImage ? "opacity-0" : "opacity-75",
+          isVideo && "opacity-100 md:opacity-0",
           "group-hover/media:opacity-100 transition-opacity duration-200",
           "z-10 absolute top-6 right-6"
         )}

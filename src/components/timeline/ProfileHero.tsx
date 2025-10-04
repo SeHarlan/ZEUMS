@@ -17,7 +17,7 @@ const ProfileHero: FC<ProfileHeroProps> = ({ publicUser }) => {
     <div>
       <BannerImage
         media={publicUser?.bannerImage}
-        className="text-5xl mb-4 md:mb-8"
+        className="text-5xl mb-4 md:mb-8 md:shadow-lg rounded-none xl:rounded-b-md"
         fallbackText={displayName}
       />
       <div className={PAGE_PADDING_X}>

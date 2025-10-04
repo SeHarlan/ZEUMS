@@ -52,7 +52,12 @@ const ExpandableText: FC<ExpandableTextProps> = ({
     <div className={className}>
       <P
         ref={textRef}
-        className={cn(textClassName, clamp, isExpanded && "opacity-50")}
+        className={cn(
+          textClassName,
+          clamp,
+          isExpanded && "opacity-50",
+          // showButton && "mb-5"
+        )}
       >
         {text}
       </P>
@@ -65,7 +70,7 @@ const ExpandableText: FC<ExpandableTextProps> = ({
               onClick={() => setIsExpanded(!isExpanded)}
               className={cn(
                 "h-auto p-0 text-sm text-muted-foreground/50 mt-1 hover:text-muted-foreground duration-300 transition-colors",
-                "absolute -bottom-6 left-0",
+                // "absolute -bottom-6 left-0",
                 buttonClassName
               )}
             >
