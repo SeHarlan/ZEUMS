@@ -85,7 +85,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       </Button>
       <div className="relative pb-8 mb-0">
         <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
-        <div className="relative flex flex-col space-y-6">
+        <div className="relative flex flex-col space-y-20">
           {renderedEntries}
         </div>
       </div>

@@ -92,6 +92,7 @@ export const cleanGalleryRows = (galleryRows: GalleryRowItem[][]): GalleryRowIte
 interface ProcessGalleryRowsProps {
   galleryRows: GalleryRowItem[][];
   gap: number;
+  padding?: number;
   useRowHeight: boolean;
   containerWidth: number;
   maxHeight: number;
@@ -99,6 +100,7 @@ interface ProcessGalleryRowsProps {
 export const processGalleryRows = ({
   galleryRows,
   gap,
+  padding = 0,
   useRowHeight,
   containerWidth,
   maxHeight,
@@ -120,7 +122,7 @@ export const processGalleryRows = ({
     }, 0);
 
     //get the space between items 
-    const rowGapOffset = gap * (row.length - 1)
+    const rowGapOffset = gap * (row.length-1) + padding * 2
     const rowHeight = Math.min(
       (containerWidth - rowGapOffset) / totalAspectRatio,
       maxHeight

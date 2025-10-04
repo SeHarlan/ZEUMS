@@ -26,7 +26,7 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
         className={cn(
           "order-1",
           flip && "md:order-2",
-          "p-3 bg-muted rounded-md shadow border-1 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+          "p-3 bg-secondary rounded-md shadow hover:shadow-md transition-shadow duration-300 cursor-pointer"
         )}
         onClick={handleClick}
       >

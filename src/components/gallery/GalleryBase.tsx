@@ -4,6 +4,7 @@ import { FC, useMemo } from "react";
 import { cn } from "@/utils/ui-utils";
 import { cleanGalleryRows, initializeGalleryRows, processGalleryRows } from "@/utils/gallery";
 import useGalleryDimensions from "@/hooks/useGalleryDimensions";
+import { GalleryItemTypes } from "@/types/galleryItem";
 
 interface GalleryBaseProps {
   gallery?: GalleryType | null;
@@ -12,8 +13,9 @@ interface GalleryBaseProps {
   hideItemDescriptions?: boolean;
 }
 
-const GAP = 32; //px
+const GAP = 48; //px
 const MAX_HEIGHT_RATIO = 0.75;
+const PADDING = 24;
 
 
 const GalleryBase: FC<GalleryBaseProps> = ({
@@ -31,6 +33,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
     const processedRows = processGalleryRows({
       galleryRows,
       gap: GAP,
+      padding: PADDING,
       useRowHeight: isDesktop,
       containerWidth,
       maxHeight,
@@ -46,21 +49,30 @@ const GalleryBase: FC<GalleryBaseProps> = ({
             key={"row-" + index}
             className={cn(
               "flex justify-center",
-              "flex-col md:flex-row items-center"
+              "flex-col md:flex-row items-center md:items-start",
+              index % 2 === 0 && "bg-secondary rounded-md shadow"
             )}
-            style={{ gap: GAP }}
+            style={{ gap: GAP, padding: PADDING, paddingBottom: PADDING * 2 }}
           >
             {row.map((cell) => (
               <div
                 key={cell.item._id.toString()}
-                className="relative duration-200 w-full h-fit"
-                style={{ maxWidth: cell.width }}
+                className={cn("relative duration-200 w-full",
+                )}
+                style={{
+                  maxWidth: cell.width,
+                }}
               >
-                <ItemComponent
-                  item={cell.item}
-                  hideTitle={hideItemTitles}
-                  hideDescription={hideItemDescriptions}
-                />
+                <div
+                  className={cn(cell.item.itemType === GalleryItemTypes.Text && "flex flex-col w-full shrink-0 justify-center")}
+                  style={cell.item.itemType === GalleryItemTypes.Text ? { height: cell.height } : {}}
+                >
+                  <ItemComponent
+                    item={cell.item}
+                    hideTitle={hideItemTitles}
+                    hideDescription={hideItemDescriptions}
+                  />
+                </div>
               </div>
             ))}
           </div>

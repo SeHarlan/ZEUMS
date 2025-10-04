@@ -53,6 +53,7 @@ export interface ProcessedEntry {
   showDate: boolean;
   flipEntry: boolean;
   flipDate: boolean;
+  isGalleryEntry: boolean;
 }
 export const processTimelineEntries = (
   entries: TimelineEntry[],
@@ -67,6 +68,8 @@ export const processTimelineEntries = (
     const isAssetEntry =
       entry.entryType === EntryTypes.BlockchainAsset ||
       entry.entryType === EntryTypes.UserAsset;
+    
+    const isGalleryEntry = entry.entryType === EntryTypes.Gallery;
 
     // Format the date
     const entryDate = entry.date.toLocaleString(undefined, {
@@ -83,7 +86,7 @@ export const processTimelineEntries = (
       dateIndex++;
     }
 
-    if (isAssetEntry) assetIndex++;
+    if (isAssetEntry || isGalleryEntry) assetIndex++;
 
     const flipEntry = assetIndex % 2 === 1; // Only track asset entries
     const flipDate = dateIndex % 2 === 1; // Flip every other date
@@ -91,6 +94,7 @@ export const processTimelineEntries = (
     return cb({
       entry,
       isAssetEntry,
+      isGalleryEntry,
       entryDate,
       entryYear,
       showYear,

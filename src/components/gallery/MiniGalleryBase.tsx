@@ -41,13 +41,16 @@ const MiniGalleryBase: FC<GalleryBaseProps> = ({
         galleryRows.map((row, index) => (
           <div
             key={"row-" + index}
-            className={cn("flex justify-center", "flex-row items-center")}
+            className={cn(
+              "flex justify-center",
+              "flex-row items-center ",
+            )}
             style={{ gap: GAP }}
           >
             {row.map((cell) => (
               <div
                 key={cell.item._id.toString()}
-                className="relative duration-200 w-full h-fit"
+                className={cn("relative duration-200 w-full h-fit")}
                 style={{ maxWidth: cell.width }}
               >
                 <MiniGalleryItemBase item={cell.item} />
