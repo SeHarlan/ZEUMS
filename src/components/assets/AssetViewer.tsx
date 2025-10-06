@@ -110,7 +110,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
         src={imageUrl}
         alt={alt}
         className={cn(
-          "w-full transition-opacity duration-200",
+          "w-full transition-opacity duration-200 bg-muted",
           isLoaded ? "opacity-100" : "opacity-0",
           objectFit
         )}
