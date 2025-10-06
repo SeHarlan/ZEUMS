@@ -42,7 +42,7 @@ export default function SolanaAssetPage() {
           variant={"outline"}
           size="icon"
           onClick={handleSearch}
-          className="size-10"
+          className="size-12 md:size-10"
         >
           <SearchIcon className="size-5" />
         </Button>

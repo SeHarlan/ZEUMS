@@ -30,6 +30,7 @@ const EditGalleryPage = () => {
         <LinkButton
           href={USER_GALLERY(id)}
           variant="outline"
+          
         >
           <P className="">View Gallery</P>
           <EyeIcon />

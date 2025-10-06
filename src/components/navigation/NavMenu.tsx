@@ -66,7 +66,10 @@ const NavMenu: FC = () => {
         </NavigationMenuItem>
 
         <NavDropDown trigger={"Explore"}>
-          <NavLink label={`About ${TITLE_COPY}`} href={ABOUT} />
+          <NavLink
+            label={`About ${TITLE_COPY}`}
+            href={ABOUT}
+          />
           <Button
             variant="ghost"
             className={cn("w-full")}
@@ -74,8 +77,8 @@ const NavMenu: FC = () => {
           >
             Search Assets
           </Button>
-          <NavLink label="Timelines" href={COMING_SOON} />
-          <NavLink label="Galleries" href={COMING_SOON} />
+          <NavLink label="Timelines" href={COMING_SOON}  />
+          <NavLink label="Galleries" href={COMING_SOON}  />
         </NavDropDown>
 
         <NavDropDown trigger={"Profile"}>
@@ -83,61 +86,66 @@ const NavMenu: FC = () => {
             label="Profile Settings"
             href={EDIT_PROFILE_DISPLAY}
             disabled={!loggedIn}
-            className="order-1"
+            className="order-1" 
           />
           <NavLink
             label="Edit Timeline"
             href={EDIT_TIMELINE}
             disabled={!loggedIn}
             className="order-2"
+            
           />
           <NavLink
             label="Manage Galleries"
             href={EDIT_GALLERIES}
             disabled={!loggedIn}
-            className="order-3"
+            className="order-3" 
           />
 
           <Separator className="w-full md:col-span-2 order-4" />
 
-          <LinkButton
-            href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
-            className="md:col-span-2 w-full order-5"
-            disabled={!loggedIn}
-          >
-            Go to my timeline
-          </LinkButton>
+          <NavigationMenuLink asChild>
+            <LinkButton
+              href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
+              className="md:col-span-2 w-full order-5"
+              disabled={!loggedIn}
+            >
+              Go to my timeline
+            </LinkButton>
+          </NavigationMenuLink>
 
           <LoginButton
             className="order-6 md:order-7"
             variant={loggedIn ? "outline" : "default"}
           />
 
-          <LinkButton
-            href={EDIT_PROFILE_ACCOUNT}
-            className={cn(
-              "order-7 md:order-6",
-              !loggedIn && "font-serif" //for default Z when no user
-            )}
-            variant="secondary"
-            disabled={!loggedIn}
-          >
-            {loggedIn ? userDisplayName : noUserDisplayName}
+          <NavigationMenuLink asChild>
+            <LinkButton
+              href={EDIT_PROFILE_ACCOUNT}
+              className={cn(
+                "order-7 md:order-6",
+                !loggedIn && "font-serif" //for default Z when no user
+              )}
+              variant="secondary"
+              disabled={!loggedIn}
+            >
+              {loggedIn ? userDisplayName : noUserDisplayName}
 
-            {walletMismatch && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="size-4" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <P>
-                    You are currently connected to a wallet not associated with
-                    your account
-                  </P>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </LinkButton>
+              {walletMismatch && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <P>
+                      You are currently connected to a wallet not associated with
+                      your account
+                    </P>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </LinkButton>
+          </NavigationMenuLink>
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>
@@ -146,14 +154,16 @@ const NavMenu: FC = () => {
 
 export default NavMenu;
 
-interface NavDropDownProps { 
+interface NavDropDownProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
 }
-const NavDropDown: FC<NavDropDownProps> = ({ children, trigger}) => { 
+const NavDropDown: FC<NavDropDownProps> = ({ children, trigger }) => { 
   return (
-    <NavigationMenuItem>
-      <NavigationMenuTrigger className="rounded-sm text-md px-2 md:px-4">
+    <NavigationMenuItem >
+      <NavigationMenuTrigger
+        className="rounded-sm text-md px-2 md:px-4"
+      >
         {trigger}
       </NavigationMenuTrigger>
       <NavigationMenuContent>
@@ -170,8 +180,9 @@ interface NavLinkProps {
   label: string;
   className?: string;
   disabled?: boolean;
+  onClick?: () => void;
 }
-const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
+const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled, onClick }) => {
   return (
     <Link
       href={href}
@@ -179,6 +190,7 @@ const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : undefined}
       className={disabled ? "pointer-events-none" : ""}
+      onClick={onClick}
     >
       <NavigationMenuLink
         // with "asChild" these classNames will be passed down.
@@ -191,7 +203,7 @@ const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
         )}
         asChild
       >
-        <p>{label}</p>
+        <P>{label}</P>
       </NavigationMenuLink>
     </Link>
   );
