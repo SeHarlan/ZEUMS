@@ -32,7 +32,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       return (
         <Fragment key={entry._id.toString()}>
           {showYear && (
-            <H2 className="w-fit sticky top-0 z-20 left-1/2 -translate-x-1/2 bg-background px-6 py-2 rounded-b-md text-muted-foreground shadow">
+            <H2 className="w-fit sticky top-0 z-10 left-1/2 -translate-x-1/2 bg-background px-6 py-2 rounded-b-md text-muted-foreground shadow">
               {entryYear}
             </H2>
           )}
@@ -78,7 +78,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
     <div className="pb-4 space-y-2">
       <Button
         className="mx-auto flex font-serif text-muted-foreground"
-        variant="ghost"
+        variant="link"
         onClick={handleScrollToBottom}
       >
         Start at the beginning <ArrowDownIcon />
@@ -92,7 +92,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       <Separator />
       <Button
         className="mx-auto flex font-serif text-muted-foreground"
-        variant="ghost"
+        variant="link"
         onClick={handleScrollToTop}
       >
         Back to the top <ArrowUpIcon />

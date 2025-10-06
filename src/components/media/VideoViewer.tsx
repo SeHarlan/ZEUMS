@@ -48,9 +48,9 @@ const mimeTypes: Record<string, string> = {
 };
 
 const BUFFERING_DELAY = 1_000; //time before buffering message shows
-const LOADING_TIMEOUT = 30_000; //30 seconds
-
-
+const LOADING_TIMEOUT = 30_000; //30 seconds - before before showing long load time message
+const REMOVE_RENDER_DELAY = 10_000//10_000; //10 seconds - remove from dom after delay
+const RENDER_DEBOUNCE_DELAY = 300; //300ms - debounce render state update to prevent mounting and unmounting too quickly
 interface VideoViewerProps {
   src: string;
   poster?: string;
@@ -66,23 +66,76 @@ interface VideoViewerProps {
   onError?: ((e: unknown) => void);
 }
 
-const VideoViewer: FC<VideoViewerProps> = (props) => {
-  const { inView, ref } = useInView();
+const VideoViewer: FC<VideoViewerProps> = ({containerClassName, ...props}) => {
+  const { inView, ref: containerRef } = useInView({rootMargin: "200px"});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  const showLoadingState = isLoading || isBuffering;
+
+  const setIsLoadingCallback = useCallback((isLoading: boolean) => {
+    setIsLoading(isLoading);
+  }, []);
+  const setIsBufferingCallback = useCallback((isBuffering: boolean) => {
+    setIsBuffering(isBuffering);
+  }, []);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (inView) {
+      timeout = setTimeout(() => {
+        setShouldRender(true);
+      }, RENDER_DEBOUNCE_DELAY);
+
+    } else {
+      timeout = setTimeout(() => {
+        setShouldRender(false);
+
+        //also reset parent state
+        setIsLoading(true);
+        setIsBuffering(false);
+      }, REMOVE_RENDER_DELAY);
+    }
+    return () => clearTimeout(timeout);
+  }, [inView])
 
   return (
     <div
-      ref={ref}
-      className={cn("w-full h-full", !inView && "bg-muted animate-skeleton-shimmer")}
+      ref={containerRef}
+      className={cn(
+        "relative group/video w-full h-full flex justify-center items-center",
+        showLoadingState && "animate-skeleton-shimmer",
+        containerClassName
+      )}
     >
-      {inView && <VideoViewerCore {...props} />}
+      {shouldRender && (
+        <VideoViewerCore
+          {...props}
+          containerRef={containerRef}
+          isLoading={isLoading}
+          isBuffering={isBuffering}
+          setIsLoading={setIsLoadingCallback}
+          setIsBuffering={setIsBufferingCallback}
+          inView={inView}
+        />
+      )}
     </div>
   );
 };
 
-const VideoViewerCore: FC<VideoViewerProps> = ({
+interface VideoViewerCoreProps extends Omit<VideoViewerProps, "containerClassName"> {
+  isLoading: boolean;
+  isBuffering: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  setIsBuffering: (isBuffering: boolean) => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  inView: boolean;
+}
+
+const VideoViewerCore: FC<VideoViewerCoreProps> = ({
   src,
   poster,
-  containerClassName,
   className,
   controls = false,
   minimalControls,
@@ -91,13 +144,19 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
   loop = true,
   onLoadedMetadata,
   onError,
+  isLoading,
+  isBuffering,
+  setIsLoading,
+  setIsBuffering,
+  containerRef,
+  inView
 }) => {
   const defaultMuted = autoPlay ? true : muted;
 
   const controlsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(defaultMuted);
@@ -105,8 +164,8 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [isBuffering, setIsBuffering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
   const [userPaused, setUserPaused] = useState(false);
@@ -142,6 +201,7 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
   const handleVideoPlayError = useCallback((error: unknown) => {
     setIsLoading(false);
     setIsPlaying(false);
+    setIsBuffering(false);
 
     // More comprehensive autoplay error detection
     const isAutoplayError = error &&
@@ -160,14 +220,15 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
       setFailedToPlayMessage("error");
       onError?.(error);
     }
-  }, [onError, handleAutoplayError]);
+  }, [onError, handleAutoplayError, setIsLoading, setIsBuffering]);
 
   const handleLoadingTimeout = useCallback(() => {
     console.warn("Video loading timeout");
     setIsLoading(false);
+    setIsBuffering(false);
     setIsPlaying(false);
     setFailedToPlayMessage("loading-timeout");
-  }, []);
+  }, [setIsLoading, setIsBuffering]);
 
 
   const videoIsStopped = (video: HTMLVideoElement) => {
@@ -323,7 +384,9 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
     };
 
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-    const handlePlay = () => {setIsPlaying(true)};
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
     const handlePause = () => setIsPlaying(false);
     const handleError = (e: Event) => {
       handleVideoPlayError(e);
@@ -346,9 +409,10 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
 
     return () => {
       clearTimeout(bufferingTimeout);
-      clearTimeout(loadingTimeout); 
+      clearTimeout(loadingTimeout);
 
-      if (useCurrentTime) video.removeEventListener("timeupdate", handleTimeUpdate);
+      if (useCurrentTime)
+        video.removeEventListener("timeupdate", handleTimeUpdate);
 
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("canplaythrough", handleCanPlayThrough);
@@ -359,25 +423,35 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("error", handleError);
     };
-  }, [defaultMuted, onLoadedMetadata, onError, useCurrentTime, autoPlay, handleVideoPlayError, handleLoadingTimeout]);
+  }, [
+    defaultMuted,
+    onLoadedMetadata,
+    onError,
+    useCurrentTime,
+    autoPlay,
+    handleVideoPlayError,
+    handleLoadingTimeout,
+    setIsBuffering,
+    setIsLoading,
+  ]);
 
   // //pause when not in view and play when in view and not paused
   // //only autoplay again if autoPlay is true and the user hasnt manually paused
-  // useEffect(() => {
-  //   const video = videoRef.current;
-  //   if (!video) return;
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
-  //   // Early return if the video cannot play through all the way
-  //   if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
-  //     return;
-  //   }
+    // Early return if the video cannot play through all the way
+    if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
+      return;
+    }
 
-  //   if (!inView) {
-  //     video?.pause();
-  //   } else if (autoPlay && !userPaused && videoIsStopped(video)) {
-  //     video?.play().catch(handleVideoPlayError);
-  //   }
-  // }, [inView, autoPlay, handleVideoPlayError, userPaused]);
+    if (!inView) {
+      video?.pause();
+    } else if (autoPlay && !userPaused && videoIsStopped(video)) {
+      video?.play().catch(handleVideoPlayError);
+    }
+  }, [inView, autoPlay, handleVideoPlayError, userPaused]);
   
 
   // Listen for fullscreen changes
@@ -498,18 +572,19 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
       container.removeEventListener('pointerdown', handlePointerDown as EventListener);
     };
 
-  }, [showControls, handleVideoPlayError, isSimpleVideo]);  
+  }, [showControls, handleVideoPlayError, isSimpleVideo, containerRef]);  
 
 
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "relative group/video w-full h-full flex justify-center items-center",
-        (isLoading || isBuffering) && "animate-skeleton-shimmer",
-        containerClassName
-      )}
-    >
+    // <div
+    //   ref={containerRef}
+    //   className={cn(
+    //     "relative group/video w-full h-full flex justify-center items-center",
+    //     (isLoading || isBuffering) && "animate-skeleton-shimmer",
+    //     containerClassName
+    //   )}
+    // >
+    <>
       {!isPlaying && failedToPlayMessage && (
         <div
           ref={feedbackRef}
@@ -631,7 +706,7 @@ const VideoViewerCore: FC<VideoViewerProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -186,7 +186,8 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
     <SideDrawer
       triggerButton={
         <Button variant={buttonVariant} className={cn("w-full", buttonClassName)}>
-          <P>{buttonText}</P>
+          <P className="hidden md:block">{buttonText}</P>
+          <P className="md:hidden">Add Item</P>
           <SquarePlusIcon />
         </Button>
       }

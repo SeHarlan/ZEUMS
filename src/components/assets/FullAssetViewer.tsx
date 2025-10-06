@@ -113,7 +113,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       {renderContent()}
 
       {/* Blurred background image */}
-      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-500">
         <Image
           unoptimized={unoptimized}
           loading="eager"
@@ -124,7 +124,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
           aria-hidden="true"
           className={cn(
             "object-cover",
-            !mediaError && "scale-125 blur-3xl opacity-50"
+            !mediaError && "scale-125 blur-3xl opacity-75"
           )}
         />
       </div>

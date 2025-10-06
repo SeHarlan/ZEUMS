@@ -8,7 +8,7 @@ interface UseInViewOptions {
   passedRef?: RefObject<HTMLDivElement | null>;
 }
 
-export function useInView({ threshold = 0.1, rootMargin = "50px", triggerOnce = false, passedRef }: UseInViewOptions = {}) {
+export function useInView({ threshold = 0, rootMargin = "50px", triggerOnce = false, passedRef }: UseInViewOptions = {}) {
 
   const [inView, setInView] = useState(false);
   const internalRef = useRef<HTMLDivElement | null>(null);

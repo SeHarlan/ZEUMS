@@ -225,7 +225,8 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
     <SideDrawer
       triggerButton={
         <Button className="w-full">
-          <P>Rearrange Gallery Items</P>
+          <P className="hidden md:block">Rearrange Gallery Items</P>
+          <P className="md:hidden">Rearrange Items</P>
           <LayoutTemplateIcon />
         </Button>
       }
@@ -260,17 +261,17 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
           >
             <Droppable id={DROP_AREA_ID_BEFORE} />
 
-              {galleryRows.map((row, rowIndex) => {
-                return (
-                  <div
-                    key={rowIndex}
-                    className={cn("flex justify-center flex-row items-center")}
-                    style={{ gap: GAP }}
+            {galleryRows.map((row, rowIndex) => {
+              return (
+                <div
+                  key={rowIndex}
+                  className={cn("flex justify-center flex-row items-center")}
+                  style={{ gap: GAP }}
+                >
+                  <SortableContext
+                    items={row.map((item) => item.item._id.toString())}
+                    strategy={rectSortingStrategy}
                   >
-                    <SortableContext
-                      items={row.map((item) => item.item._id.toString())}
-                      strategy={rectSortingStrategy}
-                    >
                     {row.map((cell) => {
                       const hoverSide =
                         hoverData?.id === cell.item._id.toString()
@@ -284,10 +285,10 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
                         />
                       );
                     })}
-                    </SortableContext>
-                  </div>
-                );
-              })}
+                  </SortableContext>
+                </div>
+              );
+            })}
             <Droppable id={DROP_AREA_ID_AFTER} />
 
             <DragOverlay>

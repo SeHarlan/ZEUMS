@@ -27,22 +27,24 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ galleryId }) => {
     }
   };
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr] gap-6">
-        <NewItemFormButton galleryId={galleryId} />
-        <Button
-          onClick={handleOpenEditDrawer}
-          disabled={!gallery}
-          variant={"outline"}
-          className="w-full"
-        >
-          <P className="hidden md:block">Edit Gallery Settings</P>
-          <SettingsIcon />
-        </Button>
-      </div>
-      <div className="grid grid-cols-[auto_1fr] md:grid-cols-[1fr_2fr] gap-6 mb-8">
-        <AddBlockchainGalleryItemsButton galleryId={galleryId} />
-        <RearrangeItemsButton galleryId={galleryId} />
+    <div className="">
+      <div className="sticky top-0 rounded-xl p-6 z-20 shadow-md border bg-muted-blur mb-6">
+        <div className="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr] gap-6 mb-6">
+          <NewItemFormButton galleryId={galleryId} />
+          <Button
+            onClick={handleOpenEditDrawer}
+            disabled={!gallery}
+            variant={"outline"}
+            className="w-full"
+          >
+            <P className="hidden md:block">Edit Gallery Settings</P>
+            <SettingsIcon />
+          </Button>
+        </div>
+        <div className="grid grid-cols-[auto_1fr] md:grid-cols-[1fr_2fr] gap-6">
+          <AddBlockchainGalleryItemsButton galleryId={galleryId} />
+          <RearrangeItemsButton galleryId={galleryId} />
+        </div>
       </div>
 
       {isReady && !gallery?.items?.length ? (
@@ -60,6 +62,7 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ galleryId }) => {
           hideItemTitles={gallery?.hideItemTitles}
         />
       )}
+
     </div>
   );
 }

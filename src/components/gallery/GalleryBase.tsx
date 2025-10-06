@@ -52,29 +52,43 @@ const GalleryBase: FC<GalleryBaseProps> = ({
               "flex-col md:flex-row items-center md:items-start",
               index % 2 !== 0 && "bg-secondary rounded-lg"
             )}
-            style={{ gap: GAP, padding: PADDING, paddingBottom: index % 2 !== 0 ? PADDING : 0 }}
+            style={{
+              gap: GAP,
+              padding: PADDING,
+              paddingBottom: index % 2 !== 0 ? PADDING : 0,
+            }}
           >
-            {row.map((cell) => (
-              <div
-                key={cell.item._id.toString()}
-                className={cn("relative duration-200 w-full",
-                )}
-                style={{
-                  maxWidth: cell.width,
-                }}
-              >
+            {row.map((cell) => {
+              const isNotTextOnlyRow = row.some(
+                (cell) => cell.item.itemType !== GalleryItemTypes.Text
+              );
+              const useFixedHeight =
+                cell.item.itemType === GalleryItemTypes.Text &&
+                isNotTextOnlyRow;
+              return (
                 <div
-                  className={cn(cell.item.itemType === GalleryItemTypes.Text && "flex flex-col w-full shrink-0 justify-center")}
-                  style={cell.item.itemType === GalleryItemTypes.Text ? { height: cell.height } : {}}
+                  key={cell.item._id.toString()}
+                  className={cn("relative duration-200 w-full")}
+                  style={{
+                    maxWidth: cell.width,
+                  }}
                 >
-                  <ItemComponent
-                    item={cell.item}
-                    hideTitle={hideItemTitles}
-                    hideDescription={hideItemDescriptions}
-                  />
+                  <div
+                    className={cn(
+                      useFixedHeight &&
+                        "flex flex-col w-full shrink-0 justify-center"
+                    )}
+                    style={useFixedHeight ? { height: cell.height } : {}}
+                  >
+                    <ItemComponent
+                      item={cell.item}
+                      hideTitle={hideItemTitles}
+                      hideDescription={hideItemDescriptions}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ))}
     </div>
