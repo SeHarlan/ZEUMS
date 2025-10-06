@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { useState } from 'react';
 import useSolanaAsset from '@/hooks/useSolanaAsset';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
 import { Button } from '@/components/ui/button';
@@ -8,18 +8,13 @@ import { NavBarActions } from '@/context/NavBarActionsProvider';
 import { SearchIcon } from 'lucide-react';
 import SearchAssetDialog from '@/components/assets/SearchAssetDialog';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
-import LoadingPage from '@/components/general/LoadingPage';
-import GlitchFeedback from '@/components/general/GlitchFeedback';
-import { TITLE_COPY } from '@/textCopy/mainCopy';
+import FeedbackWrapper from '@/components/general/FeedbackWrapper';
+import { useParams } from 'next/navigation';
 
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
-
-export default function SolanaAssetPage({ params }: Props) {
-  const resolvedParams = use(params);
-  const { solanaAsset, isLoading, isError } = useSolanaAsset(resolvedParams.id);
+export default function SolanaAssetPage() {
+  const { id }= useParams<{id: string}>()
+  const { solanaAsset, isLoading, isError } = useSolanaAsset(id);
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
   const [metadataOpen, setMetadataOpen] = useState(false);
 
@@ -31,29 +26,10 @@ export default function SolanaAssetPage({ params }: Props) {
     setMetadataOpen(true);
   }
 
-  const renderContent = () => {
-    if (isLoading) {
-      return <LoadingPage complete={false} loading={true} />
-    }
-
-    if (isError || !solanaAsset) {
-      let subtitle = "";
-      if (isError) subtitle = "Failed to load asset";
-      if (!solanaAsset) subtitle = "Asset not found";
-
-      return <GlitchFeedback title={TITLE_COPY} subtitle={subtitle} />
-    }
-
-    return (
-      <FullAssetViewer 
-        asset={solanaAsset}
-      />
-    );
-  };
+  
 
   return (
-    <div className="w-full h-screen relative flex items-center justify-center"
-    >
+    <div className="w-full h-screen relative flex items-center justify-center">
       <NavBarActions>
         <Button
           variant={"outline"}
@@ -66,11 +42,12 @@ export default function SolanaAssetPage({ params }: Props) {
           variant={"outline"}
           size="icon"
           onClick={handleSearch}
-          className="size-10"
+          className="size-12 md:size-10"
         >
           <SearchIcon className="size-5" />
         </Button>
       </NavBarActions>
+
       <SearchAssetDialog
         open={searchAssetOpen}
         onOpenChange={setSearchAssetOpen}
@@ -83,7 +60,15 @@ export default function SolanaAssetPage({ params }: Props) {
         />
       )}
 
-      {renderContent()}
+      <FeedbackWrapper
+        isLoading={isLoading}
+        isError={isError}
+        hasData={!!solanaAsset}
+        errorSubtitle={"Failed to load asset"}
+        noDataSubtitle={"Asset not found"}
+      >
+        {solanaAsset && <FullAssetViewer asset={solanaAsset} />}
+      </FeedbackWrapper>
     </div>
   );
 }

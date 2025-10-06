@@ -5,19 +5,29 @@ import { useDebounce } from "./useDebounce";
 import axios from "axios";
 import { USER_USERNAME_ROUTE } from "@/constants/serverRoutes";
 import { handleClientError } from "@/utils/handleError";
+import { isUsernameBanned } from "@/constants/bannedUsernames";
 
 const DEBOUNCE_TIME = 500;
 
 const usernameSchema = z
   .string()
-  .min(3, {
-    message: "Username must be at least 3 characters.",
+  .min(2, {
+    message: "Username must be at least 2 characters.",
   })
   .regex(/^[a-zA-Z0-9_-]+$/, {
     message:
       "Username can only contain letters, numbers, underscores, and hyphens.",
   })
   .superRefine((val, ctx) => { 
+    // Check if username is banned
+    if (isUsernameBanned(val)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This username is not available. Please choose another.",
+      });
+      return;
+    }
+
     if (val.length > 30) {
       let isWalletAddress = false;
       try { 
@@ -45,15 +55,18 @@ export const useUsernameValidation = (initUsername?: string) => {
 
   const checkUsernameUniqueness = useCallback(async (value: string) => {
     try {
-      const response = await axios.post<{ isUnique: boolean }>(USER_USERNAME_ROUTE, {
-        username: value,
+      const response = await axios.post<{ isUnique: boolean; error?: string }>(USER_USERNAME_ROUTE, {
+        username: value, // Send username as-is for case-insensitive check
       });
       
       if (!response.data.isUnique) {
-        setError("Username is already taken");
+        // Use server error message if available, otherwise default message
+        setError(response.data.error || "Username is already taken");
+        return false;
       } else {
         // Clear error if username is unique and no other validation errors
         setError(null);
+        return true;
       }
     } catch (err) {
       handleClientError({
@@ -61,6 +74,7 @@ export const useUsernameValidation = (initUsername?: string) => {
         location: "useUsernameValidation_checkUsernameUniqueness",
       });
       setError("Failed to check username availability");
+      return false;
     }
   }, []);
 
@@ -100,5 +114,6 @@ export const useUsernameValidation = (initUsername?: string) => {
     error,
     isValid,
     validateUsername,
+    checkUsernameUniqueness
   };
 };

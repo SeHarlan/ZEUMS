@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import User from "../../models/User";
+import User, { UsernameCollation } from "../../models/User";
 import { standardErrorResponses } from "@/utils/server";
+import { isUsernameBanned } from "@/constants/bannedUsernames";
 
 export async function checkUsernameUniquenessHandler(req: NextRequest): Promise<NextResponse> {
   try {
@@ -13,10 +14,19 @@ export async function checkUsernameUniquenessHandler(req: NextRequest): Promise<
       throw new Error("Username is required");
     }
     
-    // Use case-insensitive regex for MongoDB query
-    const existingUser = await User.findOne({
-      username: { $regex: new RegExp(`^${username}$`, "i") }
-    }).select("_id").lean();
+    // Check if username is banned
+    if (isUsernameBanned(username)) {
+      return NextResponse.json({ 
+        isUnique: false, 
+        error: "This username is not available. Please choose another." 
+      });
+    }
+    
+    // Use case-insensitive username uniqueness check
+    const existingUser = await User.findOne({ username })
+      .collation(UsernameCollation)
+      .select("_id")
+      .lean();
     
     const isUnique = !existingUser; // true if unique (no user found), false if taken
     

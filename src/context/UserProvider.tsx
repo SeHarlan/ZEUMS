@@ -21,9 +21,9 @@ import { toast } from "sonner";
 import { truncate } from "@/utils/ui-utils";
 import { handleClientError } from "@/utils/handleError";
 import { USER_ROUTE } from "@/constants/serverRoutes";
-import { parseEntryDates } from "@/utils/timeline";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
+import { activeSolanaWalletIsInUserWallets, parseUserDates } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -32,6 +32,7 @@ type UserContextType = {
   logOutUser: () => Promise<void>;
   userLoading: boolean;
   loggedIn: boolean;
+  revalidateUser: () => void;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -41,6 +42,7 @@ const UserContext = createContext<UserContextType>({
   logOutUser: async () => {},
   userLoading: false,
   loggedIn: false,
+  revalidateUser: () => {},
 });
 
 export const useUser = () => useContext(UserContext);
@@ -61,6 +63,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const userExists = !!user;
   const sessionIdExists = !!session?.user && !!session.user.id;
 
+  const walletIsVerified = activeSolanaWalletIsInUserWallets(user, publicKey);
+
   //users with oauth accounts have an email
   const validOAuthEmail = !!user?.authUserId ? user.authUser.email : null;
 
@@ -72,14 +76,14 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logOutUser = useCallback(async () => {
+    signingInRef.current = false;
     if (disconnect) {
       await disconnect();
     }
+    await signOut({ redirect: false });
 
     setUser(null);
     setHasLoggedIn(false);
-    signingInRef.current = false;
-    signOut({ redirect: false });
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
@@ -142,7 +146,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (hasLoggedIn || !userExists) return;
     //once userExists is true check to make sure the needed info is also there (publicKey or validOAuthEmail)
     //then set hasLoggedIn to true
-    if (publicKey) {
+    if (walletIsVerified && publicKey) {
       toast.success("Logged in", {
         description: `${truncate(publicKey.toString())} is connected`,
       });
@@ -157,47 +161,39 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       //TODO consider fallback options
       logOutUser();
     }
-  }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail]);
+  }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail, walletIsVerified]);
+
+  const fetchUser = useCallback((controller?: AbortController) => {
+    axios
+      .get<{ user: UserType }>(USER_ROUTE, { signal: controller?.signal })
+      .then((response) => {
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
+      })
+      .catch((error) => {
+        //if no controller, don't log out user on error (will be the case for revalidating user)
+        if (!controller) return;
+        
+        if (controller?.signal.aborted) return;
+        logOutUser();
+        handleClientError({
+          error,
+          location: "useAuth_fetchUser",
+        });
+      });
+
+  }, [logOutUser]);
 
   useEffect(() => {
     if (userExists) return;
 
     if (status === "authenticated" && sessionIdExists) {
       const controller = new AbortController();
-
-      axios
-        .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
-        .then((response) => {
-          const userData = response.data.user;
-
-          // Convert date strings back to Date objects
-          if (userData.createdTimelineEntries) {
-            userData.createdTimelineEntries = parseEntryDates(
-              userData.createdTimelineEntries
-            );
-          }
-
-          if (userData.collectedTimelineEntries) {
-            userData.collectedTimelineEntries = parseEntryDates(
-              userData.collectedTimelineEntries
-            );
-          }
-
-          setUser(userData);
-        })
-        .catch((error) => {
-          if (controller.signal.aborted) return;
-
-          logOutUser();
-          handleClientError({
-            error,
-            location: "useAuth_get(USER_ROUTE)",
-          });
-        });
+      fetchUser(controller);
 
       return () => controller.abort();
     }
-  }, [logOutUser, sessionIdExists, status, userExists]);
+  }, [fetchUser, userExists, sessionIdExists, status]);
 
   const contextValue = useMemo(
     () => ({
@@ -207,8 +203,9 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       logInUser,
       userLoading,
       loggedIn: userExists,
+      revalidateUser: fetchUser,
     }),
-    [user, userLoading, userExists, logOutUser, logInUser]
+    [user, userLoading, userExists, logOutUser, logInUser, fetchUser]
   );
 
   return (

@@ -280,18 +280,18 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           float rgbValue = random(rgbChunk + st + vec2(blockTime, 0.));
 
-          if((rgbValue < mouseDisplacement - 0.5)) {
-            float colRan = random(rgbChunk + 100. + vec2(t, blockTime));
-            vec3 staticCol = color;
-            if(colRan < 0.33) {
-              staticCol = vec3(1.,0.,0.);
-            } else if (colRan < 0.66) {
-              staticCol = vec3(0.,1.,0.);
-             }else if(colRan < 0.99) {
-              staticCol = vec3(0.,0.,1.);
-            }
-            color = mix(color, staticCol, (0.1 + mouseDisplacement) * (glitchSquared + 0.1));//glitchSquared * (mouseDisplacement + 0.1));
-          }
+          // if((rgbValue < mouseDisplacement - 0.5)) {
+          //   float colRan = random(rgbChunk + 100. + vec2(t, blockTime));
+          //   vec3 staticCol = color;
+          //   if(colRan < 0.33) {
+          //     staticCol = vec3(1.,0.,0.);
+          //   } else if (colRan < 0.66) {
+          //     staticCol = vec3(0.,1.,0.);
+          //    }else if(colRan < 0.99) {
+          //     staticCol = vec3(0.,0.,1.);
+          //   }
+          //   color = mix(color, staticCol, (0.1 + mouseDisplacement) * (glitchSquared + 0.1));//glitchSquared * (mouseDisplacement + 0.1));
+          // }
             
           //static outside text
           if(text.a < 0.5) {

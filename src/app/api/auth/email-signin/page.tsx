@@ -17,6 +17,7 @@ import { HOME } from "@/constants/clientRoutes";
 import { useReturnPath } from "@/hooks/useReturnPath";
 import { useEmailValidation } from "@/hooks/useEmailValidation";
 import { StatelessFormItem } from "@/components/general/StatelessFormItem";
+import { toast } from "sonner";
 
 export default function MagicLinkPage() {
   const { email, setEmail, isValid, error } = useEmailValidation();
@@ -44,11 +45,10 @@ export default function MagicLinkPage() {
     } catch (error: unknown) {
       handleClientError({
         error,
-        location: "email-signin-MagicLinkPage_handleSubmit",
+        location: "emailsignin-MagicLinkPage_handleSubmit",
       });
-      import("sonner").then(({ toast }) => {
-        toast.error("Failed to send magic link. Please try again.");
-      });
+      toast.error("Failed to send magic link. Please try again.");
+
     } finally {
       setIsLoading(false);
     }

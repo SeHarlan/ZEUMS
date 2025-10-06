@@ -1,17 +1,22 @@
 import { CreateUserData } from "@/types/user";
-import User from "../models/User";
+import User, { UsernameCollation } from "../models/User";
 import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
 import mongoose from "mongoose";
 import { User as NextAuthUser } from "next-auth";
 import PendingEmailVerification from "../models/PendingEmailVerification";
+import { isUsernameBanned, generateRandomFallbackUsername } from "@/constants/bannedUsernames";
+
+
+const MAX_USERNAME_FALLBACK_ATTEMPTS = 5;
 
 export type FindOrCreateProps = {
   createData: CreateUserData;
   authUserId?: string; // NextAuth user ID
   wallet?: CreateWalletData;
 };
+
 /**
  * @param createData - The data to create a user if not found
  * @param wallet - The wallet to find or create a user for
@@ -26,11 +31,11 @@ export async function findOrCreateUser({
   
   try {
     if (wallet) {
-      return handleWithWallet({ wallet, createData });
+      return await handleWithWallet({ wallet, createData });
     }
 
     if (authUserId) {
-      return handleWithAuthId({ authUserId, createData });
+      return await handleWithAuthId({ authUserId, createData });
     }
 
     // If neither wallet nor auth ID is provided throw an error, on catch null will be returned
@@ -38,7 +43,10 @@ export async function findOrCreateUser({
   } catch (error: unknown) {
 
     const method = !!wallet ? "handleWithWallet" : "handleWithAuthId";
-    handleServerError({ error, location: `services-user_findOrCreateUser_${method}` });
+    handleServerError({
+      error,
+      location: `services-user_findOrCreateUser_${method}`
+    });
     return null;
   }
 }
@@ -110,9 +118,13 @@ const handleWithAuthId = async ({
     return sessionUser;
   }
 
-  // No pending verification and no existing user - create new user
+  // No pending verification and no existing user - create new user  (OAuth flow)
+  //username comes from the provider, so we need to ensure it is unique and not banned
+  const uniqueUsername = await ensureUniqueUsername(createData.username);
+
   const newUser = new User({
     ...createData,
+    username: uniqueUsername,
     authUserId: authUserId,
   });
   await newUser.save();
@@ -143,10 +155,12 @@ const handleWithWallet = async ({
         .exec();
   
       if (!user) {
-        //shouldn't ever happen
-        //just in case we need to handle case where user is not found delete the wallet:
-        // await walletModel.deleteOne();
-        throw new Error("User not found for the given wallet");
+        //shouldn't happen
+        //edge case where user is not means there is an orphan wallet
+        //Log and delete the wallet
+
+        await walletModel.deleteOne();
+        throw new Error("Orphaned Wallet - User not found for the given Wallet");
       }
   
       const sessionUser: NextAuthUser = {
@@ -157,20 +171,18 @@ const handleWithWallet = async ({
       return sessionUser;
     } else {
       // If wallet does not exist, create a new user and wallet within a transaction
-      
       mongooseSession.startTransaction();
   
       const user = new User(createData);
       await user.save({ session: mongooseSession });
   
+      //Needs to be an array to work with session transaction
       await Wallet.create(
-        [
-          {
-            owner: user._id,
-            address: wallet.address,
-            type: wallet.type,
-          },
-        ],
+        [{
+          owner: user._id,
+          address: wallet.address,
+          type: wallet.type,
+        }],
         { session: mongooseSession }
       ) //errors handled in parent function
   
@@ -183,11 +195,53 @@ const handleWithWallet = async ({
       return sessionUser;
     }
   } catch (error: unknown) {
-
-    await mongooseSession.abortTransaction();
+    if (mongooseSession.inTransaction()) {
+      await mongooseSession.abortTransaction();
+    }
     
     throw error; //throw error for parent function to handle
   } finally {
     mongooseSession.endSession();
   }
+}
+
+
+/**
+ * Ensures username (taken from provider) is unique and not banned for OAuth flows, generating fallback if needed
+ * @param username - The original username
+ * @returns A unique, non-banned username with z_ prefix if needed
+ */
+async function ensureUniqueUsername(username: string): Promise<string> {
+  let finalUsername = username.trim();
+  
+  
+  // Check if username is banned - if so, generate fallback with z_ prefix
+  if (isUsernameBanned(finalUsername)) {
+    finalUsername = generateRandomFallbackUsername(username);
+  }
+  
+  // Check if username is unique
+  let attempts = 0;
+  const maxAttempts = MAX_USERNAME_FALLBACK_ATTEMPTS;
+  
+  while (attempts < maxAttempts) {
+    // Use case-insensitive username uniqueness check
+    const existingUser = await User.findOne({ username: finalUsername })
+      .collation(UsernameCollation)
+      .select("_id")
+      .lean();
+    
+    if (!existingUser) {
+      return finalUsername;
+    } else {
+      // try to generate a new fallback username with z_ prefix again
+      finalUsername = generateRandomFallbackUsername(username);
+      attempts++;
+    }
+  }
+  
+ 
+  // after max attempts add a uuid to the end to guarantee uniqueness 
+  const uniqueId = crypto.randomUUID().replace(/-/g, "").substring(0, 8);
+  return `${finalUsername}_${uniqueId}`;
 }

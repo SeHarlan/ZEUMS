@@ -8,7 +8,7 @@ interface UseInViewOptions {
   passedRef?: RefObject<HTMLDivElement | null>;
 }
 
-export function useInView({ threshold = 0.1, rootMargin = "50px", triggerOnce = false, passedRef }: UseInViewOptions = {}) {
+export function useInView({ threshold = 0, rootMargin = "50px", triggerOnce = false, passedRef }: UseInViewOptions = {}) {
 
   const [inView, setInView] = useState(false);
   const internalRef = useRef<HTMLDivElement | null>(null);
@@ -25,6 +25,7 @@ export function useInView({ threshold = 0.1, rootMargin = "50px", triggerOnce = 
           setInView(true);
           if (triggerOnce) {
             observer.unobserve(element);
+            observer.disconnect();
           }
         } else if (!triggerOnce) {
           setInView(false);
@@ -40,6 +41,7 @@ export function useInView({ threshold = 0.1, rootMargin = "50px", triggerOnce = 
 
     return () => {
       observer.unobserve(element);
+      observer.disconnect(); // Ensure complete cleanup
     };
   }, [threshold, rootMargin, triggerOnce, passedRef]);
   

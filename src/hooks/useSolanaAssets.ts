@@ -6,7 +6,7 @@ import { GetSolanaAssetsProps, ParsedBlockChainAsset } from "@/types/asset";
 
 const solanaAssetFetcher = async (props: GetSolanaAssetsProps) => {
   if (!props.publicKeys?.length) return [];
-
+  console.time("solanaAssetFetcher");
   return axios
     .post<ParsedBlockChainAsset[]>(ASSETS_SOLANA_ROUTE, props)
     .then((res) => res.data)

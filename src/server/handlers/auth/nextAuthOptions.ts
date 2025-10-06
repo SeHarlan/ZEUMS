@@ -126,11 +126,10 @@ const getProviders = () => {
           if (signinMessage.nonce !== csrfToken) {
             throw new Error("Could not validate the csrf token");
           }
-
         
           const validationResult = await signinMessage.validate(
             credentials?.signature || ""
-          );
+          );          
 
           if (!validationResult)
             throw new Error("Could not validate the signed message");
@@ -149,7 +148,7 @@ const getProviders = () => {
           if (!sessionUser) {
             throw new Error("Could not find or create user");
           }
-          
+
           return sessionUser;
         } catch (e) {
           handleServerError({
@@ -209,8 +208,9 @@ export const getAuthOptions = (req: NextRequest): NextAuthOptions => {
               throw new Error("Email not found in user");
             }
             
-            const username =
-              user.name?.replaceAll(" ", "") || email.split("@")[0];
+            const username = (
+              user.name?.replaceAll(" ", "") || email.split("@")[0]
+            ).toLowerCase();
             
             const sessionUser = await findOrCreateUser({
               authUserId: user.id,

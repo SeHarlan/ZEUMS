@@ -2,7 +2,7 @@ import { DisplayNameFields, UserType } from "@/types/user";
 import { ChainIdsEnum } from "@/types/wallet";
 import { truncate } from "./ui-utils";
 import { PublicKey } from "@solana/web3.js";
-
+import { parseEntryDates } from "./timeline";
 
 // Group users wallet addresses by blockchain 
 export const getWalletsByChain = (
@@ -57,3 +57,16 @@ export const getPrimaryWallet = (user: UserType | null) => {
     address: primaryWallet.address,
   };
 }
+
+export const parseUserDates = (user: UserType): UserType => {
+  return {
+    ...user,
+    ...(user.createdTimelineEntries && {
+      createdTimelineEntries: parseEntryDates(user.createdTimelineEntries),
+    }),
+    ...(user.collectedTimelineEntries && {
+      collectedTimelineEntries: parseEntryDates(user.collectedTimelineEntries),
+    }),
+  };
+};
+

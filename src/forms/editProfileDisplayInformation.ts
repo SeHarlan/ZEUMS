@@ -1,7 +1,37 @@
 import { z } from "zod";
+import { urlSchema } from "./urlSchema";
+import { EditTimelineTab } from "@/types/ui/dashboard";
+
+// Helper function to validate social media handles (not URLs)
+const validateSocialHandle = (value: string | undefined) => {
+  if (!value || value === "") return true; // Allow empty values
+  
+  // Check for common domain extensions
+  const domainExtensions = ['.com', '.org', '.net', '.io', '.gg', '.me', '.co'];
+  if (domainExtensions.some(ext => value.toLowerCase().includes(ext))) {
+    return false;
+  }
+  
+  // Check for characters that wouldn't be in usernames
+  const invalidChars = ['/', '\\', ':', '?', '#', '&', '=', '+', '@', ' '];
+  if (invalidChars.some(char => value.includes(char))) {
+    return false;
+  }
+  
+  return true;
+};
+
+// Reusable social media handle schema
+const socialHandleSchema = z
+  .string()
+  .optional()
+  .refine(validateSocialHandle, {
+    message: "Please enter just the handle (e.g., 'username'). No URLs, domains, or special characters like /, :, @",
+  })
+  .transform((val) => (val === "" ? undefined : val));
+
 // Form schema with Zod validation
 export const profileDisplayFormSchema = z.object({
-  // profilePicture: z.string().optional(),
   displayName: z
     .string()
     .min(2, {
@@ -17,31 +47,15 @@ export const profileDisplayFormSchema = z.object({
     .or(z.literal(""))
     .optional(),
   socialHandles: z.object({
-    x: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
-    instagram: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
-    tiktok: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
-    facebook: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
-    telegram: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
-    discord: z
-      .string()
-      .optional()
-      .transform((val) => (val === "" ? undefined : val)),
+    x: socialHandleSchema,
+    instagram: socialHandleSchema,
+    tiktok: socialHandleSchema,
+    telegram: socialHandleSchema,
+    discord: socialHandleSchema,
+    website: urlSchema,
+    // facebook: socialHandleSchema,
   }),
+  primaryTimeline: z.nativeEnum(EditTimelineTab),
   // websites: z.array(z.string().url()).optional().transform((val) => (val === "" ? undefined : val)),
 });
 

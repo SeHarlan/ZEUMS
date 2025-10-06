@@ -1,28 +1,40 @@
-import { USER_AUTH_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
+import { USER_AUTH_VIRTUAL, USER_COLLECTED_GALLERIES_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_GALLERIES_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
 import { TimelineEntry } from "./entry";
 import { WalletType } from "./wallet";
 import { Schema } from "mongoose";
 import { AuthUserType } from "./next-auth";
+import { ImageType } from "./media";
+import { EditTimelineTab } from "./ui/dashboard";
+import { UserVirtualGalleryType } from "./gallery";
+
+// export type Website = {
+//   url: string;
+//   name: string;
+//   image: ImageType;
+// };
 
 export type BaseUserType = {
   _id: Schema.Types.ObjectId;
   username: string;
   displayName?: string;
+  profileImage?: ImageType; 
+  bannerImage?: ImageType;
   email?: string;
-  name?: string; // Required by NextAuth
-  image?: string; // Required by NextAuth
   bio?: string;
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
+  primaryTimeline?: EditTimelineTab;
+  // websites?: Website[];
 };
 
 export const SOCIAL_HANDLE_KEYS = [
   "x",
   "instagram",
   "tiktok",
-  "facebook",
   "telegram",
   "discord",
+  "website",
+  // "facebook",
 ] as const;
 
 // Define the type based on that const
@@ -40,9 +52,18 @@ export function isValidSocialHandleKey(
 /** extend UserType with virtuals populated */
 export type UserType = BaseUserType & {
   [USER_WALLET_VIRTUAL]: WalletType[];
+  [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[];
+  [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[];
+  [USER_AUTH_VIRTUAL]: AuthUserType;
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_CREATED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_COLLECTED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
+};
+
+export type PublicUserType = BaseUserType & {
   [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
-  [USER_AUTH_VIRTUAL]: AuthUserType;
 };
 
 export type CreateUserData = {

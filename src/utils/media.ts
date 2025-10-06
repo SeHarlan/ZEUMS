@@ -1,13 +1,16 @@
 import {
   BlockchainMedia,
   CdnIdType,
+  ImageType,
   isBlockchainImage,
   isBlockchainMedia,
+  isImageType,
+  MediaCategory,
   MediaType,
   UserMedia,
 } from "@/types/media";
 
-export const getImageUrlSources = (media: MediaType): string[] => {
+export const getImageUrlSources = (media: MediaType, unoptimized = true): string[] => {
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -16,7 +19,11 @@ export const getImageUrlSources = (media: MediaType): string[] => {
   if (cdn) {
     const { type, cdnId } = cdn;
     if (type === CdnIdType.HELIUS_URL) {
-      sources.push(cdnId);
+      //else use original url for optimization
+      // only use helius url for unoptimized images
+      if (unoptimized) { 
+        sources.push(cdnId);
+      }
     } else if (type === CdnIdType.CLOUDINARY_ID) {
       // TODO: Cloudinary, will need to construct this URL
       sources.push(cdnId);
@@ -63,3 +70,36 @@ export const getVideoAspectRatio = (videoElement: HTMLVideoElement) => {
   return videoElement.videoWidth / videoElement.videoHeight;
 }
 
+export const convertMediaToImage = (media: MediaType): ImageType => { 
+  if (isImageType(media)) return media;
+
+
+  // convert blockchain media to image (requires imageUrl)
+  if (isBlockchainMedia(media)) {
+    const imageMedia: ImageType = {
+      imageUrl: media.imageUrl,
+      imageCdn: media.imageCdn,
+      origin: media.origin,
+      aspectRatio: media.aspectRatio,
+      category: MediaCategory.Image,
+    };
+    return imageMedia;
+  } else {
+    // convert user media to image (no imageUrl)
+    const imageMedia: ImageType = {
+      imageCdn: media.imageCdn,
+      origin: media.origin,
+      aspectRatio: media.aspectRatio,
+      category: MediaCategory.Image,
+    };
+    return imageMedia;
+  }
+}
+
+export const isGif = (media: MediaType) => {
+  const isGif = isBlockchainImage(media)
+    ? media.imageUrl.endsWith("gif")
+    : false;
+
+  return isGif;
+}

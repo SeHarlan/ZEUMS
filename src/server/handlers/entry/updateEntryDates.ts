@@ -35,13 +35,7 @@ export async function updateEntryDatesHandler(
       ordered: false, // Continue even if some operations fail
     });
 
-    const updatedIds = datesToUpdate.map((update) => update._id);
-    const updatedEntryDates = await Entry.find({
-      _id: { $in: updatedIds },
-      owner: authSessionUser.dbUserId,
-    }).select("_id date");
-
-    return NextResponse.json({ updatedEntryDates, ...bulkWriteResult });
+    return NextResponse.json({ bulkWriteResult });
   } catch (error) {
     return standardErrorResponses({
       error,

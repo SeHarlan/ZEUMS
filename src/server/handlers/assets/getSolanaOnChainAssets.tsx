@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function getSolanaOnChainAssetsHandler(req: NextRequest): Promise<NextResponse>{  
   try {
+    console.time("getSolanaOnChainAssetsHandler");
     const { publicKeys, source } = (await req
       .text()
       .then((data) => JSON.parse(data))) as GetSolanaAssetsProps;
@@ -13,13 +14,19 @@ export async function getSolanaOnChainAssetsHandler(req: NextRequest): Promise<N
     if (!publicKeys?.length) { 
       return NextResponse.json([], { status: 204 });
     }
+    console.time("getSolanaOnChainAssets");
     const rawAssets = await getAllSolanaAssets({
       publicKeys: publicKeys,
       source: source,
     });
+    console.timeEnd("getSolanaOnChainAssets");
 
+    console.time("parseSolanaAssets");
     const parsedAssets = parseSolanaAssets(rawAssets);
 
+    console.timeEnd("parseSolanaAssets");
+    console.timeEnd("getSolanaOnChainAssetsHandler");
+    
     return NextResponse.json(parsedAssets, { status: 200 });
   
   } catch (error) { 

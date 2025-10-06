@@ -12,6 +12,9 @@ import "./globals.css";
 import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense } from "react";
+import { AspectRatioProvider } from "@/context/AspectRatioProvider";
+import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 
 
 const dmSerif = DM_Serif_Text({
@@ -31,12 +34,36 @@ const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
 });
 
+
 export const metadata: Metadata = {
-  title: "Zeums",
-  description: "Celebrate your digital history",
+  metadataBase: new URL(process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.zeums.art"),
+  title: TITLE_COPY,
+  description: SUBTITLE_COPY,
   icons: {
-    icon: "/icon.png"
-  }
+    icon: "/icon.png",
+  },
+  openGraph: {
+    title: TITLE_COPY,
+    description: SUBTITLE_COPY,
+    url: "https://www.zeums.art",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${TITLE_COPY} - ${SUBTITLE_COPY}`,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE_COPY,
+    description: SUBTITLE_COPY,
+    images: ["/og-image.png"],
+    creator: "@ZEUMS_art",
+  },
 };
 
 export default function RootLayout({
@@ -59,13 +86,15 @@ export default function RootLayout({
           <AuthContextProvider>
             <UserContextProvider>
               <NavBarActionsProvider>
-                <ScrollArea className="h-screen">
-                  <Suspense fallback={<nav />}>
-                    <NavBar />
-                  </Suspense>
-                  {children}
-                  <Toaster />
-                </ScrollArea>
+                <AspectRatioProvider>
+                  <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
+                    <Suspense fallback={<nav />}>
+                      <NavBar />
+                    </Suspense>
+                    {children}
+                    <Toaster />
+                  </ScrollArea>
+                </AspectRatioProvider>
               </NavBarActionsProvider>
             </UserContextProvider>
           </AuthContextProvider>

@@ -1,8 +1,9 @@
-import { ParsedBlockChainAsset } from "@/types/asset";
+import { BlockchainCollection, ParsedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
 import { GetAssetResponse, File, Interface } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
+import { solanaSpamCreatorAddresses, solanaWhiteListedCollectionAddresses } from "./addressLists";
 
 
 export const parseSolanaAssets = (
@@ -12,25 +13,16 @@ export const parseSolanaAssets = (
   const editionMap: Record<string, ParsedBlockChainAsset> = {}; 
 
   for (const asset of rawAssets) {
-    const { content, creators, ownership, id, grouping, authorities } = asset;
+    const { content, creators, ownership, id } = asset;
 
 
     ///////FILTER OUT SPAM NFTs
-    if (!content || !content.files || !content.links || !content.metadata) continue;
-    const imageUrl = content.links?.image;
-
+    if (!content || isSpamNft(asset)) continue;
+    
     // Must have proper content
+    const imageUrl = content.links?.image;
     if (!imageUrl) continue;
     if (!content.metadata?.name) continue;
-
-    //TODO: find smarter way to handle this (or to filter out junk nfts in general)
-    // allowing no creators for now because some children nfts dont have creators (blame fubby and his ash)
-    const hasVerifiedCreator = creators?.some((c) => c.verified);
-    const hasCollection = !!grouping?.[0];
-    if (!hasVerifiedCreator && !hasCollection) continue;
-
-    // Must not have excessive authorities (spam indicator)
-    if (authorities && authorities.length > 5) continue;
     //////
 
     if(isCollectionNft(asset)) continue;
@@ -38,7 +30,7 @@ export const parseSolanaAssets = (
     const attributes: BlockchainAttribute[] = content.metadata.attributes
       ?.length
       ? content.metadata.attributes?.map((a) => ({
-          type: a.trait_type,
+          trait_type: a.trait_type,
           value: a.value,
         }))
       : [];
@@ -47,16 +39,28 @@ export const parseSolanaAssets = (
       creators?.map((creator) => ({
         address: creator.address,
         share: creator.share,
+        verified: creator.verified,
       })) || [];
 
     const onChainOwner = {
       address: ownership.owner,
     };
 
+    const assetGrouping = asset.grouping?.length ? asset.grouping[0] : null
+
+    const collection: BlockchainCollection | undefined = assetGrouping
+      ? {
+          address: assetGrouping.group_value,
+          name: assetGrouping.collection_metadata?.name,
+          image: assetGrouping.collection_metadata?.image,
+          description: assetGrouping.collection_metadata?.description,
+        }
+      : undefined;
+    
     //parse media and figure out category
     const { imageCdnUrl, videoUrl, htmlUrl, vrUrl } = parseSolanaMedia({
-      files: content.files,
-      animationUrl: content.links.animation_url,
+      files: content?.files || [],
+      animationUrl: content.links?.animation_url,
     });
 
     let category: MediaCategory = MediaCategory.Image;
@@ -92,6 +96,7 @@ export const parseSolanaAssets = (
       onChainOwner,
       attributes,
       media,
+      collection,
     };
 
     const isEdition =
@@ -172,3 +177,26 @@ function isCollectionNft(asset: GetAssetResponse): boolean {
   //TODO find way to handle legacy collection types
   return false;
 }
+
+function isSpamNft(asset: GetAssetResponse): boolean {
+  const { content, creators, grouping, authorities } = asset;
+  if (!content || !content.links || !content.metadata) return true;
+
+  const hasVerifiedCreator = creators?.some((c) => c.verified);
+  const whiteListedCollection =
+    grouping?.[0]?.group_value &&
+    solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
+
+  // no verified creator,  or whitelisted/verified collection -> is spam
+  if (!hasVerifiedCreator && !whiteListedCollection) return true;
+
+  // Must not have excessive authorities (spam indicator)
+  if (authorities && authorities.length > 5) return true;
+
+  for (const creator of creators || []) {
+    if (solanaSpamCreatorAddresses.has(creator.address)) return true;
+  }
+
+  return false;
+}
+

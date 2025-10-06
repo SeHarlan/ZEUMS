@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
-import Entry from "../../models/Entry/Entry";
+import Entry, { GalleryEntryVirtual } from "../../models/Entry/Entry";
 import { BaseEntry } from "@/types/entry";
 import { removeUndefined } from "@/utils/general";
 
@@ -39,8 +39,8 @@ export async function updateEntryHandler(
       {
         new: true, // Return the updated document
         runValidators: true, // Validate the update against the schema
-      }
-    );
+      },
+    ).populate(GalleryEntryVirtual);
 
     if (!updatedEntry) {
       throw new Error("Entry not found or failed to update");

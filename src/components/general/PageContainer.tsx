@@ -8,6 +8,10 @@ type PageContainerProps = {
   noPadding?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>
 
+export const PAGE_PADDING_X = "px-4 md:px-8";
+export const PAGE_PADDING_Y = "py-16 md:py-8";
+export const PAGE_PADDING = `${PAGE_PADDING_Y} ${PAGE_PADDING_X}`;
+
 export const PageContainer = ({ 
   children, 
   className = "",
@@ -29,7 +33,7 @@ export const PageContainer = ({
       className={cn(
         "w-full mx-auto",
         widthClasses[maxWidth],
-        !noPadding && "py-16 md:py-8 px-8",
+        !noPadding && PAGE_PADDING,
         className
       )}
     >

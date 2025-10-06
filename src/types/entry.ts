@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 import { GalleryType } from "./gallery";
 import { BlockchainImage, BlockchainMedia, UserImage, UserMedia } from "./media"
 import { ChainIdsEnum } from "./wallet";
-
+import { GalleryItem } from "./galleryItem";
 
 export enum EntryTypes {
   BlockchainAsset = "blockchain_asset",
@@ -14,6 +14,7 @@ export enum EntryTypes {
 export enum EntrySource {
   Creator = "creator",
   Collector = "collector",
+  // Curator = "curator",
 }
 
 export type EntryButton = {
@@ -26,12 +27,12 @@ export type BaseEntry = {
   _id: Schema.Types.ObjectId;
   /** User ID of the entry owner */
   owner: Schema.Types.ObjectId;
-  date: Date;
   /** Source of the entry (creator or collector) */
   source: EntrySource;
   title?: string;
   description?: string;
   buttons?: EntryButton[];
+  date: Date;
 };
 
 export type TextEntry = BaseEntry & {
@@ -50,6 +51,7 @@ export type BlockchainCreator = {
   address: string;
   /** Ownership/Royalty Percentage  */
   share: number;
+  verified?: boolean;
   /** User ID of the creator, if available */
   userId?: Schema.Types.ObjectId;
 };
@@ -62,7 +64,7 @@ export type BlockchainOwner = {
 }
 
 export type BlockchainAttribute = {
-  type: string;
+  trait_type: string;
   value: string;
 }
 
@@ -89,17 +91,30 @@ export type GalleryEntry = BaseGalleryEntry & {
 }
 
 // Combined type using discriminated union
-export type TimelineEntry = TextEntry | BlockchainAssetEntry | UserAssetEntry | GalleryEntry;
+export type TimelineEntry =
+  | TextEntry
+  | BlockchainAssetEntry
+  | UserAssetEntry
+  | GalleryEntry;
+
+
 
 // Types related to entry CRUD
-export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id">
+export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id"> & {
+  galleryId?: string;
+}
 
 export type TimelineEntryDateUpdate = {
-  _id: Schema.Types.ObjectId;
+  _id: string;
   date: Date;
 }
 
 // Type guard functions
+export function isEntry(
+  entryOrItem: GalleryItem | TimelineEntry
+): entryOrItem is TimelineEntry {
+  return "entryType" in entryOrItem;
+}
 export function isBlockchainAssetEntry(entry: TimelineEntry | TimelineEntryCreation): entry is BlockchainAssetEntry {
   return entry.entryType === EntryTypes.BlockchainAsset
 }
@@ -108,10 +123,15 @@ export function isUserAssetEntry(entry: TimelineEntry): entry is UserAssetEntry 
   return entry.entryType === EntryTypes.UserAsset
 }
 
+export function isMediaEntry(entry: TimelineEntry): entry is BlockchainAssetEntry | UserAssetEntry {
+  return isBlockchainAssetEntry(entry) || isUserAssetEntry(entry);
+}
+
 export function isTextEntry(entry: TimelineEntry): entry is TextEntry {
   return entry.entryType === EntryTypes.Text;
 }
 
-export function isGalleryEntry(entry: TimelineEntry): entry is GalleryEntry {
+export function isGalleryEntry(entry?: TimelineEntry | null): entry is GalleryEntry {
+  if(!entry) return false;
   return entry.entryType === EntryTypes.Gallery;
 }

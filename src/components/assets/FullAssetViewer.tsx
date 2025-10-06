@@ -20,14 +20,16 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
   className?: string;
+  unoptimized?: boolean;
 }
 
 const FullAssetViewer: FC<FullAssetViewerProps> = ({
   asset,
   className,
+  unoptimized = false,
 }) => {
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback(asset.media);
+    useImageFallback({media: asset.media, unoptimized});
 
   const [mediaError, setMediaError] = useState(false);
 
@@ -82,11 +84,10 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       default:
         return (
           <Image
-            unoptimized={true}
+            unoptimized={unoptimized}
             loading="eager"
             priority
             fill
-            sizes="100vw"
             onError={onError}
             onLoad={onLoad}
             src={imageUrl}
@@ -110,18 +111,21 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       )}
     >
       {renderContent()}
-      
+
       {/* Blurred background image */}
-      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-500">
         <Image
-          unoptimized={true}
+          unoptimized={unoptimized}
           loading="eager"
           priority
           fill
           src={imageUrl}
           alt="blurred background"
           aria-hidden="true"
-          className={cn("object-cover", !mediaError && "scale-150 blur-3xl opacity-50")}
+          className={cn(
+            "object-cover",
+            !mediaError && "scale-125 blur-3xl opacity-75"
+          )}
         />
       </div>
     </div>
