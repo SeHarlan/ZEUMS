@@ -29,6 +29,7 @@ interface AssetViewerProps {
   objectFit?: "object-cover" | "object-contain";
   aspectRatio?: "square" | "media-defined";
   className?: string;
+  unoptimized?: boolean;
 }
 
 const AssetViewer: FC<AssetViewerProps> = ({
@@ -36,12 +37,13 @@ const AssetViewer: FC<AssetViewerProps> = ({
   aspectRatio = "media-defined",
   objectFit = "object-contain",
   className,
+  unoptimized = false,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback(asset.media);
+    useImageFallback({media: asset.media, unoptimized});
 
   const [videoError, setVideoError] = useState(false);
 
@@ -99,7 +101,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToMediaPage}
-        unoptimized={true}
+        unoptimized={unoptimized}
         width={width}
         height={height}
         loading="lazy"

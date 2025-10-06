@@ -47,6 +47,9 @@ const mimeTypes: Record<string, string> = {
   wmv: "video/x-ms-wmv",
 };
 
+const BUFFERING_DELAY = 1_000; //time before buffering message shows
+const LOADING_TIMEOUT = 30_000; //30 seconds
+
 
 interface VideoViewerProps {
   src: string;
@@ -63,10 +66,20 @@ interface VideoViewerProps {
   onError?: ((e: unknown) => void);
 }
 
-const BUFFERING_DELAY = 1_000; //time before buffering message shows
-const LOADING_TIMEOUT = 30_000; //30 seconds
+const VideoViewer: FC<VideoViewerProps> = (props) => {
+  const { inView, ref } = useInView();
 
-const VideoViewer: FC<VideoViewerProps> = ({
+  return (
+    <div
+      ref={ref}
+      className={cn("w-full h-full", !inView && "bg-muted animate-skeleton-shimmer")}
+    >
+      {inView && <VideoViewerCore {...props} />}
+    </div>
+  );
+};
+
+const VideoViewerCore: FC<VideoViewerProps> = ({
   src,
   poster,
   containerClassName,
@@ -98,7 +111,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
   const [userPaused, setUserPaused] = useState(false);
 
-  const { inView } = useInView({ passedRef: containerRef });
+  // const { inView } = useInView({ passedRef: containerRef });
 
   //these prevent unneeded event listeners and other checks
   const useCurrentTime = controls && !minimalControls;
@@ -348,23 +361,23 @@ const VideoViewer: FC<VideoViewerProps> = ({
     };
   }, [defaultMuted, onLoadedMetadata, onError, useCurrentTime, autoPlay, handleVideoPlayError, handleLoadingTimeout]);
 
-  //pause when not in view and play when in view and not paused
-  //only autoplay again if autoPlay is true and the user hasnt manually paused
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // //pause when not in view and play when in view and not paused
+  // //only autoplay again if autoPlay is true and the user hasnt manually paused
+  // useEffect(() => {
+  //   const video = videoRef.current;
+  //   if (!video) return;
 
-    // Early return if the video cannot play through all the way
-    if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
-      return;
-    }
+  //   // Early return if the video cannot play through all the way
+  //   if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
+  //     return;
+  //   }
 
-    if (!inView) {
-      video?.pause();
-    } else if (autoPlay && !userPaused && videoIsStopped(video)) {
-      video?.play().catch(handleVideoPlayError);
-    }
-  }, [inView, autoPlay, handleVideoPlayError, userPaused]);
+  //   if (!inView) {
+  //     video?.pause();
+  //   } else if (autoPlay && !userPaused && videoIsStopped(video)) {
+  //     video?.play().catch(handleVideoPlayError);
+  //   }
+  // }, [inView, autoPlay, handleVideoPlayError, userPaused]);
   
 
   // Listen for fullscreen changes
@@ -500,7 +513,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
       {!isPlaying && failedToPlayMessage && (
         <div
           ref={feedbackRef}
-          className=" z-50 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-2 rounded-md"
+          className=" z-50 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-1 sm:p-2 rounded-md"
         >
           {failedToPlayMessage === "loading-timeout" && (
             <div className="text-center">

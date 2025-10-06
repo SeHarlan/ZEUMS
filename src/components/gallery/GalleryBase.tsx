@@ -50,7 +50,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
             className={cn(
               "flex justify-center",
               "flex-col md:flex-row items-center md:items-start",
-              index % 2 !== 0 && "bg-secondary rounded-md shadow"
+              index % 2 !== 0 && "bg-secondary rounded-lg"
             )}
             style={{ gap: GAP, padding: PADDING, paddingBottom: index % 2 !== 0 ? PADDING : 0 }}
           >

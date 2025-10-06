@@ -2,14 +2,19 @@ import { MediaType } from "@/types/media";
 import { getImageUrlSources } from "@/utils/media";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+interface UseImageFallbackProps {
+  media: MediaType;
+  onFinalError?: () => void;
+  unoptimized?: boolean;
+}
 
-export const useImageFallback = (media: MediaType, onFinalError?: () => void) => {
+export const useImageFallback = ({ media, onFinalError, unoptimized }: UseImageFallbackProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
   const [finalErrorCalled, setFinalErrorCalled] = useState(false);
   
   const onLoad = () => setLoaded(true);
-  const sources = getImageUrlSources(media);
+  const sources = getImageUrlSources(media, unoptimized);
   const isError = useMemo(() =>
     imageIndex >= sources.length
   , [imageIndex, sources]);

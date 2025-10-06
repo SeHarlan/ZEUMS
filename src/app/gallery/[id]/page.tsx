@@ -31,7 +31,7 @@ const GalleryPage = () => {
         hasData={!!gallery}
         noDataSubtitle="Gallery not found"
       >
-        <div className="rounded-md p-6.25 lg:p-12.5 mb-18.75 text-center space-y-4 shadow border bg-secondary">
+        <div className="rounded-lg p-6.25 lg:p-12.5 mb-18.75 text-center space-y-4 bg-secondary">
           <H1>{gallery?.title}</H1>
           <LinkButton
             href={attributionLink}

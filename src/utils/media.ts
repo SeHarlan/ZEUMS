@@ -10,7 +10,7 @@ import {
   UserMedia,
 } from "@/types/media";
 
-export const getImageUrlSources = (media: MediaType): string[] => {
+export const getImageUrlSources = (media: MediaType, unoptimized = true): string[] => {
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -19,7 +19,11 @@ export const getImageUrlSources = (media: MediaType): string[] => {
   if (cdn) {
     const { type, cdnId } = cdn;
     if (type === CdnIdType.HELIUS_URL) {
-      sources.push(cdnId);
+      //else use original url for optimization
+      // only use helius url for unoptimized images
+      if (unoptimized) { 
+        sources.push(cdnId);
+      }
     } else if (type === CdnIdType.CLOUDINARY_ID) {
       // TODO: Cloudinary, will need to construct this URL
       sources.push(cdnId);

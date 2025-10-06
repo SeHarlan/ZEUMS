@@ -31,6 +31,7 @@ export const ProfileImage = ({
 
   return (
     <MediaThumbnail
+      unoptimized={false}
       media={media}
       alt={"Profile Image"}
       objectFit="object-cover"

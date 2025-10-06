@@ -23,9 +23,12 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
       ? "ownerAddress" : "creatorAddress";
 
   for (const publicKey of publicKeys) {
+
     let page = 1 // Starts at 1
     let continueFetching = true;
     while (continueFetching) {
+
+      console.time(`getAllSolanaAssets-page-${page}`);
 
       const params = {
         jsonrpc: "2.0",
@@ -53,6 +56,7 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
           return res.data.result;
         })
             
+      console.timeEnd(`getAllSolanaAssets-page-${page}`);
       if (!res || res.items.length == 0) {
         continueFetching = false
         break;
@@ -62,6 +66,7 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
       }
     }
   }
+
   return assets;
 }
 

@@ -31,6 +31,7 @@ export const BannerImage: FC<BannerImageProps> = ({
   
   return (
     <MediaThumbnail
+      unoptimized={false}
       size="full"
       media={media}
       alt={"Banner Image"}

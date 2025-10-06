@@ -53,7 +53,7 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
           />
           <LinkButton
             href={galleryLink}
-            variant="link"
+            variant="ghost"
           >
             View Gallery
             <ArrowRightIcon />

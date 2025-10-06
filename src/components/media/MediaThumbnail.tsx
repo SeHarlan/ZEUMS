@@ -25,6 +25,7 @@ interface MediaThumbnailProps {
   size?: "small" | "medium" | "full";
   priority?: boolean;
   noPadding?: boolean;
+  unoptimized?: boolean;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -39,6 +40,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   size = "small",
   priority,
   noPadding,
+  unoptimized = true,
 }) => {
   const {
     isLoaded,
@@ -47,7 +49,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError: handleFallbackError,
     onLoad: handleFallbackLoad,
-  } = useImageFallback(media, onError);
+  } = useImageFallback({media, onFinalError: onError, unoptimized});
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();
@@ -65,7 +67,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
       <Image
         height={height}
         width={width}
-        unoptimized={true}
+        unoptimized={unoptimized}
         loading={priority ? "eager" : "lazy"}
         onError={handleFallbackError}
         onLoad={handleLoad}
