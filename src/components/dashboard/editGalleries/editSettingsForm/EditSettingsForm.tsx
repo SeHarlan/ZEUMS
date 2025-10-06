@@ -1,6 +1,6 @@
 "use client";
 import { FC, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
 import { useForm } from "react-hook-form";
@@ -14,11 +14,13 @@ import { P } from "@/components/typography/Typography";
 import useGalleryById from "@/hooks/useGalleryById";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { useUser } from "@/context/UserProvider";
-import { usePathname, useRouter } from "next/navigation";
-import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { usePathname } from "next/navigation";
+import { EDIT_GALLERY, USER_GALLERY } from "@/constants/clientRoutes";
 import { Separator } from "@/components/ui/separator";
-import { ImagesIcon } from "lucide-react";
+import { EyeIcon, ImagesIcon } from "lucide-react";
 import EditSettingsContent from "./EditSettingsFormContent";
+import { cn } from "@/utils/ui-utils";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 
 const formId = "edit-gallery-form";
 
@@ -32,10 +34,12 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   const galleryId = editingGallery?._id?.toString() || "";
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
   const { revalidateUser } = useUser();
-  const router = useRouter();
   const pathname = usePathname();
 
   const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
+
+  const returnKey = getReturnKey(pathname);
+  const viewGalleryPath = USER_GALLERY(galleryId) + makeReturnQueryParam(returnKey);
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
@@ -108,10 +112,6 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
     if (!open) onClose()
   }
   
-  const goToGalleryItems = () => {
-    router.push(EDIT_GALLERY(galleryId));
-  }
-
   return (
     <SideDrawer
       triggerButton={null}
@@ -130,15 +130,22 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         </Button>
       }
     >
-      {notOnGalleryItemsPage && (
-        <>
-          <Button onClick={goToGalleryItems} className="w-full">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <LinkButton
+          href={viewGalleryPath}
+          className={cn("w-full", !notOnGalleryItemsPage && "col-span-2")}
+        >
+          View Gallery
+          <EyeIcon />
+        </LinkButton>
+        {notOnGalleryItemsPage && (
+          <LinkButton href={EDIT_GALLERY(galleryId)} variant="outline" className="w-full">
             Manage Gallery Items
             <ImagesIcon />
-          </Button>
-          <Separator className="my-6" />
-        </>
-      )}
+          </LinkButton>
+        )}
+      </div>
+      <Separator className="my-6" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
           <EditSettingsContent form={form} />
