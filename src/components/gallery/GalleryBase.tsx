@@ -14,6 +14,7 @@ interface GalleryBaseProps {
 }
 
 const GAP = 50; //px
+const GAP_SMALL = 25; //px
 const MAX_HEIGHT_RATIO = 0.75;
 const PADDING = 25;
 
@@ -33,6 +34,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
     const processedRows = processGalleryRows({
       galleryRows,
       gap: GAP,
+      gapSmall: GAP_SMALL,
       padding: PADDING,
       useRowHeight: isDesktop,
       containerWidth,
@@ -45,9 +47,9 @@ const GalleryBase: FC<GalleryBaseProps> = ({
     <div className="space-y-30 mb-30" ref={containerRef}>
       {isReady &&
         galleryRows.map((row, index) => {
+          const useBreakup = (index + 1) % 2 === 0;
 
-          const isEven = index % 2 !== 0;
-
+          const gap = row.length > 3 ? GAP_SMALL : GAP;
           return (
             <div
               key={"row-" + index}
@@ -55,15 +57,14 @@ const GalleryBase: FC<GalleryBaseProps> = ({
                 "relative overflow-hidden",
                 "flex justify-center",
                 "flex-col md:flex-row items-center md:items-start",
-                isEven && "bg-secondary rounded-lg border shadow"
+                useBreakup && "border-x-2 rounded-xl bg-secondary"
               )}
               style={{
-                gap: GAP,
+                gap,
                 padding: PADDING,
-                paddingBottom: isEven ? PADDING : 0,
+                paddingBottom: useBreakup ? PADDING : 0,
               }}
             >
-              
               {row.map((cell) => {
                 const isNotTextOnlyRow = row.some(
                   (cell) => cell.item.itemType !== GalleryItemTypes.Text
@@ -71,6 +72,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
                 const useFixedHeight =
                   cell.item.itemType === GalleryItemTypes.Text &&
                   isNotTextOnlyRow;
+
                 return (
                   <div
                     key={cell.item._id.toString()}
@@ -97,8 +99,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
               })}
             </div>
           );
-        }
-      )}
+        })}
     </div>
   );
 };

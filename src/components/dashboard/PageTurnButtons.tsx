@@ -9,7 +9,7 @@ interface PageTurnProps {
 }
 export const PageTurnLeft: FC<PageTurnProps> = ({path, onClick, useOnClick}) => { 
   return (
-    <div className="z-30 fixed top-1/2 -translate-y-1/2 left-2 md:left-4 lg:left-8">
+    <div className="z-30 hidden sm:block fixed top-1/2 -translate-y-1/2 left-2 md:left-4 lg:left-8">
       {useOnClick ? (
         <Button
           size="icon"
@@ -36,7 +36,7 @@ export const PageTurnLeft: FC<PageTurnProps> = ({path, onClick, useOnClick}) => 
 
 export const PageTurnRight: FC<PageTurnProps> = ({path, onClick, useOnClick}) => { 
   return (
-    <div className="z-30 fixed top-1/2 -translate-y-1/2 right-2 md:right-4 lg:right-8">
+    <div className="z-30 hidden sm:block fixed top-1/2 -translate-y-1/2 right-2 md:right-4 lg:right-8">
       {useOnClick ? (
         <Button
           size="icon"
