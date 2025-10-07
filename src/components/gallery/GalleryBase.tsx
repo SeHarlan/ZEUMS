@@ -42,55 +42,63 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
 
   return (
-    <div className="space-y-25 mb-30" ref={containerRef}>
+    <div className="space-y-30 mb-30" ref={containerRef}>
       {isReady &&
-        galleryRows.map((row, index) => (
-          <div
-            key={"row-" + index}
-            className={cn(
-              "flex justify-center",
-              "flex-col md:flex-row items-center md:items-start",
-              index % 2 !== 0 && "bg-secondary rounded-lg"
-            )}
-            style={{
-              gap: GAP,
-              padding: PADDING,
-              paddingBottom: index % 2 !== 0 ? PADDING : 0,
-            }}
-          >
-            {row.map((cell) => {
-              const isNotTextOnlyRow = row.some(
-                (cell) => cell.item.itemType !== GalleryItemTypes.Text
-              );
-              const useFixedHeight =
-                cell.item.itemType === GalleryItemTypes.Text &&
-                isNotTextOnlyRow;
-              return (
-                <div
-                  key={cell.item._id.toString()}
-                  className={cn("relative duration-200 w-full")}
-                  style={{
-                    maxWidth: cell.width,
-                  }}
-                >
+        galleryRows.map((row, index) => {
+
+          const isEven = index % 2 !== 0;
+
+          return (
+            <div
+              key={"row-" + index}
+              className={cn(
+                "relative overflow-hidden",
+                "flex justify-center",
+                "flex-col md:flex-row items-center md:items-start",
+                isEven && "bg-secondary rounded-lg border shadow"
+              )}
+              style={{
+                gap: GAP,
+                padding: PADDING,
+                paddingBottom: isEven ? PADDING : 0,
+              }}
+            >
+              
+              {row.map((cell) => {
+                const isNotTextOnlyRow = row.some(
+                  (cell) => cell.item.itemType !== GalleryItemTypes.Text
+                );
+                const useFixedHeight =
+                  cell.item.itemType === GalleryItemTypes.Text &&
+                  isNotTextOnlyRow;
+                return (
                   <div
-                    className={cn(
-                      useFixedHeight &&
-                        "flex flex-col w-full shrink-0 justify-center"
-                    )}
-                    style={useFixedHeight ? { height: cell.height } : {}}
+                    key={cell.item._id.toString()}
+                    className={cn("relative duration-200 w-full")}
+                    style={{
+                      maxWidth: cell.width,
+                    }}
                   >
-                    <ItemComponent
-                      item={cell.item}
-                      hideTitle={hideItemTitles}
-                      hideDescription={hideItemDescriptions}
-                    />
+                    <div
+                      className={cn(
+                        useFixedHeight &&
+                          "flex flex-col w-full shrink-0 justify-center"
+                      )}
+                      style={useFixedHeight ? { height: cell.height } : {}}
+                    >
+                      <ItemComponent
+                        item={cell.item}
+                        hideTitle={hideItemTitles}
+                        hideDescription={hideItemDescriptions}
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          );
+        }
+      )}
     </div>
   );
 };
