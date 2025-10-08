@@ -16,6 +16,7 @@ import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
 
+export const MAX_SELECTED_ASSETS = 9;
 interface AddBlockchainEntriesProps {
   source: EntrySource;
 } 
@@ -131,7 +132,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
             setSelectAssets={setSelectedAssets}
             source={source}
             withSearch
-            maxSelected={9}
+            maxSelected={MAX_SELECTED_ASSETS}
             maxSelectWarningBody={
               <div className="flex flex-col gap-y-2 justify-center-safe p-4">
                 <P className="text-sm">

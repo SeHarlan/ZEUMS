@@ -5,56 +5,75 @@ interface VideoMetadataRequest {
   timestamp: number;
   abortController?: AbortController;
 }
-
-const VIDEO_METADATA_TIMEOUT = 20_000; // 20 second timeout
-
-class VideoMetadataPool {
-  private pool: HTMLVideoElement[] = [];
-  private maxPoolSize = 2; // Pool size of 2 for mobile-friendly performance
+export const REQUEST_ABORTED_ERROR = "Request aborted";
+export const REQUEST_FULL_ERROR = "Queue full";
+const VIDEO_METADATA_TIMEOUT = 30_000; // 30 second timeout
+const MAX_QUEUE_SIZE = 20;
+class VideoMetadataQueue {
+  private videoElement: HTMLVideoElement | null = null;
+  private currentRequest: VideoMetadataRequest | null = null;
   private requestQueue: VideoMetadataRequest[] = [];
-  private activeRequests = new Map<string, VideoMetadataRequest[]>();
-  private cleanupTimeouts = new Map<HTMLVideoElement, NodeJS.Timeout>();
+  private eventListeners = new Map<string, () => void>(); // Track event listeners for current video
 
-  // Get or create a video element from the pool
+  // Get or create the single video element
   private getVideoElement(): HTMLVideoElement {
-    if (this.pool.length > 0) {
-      return this.pool.pop()!;
+    if (!this.videoElement) {
+      this.videoElement = document.createElement("video");
+      this.videoElement.preload = "metadata";
+      this.videoElement.muted = true;
+      this.videoElement.crossOrigin = "anonymous";
     }
-    
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.muted = true;
-    video.crossOrigin = 'anonymous';
-    return video;
+    return this.videoElement;
   }
 
-  // Return video element to pool after cleanup
-  private returnToPool(video: HTMLVideoElement) {
-    // Clean up the video element
-    video.pause();
-    video.src = '';
-    video.load();
-    
-    // Clear any existing timeouts
-    const existingTimeout = this.cleanupTimeouts.get(video);
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
+  // Remove all event listeners
+  private removeAllEventListeners() {
+    this.eventListeners.forEach((cleanup, eventType) => {
+      this.videoElement?.removeEventListener(eventType, cleanup);
+    });
+    this.eventListeners.clear();
+  }
 
-    // Return to pool if not at capacity
-    if (this.pool.length < this.maxPoolSize) {
-      this.pool.push(video);
-    } else {
-      // Remove from DOM if pool is full
-      video.remove();
+  // Add event listener with cleanup tracking
+  private addEventListener(eventType: string, handler: () => void) {
+    if (this.videoElement) {
+      this.videoElement.addEventListener(eventType, handler);
+      this.eventListeners.set(eventType, handler);
     }
   }
 
-  // Process queued requests
-  private processQueue() {
-    while (this.requestQueue.length > 0 && this.activeRequests.size < this.maxPoolSize) {
+  // Clean up the current video element
+  private cleanupVideoElement() {
+    if (this.videoElement) {
+      this.videoElement.pause();
+      this.videoElement.src = "";
+      this.videoElement.load();
+      this.removeAllEventListeners();
+    }
+  }
+
+  // Process the next request in queue
+  private processNextRequest() {
+    // Early return if already processing a request
+    if (this.currentRequest) {
+      return;
+    }
+
+    if (this.requestQueue.length > 0) {
       const request = this.requestQueue.shift()!;
       this.processRequest(request);
+    } else {
+      // Queue is empty - perform final cleanup
+      this.performFinalCleanup();
+    }
+  }
+  // Add final cleanup method
+  private performFinalCleanup() {
+    if (this.videoElement) {
+      this.cleanupVideoElement();
+      // Optionally remove from DOM to free memory
+      this.videoElement.remove();
+      this.videoElement = null;
     }
   }
 
@@ -63,162 +82,135 @@ class VideoMetadataPool {
     const video = this.getVideoElement();
     const { src, abortController } = request;
 
-    // Group requests for the same video source
-    if (!this.activeRequests.has(src)) {
-      this.activeRequests.set(src, []);
-    }
-    this.activeRequests.get(src)!.push(request);
+    this.currentRequest = request;
 
     let isProcessed = false;
     const timeout = setTimeout(() => {
       if (!isProcessed) {
-        this.handleError(video, src, new Error('Metadata loading timeout'));
+        this.handleError(new Error("Metadata loading timeout"));
       }
     }, VIDEO_METADATA_TIMEOUT);
 
     // Handle abort signal
     const abortHandler = () => {
       if (!isProcessed) {
-        this.handleAbort(video, src, request);
+        this.handleAbort(request);
       }
     };
-    
+
     if (abortController) {
-      abortController.signal.addEventListener('abort', abortHandler);
+      abortController.signal.addEventListener("abort", abortHandler);
     }
 
     const cleanup = () => {
       if (isProcessed) return;
       isProcessed = true;
-      
+
       clearTimeout(timeout);
-      this.cleanupTimeouts.delete(video);
-      
+
       // Remove abort listener
       if (abortController) {
-        abortController.signal.removeEventListener('abort', abortHandler);
+        abortController.signal.removeEventListener("abort", abortHandler);
       }
-      
-      // Remove from active requests
-      const requests = this.activeRequests.get(src);
-      if (requests) {
-        const index = requests.findIndex(r => r === request);
-        if (index > -1) requests.splice(index, 1);
-        
-        // If no more requests for this src, clean up
-        if (requests.length === 0) {
-          this.activeRequests.delete(src);
-          this.returnToPool(video);
-        }
-      }
-      
+
+      this.currentRequest = null;
+      this.cleanupVideoElement();
+
       // Process next queued request
-      this.processQueue();
+      this.processNextRequest();
     };
 
-    video.onloadedmetadata = () => {
+    // Use tracked event listeners
+    this.addEventListener("loadedmetadata", () => {
       if (isProcessed) return;
-      
+
       const ratio = video.videoWidth / video.videoHeight;
-      
-      // Resolve all requests for this video source
-      const requests = this.activeRequests.get(src) || [];
-      requests.forEach(req => req.resolve(ratio));
-      
+      request.resolve(ratio);
       cleanup();
-    };
+    });
 
-    video.onerror = () => {
+    this.addEventListener("error", () => {
       if (isProcessed) return;
-      this.handleError(video, src, new Error('Video loading failed'));
-    };
+      this.handleError(new Error("Video loading failed"));
+    });
 
     video.src = src;
+    video.load(); // Force loading of the new source
   }
 
-  private handleError(video: HTMLVideoElement, src: string, error: Error) {
-    // Reject all requests for this video source
-    const requests = this.activeRequests.get(src) || [];
-    requests.forEach(req => req.reject(error));
-    
-    this.activeRequests.delete(src);
-    this.returnToPool(video);
-    this.processQueue();
-  }
-
-  private handleAbort(video: HTMLVideoElement, src: string, abortedRequest: VideoMetadataRequest) {
-    // Only reject the specific aborted request
-    abortedRequest.reject(new Error('Request aborted'));
-    
-    // Remove only this request from active requests
-    const requests = this.activeRequests.get(src) || [];
-    const index = requests.findIndex(r => r === abortedRequest);
-    if (index > -1) {
-      requests.splice(index, 1);
-      
-      // If no more requests for this src, clean up
-      if (requests.length === 0) {
-        this.activeRequests.delete(src);
-        this.returnToPool(video);
-        this.processQueue();
-      }
+  private handleError(error: Error) {
+    if (this.currentRequest) {
+      this.currentRequest.reject(error);
+      this.currentRequest = null;
+      this.cleanupVideoElement();
+      this.processNextRequest();
     }
   }
 
+  private handleAbort(abortedRequest: VideoMetadataRequest) {
+    abortedRequest.reject(new Error(REQUEST_ABORTED_ERROR));
+    this.currentRequest = null;
+    this.cleanupVideoElement();
+    this.processNextRequest();
+  }
+
   // Public API: Get video metadata with cancellation support
-  getVideoMetadata(src: string): { promise: Promise<number>; abort: () => void } {
+  getVideoMetadata(src: string): {
+    promise: Promise<number>;
+    abort: () => void;
+  } {
     const abortController = new AbortController();
-    
+
     const promise = new Promise<number>((resolve, reject) => {
       const request: VideoMetadataRequest = {
         src,
         resolve,
         reject,
         timestamp: Date.now(),
-        abortController
+        abortController,
       };
 
-      // Check if we already have an active request for this src
-      if (this.activeRequests.has(src)) {
-        this.activeRequests.get(src)!.push(request);
-        return;
-      }
-
       // Add to queue or process immediately
-      if (this.activeRequests.size < this.maxPoolSize) {
+      if (!this.currentRequest) {
         this.processRequest(request);
       } else {
-        this.requestQueue.push(request);
+        // Prevent queue from growing too large
+        if (this.requestQueue.length < MAX_QUEUE_SIZE) {
+          this.requestQueue.push(request);
+        } else {
+          request.reject(new Error(REQUEST_FULL_ERROR));
+        }
       }
     });
 
     return {
       promise,
-      abort: () => abortController.abort()
+      abort: () => abortController.abort(),
     };
   }
 
   // Cleanup method for app unmount
   destroy() {
-    // Clear all timeouts
-    this.cleanupTimeouts.forEach(timeout => clearTimeout(timeout));
-    this.cleanupTimeouts.clear();
-    
-    // Clean up pool
-    this.pool.forEach(video => {
-      video.pause();
-      video.src = '';
-      video.remove();
-    });
-    this.pool = [];
-    
+    // Clean up current video element
+    this.cleanupVideoElement();
+
+    // Reject current request if any
+    if (this.currentRequest) {
+      this.currentRequest.reject(new Error("Pool destroyed"));
+      this.currentRequest = null;
+    }
+
     // Reject all pending requests
-    this.requestQueue.forEach(req => req.reject(new Error('Pool destroyed')));
+    this.requestQueue.forEach((req) => req.reject(new Error("Pool destroyed")));
     this.requestQueue = [];
-    
-    this.activeRequests.clear();
+
+    // Remove video element from DOM
+    if (this.videoElement) {
+      this.videoElement.remove();
+      this.videoElement = null;
+    }
   }
 }
 
 // Singleton instance
-export const videoMetadataPool = new VideoMetadataPool();
+export const videoMetadataQueue = new VideoMetadataQueue();
