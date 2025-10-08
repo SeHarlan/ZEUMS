@@ -100,7 +100,7 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
                       variant={"outline"}
                       className="text-left justify-start"
                     >
-                      <P>Retrieving mint date</P>
+                      <P>Retrieving mint date...</P>
                     </Button>
                   ) : (
                     <PopoverTrigger asChild>
