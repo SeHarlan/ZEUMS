@@ -80,6 +80,9 @@ const getProviders = () => {
       // Ensure proper callback URL handling
       checks: ["state"],
       allowDangerousEmailAccountLinking: true,
+      httpOptions: {
+        timeout: 10000,
+      }
     }),
     // TwitterProvider({
     //   clientId: process.env.TWITTER_CLIENT_ID || "",

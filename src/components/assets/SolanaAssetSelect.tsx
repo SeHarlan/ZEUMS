@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect, useMemo } from "react";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import Pagination from "../general/Pagination"
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { useUser } from "@/context/UserProvider";
@@ -20,10 +20,11 @@ import { ImageVariant } from "@/types/media";
 import { Button, LinkButton } from "../ui/button";
 import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface SolanaAssetSelectProps {
   usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
-  source: EntrySource;
+  source: EntrySource | "choose";
   selectedAssets: ParsedBlockChainAsset[] | null;
   setSelectAssets: (assets: ParsedBlockChainAsset[]) => void;
   optimisticallySelectedAssets: Set<string>;
@@ -51,6 +52,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 200);
+  const [selectedSource, setSelectedSource] = useState<EntrySource>(EntrySource.Collector);
 
   const { user } = useUser();
 
@@ -61,7 +63,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
   const { solanaAssets, isLoading } = useSolanaAssets({
     publicKeys: solanaPublicKeys,
-    source,
+    source: source === "choose" ? selectedSource : source,
   });
 
   const filteredAssets = useMemo(() => {
@@ -190,7 +192,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     return <P className="text-muted-foreground text-center">No assets found</P>;
   };
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       <div className="flex justify-between flex-wrap gap-2">
         {withSearch ? (
           <PrefixInput
@@ -200,7 +202,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        ) : null}
+        ) : <div/>}
         {maxSelected > 1 ? (
           <Button
             onClick={handleClear}
@@ -211,6 +213,17 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           </Button>
         ) : null}
       </div>
+      {source === "choose" ? (
+        <Tabs
+          onValueChange={(value) => setSelectedSource(value as EntrySource)}
+          value={selectedSource}
+        >
+          <TabsList className="w-full">
+            <TabsTrigger value="collector">Collector</TabsTrigger>
+            <TabsTrigger value="creator">Creator</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      ) : null}
       <ScrollArea className="flex-1 min-h-0 pr-3">
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
@@ -233,27 +246,23 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
             );
-            const isOptimisticallySelected = optimisticallySelectedAssets.has(asset.tokenAddress);
-
-            const isUsed = usedAssetAddresses?.has(
+            const isOptimisticallySelected = optimisticallySelectedAssets.has(
               asset.tokenAddress
             );
 
+            const isUsed = usedAssetAddresses?.has(asset.tokenAddress);
+
             const isDisabled = (showMaxSelectWarning && !isSelected) || isUsed;
 
-            if (isUsed) { 
+            if (isUsed) {
               return (
                 <Tooltip key={asset.tokenAddress}>
                   <TooltipTrigger disabled={!isUsed}>
-
-                      <AssetThumbnailCard
-                        asset={asset}
-                        imageVariant={imageVariant}
-                        className={cn(
-                          "border-3 border-transparent opacity-50"
-                        )}
-                      />
-                
+                    <AssetThumbnailCard
+                      asset={asset}
+                      imageVariant={imageVariant}
+                      className={cn("border-3 border-transparent opacity-50")}
+                    />
                   </TooltipTrigger>
                   <TooltipContent>
                     <P>This asset is already being used</P>

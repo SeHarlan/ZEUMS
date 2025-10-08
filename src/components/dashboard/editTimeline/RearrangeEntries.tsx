@@ -180,10 +180,8 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
       const isBeforeBelow = !isDown && belowEntry && activeTime <= belowTime;
       const isAfterAbove = isDown && aboveEntry && activeTime >= aboveTime;
 
-      if (!aboveEntry) {
-        // Dropped at the very top -> make it "now"
-        activeTime = nowTime;
-      } else if (isBeforeBelow || isAfterAbove) {
+    
+      if (isBeforeBelow || isAfterAbove) {
         // Would fall below the below/older entry; place midway below
         activeTime = Math.floor((aboveTime + belowTime) / 2);
       }
