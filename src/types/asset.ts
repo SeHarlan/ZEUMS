@@ -9,6 +9,13 @@ export interface GetSolanaAssetProps {
   mintAddress: string;
 }
 
+export interface GetEstimateMintDatesProps {
+  mintAddresses: string[];
+}
+export interface DateMap {
+  [mintAddress: string]: Date | null;
+}
+
 export type BlockchainCollection = {
   address: string;
   name?: string;

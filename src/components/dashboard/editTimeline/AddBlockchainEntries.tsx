@@ -3,20 +3,15 @@
 import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ENTRY_ENTRIES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
+import { EntrySource, EntryTypes, TimelineBlockchainEntryCreation, TimelineEntry } from "@/types/entry";
 import { handleClientError } from "@/utils/handleError";
-import { addPreciseCurrentTime, getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
-import { cn } from "@/utils/ui-utils";
+import { getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
 import axios from "axios";
-import { format } from "date-fns";
-import { CalendarIcon, CpuIcon, ImagesIcon } from "lucide-react";
+import { CpuIcon, ImagesIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
@@ -29,7 +24,6 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
 
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
-  const [pickedDate, setPickedDate] = useState<Date>(new Date());
   const [submitting, setSubmitting] = useState(false)
   const [open, setOpen] = useState(false);
 
@@ -47,7 +41,6 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
 
   const handleClear = () => {
     setSelectedAssets([]);
-    setPickedDate(new Date());
     setOptimisticallySelectedAssets(new Set());
   }
 
@@ -59,21 +52,23 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
   const handleAssetsAdd = async () => { 
     setSubmitting(true)
 
-    const preciseTime = addPreciseCurrentTime(pickedDate);
-
-    const entriesCreationData = selectedAssets.map((asset) => ({
-      ...asset,
-      date: preciseTime,
-      source
-    }));
+    const entriesCreationData: TimelineBlockchainEntryCreation[] =
+      selectedAssets.map((asset) => ({
+        ...asset,
+        source,
+      }));
 
     axios
-      .post<{ createdEntries: TimelineEntry[] }>(ENTRY_ENTRIES_ROUTE, entriesCreationData)
+      .post<{ createdEntries: TimelineEntry[], successfullyFetchedDates: number }>(ENTRY_ENTRIES_ROUTE, entriesCreationData)
       .then((response) => {
-        const { createdEntries } = response.data;
+        const { createdEntries, successfullyFetchedDates } = response.data;
         const parsedCreatedEntries = parseEntryDates(createdEntries);
 
-        if (parsedCreatedEntries.length < entriesCreationData.length) {
+        if (successfullyFetchedDates < entriesCreationData.length) {
+          toast.info("Failed to be retrieve mint date for some entries", {
+            description: "You can try again inside the entries edit panel",
+          });
+        } else if (parsedCreatedEntries.length < entriesCreationData.length) {
           toast.info("Some entries failed to be saved.");
         } else {
           toast.success("All entries saved!");
@@ -151,61 +146,20 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
           />
         </div>
 
-        <DialogFooter className="">
-          <div className="flex gap-2 flex-wrap items-center w-full sm:w-fit">
-            <Popover>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        " pl-3 text-left font-normal",
-                        !pickedDate && "text-muted-foreground",
-                        "w-full sm:w-fit"
-                      )}
-                    >
-                      {pickedDate ? (
-                        format(pickedDate, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  This date determines where the entries are placed in the
-                  timeline.
-                </TooltipContent>
-              </Tooltip>
-
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  required
-                  mode="single"
-                  selected={pickedDate}
-                  onSelect={setPickedDate}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
-
+             {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
+          <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
+        {/* <DialogFooter className=""> */}
+          {/* <div className="flex gap-2 flex-wrap items-center w-full sm:w-fit"> */}
             <Button
               type="button"
               onClick={handleAssetsAdd}
               loading={submitting}
               disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}
-              className="w-full sm:w-36"
             >
               Create Entries
               <CpuIcon />
             </Button>
-          </div>
+          {/* </div> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

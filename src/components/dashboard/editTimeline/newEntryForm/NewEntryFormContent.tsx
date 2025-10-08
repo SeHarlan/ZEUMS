@@ -27,6 +27,8 @@ import { BlockchainAssetEntryIcon, GalleryEntryIcon, TextEntryIcon } from "@/com
 import ButtonEditor from "@/components/timeline/ButtonEditor";
 import SelectGalleryEntry from "../../SelectGalleryEntry";
 import { UserVirtualGalleryType } from "@/types/gallery";
+import { P } from "@/components/typography/Typography";
+import { getFirstBlockchainItem } from "@/utils/gallery";
 
 interface NewEntryFormContentProps {
   form: UseFormReturn<EntryFormValues>;
@@ -37,9 +39,12 @@ interface NewEntryFormContentProps {
   source: EntrySource;
   gallery: UserVirtualGalleryType | null;
   setGallery: (gallery: UserVirtualGalleryType | null) => void;
+  handleGetMintDates: (tokenAddress?: string) => void;
+  fetchingMintDate: boolean;
 }
 
 const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
+  handleGetMintDates,
   form,
   selectedEntryType,
   blockchainAsset,
@@ -48,11 +53,31 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   source,
   gallery,
   setGallery,
+  fetchingMintDate,
 }) => {
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
   const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
 
-  const hideTitleAndDescription = (isBlockchainEntry && !blockchainAsset) || isGalleryEntry && !gallery;
+  const hasFetchableDate = isBlockchainEntry || isGalleryEntry 
+
+  const hideDetailInputs = (isBlockchainEntry && !blockchainAsset) || isGalleryEntry && !gallery;
+
+  const handleGetMintDate = () => { 
+    if(isBlockchainEntry) {
+      handleGetMintDates(blockchainAsset?.tokenAddress);
+    } else if(isGalleryEntry) {
+      const firstItem = getFirstBlockchainItem(gallery?.items);
+      handleGetMintDates(firstItem?.tokenAddress);
+    }
+  }
+
+  const getDateText = () => {
+    if(isBlockchainEntry) {
+      return "Get mint date"
+    } else if(isGalleryEntry) {
+      return "Get first item's mint date";
+    }
+  }
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -100,50 +125,78 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
 
       <Separator />
 
-      <FormField
-        control={form.control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
+      {hideDetailInputs ? null : (
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date</FormLabel>
+              <Popover>
                 <FormControl>
-                  <Button
-                    variant={"outline"}
+                  <div
                     className={cn(
-                      " pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
+                      "w-full ",
+                      hasFetchableDate &&
+                        "grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2"
                     )}
                   >
-                    {field.value ? (
-                      format(field.value, "PPP")
+                    {fetchingMintDate ? (
+                      <Button disabled variant={"outline"}>
+                        <P>Retrieving mint date</P>
+                      </Button>
                     ) : (
-                      <span>Pick a date</span>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant={"outline"}
+                          className={cn(
+                            " pl-3 text-left font-normal w-full",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          disabled={fetchingMintDate}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
                     )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
+                    {hasFetchableDate && (
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        onClick={handleGetMintDate}
+                        loading={fetchingMintDate}
+                      >
+                        {getDateText()}
+                      </Button>
+                    )}
+                  </div>
                 </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription>
-              This date determines the order of entries
-            </FormDescription>
-          </FormItem>
-        )}
-      />
 
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                This date determines the order of entries
+              </FormDescription>
+            </FormItem>
+          )}
+        />
+      )}
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
           blockchainAsset={blockchainAsset}
@@ -161,8 +214,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
         />
       ) : null}
 
-
-      {hideTitleAndDescription ? null : (
+      {hideDetailInputs ? null : (
         <>
           <FormField
             control={form.control}

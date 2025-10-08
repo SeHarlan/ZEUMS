@@ -9,6 +9,7 @@ import { P } from "../typography/Typography";
 import { UserVirtualGalleryType } from "@/types/gallery";
 import { cn } from "@/utils/ui-utils";
 import ScrollableDialog from "../general/ScrollableDialog";
+import CreateGalleryDialogButton from "./editGalleries/CreateGalleryDialog";
 
 interface SelectGalleryEntryProps {
   source: EntrySource;
@@ -26,6 +27,7 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
   const galleryKey = getGalleryKey(source);
   const galleries = user?.[galleryKey] || [];
 
+  const noGalleries = galleries.length === 0;
   const handleSelectGallery = () => {
     setEntryGallery(selectedGallery);
   };
@@ -43,15 +45,12 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
             <Button type="button">Choose gallery to link</Button>
           </div>
         }
-        footerContent={
-          <Button
-            type="button"
-            onClick={handleSelectGallery}
-          >
+        footerContent={!noGalleries ? (
+          <Button type="button" onClick={handleSelectGallery}>
             Select
             <GalleryVerticalIcon />
           </Button>
-        }
+        ) : null}
         title="Select Gallery To Link"
         description="Select a gallery to link to on your timeline."
       >
@@ -66,6 +65,14 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
               }
             />
           ))}
+          {noGalleries ? (
+            <CreateGalleryDialogButton
+              source={source}
+              buttonClassName="h-16"
+              buttonText="Create your first gallery!"
+              buttonVariant="default"
+            />
+          ) : null}
         </div>
       </ScrollableDialog>
     );

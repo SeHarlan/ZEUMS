@@ -7,7 +7,7 @@ import { FC,  useMemo, useState } from "react";
 import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
 import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { useUser } from "@/context/UserProvider";
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragMoveEvent, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -28,6 +28,11 @@ import SideDrawer from "@/components/general/SideDrawer";
 import type { BulkWriteResult } from "mongodb";
 import { isMediaGalleryItem } from "@/types/galleryItem";
 
+
+interface HoverData {
+  id: string;
+  side: "above" | "down";
+}
 interface RearrangeEntriesProps { 
   source: EntrySource;
 }
@@ -37,7 +42,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
   const [submitting, setSubmitting] = useState(false);
   const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
+  const [hoverData, setHoverData] = useState<HoverData | null>(null);
   const timelineKey = getTimelineKey(source);
 
   const originalEntries = useMemo(() => {
@@ -119,6 +124,25 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
     
   };
 
+  const getCursorSide = (event: DragMoveEvent): HoverData | null => {
+    const { activatorEvent, over, delta } = event;
+    if (!over || !(activatorEvent instanceof MouseEvent)) return null;
+
+    const overRect = over.rect;
+    const mouseY = activatorEvent.clientY + delta.y;
+
+    // Calculate which side of the over item the cursor is on
+    const overCenterY = overRect.top + overRect.height / 2;
+    const cursorSide = mouseY < overCenterY ? "above" : "down";
+    return { id: over.id.toString(), side: cursorSide };
+  };
+
+  const onDragMove = (event: DragMoveEvent) => {
+    const cursorSideData = getCursorSide(event);
+    if (!cursorSideData) return;
+    setHoverData(cursorSideData);
+  };
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -127,51 +151,51 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
     const activeId = active.id;
     const overId = over.id;
 
-    if (activeId !== overId) {
-      setRearrangedEntries((entries) => {
-        // Find the indices of the dragged item and drop target
-        const oldIndex = entries.findIndex(
-          (entry) => entry._id.toString() === activeId
-        );
-        const newIndex = entries.findIndex(
-          (entry) => entry._id.toString() === overId
-        );
+    setRearrangedEntries((entries) => {
+      // Find the indices of the dragged item and drop target
+      const oldIndex = entries.findIndex(
+        (entry) => entry._id.toString() === activeId
+      );
+      const newIndex = entries.findIndex(
+        (entry) => entry._id.toString() === overId
+      );
 
-        const moved = arrayMove(entries, oldIndex, newIndex);
+      //if over itself don't move it but do check positioning and change the date accordingly 
+      const moved = activeId === overId ? entries : arrayMove(entries, oldIndex, newIndex);
 
-        //update the date of the moved entry to be between the entries before and after it
-        const recentEntry = moved[newIndex - 1] ?? null; // above (more recent)
-        const olderEntry = moved[newIndex + 1] ?? null; // below (older)
+      //update the date of the moved entry to be between the entries before and after it
+      const aboveEntry = moved[newIndex - 1] ?? null; // above (more recent)
+      const belowEntry = moved[newIndex + 1] ?? null; // below (older)
 
-        const nowTime = Date.now();
-        const recentTime = recentEntry ? recentEntry.date.getTime() : nowTime;
-        const olderTime = olderEntry
-          ? olderEntry.date.getTime()
-          : Number.NEGATIVE_INFINITY;
+      const nowTime = Date.now();
+      const aboveTime = aboveEntry ? aboveEntry.date.getTime() : nowTime;
+      const belowTime = belowEntry
+        ? belowEntry.date.getTime()
+        : aboveTime;
+      
+      // 60 seconds around entry to place it on the same day
+      const isDown = hoverData?.side === "down";
+      let activeTime = isDown ? belowTime + (60_000) : aboveTime - (60_000);
 
-        //TODO-probably-not: handle extreme edge case where time in milliseconds end up the same 
-        
-        // 60 seconds before the more recent entry to place it below but on the same day
-        const beforeRecentTime = recentTime - 60_000;
+      const isBeforeBelow = !isDown && belowEntry && activeTime <= belowTime;
+      const isAfterAbove = isDown && aboveEntry && activeTime >= aboveTime;
 
-        let activeTime = beforeRecentTime;
+    
+      if (isBeforeBelow || isAfterAbove) {
+        // Would fall below the below/older entry; place midway below
+        activeTime = Math.floor((aboveTime + belowTime) / 2);
+      }
 
-        if (!recentEntry) {
-          // Dropped at the very top -> make it "now"
-          activeTime = nowTime;
-        } else if (olderEntry && beforeRecentTime <= olderTime) {
-          // Would fall below the next entry; place midway
-          activeTime = Math.floor((recentTime + olderTime) / 2);
-        }
+      moved[newIndex] = {
+        ...moved[newIndex],
+        date: new Date(activeTime),
+      };
 
-        moved[newIndex] = {
-          ...moved[newIndex],
-          date: new Date(activeTime),
-        };
+      return moved;
+    });
+    
 
-        return moved;
-      });
-    }
+    setHoverData(null);
   }
 
   return (
@@ -185,7 +209,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
       open={drawerOpen}
       onOpenChange={handleOpenChange}
       title="Rearrange Entries"
-      description="Quickly change the order of entries on the timeline."
+      description="Quickly change the order and dates of entries"
       actionButton={
         <Button
           type="button"
@@ -202,6 +226,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
         onDragEnd={handleDragEnd}
         collisionDetection={closestCenter}
         modifiers={[restrictToVerticalAxis]}
+        onDragMove={onDragMove}
       >
         <SortableContext
           items={rearrangedEntries.map((entry) => entry._id.toString())}

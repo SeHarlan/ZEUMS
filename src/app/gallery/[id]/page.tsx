@@ -21,8 +21,7 @@ const GalleryPage = () => {
   const username = gallery?.ownerData?.username;
   const attributionLink = username ? USER_TIMELINE(username) : "";
   const profileImage = gallery?.ownerData?.profileImage;
-  console.log("🚀 ~ GalleryPage ~ gallery?.ownerData:", gallery?.ownerData)
-  
+
   return (
     <PageContainer maxWidth="large">
       <FeedbackWrapper
@@ -31,23 +30,30 @@ const GalleryPage = () => {
         hasData={!!gallery}
         noDataSubtitle="Gallery not found"
       >
-        <div className="rounded-lg p-6.25 lg:p-12.5 mb-18.75 text-center space-y-4 bg-secondary">
-          <H1>{gallery?.title}</H1>
-          <LinkButton
-            href={attributionLink}
-            variant="link"
-            className="relative mx-auto h-auto w-fit flex items-center gap-4"
-          >
-            <div className="size-10">
-              <ProfileImage media={profileImage} className="flex-shrink-0" />
-            </div>
-            <P>
-              {attribution} {getDisplayName(gallery?.ownerData || null)}
-            </P>
-          </LinkButton>
-          <P className="text-muted-foreground whitespace-pre-line">
-            {gallery?.description}
-          </P>
+        <div className="relative p-6.25 lg:p-12.5 my-18.75 overflow-hidden border-y-6 border-double rounded-2xl">
+          <div className="relative text-center space-y-4 z-10 ">
+            <H1>{gallery?.title}</H1>
+            <LinkButton
+              href={attributionLink}
+              variant="link"
+              className="relative mx-auto h-auto w-fit flex items-center gap-4"
+            >
+              <div className="size-10">
+                <ProfileImage
+                  media={profileImage}
+                  className="flex-shrink-0 border"
+                />
+              </div>
+              <P>
+                {attribution} {getDisplayName(gallery?.ownerData || null)}
+              </P>
+            </LinkButton>
+            {gallery?.description && (
+              <P className="text-muted-foreground whitespace-pre-line">
+                {gallery.description}
+              </P>
+            )}
+          </div>
         </div>
         <GalleryBase gallery={gallery} ItemComponent={GalleryItemBase} />
       </FeedbackWrapper>

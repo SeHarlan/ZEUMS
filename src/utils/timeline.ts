@@ -74,6 +74,7 @@ export const processTimelineEntries = (
     // Format the date
     const entryDate = entry.date.toLocaleString(undefined, {
       month: "long",
+      day: "numeric",
     });
 
     const entryYear = entry.date.getFullYear();

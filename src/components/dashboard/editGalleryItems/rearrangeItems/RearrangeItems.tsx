@@ -33,6 +33,7 @@ interface RearrangeItemsProps {
 interface HoverData {
   id: string;
   side: "left" | "right";
+
 }
 const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => { 
   const { gallery, mutateGallery } = useGalleryById(galleryId);
@@ -93,6 +94,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
     // Calculate which side of the over item the cursor is on
     const overCenterX = overRect.left + overRect.width / 2;
     const cursorSide = mouseX < overCenterX ? "left" : "right";
+
     return { id: over.id.toString(), side: cursorSide }
   }
 

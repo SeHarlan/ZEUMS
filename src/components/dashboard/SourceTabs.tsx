@@ -22,11 +22,11 @@ const SourceTabs: FC<SourceTabsProps> = ({EditComponent}) => {
       value: EditTimelineTab.COLLECTOR,
       source: EntrySource.Collector,
     },
-    {
-      title: "Curator",
-      value: EditTimelineTab.CURATOR,
-      source: undefined, // TODO: add curator source
-    },
+    // {
+    //   title: "Curator",
+    //   value: EditTimelineTab.CURATOR,
+    //   source: undefined, // TODO: add curator source
+    // },
   ];
 
   const orderedContent = () => {

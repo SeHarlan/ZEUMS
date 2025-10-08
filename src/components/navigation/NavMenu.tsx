@@ -123,13 +123,15 @@ const NavMenu: FC = () => {
             <LinkButton
               href={EDIT_PROFILE_ACCOUNT}
               className={cn(
-                "order-7 md:order-6",
+                "order-7 md:order-6 flex-row",
                 !loggedIn && "font-serif" //for default Z when no user
               )}
               variant="secondary"
               disabled={!loggedIn}
             >
-              {loggedIn ? userDisplayName : noUserDisplayName}
+              <P>
+                {loggedIn ? userDisplayName : noUserDisplayName}
+              </P>
 
               {walletMismatch && (
                 <Tooltip>

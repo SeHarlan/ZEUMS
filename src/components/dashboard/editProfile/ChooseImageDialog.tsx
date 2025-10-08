@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { EntrySource } from "@/types/entry";
 import { ImageType, ImageVariant } from "@/types/media";
 import { convertMediaToImage } from "@/utils/media";
 
@@ -55,7 +54,7 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
             perPage={imageVariant === "banner" ? 8 : 12}
             selectedAssets={selectedAssets}
             setSelectAssets={setSelectedAssets}
-            source={EntrySource.Collector}
+            source={"choose"}
             withSearch
             imageVariant={imageVariant}
             optimisticallySelectedAssets={optimisticallySelectedAssets}

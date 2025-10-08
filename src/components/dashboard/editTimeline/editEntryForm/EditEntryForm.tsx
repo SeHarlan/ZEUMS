@@ -1,9 +1,9 @@
 "use client";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { BaseEntry, EntrySource, EntryTypes, isGalleryEntry, TimelineEntry } from "@/types/entry";
+import { BaseEntry, EntrySource, EntryTypes, isBlockchainAssetEntry, isGalleryEntry, TimelineEntry } from "@/types/entry";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -16,6 +16,9 @@ import { P } from "@/components/typography/Typography";
 import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
 import { addHttpsPrefix } from "@/utils/general";
 import EditEntryFormContent from "./EditEntryFormContent";
+import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
+import { DateMap } from "@/types/asset";
+import { getFirstBlockchainItem } from "@/utils/gallery";
 
 const formId = "edit-entry-form";
 
@@ -28,6 +31,7 @@ interface EditEntryFormProps {
 const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }) => {
   const { setUser } = useUser()
   const [submitting, setSubmitting] = useState(false);
+  const [fetchingMintDate, setFetchingMintDate] = useState(false);
 
   const selectedEntryType = editingEntry?.entryType || EntryTypes.BlockchainAsset;
   const source = editingEntry?.source || EntrySource.Creator;
@@ -48,16 +52,56 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
     defaultValues,
   });
 
-  const { reset } = form;
+  const { reset, setValue } = form;
 
   useEffect(() => {
-    //isOpen means there is an entry to edit
     if (isOpen) { 
+      //reset with new default values
       reset(defaultValues)
-    }else {
-      reset(); // Clear form when drawer closes
     }
-  }, [reset, defaultValues, isOpen]);
+  }, [reset, isOpen, defaultValues]);
+
+  const handleGetMintDates = useCallback(async () => {
+    if (!editingEntry) return 
+
+    const tokenAddress =
+      isBlockchainAssetEntry(editingEntry)
+        ? editingEntry.tokenAddress
+        : isGalleryEntry(editingEntry)
+          ? getFirstBlockchainItem(editingEntry.gallery?.items)?.tokenAddress
+          : undefined;
+    
+    if (!tokenAddress) return;
+
+    setFetchingMintDate(true);
+    return axios
+      .post<{ addressDatesMap: DateMap }>(ENTRY_DATES_ROUTE, {
+        mintAddresses: [tokenAddress],
+      })
+      .then((response) => {
+        const { addressDatesMap } = response.data;
+        const mintDate = addressDatesMap[tokenAddress];
+
+        if (!mintDate) {
+          throw new Error("No date returned");
+        }
+
+        toast.success("Mint date successfully retrieved!");
+        setValue("date", new Date(mintDate));
+      })
+      .catch((error) => {
+        toast.error("Failed to get the mint date.", {
+          description: "Please try again",
+        });
+        handleClientError({
+          error,
+          location: "EditEntryForm_handleGetMintDates",
+        });
+      })
+      .finally(() => {
+        setFetchingMintDate(false);
+      });
+    }, [setValue, editingEntry]);
 
   const onSubmit = (data: EntryFormValues) => {
     if (!editingEntry) return;
@@ -149,6 +193,8 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
             form={form}
             selectedEntryType={selectedEntryType}
             handleOpenChange={handleOpenChange}
+            handleGetMintDates={handleGetMintDates}
+            fetchingMintDate={fetchingMintDate}
           />
         </form>
       </Form>

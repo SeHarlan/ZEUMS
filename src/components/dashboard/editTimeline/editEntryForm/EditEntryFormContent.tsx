@@ -29,6 +29,8 @@ interface EditEntryFormContentProps {
   selectedEntryType: EntryTypes;
   galleryId?: string;
   handleOpenChange: (open: boolean) => void;
+  handleGetMintDates: () => void;
+  fetchingMintDate: boolean;
 }
 
 const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
@@ -36,11 +38,24 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
   selectedEntryType,
   galleryId,
   handleOpenChange,
+  handleGetMintDates,
+  fetchingMintDate,
 }) => { 
   const { title, description } = ENTRY_TYPE_COPY[selectedEntryType]
   const Icon = EntryTypeIcons[selectedEntryType];
 
   const isGalleryEntry = galleryId && selectedEntryType === EntryTypes.Gallery;
+  const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
+  
+  const hasFetchableDate = isBlockchainEntry || isGalleryEntry; 
+
+  const getDateText = () => {
+    if(isBlockchainEntry) {
+      return "Get mint date"
+    } else if(isGalleryEntry) {
+      return "Get first item's mint date";
+    }
+  }
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -51,9 +66,13 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
             <P>{title}</P>
           </div>
           {isGalleryEntry && (
-            <LinkButton href={EDIT_GALLERY(galleryId)} className="h-6" onClick={() => handleOpenChange(false)}>
+            <LinkButton
+              href={EDIT_GALLERY(galleryId)}
+              className="h-6"
+              onClick={() => handleOpenChange(false)}
+            >
               Edit Gallery Items
-              <EditIcon  />
+              <EditIcon />
             </LinkButton>
           )}
         </div>
@@ -67,24 +86,51 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
           <FormItem>
             <FormLabel>Date</FormLabel>
             <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      " pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
+              <FormControl>
+                <div
+                  className={cn(
+                    "w-full ",
+                    hasFetchableDate &&
+                      "grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2"
+                  )}
+                >
+                  {fetchingMintDate ? (
+                    <Button disabled variant={"outline"}>
+                      <P>Retrieving mint date</P>
+                    </Button>
+                  ) : (
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant={"outline"}
+                        className={cn(
+                          " pl-3 text-left font-normal w-full",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        disabled={fetchingMintDate}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                  )}
+                  {hasFetchableDate && (
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      onClick={() => handleGetMintDates()}
+                      loading={fetchingMintDate}
+                    >
+                      {getDateText()}
+                    </Button>
+                  )}
+                </div>
+              </FormControl>
+
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"

@@ -38,26 +38,29 @@ const MiniGalleryBase: FC<GalleryBaseProps> = ({
   return (
     <div className="space-y-3" ref={containerRef}>
       {isReady &&
-        galleryRows.map((row, index) => (
-          <div
-            key={"row-" + index}
-            className={cn(
-              "flex justify-center",
-              "flex-row items-center ",
-            )}
-            style={{ gap: GAP }}
-          >
-            {row.map((cell) => (
-              <div
-                key={cell.item._id.toString()}
-                className={cn("relative duration-200 w-full h-fit")}
-                style={{ maxWidth: cell.width }}
-              >
-                <MiniGalleryItemBase item={cell.item} />
-              </div>
-            ))}
-          </div>
-        ))}
+        galleryRows.map((row, index) => {
+          return (
+            <div
+              key={"row-" + index}
+              className={cn(
+                "flex justify-center",
+                "flex-row items-center",
+              )}
+              style={{ gap: GAP }}
+            >
+              {row.map((cell) => (
+                <div
+                  key={cell.item._id.toString()}
+                  className={cn("relative duration-200 w-full h-fit")}
+                  style={{ maxWidth: cell.width }}
+                >
+                  <MiniGalleryItemBase item={cell.item} />
+                </div>
+              ))}
+            </div>
+          )
+        })
+      }
     </div>
   );
 };

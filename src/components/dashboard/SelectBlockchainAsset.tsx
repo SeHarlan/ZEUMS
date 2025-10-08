@@ -4,12 +4,14 @@ import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { EntrySource } from "@/types/entry";
+import { EntrySource, EntryTypes } from "@/types/entry";
 import { MediaCategory } from "@/types/media";
 import { getImageAspectRatio, getVideoAspectRatio } from "@/utils/media";
 
 import { CpuIcon, TrashIcon } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
+import { getTimelineKey } from "@/utils/timeline";
+import { useUser } from "@/context/UserProvider";
 
 interface SelectBlockchainAssetProps {
   source: EntrySource;
@@ -24,8 +26,20 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
   source,
   setAspectRatio,
 }) => {
+  const { user } = useUser();
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
+
+  const timelineKey = getTimelineKey(source);
+
+  const usedAssetAddresses = useMemo(() => {
+    const currentTimeline = user?.[timelineKey] || [];
+    const items =
+      currentTimeline
+        ?.filter((item) => item.entryType === EntryTypes.BlockchainAsset)
+        .map((item) => item.tokenAddress) || [];
+    return new Set(items);
+  }, [user, timelineKey]);
 
   const handleAssetAdd = () => {
     setBlockchainAsset(selectedAssets[0]);
@@ -63,12 +77,15 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
           <DialogHeader className="flex-row justify-between items-center">
             <DialogTitle className="w-fit">Select Blockchain Asset</DialogTitle>
             <DialogDescription className="sr-only">
-              This dialog allows you to select a blockchain asset to add to your timeline.
+              This dialog allows you to select a blockchain asset to add to your
+              timeline.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 min-h-0">
+            
             <SolanaAssetSelect
+              usedAssetAddresses={usedAssetAddresses}
               optimisticallySelectedAssets={optimisticallySelectedAssets}
               setOptimisticallySelectedAssets={setOptimisticallySelectedAssets}
               selectedAssets={selectedAssets}
@@ -80,7 +97,14 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
 
           {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
           <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
-            <Button type="button" onClick={handleAssetAdd} disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}>
+            <Button
+              type="button"
+              onClick={handleAssetAdd}
+              disabled={
+                selectedAssets.length === 0 ||
+                optimisticallySelectedAssets.size > 0
+              }
+            >
               Select
               <CpuIcon />
             </Button>

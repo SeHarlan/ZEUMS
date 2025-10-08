@@ -104,6 +104,8 @@ export type TimelineEntryCreation = Omit<TimelineEntry, "owner" | "_id"> & {
   galleryId?: string;
 }
 
+export type TimelineBlockchainEntryCreation = Omit<BlockchainAssetEntry, "owner" | "_id" | "date"> 
+
 export type TimelineEntryDateUpdate = {
   _id: string;
   date: Date;

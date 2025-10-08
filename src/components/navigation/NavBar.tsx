@@ -83,7 +83,6 @@ const NavBar: FC = () => {
           "top-4 lg:top-8"
         )}
       >
-        {/* {actions && ( */}
         <div
           className={cn(
             "relative flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
@@ -102,7 +101,7 @@ const NavBar: FC = () => {
             <MessageCircleQuestionIcon className="size-6" />
           </Button>
         </div>
-        {/* )} */}
+  
 
         <Button
           variant={"outline"}
@@ -118,28 +117,6 @@ const NavBar: FC = () => {
           )}
         </Button>
       </div>
-
-      {/* <div
-        className={cn(
-          "fixed z-90 right-4 lg:right-8 bottom-4 lg:bottom-8",
-          "flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
-          "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
-          menuOpen
-            ? "right-4 lg:right-8 animate-in "
-            : "-right-[200%] animate-out",
-          "md:hover:animate-in"
-        )}
-      >
-        <Button
-          onClick={handleSupportClick}
-          size="icon"
-          variant="outline"
-          className="size-12 md:size-10"
-        >
-          <MessageCircleQuestionIcon className="size-6" />
-        </Button>
-      </div> */}
-
       <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
     </div>
   );
