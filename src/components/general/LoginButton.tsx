@@ -10,7 +10,7 @@ interface LoginButtonProps extends VariantProps<typeof buttonVariants> {
 }
 
 const LoginButton: FC<LoginButtonProps> = ({ variant, size, className }) => {
-  const { logOutUser, logInUser, userLoading, loggedIn } = useUser();
+  const { logOutUser, logInUser, userLoading, loggedIn, loggingOut } = useUser();
 
   const handleClick = async () => {
     if (!loggedIn) {
@@ -23,7 +23,7 @@ const LoginButton: FC<LoginButtonProps> = ({ variant, size, className }) => {
   return (
     <Button
       onClick={handleClick}
-      loading={userLoading}
+      loading={userLoading || loggingOut}
       variant={variant}
       size={size}
       className={className}
