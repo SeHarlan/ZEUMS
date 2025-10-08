@@ -11,7 +11,7 @@ import { handleClientError } from "@/utils/handleError";
 import { toast } from "sonner";
 import { BoxIcon, Code2Icon } from "lucide-react";
 import { BANNER_RATIO } from "@/constants/ui";
-import { videoMetadataPool } from "@/utils/videoMetadataPool";
+import { REQUEST_ABORTED_ERROR, REQUEST_FULL_ERROR, videoMetadataQueue } from "@/utils/videoMetadataPool";
 import LoadingSpinner from "../general/LoadingSpinner";
 
 interface AssetThumbnailCardProps {
@@ -111,8 +111,10 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       //if optimistic wait for image to load then handle click
       return;
     }
+
+    //get video metadata
     try {
-      const { promise, abort } = videoMetadataPool.getVideoMetadata(getMediaUrl(asset.media));
+      const { promise, abort } = videoMetadataQueue.getVideoMetadata(getMediaUrl(asset.media));
       abortControllerRef.current = abort;
       
       const ratio = await promise;
@@ -120,9 +122,17 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       onClick?.(ratio);
     } catch (error) {
       // Don't show error if it was aborted
-      if (error instanceof Error && error.message === 'Request aborted') {
+      if (error instanceof Error && error.message === REQUEST_ABORTED_ERROR) {
         return;
       }
+
+      if (error instanceof Error && error.message === REQUEST_FULL_ERROR) {
+        toast.info("Video asset queue is full", {
+          description: "Please try again shortly",
+        });
+        return;
+      }
+
       setError(true);
       toast.error("Failed to load video.");
       handleClientError({

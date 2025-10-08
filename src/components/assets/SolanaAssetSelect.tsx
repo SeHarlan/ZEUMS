@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useMemo, useState } from "react";
 import Pagination from "../general/Pagination"
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { useUser } from "@/context/UserProvider";
@@ -26,9 +26,9 @@ interface SolanaAssetSelectProps {
   usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
   source: EntrySource | "choose";
   selectedAssets: ParsedBlockChainAsset[] | null;
-  setSelectAssets: (assets: ParsedBlockChainAsset[]) => void;
+  setSelectAssets: Dispatch<SetStateAction<ParsedBlockChainAsset[]>>;
   optimisticallySelectedAssets: Set<string>;
-  setOptimisticallySelectedAssets: (assets: Set<string>) => void;
+  setOptimisticallySelectedAssets: Dispatch<SetStateAction<Set<string>>>;
   perPage?: number;
   /** @defaults 1 */
   maxSelected?: number;
@@ -146,28 +146,32 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
     if (isSelected) {
       //delete from list
-      setSelectAssets(
-        selectedAssets?.filter((a) => a.tokenAddress !== asset.tokenAddress) || []
+      setSelectAssets(prev => 
+        prev?.filter((a) => a.tokenAddress !== asset.tokenAddress) || []
       );
     } else {
-      if (selectedAssets && selectedAssets?.length >= maxSelected) {
-        return;
-      }
-      setSelectAssets([
-        ...(selectedAssets || []),
-        mergeAspectRatio(asset, aspectRatio),
-      ]);
+      setSelectAssets(prev => {
+        if (prev && prev?.length >= maxSelected) {
+          return prev
+        }
+        return [
+          ...(prev || []),
+          mergeAspectRatio(asset, aspectRatio),
+        ]
+    });
     }
   };
 
   const handleOptimisticClick = (assetId: string, isSelected: boolean) => {
-    const newSet = new Set(optimisticallySelectedAssets);
-    if (isSelected) {
-      newSet.add(assetId);
-    } else {
-      newSet.delete(assetId);
-    }
-    setOptimisticallySelectedAssets(newSet);
+    setOptimisticallySelectedAssets((prev) => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(assetId);
+      } else {
+        newSet.delete(assetId);
+      }
+      return newSet;
+    });
   };
 
   const renderFeedback = () => {
