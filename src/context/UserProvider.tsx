@@ -33,6 +33,7 @@ type UserContextType = {
   userLoading: boolean;
   loggedIn: boolean;
   revalidateUser: () => void;
+  loggingOut: boolean;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -43,6 +44,7 @@ const UserContext = createContext<UserContextType>({
   userLoading: false,
   loggedIn: false,
   revalidateUser: () => {},
+  loggingOut: false,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -57,6 +59,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserType | null>(null);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const signingInRef = useRef(false);
   
@@ -76,6 +79,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logOutUser = useCallback(async () => {
+    setLoggingOut(true);
     signingInRef.current = false;
     if (disconnect) {
       await disconnect();
@@ -84,6 +88,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setUser(null);
     setHasLoggedIn(false);
+    setLoggingOut(false);
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
@@ -204,8 +209,9 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       userLoading,
       loggedIn: userExists,
       revalidateUser: fetchUser,
+      loggingOut,
     }),
-    [user, userLoading, userExists, logOutUser, logInUser, fetchUser]
+    [user, userLoading, userExists, logOutUser, logInUser, fetchUser, loggingOut]
   );
 
   return (

@@ -95,8 +95,12 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
                   )}
                 >
                   {fetchingMintDate ? (
-                    <Button disabled variant={"outline"}>
-                      <P>Retrieving mint date</P>
+                    <Button
+                      disabled
+                      variant={"outline"}
+                      className="text-left justify-start"
+                    >
+                      <P>Retrieving mint date...</P>
                     </Button>
                   ) : (
                     <PopoverTrigger asChild>
