@@ -47,22 +47,18 @@ const GalleryBase: FC<GalleryBaseProps> = ({
     <div className="space-y-30 mb-30" ref={containerRef}>
       {isReady &&
         galleryRows.map((row, index) => {
-          const useBreakup = (index + 1) % 2 === 0;
-
           const gap = row.length > 3 ? GAP_SMALL : GAP;
           return (
             <div
               key={"row-" + index}
               className={cn(
-                "relative overflow-hidden",
+                "relative overflow-hidden rounded-xl",
                 "flex justify-center",
                 "flex-col md:flex-row items-center md:items-start",
-                useBreakup && "border-x-2 rounded-xl bg-secondary"
               )}
               style={{
                 gap,
                 padding: PADDING,
-                paddingBottom: useBreakup ? PADDING : 0,
               }}
             >
               {row.map((cell) => {

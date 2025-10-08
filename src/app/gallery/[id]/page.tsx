@@ -30,7 +30,7 @@ const GalleryPage = () => {
         hasData={!!gallery}
         noDataSubtitle="Gallery not found"
       >
-        <div className="relative p-6.25 lg:p-12.5 my-18.75 overflow-hidden border-y-2 rounded-2xl bg-muted">
+        <div className="relative p-6.25 lg:p-12.5 my-18.75 overflow-hidden border-y-6 border-double rounded-2xl">
           <div className="relative text-center space-y-4 z-10 ">
             <H1>{gallery?.title}</H1>
             <LinkButton
@@ -49,7 +49,7 @@ const GalleryPage = () => {
               </P>
             </LinkButton>
             {gallery?.description && (
-              <P className="text-primary whitespace-pre-line">
+              <P className="text-muted-foreground whitespace-pre-line">
                 {gallery.description}
               </P>
             )}

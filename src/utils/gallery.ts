@@ -23,6 +23,12 @@ export const getFirstItemWithMedia = (galleryItems?: GalleryItem[]) => {
       item.itemType === GalleryItemTypes.UserAsset
   );
 }
+export const getFirstBlockchainItem = (galleryItems?: GalleryItem[]) => {
+  return galleryItems?.find(
+    (item) =>
+      item.itemType === GalleryItemTypes.BlockchainAsset
+  );
+}
 
 export const convertToUserVirtualGallery = (
   gallery: GalleryType
