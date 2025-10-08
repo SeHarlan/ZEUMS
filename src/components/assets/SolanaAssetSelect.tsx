@@ -19,6 +19,7 @@ import { ChainIdsEnum } from "@/types/wallet";
 import { ImageVariant } from "@/types/media";
 import { Button, LinkButton } from "../ui/button";
 import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface SolanaAssetSelectProps {
   usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
@@ -240,6 +241,27 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
             const isDisabled = (showMaxSelectWarning && !isSelected) || isUsed;
 
+            if (isUsed) { 
+              return (
+                <Tooltip key={asset.tokenAddress}>
+                  <TooltipTrigger disabled={!isUsed}>
+
+                      <AssetThumbnailCard
+                        asset={asset}
+                        imageVariant={imageVariant}
+                        className={cn(
+                          "border-3 border-transparent opacity-50"
+                        )}
+                      />
+                
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <P>This asset is already being used</P>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
             return (
               <AssetThumbnailCard
                 key={asset.tokenAddress}
@@ -247,20 +269,20 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
                 imageVariant={imageVariant}
                 onClick={(aspectRatio) => {
                   if (isDisabled) return;
-                  handleAssetClick({ asset, isSelected, aspectRatio })
+                  handleAssetClick({ asset, isSelected, aspectRatio });
                 }}
                 optimisticClick={isOptimisticallySelected}
                 setOptimisticClick={(click) => {
                   if (isDisabled) return;
-                  handleOptimisticClick(asset.tokenAddress, click)
+                  handleOptimisticClick(asset.tokenAddress, click);
                 }}
                 className={cn(
                   "cursor-pointer border-3 hover:shadow-md transition-shadow duration-200",
                   isSelected
                     ? "border-primary"
                     : isOptimisticallySelected
-                      ? "border-primary/90"
-                      : "border-transparent",
+                    ? "border-primary/90"
+                    : "border-transparent",
                   isDisabled
                     ? "opacity-50 cursor-default pointer-events-none"
                     : ""
