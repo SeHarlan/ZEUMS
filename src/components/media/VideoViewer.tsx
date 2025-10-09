@@ -49,7 +49,7 @@ const mimeTypes: Record<string, string> = {
 
 const BUFFERING_DELAY = 1_000; //time before buffering message shows
 const LOADING_TIMEOUT = 30_000; //30 seconds - before before showing long load time message
-const REMOVE_RENDER_DELAY = 10_000//10_000; //10 seconds - remove from dom after delay
+const REMOVE_RENDER_DELAY = 5_000//5 seconds - remove from dom after delay
 const RENDER_DEBOUNCE_DELAY = 300; //300ms - debounce render state update to prevent mounting and unmounting too quickly
 interface VideoViewerProps {
   src: string;
@@ -577,13 +577,13 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
           className=" z-10 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-1 sm:p-2 rounded-md"
         >
           {failedToPlayMessage === "loading-timeout" && (
-            <div className="text-center">
+            <div className="text-center text-sm">
               <P>Video failed to load in a reasonable amount of time.</P>
               <P>You may try again.</P>
             </div>
           )}
-          <Button onClick={togglePlay} size="lg" loading={isLoading}>
-            Play <PlayIcon className="" />
+          <Button onClick={togglePlay} loading={isLoading}>
+            Play <PlayIcon />
           </Button>
         </div>
       )}
