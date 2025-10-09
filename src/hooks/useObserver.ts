@@ -1,21 +1,31 @@
 "use client";
+import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { RefObject, useEffect, useRef, useState } from "react";
 
 interface UseInViewOptions {
   threshold?: number;
   rootMargin?: string;
+  mobileRootMargin?: string
   triggerOnce?: boolean;
   passedRef?: RefObject<HTMLDivElement | null>;
 }
 
-export function useInView({ threshold = 0, rootMargin = "50px", triggerOnce = false, passedRef }: UseInViewOptions = {}) {
-
+export function useInView({
+  threshold = 0,
+  rootMargin = "50px",
+  mobileRootMargin = "0px",
+  triggerOnce = false,
+  passedRef,
+}: UseInViewOptions = {}) {
   const [inView, setInView] = useState(false);
   const internalRef = useRef<HTMLDivElement | null>(null);
+  const { isMd } = useBreakpoints();
 
   useEffect(() => {
     const element = passedRef?.current || internalRef.current;
     if (!element) return;
+
+    const responsiveRootMargin = !isMd ? mobileRootMargin : rootMargin;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -33,7 +43,7 @@ export function useInView({ threshold = 0, rootMargin = "50px", triggerOnce = fa
       },
       {
         threshold,
-        rootMargin,
+        rootMargin: responsiveRootMargin,
       }
     );
 
@@ -43,11 +53,10 @@ export function useInView({ threshold = 0, rootMargin = "50px", triggerOnce = fa
       observer.unobserve(element);
       observer.disconnect(); // Ensure complete cleanup
     };
-  }, [threshold, rootMargin, triggerOnce, passedRef]);
-  
+  }, [threshold, rootMargin, mobileRootMargin, isMd, triggerOnce, passedRef]);
 
   return {
     ref: passedRef || internalRef,
-    inView
+    inView,
   };
 }

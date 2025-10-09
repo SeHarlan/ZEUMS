@@ -13,6 +13,7 @@ import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suspense } from "react";
 import { AspectRatioProvider } from "@/context/AspectRatioProvider";
+import { ResponsiveProvider } from "@/context/ResponsiveProvider";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 
@@ -85,17 +86,19 @@ export default function RootLayout({
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
-              <NavBarActionsProvider>
-                <AspectRatioProvider>
-                  <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
-                    <Suspense fallback={<nav />}>
-                      <NavBar />
-                    </Suspense>
-                    {children}
-                    <Toaster />
-                  </ScrollArea>
-                </AspectRatioProvider>
-              </NavBarActionsProvider>
+              <ResponsiveProvider>
+                <NavBarActionsProvider>
+                  <AspectRatioProvider>
+                    <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
+                      <Suspense fallback={<nav />}>
+                        <NavBar />
+                      </Suspense>
+                      {children}
+                      <Toaster />
+                    </ScrollArea>
+                  </AspectRatioProvider>
+                </NavBarActionsProvider>
+              </ResponsiveProvider>
             </UserContextProvider>
           </AuthContextProvider>
         </WalletContextProvider>
