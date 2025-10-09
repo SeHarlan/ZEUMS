@@ -1,4 +1,5 @@
-import { MD_BREAKPOINT } from "@/constants/ui";
+
+import { MD_BREAKPOINT } from "@/context/ResponsiveProvider";
 import { debounce } from "@/utils/general";
 import { useCallback, useEffect, useState } from "react";
 
@@ -15,6 +16,7 @@ const useGalleryDimensions = (useResponsive = true, maxHeightRatio = 0.75, useRo
 
   const getDimensions = useCallback(() => {
     if (!containerRef?.current) return;
+
     const rowWidth = containerRef.current.offsetWidth;
     setContainerWidth(rowWidth);
 

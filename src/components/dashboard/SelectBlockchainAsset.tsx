@@ -4,16 +4,16 @@ import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ParsedBlockChainAsset } from "@/types/asset";
-import { EntrySource, EntryTypes } from "@/types/entry";
+import { EntrySource } from "@/types/entry";
 import { MediaCategory } from "@/types/media";
 import { getImageAspectRatio, getVideoAspectRatio } from "@/utils/media";
 
-import { CpuIcon, TrashIcon } from "lucide-react";
-import { FC, useMemo, useState } from "react";
-import { getTimelineKey } from "@/utils/timeline";
-import { useUser } from "@/context/UserProvider";
+import { TrashIcon } from "lucide-react";
+import { FC, useState } from "react";
+import { BlockchainAssetEntryIcon } from "../icons/EntryTypes";
 
 interface SelectBlockchainAssetProps {
+  usedAssetAddresses: Set<string>;
   source: EntrySource;
   blockchainAsset: ParsedBlockChainAsset | null;
   setBlockchainAsset: (media: ParsedBlockChainAsset | null) => void;
@@ -21,25 +21,14 @@ interface SelectBlockchainAssetProps {
 }
 
 const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
+  usedAssetAddresses,
   blockchainAsset,
   setBlockchainAsset,
   source,
   setAspectRatio,
 }) => {
-  const { user } = useUser();
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
   const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
-
-  const timelineKey = getTimelineKey(source);
-
-  const usedAssetAddresses = useMemo(() => {
-    const currentTimeline = user?.[timelineKey] || [];
-    const items =
-      currentTimeline
-        ?.filter((item) => item.entryType === EntryTypes.BlockchainAsset)
-        .map((item) => item.tokenAddress) || [];
-    return new Set(items);
-  }, [user, timelineKey]);
 
   const handleAssetAdd = () => {
     setBlockchainAsset(selectedAssets[0]);
@@ -69,7 +58,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
       <Dialog>
         <DialogTrigger asChild>
           <div className="p-2 flex flex-col items-center justify-center gap-4">
-            <CpuIcon className="size-12 text-muted-foreground" />
+            <BlockchainAssetEntryIcon className="size-12 text-muted-foreground" />
             <Button type="button">Choose blockchain asset</Button>
           </div>
         </DialogTrigger>
@@ -83,7 +72,6 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
           </DialogHeader>
 
           <div className="flex-1 min-h-0">
-            
             <SolanaAssetSelect
               usedAssetAddresses={usedAssetAddresses}
               optimisticallySelectedAssets={optimisticallySelectedAssets}
@@ -106,7 +94,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
               }
             >
               Select
-              <CpuIcon />
+              <BlockchainAssetEntryIcon />
             </Button>
           </DialogFooter>
         </DialogContent>

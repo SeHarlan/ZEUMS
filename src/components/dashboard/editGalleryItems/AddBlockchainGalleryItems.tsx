@@ -1,6 +1,7 @@
 "use client";
 
 import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +22,7 @@ import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/gall
 import { getLastGalleryRowIndex } from "@/utils/gallery";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
-import {
-  CpuIcon,
-  ImagesIcon,
-} from "lucide-react";
+import { ImagesIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -44,7 +42,6 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
   const source = gallery?.source || EntrySource.Creator;
 
   const usedAssetAddresses = useMemo(() => { 
-
     const items = gallery?.items
       ?.filter((item) => item.itemType === GalleryItemTypes.BlockchainAsset)
       .map((item) => item.tokenAddress) || [];
@@ -167,7 +164,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
             className="w-full lg:w-fit"
           >
             Create Gallery Items
-            <CpuIcon />
+            <BlockchainAssetEntryIcon />
           </Button>
         </DialogFooter>
       </DialogContent>

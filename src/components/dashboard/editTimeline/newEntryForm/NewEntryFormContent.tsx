@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { EntryFormValues } from "@/forms/upsertEntry";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { EntrySource, EntryTypes } from "@/types/entry";
 import { Button } from "@/components/ui/button";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
@@ -29,6 +29,8 @@ import SelectGalleryEntry from "../../SelectGalleryEntry";
 import { UserVirtualGalleryType } from "@/types/gallery";
 import { P } from "@/components/typography/Typography";
 import { getFirstBlockchainItem } from "@/utils/gallery";
+import { useUser } from "@/context/UserProvider";
+import { getTimelineKey } from "@/utils/timeline";
 
 interface NewEntryFormContentProps {
   form: UseFormReturn<EntryFormValues>;
@@ -55,12 +57,25 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   setGallery,
   fetchingMintDate,
 }) => {
+  const {user} = useUser();
+
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
   const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
 
   const hasFetchableDate = isBlockchainEntry || isGalleryEntry 
 
   const hideDetailInputs = (isBlockchainEntry && !blockchainAsset) || isGalleryEntry && !gallery;
+  
+  const timelineKey = getTimelineKey(source);
+
+  const usedAssetAddresses = useMemo(() => {
+    const currentTimeline = user?.[timelineKey] || [];
+    const items =
+      currentTimeline
+        ?.filter((item) => item.entryType === EntryTypes.BlockchainAsset)
+        .map((item) => item.tokenAddress) || [];
+    return new Set(items);
+  }, [user, timelineKey]);
 
   const handleGetMintDate = () => { 
     if(isBlockchainEntry) {
@@ -199,6 +214,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
       )}
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
+          usedAssetAddresses={usedAssetAddresses}
           blockchainAsset={blockchainAsset}
           setBlockchainAsset={setBlockchainAsset}
           source={source}

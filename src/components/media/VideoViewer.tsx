@@ -49,7 +49,7 @@ const mimeTypes: Record<string, string> = {
 
 const BUFFERING_DELAY = 1_000; //time before buffering message shows
 const LOADING_TIMEOUT = 30_000; //30 seconds - before before showing long load time message
-const REMOVE_RENDER_DELAY = 10_000//10_000; //10 seconds - remove from dom after delay
+const REMOVE_RENDER_DELAY = 5_000//5 seconds - remove from dom after delay
 const RENDER_DEBOUNCE_DELAY = 300; //300ms - debounce render state update to prevent mounting and unmounting too quickly
 interface VideoViewerProps {
   src: string;
@@ -67,7 +67,7 @@ interface VideoViewerProps {
 }
 
 const VideoViewer: FC<VideoViewerProps> = ({containerClassName, ...props}) => {
-  const { inView, ref: containerRef } = useInView({rootMargin: "200px"});
+  const { inView, ref: containerRef } = useInView({rootMargin: "200px", mobileRootMargin: "0px"});
   const [isLoading, setIsLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
@@ -156,21 +156,15 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
   const controlsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
-  // const containerRef = useRef<HTMLDivElement>(null);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(defaultMuted);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isBuffering, setIsBuffering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
   const [userPaused, setUserPaused] = useState(false);
-
-  // const { inView } = useInView({ passedRef: containerRef });
 
   //these prevent unneeded event listeners and other checks
   const useCurrentTime = controls && !minimalControls;
@@ -576,34 +570,26 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
 
 
   return (
-    // <div
-    //   ref={containerRef}
-    //   className={cn(
-    //     "relative group/video w-full h-full flex justify-center items-center",
-    //     (isLoading || isBuffering) && "animate-skeleton-shimmer",
-    //     containerClassName
-    //   )}
-    // >
     <>
       {!isPlaying && failedToPlayMessage && (
         <div
           ref={feedbackRef}
-          className=" z-50 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-1 sm:p-2 rounded-md"
+          className=" z-10 absolute-center flex flex-col justify-center items-center gap-2 sm:gap-4 bg-popover-blur p-2 rounded-md"
         >
           {failedToPlayMessage === "loading-timeout" && (
-            <div className="text-center">
+            <div className="text-center text-xs">
               <P>Video failed to load in a reasonable amount of time.</P>
               <P>You may try again.</P>
             </div>
           )}
-          <Button onClick={togglePlay} size="lg" loading={isLoading}>
-            Play <PlayIcon className="" />
+          <Button onClick={togglePlay} loading={isLoading}>
+            Play <PlayIcon />
           </Button>
         </div>
       )}
 
       {isBuffering && (
-        <div className="z-50 absolute-center bg-popover-blur px-3 py-1 rounded-md">
+        <div className="z-10 absolute-center bg-popover-blur px-3 py-1 rounded-md">
           <P>Buffering...</P>
         </div>
       )}

@@ -86,7 +86,6 @@ const AssetViewer: FC<AssetViewerProps> = ({
       return (
         <VideoViewer
           src={getMediaUrl(media)}
-          poster={imageUrl}
           onError={() => setVideoError(true)}
           minimalControls
           autoPlay

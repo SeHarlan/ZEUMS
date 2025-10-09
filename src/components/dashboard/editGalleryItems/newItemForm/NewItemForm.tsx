@@ -31,16 +31,23 @@ interface NewItemFormProps {
   buttonText?: string;
 }
 
-const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVariant = "default", buttonText = "Add New Gallery Item"}) => {
+const NewItemForm: FC<NewItemFormProps> = ({
+  galleryId,
+  buttonClassName,
+  buttonVariant = "default",
+  buttonText = "Add New Gallery Item",
+}) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
-  const { user, revalidateUser } = useUser()
+  const { user, revalidateUser } = useUser();
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
-  const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(GalleryItemTypes.BlockchainAsset);
+  const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(
+    GalleryItemTypes.BlockchainAsset
+  );
 
   const source = gallery?.source || EntrySource.Creator;
 
@@ -49,7 +56,7 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
     title: "",
     description: "",
     buttons: [],
-  }), [])
+  }), []);
 
   const form = useForm<GalleryItemFormValues>({
     resolver: zodResolver(galleryItemFormSchema),
@@ -60,12 +67,16 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
   const { title, description, itemType: selectedGalleryItemType } = watch();
 
   const disableSubmit =
-    selectedGalleryItemType === GalleryItemTypes.BlockchainAsset && !blockchainAsset
-    || !user
-  
+    (selectedGalleryItemType === GalleryItemTypes.BlockchainAsset &&
+      !blockchainAsset) ||
+    !user;
+
   useEffect(() => {
-    const isBlockchainAsset = selectedGalleryItemType === GalleryItemTypes.BlockchainAsset;
-    const isDifferent = blockchainAsset?.tokenAddress !== prevBlockchainAssetRef.current?.tokenAddress;
+    const isBlockchainAsset =
+      selectedGalleryItemType === GalleryItemTypes.BlockchainAsset;
+    const isDifferent =
+      blockchainAsset?.tokenAddress !==
+      prevBlockchainAssetRef.current?.tokenAddress;
 
     if (isBlockchainAsset && isDifferent) {
       // Only run if blockchainAsset changed
@@ -77,7 +88,14 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
       });
       prevBlockchainAssetRef.current = blockchainAsset;
     }
-  }, [blockchainAsset, reset, title, description, defaultValues, selectedGalleryItemType]);
+  }, [
+    blockchainAsset,
+    reset,
+    title,
+    description,
+    defaultValues,
+    selectedGalleryItemType,
+  ]);
 
   useEffect(() => {
     // Only reset if selectedGalleryItemType changed
@@ -97,7 +115,7 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
     reset(defaultValues);
     prevBlockchainAssetRef.current = null;
     prevGalleryItemTypeRef.current = GalleryItemTypes.BlockchainAsset;
-  }
+  };
 
   const onSubmit = (data: GalleryItemFormValues) => {
     if (!user || !gallery) return;
@@ -106,12 +124,11 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
 
     // Add https:// prefix to button URLs if they don't have a protocol
     if (data.buttons) {
-      data.buttons = data.buttons.map(button => ({
+      data.buttons = data.buttons.map((button) => ({
         ...button,
-        url: addHttpsPrefix(button.url)
+        url: addHttpsPrefix(button.url),
       }));
     }
-
 
     const lastRowIndex = getLastGalleryRowIndex(gallery.items);
 
@@ -128,7 +145,7 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
         setSubmitting(false);
         return;
       }
-      
+
       //TODO: refactor this to use the aspect Ratio provider
       const assetWithAspectRatio: ParsedBlockChainAsset = {
         ...blockchainAsset,
@@ -145,7 +162,10 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
     }
 
     axios
-      .post<{ createdGalleryItem: GalleryItem }>(GALLERY_ITEM_ROUTE, itemCreationData)
+      .post<{ createdGalleryItem: GalleryItem }>(
+        GALLERY_ITEM_ROUTE,
+        itemCreationData
+      )
       .then((response) => {
         const { createdGalleryItem } = response.data;
 
@@ -185,7 +205,10 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
   return (
     <SideDrawer
       triggerButton={
-        <Button variant={buttonVariant} className={cn("w-full", buttonClassName)}>
+        <Button
+          variant={buttonVariant}
+          className={cn("w-full", buttonClassName)}
+        >
           <P className="hidden md:block">{buttonText}</P>
           <P className="md:hidden">Add Item</P>
           <SquarePlusIcon />
@@ -208,17 +231,14 @@ const NewItemForm: FC<NewItemFormProps> = ({galleryId, buttonClassName, buttonVa
       }
     >
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          id={formId}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
           <NewItemFormContent
             form={form}
             selectedItemType={selectedGalleryItemType}
             blockchainAsset={blockchainAsset}
             setBlockchainAsset={setBlockchainAsset}
             setAspectRatio={setAspectRatio}
-            source={source}
+            galleryId={galleryId}
           />
         </form>
       </Form>
