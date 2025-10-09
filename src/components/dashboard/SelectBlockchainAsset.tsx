@@ -8,10 +8,11 @@ import { EntrySource, EntryTypes } from "@/types/entry";
 import { MediaCategory } from "@/types/media";
 import { getImageAspectRatio, getVideoAspectRatio } from "@/utils/media";
 
-import { CpuIcon, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { getTimelineKey } from "@/utils/timeline";
 import { useUser } from "@/context/UserProvider";
+import { BlockchainAssetEntryIcon } from "../icons/EntryTypes";
 
 interface SelectBlockchainAssetProps {
   source: EntrySource;
@@ -69,7 +70,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
       <Dialog>
         <DialogTrigger asChild>
           <div className="p-2 flex flex-col items-center justify-center gap-4">
-            <CpuIcon className="size-12 text-muted-foreground" />
+            <BlockchainAssetEntryIcon className="size-12 text-muted-foreground" />
             <Button type="button">Choose blockchain asset</Button>
           </div>
         </DialogTrigger>
@@ -106,7 +107,7 @@ const SelectBlockchainAsset: FC<SelectBlockchainAssetProps> = ({
               }
             >
               Select
-              <CpuIcon />
+              <BlockchainAssetEntryIcon />
             </Button>
           </DialogFooter>
         </DialogContent>

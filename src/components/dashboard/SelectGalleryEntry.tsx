@@ -1,7 +1,7 @@
 import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { Button } from "@/components/ui/button";
 import { EntrySource } from "@/types/entry";
-import { GalleryVerticalIcon, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 import { FC, useState } from "react";
 import { useUser } from "@/context/UserProvider";
 import { getGalleryKey } from "@/utils/gallery";
@@ -10,6 +10,7 @@ import { UserVirtualGalleryType } from "@/types/gallery";
 import { cn } from "@/utils/ui-utils";
 import ScrollableDialog from "../general/ScrollableDialog";
 import CreateGalleryDialogButton from "./editGalleries/CreateGalleryDialog";
+import { GalleryEntryIcon } from "../icons/EntryTypes";
 
 interface SelectGalleryEntryProps {
   source: EntrySource;
@@ -41,14 +42,14 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
       <ScrollableDialog
         trigger={
           <div className="p-2 flex flex-col items-center justify-center gap-4">
-            <GalleryVerticalIcon className="size-12 text-muted-foreground" />
+            <GalleryEntryIcon className="size-12 text-muted-foreground" />
             <Button type="button">Choose gallery to link</Button>
           </div>
         }
         footerContent={!noGalleries ? (
           <Button type="button" onClick={handleSelectGallery}>
             Select
-            <GalleryVerticalIcon />
+            <GalleryEntryIcon />
           </Button>
         ) : null}
         title="Select Gallery To Link"

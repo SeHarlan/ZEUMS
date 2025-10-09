@@ -28,13 +28,15 @@ const EditGalleries: FC<EditGalleriesProps> = ({ source }) => {
   return (
     <EditGallerySettingsContextProvider>
       <div className="space-y-6">
-        <div className="sticky top-0 rounded-xl p-6 z-20 shadow-md border bg-muted-blur mb-6">
+        <div className="sticky top-0 sm:top-8 rounded-xl p-6 z-20 shadow-md border bg-muted-blur mb-6">
           <CreateGalleryDialogButton source={source} {...buttonProps} />
-
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {galleries.map((gallery) => (
-            <EditableGalleryCard key={gallery._id.toString()} gallery={gallery} />
+            <EditableGalleryCard
+              key={gallery._id.toString()}
+              gallery={gallery}
+            />
           ))}
         </div>
       </div>

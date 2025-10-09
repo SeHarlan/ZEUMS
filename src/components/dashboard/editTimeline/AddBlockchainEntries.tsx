@@ -11,10 +11,11 @@ import { EntrySource, EntryTypes, TimelineBlockchainEntryCreation, TimelineEntry
 import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey, parseEntryDates, sortTimeline } from "@/utils/timeline";
 import axios from "axios";
-import { CpuIcon, ImagesIcon } from "lucide-react";
+import { ImagesIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 
 export const MAX_SELECTED_ASSETS = 9;
 interface AddBlockchainEntriesProps {
@@ -158,7 +159,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
               disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}
             >
               Create Entries
-              <CpuIcon />
+              <BlockchainAssetEntryIcon />
             </Button>
           {/* </div> */}
         </DialogFooter>

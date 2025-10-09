@@ -1,4 +1,5 @@
 import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,8 +12,6 @@ import {
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { ImageType, ImageVariant } from "@/types/media";
 import { convertMediaToImage } from "@/utils/media";
-
-import { CpuIcon } from "lucide-react";
 import { FC, useState } from "react";
 
 interface ChooseProfileImageDialogProps {
@@ -70,7 +69,7 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
             disabled={!selectedAssets.length || optimisticallySelectedAssets.size > 0}
           >
             Select
-            <CpuIcon />
+            <BlockchainAssetEntryIcon />
           </Button>
         </DialogFooter>
       </DialogContent>

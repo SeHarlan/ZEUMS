@@ -574,10 +574,10 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
       {!isPlaying && failedToPlayMessage && (
         <div
           ref={feedbackRef}
-          className=" z-10 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-1 sm:p-2 rounded-md"
+          className=" z-10 absolute-center flex flex-col justify-center items-center gap-2 sm:gap-4 bg-popover-blur p-2 rounded-md"
         >
           {failedToPlayMessage === "loading-timeout" && (
-            <div className="text-center text-sm">
+            <div className="text-center text-xs">
               <P>Video failed to load in a reasonable amount of time.</P>
               <P>You may try again.</P>
             </div>

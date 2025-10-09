@@ -23,7 +23,7 @@ const EditTimeline: FC<EditTimelineProps> = ({ source }) => {
   const entries = timelinesMap[source] || [];
   return (
     <div>
-      <div className="sticky top-0 rounded-xl p-6 z-20 shadow-md border bg-muted-blur mb-6">
+      <div className="sticky top-0 sm:top-8 rounded-xl p-6 z-20 shadow-md border bg-muted-blur mb-6">
         <NewEntryFormButton source={source} />
         <div className="grid grid-cols-[auto_1fr] md:grid-cols-[1fr_2fr] gap-6 mt-6">
           <AddBlockchainEntriesButton source={source} />
