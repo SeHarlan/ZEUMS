@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { EntrySource } from "@/types/entry";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 import { ParsedBlockChainAsset } from "@/types/asset";
@@ -20,6 +20,7 @@ import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/Entr
 import ButtonEditor from "@/components/timeline/ButtonEditor";
 import { GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import { GalleryItemTypes } from "@/types/galleryItem";
+import useGalleryById from "@/hooks/useGalleryById";
 
 interface NewItemFormContentProps { 
   form: UseFormReturn<GalleryItemFormValues>;
@@ -27,7 +28,7 @@ interface NewItemFormContentProps {
   blockchainAsset: ParsedBlockChainAsset | null;
   setBlockchainAsset: (asset: ParsedBlockChainAsset | null) => void;
   setAspectRatio: (aspectRatio: number | null) => void; 
-  source: EntrySource;
+  galleryId: string;
 }
 
 const NewItemFormContent: FC<NewItemFormContentProps> = ({
@@ -36,10 +37,18 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
   blockchainAsset,
   setBlockchainAsset,
   setAspectRatio,
-  source,
+  galleryId,
 }) => {
-  //TODO disabled double select - get gallery items based on source and select tokens (use atom selector)
-  // const disabledAssetAddresses =
+  const { gallery } = useGalleryById(galleryId);
+  const source = gallery?.source || EntrySource.Creator;
+
+  const usedAssetAddresses = useMemo(() => {
+    const items =
+      gallery?.items
+        ?.filter((item) => item.itemType === GalleryItemTypes.BlockchainAsset)
+        .map((item) => item.tokenAddress) || [];
+    return new Set(items);
+  }, [gallery?.items]);
   
   const isBlockchainEntry = selectedItemType === GalleryItemTypes.BlockchainAsset;
 
@@ -94,7 +103,7 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
 
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
-          // disabledAssetAddresses={disabledAssetAddresses}
+          usedAssetAddresses={usedAssetAddresses}
           blockchainAsset={blockchainAsset}
           setBlockchainAsset={setBlockchainAsset}
           source={source}

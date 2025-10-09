@@ -42,7 +42,6 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
   const source = gallery?.source || EntrySource.Creator;
 
   const usedAssetAddresses = useMemo(() => { 
-
     const items = gallery?.items
       ?.filter((item) => item.itemType === GalleryItemTypes.BlockchainAsset)
       .map((item) => item.tokenAddress) || [];
