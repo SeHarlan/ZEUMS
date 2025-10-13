@@ -212,6 +212,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
           )}
         />
       )}
+      
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
           usedAssetAddresses={usedAssetAddresses}
