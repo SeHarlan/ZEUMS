@@ -5,6 +5,7 @@ import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { SignInMessage } from "@/utils/auth";
 import { ChainIdsEnum } from "@/types/wallet";
 import { MongoServerError } from "mongodb";
+import User from "@/server/models/User";
 
 
 export async function addWalletHandler(req: NextRequest): Promise<NextResponse> {
@@ -52,6 +53,30 @@ export async function addWalletHandler(req: NextRequest): Promise<NextResponse> 
     } catch (error) {
       if (error instanceof MongoServerError && error.code === 11000) {
         // 11000 = Duplicate key error - handle gracefully
+
+        // get owner/user from existing wallet
+        const existingWallet = await Wallet.findOne({
+          address: signinMessage.publicKey,
+        });
+
+        if (!existingWallet) {
+          //fallback, shouldn't happen
+          throw new Error("Could not verify wallet, faulty duplicate key error");
+        }
+        const owner = await User.findById(existingWallet.owner);
+
+        if (!owner && authSessionUser.dbUserId) {
+          //if no owner exists assign it to the current user
+          await existingWallet.updateOne({ owner: authSessionUser.dbUserId });
+    
+          const updatedWallet = {
+            ...existingWallet.toObject(),
+            owner: authSessionUser.dbUserId,
+          };
+
+          return NextResponse.json({ createdWallet: updatedWallet });
+        }
+
         return NextResponse.json({ alreadyExists: true });
       }
       throw error;
