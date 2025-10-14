@@ -22,7 +22,9 @@ export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
 export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
 export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
 
+export const TIMELINES = '/timelines';
 export const USER_TIMELINE = (username: string) => `/${username}`;
+export const GALLERIES = '/galleries';
 export const GALLERY = '/gallery';
 export const USER_GALLERY = (galleryId: string) => `${GALLERY}/${galleryId}`;
 export const BLOCKCHAIN_MEDIA_PATHS = {

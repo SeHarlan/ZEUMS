@@ -65,7 +65,7 @@ export async function addWalletHandler(req: NextRequest): Promise<NextResponse> 
         }
         const owner = await User.findById(existingWallet.owner);
 
-        if (!owner && authSessionUser.dbUserId) {
+        if (owner === null && authSessionUser.dbUserId) {
           //if no owner exists assign it to the current user
           await existingWallet.updateOne({ owner: authSessionUser.dbUserId });
     

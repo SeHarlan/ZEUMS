@@ -66,6 +66,11 @@ export type PublicUserType = BaseUserType & {
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
 };
 
+export type PublicListUserType = Pick<PublicUserType, '_id' | 'username' | 'displayName'> & {
+  profileImage: ImageType;
+  bannerImage: ImageType;
+};
+
 export type CreateUserData = {
   username: string;
   email?: string;

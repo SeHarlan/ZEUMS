@@ -4,6 +4,7 @@ import {
   GalleryDisplayTypes,
 } from "@/types/gallery";
 import { EntrySource } from "@/types/entry";
+import { GalleryItemTypes } from "@/types/galleryItem";
 import { 
   GALLERY_ITEM_MODEL_KEY,
   GALLERY_ITEMS_FOREIGN_KEY,
@@ -107,6 +108,21 @@ export const GalleryWithFirstTwoRowsPopulate = {
   options: { 
     sort: { "position.0": 1, "position.1": 1 } 
   },
+};
+
+// Populate configuration for gallery entries that includes only the first media item
+export const GalleryWithFirstMediaPopulate = {
+  path: GALLERY_ITEMS_VIRTUAL,
+  model: GALLERY_ITEM_MODEL_KEY,
+  match: { 
+    itemType: { 
+      $in: [GalleryItemTypes.BlockchainAsset, GalleryItemTypes.UserAsset] 
+    } 
+  },
+  options: { 
+    limit: 1,
+    sort: { "position.1": 1, "position.0": 1 }
+  }
 };
 
 // Create the model

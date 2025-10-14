@@ -33,7 +33,7 @@ const GetStartedButton: FC<{disabled?: boolean}> = ({disabled}) => {
 
   return (
     <Button onClick={handleStartClicked} loading={userLoading} disabled={disabled}>
-      Get started
+      Get Started
     </Button>
   );
 }

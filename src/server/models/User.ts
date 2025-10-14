@@ -2,7 +2,6 @@ import {
   AUTH_USER_MODEL_KEY,
   ENTRY_FOREIGN_KEY,
   ENTRY_MODEL_KEY,
-  GALLERY_ITEMS_VIRTUAL,
   GALLERY_MODEL_KEY,
   GALLERY_OWNER_FOREIGN_KEY,
   GALLERY_TOTAL_ITEMS_VIRTUAL,
@@ -18,12 +17,12 @@ import {
   WALLET_MODEL_KEY,
 } from "@/constants/databaseKeys";
 import { EntrySource } from "@/types/entry";
-import { GalleryItemTypes } from "@/types/galleryItem";
 import { UserType } from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { MediaSchema } from "./Entry/media";
 import { GalleryEntryVirtual, websiteValidation } from "./Entry/Entry";
 import { EditTimelineTab } from "@/types/ui/dashboard";
+import { GalleryWithFirstMediaPopulate } from "./Gallery/Gallery";
 
 export interface UserDocument extends Document<Schema.Types.ObjectId>, UserType {}
 
@@ -153,22 +152,11 @@ export const AuthUserVirtual = {
 
 /** populates only the first item with media, but also the total items count */
 const UserGalleriesPopulate = [
+  GalleryWithFirstMediaPopulate,
   {
-    path: GALLERY_ITEMS_VIRTUAL,
-    match: { 
-      itemType: { 
-        $in: [GalleryItemTypes.BlockchainAsset, GalleryItemTypes.UserAsset] 
-      } 
-    },
-    options: { 
-      limit: 1,
-      sort: { "position.1": 1, "position.0": 1 }
-    }
+    path: GALLERY_TOTAL_ITEMS_VIRTUAL,
   },
-  {
-    path: GALLERY_TOTAL_ITEMS_VIRTUAL
-  }
-]
+];
 
 export const UserCreatedGalleriesVirtual = {
   path: USER_CREATED_GALLERIES_VIRTUAL,

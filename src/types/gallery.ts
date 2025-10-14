@@ -2,7 +2,7 @@
 import { Schema } from "mongoose";
 import { GalleryItem, GalleryMediaItem } from "./galleryItem";
 import { EntrySource } from "./entry";
-import { UserType } from "./user";
+import { BaseUserType } from "./user";
 
 export enum GalleryDisplayTypes { 
   Justify = "justify",
@@ -21,9 +21,11 @@ export type BaseGalleryType = {
   hideItemDescriptions?: boolean;
 };
 
+type GalleryOwnerData = Pick<BaseUserType, "username" | "displayName" | "profileImage">;
+
 export type GalleryType = BaseGalleryType & {
   items?: GalleryItem[];
-  ownerData?: Pick<UserType, "username" | "displayName" | "profileImage">;
+  ownerData?: GalleryOwnerData;
 }
 
 export type GalleryCreation = Pick<BaseGalleryType, "title" | "description" | "source" | "hideItemTitles" | "hideItemDescriptions"> 
@@ -31,4 +33,9 @@ export type GalleryCreation = Pick<BaseGalleryType, "title" | "description" | "s
 export type UserVirtualGalleryType = BaseGalleryType & {
   items?: GalleryMediaItem[];
   totalItems: number;
+};
+
+export type PublicGalleryType = BaseGalleryType & {
+  items: GalleryMediaItem[];
+  ownerData: GalleryOwnerData;
 };
