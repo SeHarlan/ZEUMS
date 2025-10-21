@@ -1,11 +1,10 @@
 import { USER_AUTH_VIRTUAL, USER_COLLECTED_GALLERIES_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_GALLERIES_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
-import { TimelineEntry } from "./entry";
-import { WalletType } from "./wallet";
 import { Schema } from "mongoose";
-import { AuthUserType } from "./next-auth";
-import { ImageType } from "./media";
-import { EditTimelineTab } from "./ui/dashboard";
+import { EntrySource, TimelineEntry } from "./entry";
 import { UserVirtualGalleryType } from "./gallery";
+import { ImageType } from "./media";
+import { AuthUserType } from "./next-auth";
+import { WalletType } from "./wallet";
 
 // export type Website = {
 //   url: string;
@@ -23,7 +22,7 @@ export type BaseUserType = {
   bio?: string;
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
-  primaryTimeline?: EditTimelineTab;
+  primaryTimeline?: EntrySource;
   // websites?: Website[];
 };
 

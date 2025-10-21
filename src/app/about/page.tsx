@@ -16,7 +16,7 @@ export default function About() {
       />
 
       <Blockquote className="font-bold not-italic">
-        Exhibit digital art, tell your story, and document your place in art history.
+        A platform for artists and collectors to organize and showcase their digital art.
       </Blockquote>
 
 
@@ -80,7 +80,7 @@ export default function About() {
       <section className="space-y-4">
         <H3>Join the Movement</H3>
         <P>
-          Transform scattered images, posts, and links into one cohesive story with on-chain provenance. Join the movement and document your place in art history today.
+          Gather scattered images, posts, and links in one curated space. Share your story and your art with the world.
         </P>
       </section>
 

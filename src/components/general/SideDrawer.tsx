@@ -1,4 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { FC, ReactNode } from "react";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 import {
   Sheet,
   SheetClose,
@@ -9,9 +12,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./../ui/sheet";
-import { FC, ReactNode } from "react";
-import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
 
 interface SideDrawerProps { 
   title: string;
@@ -44,7 +44,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
         <div className="row-start-2 min-h-0 px-4">
           <Separator />
           <ScrollArea className="h-full">
-            <div className="p-3">{children}</div>
+            <div className="p-2">{children}</div>
           </ScrollArea>
           <Separator />
         </div>

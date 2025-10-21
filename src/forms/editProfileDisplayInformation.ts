@@ -1,6 +1,6 @@
+import { EntrySource } from "@/types/entry";
 import { z } from "zod";
 import { urlSchema } from "./urlSchema";
-import { EditTimelineTab } from "@/types/ui/dashboard";
 
 // Helper function to validate social media handles (not URLs)
 const validateSocialHandle = (value: string | undefined) => {
@@ -55,7 +55,7 @@ export const profileDisplayFormSchema = z.object({
     website: urlSchema,
     // facebook: socialHandleSchema,
   }),
-  primaryTimeline: z.nativeEnum(EditTimelineTab),
+  primaryTimeline: z.nativeEnum(EntrySource),
   // websites: z.array(z.string().url()).optional().transform((val) => (val === "" ? undefined : val)),
 });
 

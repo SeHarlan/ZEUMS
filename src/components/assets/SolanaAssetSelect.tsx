@@ -1,26 +1,27 @@
-import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useMemo, useState } from "react";
-import Pagination from "../general/Pagination"
-import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { useUser } from "@/context/UserProvider";
-import { getWalletsByChain } from "@/utils/user";
-import { EntrySource } from "@/types/entry";
-import { Separator } from "../ui/separator";
-import { cn } from "@/utils/ui-utils";
-import { P } from "../typography/Typography";
 import { useDebouncedState } from "@/hooks/useDebounce";
-import { ScrollArea } from "../ui/scroll-area";
+import useSolanaAssets from "@/hooks/useSolanaAssets";
+import { EntrySource, isEntrySource } from "@/types/entry";
+import { cn } from "@/utils/ui-utils";
+import { getWalletsByChain } from "@/utils/user";
 import { SearchIcon, WalletIcon } from "lucide-react";
+import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useMemo, useState } from "react";
+import Pagination from "../general/Pagination";
+import { P } from "../typography/Typography";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 
-import { PrefixInput } from "../ui/input";
-import AssetThumbnailCard from "./AssetThumbnailCard";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import LoadingSpinner from "../general/LoadingSpinner";
-import { ChainIdsEnum } from "@/types/wallet";
-import { ImageVariant } from "@/types/media";
-import { Button, LinkButton } from "../ui/button";
 import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { ImageVariant } from "@/types/media";
+import { ChainIdsEnum } from "@/types/wallet";
+import { isValidSolanaAddress } from "@/utils/asset";
+import LoadingSpinner from "../general/LoadingSpinner";
+import { Button, LinkButton } from "../ui/button";
+import { PrefixInput } from "../ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import AssetThumbnailCard from "./AssetThumbnailCard";
 
 interface SolanaAssetSelectProps {
   usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
@@ -69,17 +70,21 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   const filteredAssets = useMemo(() => {
     if (!solanaAssets || solanaAssets.length === 0) return [];
     // No search term, return all assets
-    if (!debouncedSearch) return solanaAssets;
+    if (!debouncedSearch || debouncedSearch.length < 1) return solanaAssets;
 
     return solanaAssets.filter(
-      (asset) =>
-        asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        asset.tokenAddress
+      (asset) => {
+        if (isValidSolanaAddress(debouncedSearch)) { 
+          return asset.tokenAddress
           .toLowerCase()
-          .includes(debouncedSearch.toLowerCase()) ||
+          .includes(debouncedSearch.toLowerCase()) 
+        }
+
+        return asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         asset.collection?.name
           ?.toLowerCase()
           .includes(debouncedSearch.toLowerCase())
+      }
     );
   }, [solanaAssets, debouncedSearch]);
 
@@ -206,7 +211,9 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        ) : <div/>}
+        ) : (
+          <div />
+        )}
         {maxSelected > 1 ? (
           <Button
             onClick={handleClear}
@@ -219,12 +226,12 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       </div>
       {source === "choose" ? (
         <Tabs
-          onValueChange={(value) => setSelectedSource(value as EntrySource)}
+          onValueChange={(value) => isEntrySource(value) && setSelectedSource(value)}
           value={selectedSource}
         >
-          <TabsList className="w-full">
-            <TabsTrigger value="collector">Collector</TabsTrigger>
-            <TabsTrigger value="creator">Creator</TabsTrigger>
+          <TabsList className="w-full font-serif">
+            <TabsTrigger primaryActive value={EntrySource.Collector}>Collected</TabsTrigger>
+            <TabsTrigger primaryActive value={EntrySource.Creator}>Created</TabsTrigger>
           </TabsList>
         </Tabs>
       ) : null}

@@ -19,9 +19,8 @@ import {
 import { EntrySource } from "@/types/entry";
 import { UserType } from "@/types/user";
 import mongoose, { Document, Model, Schema } from "mongoose";
-import { MediaSchema } from "./Entry/media";
 import { GalleryEntryVirtual, websiteValidation } from "./Entry/Entry";
-import { EditTimelineTab } from "@/types/ui/dashboard";
+import { MediaSchema } from "./Entry/media";
 import { GalleryWithFirstMediaPopulate } from "./Gallery/Gallery";
 
 export interface UserDocument extends Document<Schema.Types.ObjectId>, UserType {}
@@ -57,7 +56,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
       required: false,
       unique: true,
     },
-    primaryTimeline: { type: String, enum: Object.values(EditTimelineTab) },
+    primaryTimeline: { type: String, enum: Object.values(EntrySource)},
   },
   {
     timestamps: true,

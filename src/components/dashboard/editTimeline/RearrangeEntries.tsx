@@ -1,46 +1,56 @@
 "use client";
 
+import SideDrawer from "@/components/general/SideDrawer";
+import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
-import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
-import { FC,  useMemo, useState } from "react";
-import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
-import MediaThumbnail from "@/components/media/MediaThumbnail";
+import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
-import { DndContext, DragEndEvent, DragMoveEvent, closestCenter } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-  arrayMove,
-} from "@dnd-kit/sortable";
+import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
+import { isMediaGalleryItem } from "@/types/galleryItem";
+import { handleClientError } from "@/utils/handleError";
+import { getTimelineKey, sortTimeline } from "@/utils/timeline";
+import { cn } from "@/utils/ui-utils";
+import { closestCenter, DndContext, DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
 import {
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/utils/ui-utils";
 import axios from "axios";
-import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { getTimelineKey, sortTimeline } from "@/utils/timeline";
-import SideDrawer from "@/components/general/SideDrawer";
+import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
 import type { BulkWriteResult } from "mongodb";
-import { isMediaGalleryItem } from "@/types/galleryItem";
+import { FC, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 
 interface HoverData {
   id: string;
   side: "above" | "down";
 }
-interface RearrangeEntriesProps { 
+interface RearrangeEntriesProps {
   source: EntrySource;
+  buttonClassName?: string;
+  buttonVariant?: "default" | "outline" | "ghost" | "link" | "secondary";
+  buttonText?: string;
 }
-const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
+const RearrangeEntries: FC<RearrangeEntriesProps> = ({
+  source,
+  buttonClassName,
+  buttonVariant = "default",
+  buttonText = "Rearrange Entries",
+}) => {
   const { user, setUser } = useUser();
 
   const [submitting, setSubmitting] = useState(false);
-  const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>([]);
+  const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>(
+    []
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
   const timelineKey = getTimelineKey(source);
@@ -53,13 +63,13 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
     return timelinesMap[source] || [];
   }, [source, user?.createdTimelineEntries, user?.collectedTimelineEntries]);
 
-  const handleOpenChange = (open: boolean) => { 
+  const handleOpenChange = (open: boolean) => {
     setDrawerOpen(open);
     if (open) {
       // Reset rearranged entries when dialog opens
       setRearrangedEntries([...originalEntries]);
     }
-  }
+  };
 
   const saveRearrangement = async () => {
     // filter to just entries with changed dates
@@ -76,18 +86,23 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
     // no changes Made
     if (!updatedEntries.length) {
       setDrawerOpen(false);
-      return
+      return;
     }
 
-    const updatesPayload : TimelineEntryDateUpdate[] = updatedEntries.map((e) => ({
-      _id: e._id.toString(),
-      date: e.date,
-    }));
+    const updatesPayload: TimelineEntryDateUpdate[] = updatedEntries.map(
+      (e) => ({
+        _id: e._id.toString(),
+        date: e.date,
+      })
+    );
 
     setSubmitting(true);
 
     axios
-      .patch<{ bulkWriteResult: BulkWriteResult }>(ENTRY_DATES_ROUTE, updatesPayload)
+      .patch<{ bulkWriteResult: BulkWriteResult }>(
+        ENTRY_DATES_ROUTE,
+        updatesPayload
+      )
       .then((response) => {
         const { bulkWriteResult } = response.data;
 
@@ -107,8 +122,8 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
             ...prevUser,
             [timelineKey]: sortedTimelineEntries,
           };
-        })
-       
+        });
+
         setDrawerOpen(false);
       })
       .catch((error) => {
@@ -121,7 +136,6 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
       .finally(() => {
         setSubmitting(false);
       });
-    
   };
 
   const getCursorSide = (event: DragMoveEvent): HoverData | null => {
@@ -160,8 +174,9 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
         (entry) => entry._id.toString() === overId
       );
 
-      //if over itself don't move it but do check positioning and change the date accordingly 
-      const moved = activeId === overId ? entries : arrayMove(entries, oldIndex, newIndex);
+      //if over itself don't move it but do check positioning and change the date accordingly
+      const moved =
+        activeId === overId ? entries : arrayMove(entries, oldIndex, newIndex);
 
       //update the date of the moved entry to be between the entries before and after it
       const aboveEntry = moved[newIndex - 1] ?? null; // above (more recent)
@@ -169,18 +184,15 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
 
       const nowTime = Date.now();
       const aboveTime = aboveEntry ? aboveEntry.date.getTime() : nowTime;
-      const belowTime = belowEntry
-        ? belowEntry.date.getTime()
-        : aboveTime;
-      
+      const belowTime = belowEntry ? belowEntry.date.getTime() : aboveTime;
+
       // 60 seconds around entry to place it on the same day
       const isDown = hoverData?.side === "down";
-      let activeTime = isDown ? belowTime + (60_000) : aboveTime - (60_000);
+      let activeTime = isDown ? belowTime + 60_000 : aboveTime - 60_000;
 
       const isBeforeBelow = !isDown && belowEntry && activeTime <= belowTime;
       const isAfterAbove = isDown && aboveEntry && activeTime >= aboveTime;
 
-    
       if (isBeforeBelow || isAfterAbove) {
         // Would fall below the below/older entry; place midway below
         activeTime = Math.floor((aboveTime + belowTime) / 2);
@@ -193,7 +205,6 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
 
       return moved;
     });
-    
 
     setHoverData(null);
   }
@@ -201,9 +212,12 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
   return (
     <SideDrawer
       triggerButton={
-        <Button>
-          <P>Rearrange Entries</P>
-          <ArrowDownUpIcon />
+        <Button
+          className={cn("w-full", buttonClassName)}
+          variant={buttonVariant}
+        >
+          <P>{buttonText}</P>
+          <ArrowDownUpIcon className="hidden sm:block" />
         </Button>
       }
       open={drawerOpen}
@@ -247,7 +261,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({source}) => {
       </DndContext>
     </SideDrawer>
   );
-}
+};
 
 export default RearrangeEntries;
 

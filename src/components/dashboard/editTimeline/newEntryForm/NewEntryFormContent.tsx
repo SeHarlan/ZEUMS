@@ -1,36 +1,32 @@
+import ButtonEditor from "@/components/timeline/ButtonEditor";
+import { P } from "@/components/typography/Typography";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/textarea";
+import { useUser } from "@/context/UserProvider";
+import { EntryFormValues } from "@/forms/upsertEntry";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { EntrySource, EntryTypes } from "@/types/entry";
+import { UserVirtualGalleryType } from "@/types/gallery";
+import { getFirstBlockchainItem } from "@/utils/gallery";
+import { getTimelineKey } from "@/utils/timeline";
 import { cn } from "@/utils/ui-utils";
 import { format } from "date-fns";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { EntryFormValues } from "@/forms/upsertEntry";
+import { CalendarIcon } from "lucide-react";
 import { FC, useMemo } from "react";
-import { EntrySource, EntryTypes } from "@/types/entry";
-import { Button } from "@/components/ui/button";
+import { UseFormReturn } from "react-hook-form";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, GALLERY_ENTRY_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
-import { BlockchainAssetEntryIcon, GalleryEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
-import ButtonEditor from "@/components/timeline/ButtonEditor";
 import SelectGalleryEntry from "../../SelectGalleryEntry";
-import { UserVirtualGalleryType } from "@/types/gallery";
-import { P } from "@/components/typography/Typography";
-import { getFirstBlockchainItem } from "@/utils/gallery";
-import { useUser } from "@/context/UserProvider";
-import { getTimelineKey } from "@/utils/timeline";
 
 interface NewEntryFormContentProps {
   form: UseFormReturn<EntryFormValues>;
@@ -52,13 +48,13 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   blockchainAsset,
   setBlockchainAsset,
   setAspectRatio,
-  source,
   gallery,
   setGallery,
   fetchingMintDate,
+  source
 }) => {
   const {user} = useUser();
-
+  
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
   const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
 
@@ -96,50 +92,6 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
 
   return (
     <div className="flex flex-col gap-y-6">
-      <FormField
-        control={form.control}
-        name="entryType"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Entry Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger className="w-full text-md min-h-12 bg-muted">
-                  <SelectValue placeholder="Entry type" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  value={EntryTypes.BlockchainAsset}
-                  className="h-10 text-md"
-                >
-                  <BlockchainAssetEntryIcon className="min-h-6 min-w-6" />
-                  {BLOCKCHAIN_ENTRY_COPY.title}
-                </SelectItem>
-                <SelectItem value={EntryTypes.Text} className="h-10 text-md">
-                  <TextEntryIcon className="min-h-6 min-w-6" />
-                  {TEXT_ENTRY_COPY.title}
-                </SelectItem>
-                {/* <SelectItem value={EntryTypes.UserAsset}>
-                  <UserAssetEntryIcon className="min-h-6 min-w-6"/>
-                  {USER_ASSET_ENTRY_COPY.title}
-                </SelectItem> */}
-                <SelectItem value={EntryTypes.Gallery}>
-                  <GalleryEntryIcon className="min-h-6 min-w-6" />
-                  {GALLERY_ENTRY_COPY.title}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              {ENTRY_TYPE_COPY[selectedEntryType].description}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <Separator />
-
       {hideDetailInputs ? null : (
         <FormField
           control={form.control}
@@ -157,7 +109,11 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
                     )}
                   >
                     {fetchingMintDate ? (
-                      <Button disabled variant={"outline"} className="text-left justify-start">
+                      <Button
+                        disabled
+                        variant={"outline"}
+                        className="text-left justify-start"
+                      >
                         <P>Retrieving mint date...</P>
                       </Button>
                     ) : (
@@ -212,7 +168,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
           )}
         />
       )}
-      
+
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
           usedAssetAddresses={usedAssetAddresses}

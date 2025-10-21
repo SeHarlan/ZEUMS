@@ -1,13 +1,13 @@
-import { EntryTypes } from "@/types/entry"
+import { EntryTypes } from "@/types/entry";
 import { GalleryItemTypes } from "@/types/galleryItem";
 
 export const BLOCKCHAIN_ENTRY_COPY = {
-  title: "Blockchain Asset",
-  description: "Display media from a blockchain asset",
+  title: "Minted Artwork",
+  description: "Display media from minted artwork",
 };
 export const TEXT_ENTRY_COPY = {
   title: "Text",
-  description: "Add extra context with text",
+  description: "Add extra context to your timeline with text.",
 };
 export const USER_ASSET_ENTRY_COPY = {
   title: "Uploaded",
@@ -15,7 +15,8 @@ export const USER_ASSET_ENTRY_COPY = {
 };
 export const GALLERY_ENTRY_COPY = {
   title: "Gallery",
-  description: "Link to a gallery page",
+  description:
+    "Connect your timeline to a collection or series of related works",
 };
 
 export const ENTRY_TYPE_COPY = {

@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import { DM_Serif_Text, DM_Sans, DM_Mono } from "next/font/google";
-import AuthContextProvider from "@/context/AuthProvider";
-import { Toaster } from "@/components/ui/sonner";
-import WalletContextProvider from "@/context/WalletProvider";
-import UserContextProvider from "@/context/UserProvider";
 import NavBar from "@/components/navigation/NavBar";
-import NavBarActionsProvider from "@/context/NavBarActionsProvider";
-import { Analytics } from "@vercel/analytics/next";
-import "@solana/wallet-adapter-react-ui/styles.css";
-import "./globals.css";
-import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Suspense } from "react";
-import { AspectRatioProvider } from "@/context/AspectRatioProvider";
-import { ResponsiveProvider } from "@/context/ResponsiveProvider";
-import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { Toaster } from "@/components/ui/sonner";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
+import { AspectRatioProvider } from "@/context/AspectRatioProvider";
+import AuthContextProvider from "@/context/AuthProvider";
+import NavBarActionsProvider from "@/context/NavBarActionsProvider";
+import { ResponsiveProvider } from "@/context/ResponsiveProvider";
+import UserContextProvider from "@/context/UserProvider";
+import WalletContextProvider from "@/context/WalletProvider";
+import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { cn } from "@/utils/ui-utils";
+import "@solana/wallet-adapter-react-ui/styles.css";
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { DM_Mono, DM_Sans, DM_Serif_Text } from "next/font/google";
+import { Suspense } from "react";
+import "./globals.css";
 
 
 const dmSerif = DM_Serif_Text({
@@ -89,12 +89,11 @@ export default function RootLayout({
               <ResponsiveProvider>
                 <NavBarActionsProvider>
                   <AspectRatioProvider>
+                    <Suspense fallback={<nav />}>
+                      <NavBar />
+                    </Suspense>
                     <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
-                      <Suspense fallback={<nav />}>
-                        <NavBar />
-                      </Suspense>
                       {children}
-                      <Toaster />
                     </ScrollArea>
                   </AspectRatioProvider>
                 </NavBarActionsProvider>
@@ -102,6 +101,7 @@ export default function RootLayout({
             </UserContextProvider>
           </AuthContextProvider>
         </WalletContextProvider>
+        <Toaster position="top-center" />
       </body>
     </html>
   );

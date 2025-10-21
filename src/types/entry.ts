@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
 import { GalleryType } from "./gallery";
-import { BlockchainImage, BlockchainMedia, UserImage, UserMedia } from "./media"
-import { ChainIdsEnum } from "./wallet";
 import { GalleryItem } from "./galleryItem";
+import { BlockchainImage, BlockchainMedia, UserImage, UserMedia } from "./media";
+import { ChainIdsEnum } from "./wallet";
 
 export enum EntryTypes {
   BlockchainAsset = "blockchain_asset",
@@ -15,6 +15,10 @@ export enum EntrySource {
   Creator = "creator",
   Collector = "collector",
   // Curator = "curator",
+}
+export const VALID_ENTRY_SOURCES = new Set(Object.values(EntrySource));
+export function isEntrySource(value?: EntrySource | string | null): value is EntrySource {
+  return !!value && VALID_ENTRY_SOURCES.has(value as EntrySource);
 }
 
 export type EntryButton = {

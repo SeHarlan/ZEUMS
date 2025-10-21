@@ -1,25 +1,28 @@
 "use client";
-import { PageContainer } from "@/components/general/PageContainer";
-import PageHeading from "@/components/general/PageHeading";
 import EditTimeline from "@/components/dashboard/editTimeline/EditTimeline";
 import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
-import SourceTabs from "@/components/dashboard/SourceTabs";
+import { PageContainer } from "@/components/general/PageContainer";
+import PageHeading from "@/components/general/PageHeading";
+import ProfileHero from "@/components/timeline/ProfileHero";
 import { Card, CardContent } from "@/components/ui/card";
-import { EDIT_GALLERIES, EDIT_PROFILE } from "@/constants/clientRoutes";
+import { EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
+import { useUser } from "@/context/UserProvider";
 
 
 export default function EditTimelinePage() { 
+  const { user } = useUser();
   return (
     <PageContainer maxWidth="large">
       <PageHeading
         title="Timeline"
         subtitle="Create and edit timeline entries"
       />
-      <PageTurnLeft path={EDIT_PROFILE} />
+      <PageTurnLeft path={EDIT_PROFILE_ACCOUNT} />
       <PageTurnRight path={EDIT_GALLERIES} />
-      <Card>
+      <Card className="pt-0 overflow-hidden">
+        <ProfileHero publicUser={user} editMode/>
         <CardContent>
-          <SourceTabs EditComponent={EditTimeline} />
+          <EditTimeline />
         </CardContent>
       </Card>
     </PageContainer>

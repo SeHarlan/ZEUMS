@@ -1,37 +1,41 @@
 "use client";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
+import SideDrawer from "@/components/general/SideDrawer";
+import { BlockchainAssetEntryIcon, GalleryEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
+import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryCreation } from "@/types/entry";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { ENTRY_ROUTE, ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
+import { Separator } from "@/components/ui/separator";
+import { ENTRY_DATES_ROUTE, ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
+import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
+import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, GALLERY_ENTRY_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
 import { DateMap, ParsedBlockChainAsset } from "@/types/asset";
-import SideDrawer from "@/components/general/SideDrawer";
-import { P } from "@/components/typography/Typography";
-import NewEntryFormContent from "./NewEntryFormContent";
-import { SquarePlusIcon } from "lucide-react";
-import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
-import { addHttpsPrefix } from "@/utils/general";
-import { cn } from "@/utils/ui-utils";
+import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryCreation } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
 import { getFirstBlockchainItem } from "@/utils/gallery";
+import { addHttpsPrefix } from "@/utils/general";
+import { handleClientError } from "@/utils/handleError";
+import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
+import { cn } from "@/utils/ui-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { ArrowLeftIcon, ImagesIcon } from "lucide-react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import AddBlockchainEntriesButton from "../AddBlockchainEntries";
+import NewEntryFormContent from "./NewEntryFormContent";
 
 const formId = "new-entry-form";
 
 interface NewEntryFormProps { 
-  source: EntrySource; 
   buttonClassName?: string;
-  buttonVariant?: "default" | "outline" | "ghost" | "link";
+  buttonVariant?: "default" | "outline" | "ghost" | "link" | "secondary";
   buttonText?: string;
+  source: EntrySource;
 }
 
-const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVariant = "default", buttonText = "Add New Entry"}) => {
+const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVariant = "default", buttonText = "Add Content"}) => {
   const { setUser } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -40,6 +44,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
   const [gallery, setGallery] = useState<UserVirtualGalleryType | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
+  const [contentChosen, setContentChosen] = useState<boolean>(false);
 
   const defaultValues: EntryFormValues = useMemo(() => ({
     entryType: EntryTypes.BlockchainAsset,
@@ -64,6 +69,24 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
 
   const timelineKey = getTimelineKey(source);
 
+  const blockchainAddText = source === EntrySource.Creator ? "created" : "collected";
+
+  const getHeaderText = () => {
+    if (contentChosen) { 
+      return ENTRY_TYPE_COPY[selectedEntryType];
+    }
+
+    return {
+      title: "Add Content",
+      description: `Add content to your ${source} timeline.`
+    }
+  }
+  const headerText = getHeaderText();
+
+  const handleChooseContent = (entryType: EntryTypes) => {
+    setContentChosen(true);
+    form.setValue("entryType", entryType);
+  }
   
   const handleGetMintDates = useCallback(async (tokenAddress?: string) => {
     if (!tokenAddress) return new Date();
@@ -86,7 +109,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
       })
       .catch((error) => {
         toast.error("Failed to get the mint date.", {
-          description: "Please try again",
+          description: "Please try again or set the date manually",
         });
         handleClientError({
           error,
@@ -142,11 +165,15 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
   }, [selectedEntryType, reset]);
 
   const fullFormReset = () => {
-    setBlockchainAsset(null);
-    setGallery(null);
-    setAspectRatio(null);
-    reset();
-    prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
+    //don't rest state till drawer has fully closed
+    setTimeout(() => {
+      setBlockchainAsset(null);
+      setGallery(null);
+      setAspectRatio(null);
+      reset();
+      prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
+      setContentChosen(false);
+    }, 333);
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -254,41 +281,105 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source, buttonClassName, buttonVar
           variant={buttonVariant}
         >
           <P>{buttonText}</P>
-          <SquarePlusIcon />
+          <ImagesIcon className="hidden sm:block" />
         </Button>
       }
       open={formOpen}
       onOpenChange={handleOpenChange}
-      title="Add New Entry"
-      description="Add a new entry to your artist timeline."
+      title={headerText.title}
+      description={headerText.description}
       actionButton={
-        <Button
-          form={formId}
-          type="submit"
-          className="w-full"
-          loading={submitting}
-          disabled={disableSubmit}
-        >
-          <P>Save New Entry</P>
-        </Button>
+        contentChosen && (
+          <Button
+            form={formId}
+            type="submit"
+            className="w-full"
+            loading={submitting}
+            disabled={disableSubmit}
+          >
+            <P>Save {ENTRY_TYPE_COPY[selectedEntryType].title}</P>
+          </Button>
+        )
       }
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
-          <NewEntryFormContent
-            fetchingMintDate={fetchingMintDate}
-            handleGetMintDates={handleGetMintDates}
-            form={form}
-            selectedEntryType={selectedEntryType}
-            blockchainAsset={blockchainAsset}
-            setBlockchainAsset={setBlockchainAsset}
-            gallery={gallery}
-            setGallery={setGallery}
-            setAspectRatio={setAspectRatio}
+      {contentChosen ? (
+        <div className="space-y-2">
+          <Button
+            onClick={() => setContentChosen(false)}
+            className="w-full"
+            size="lg"
+            variant="ghost"
+          >
+            <ArrowLeftIcon />
+            <P>Back to choose content</P>
+          </Button>
+          <Separator />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+              <NewEntryFormContent
+                fetchingMintDate={fetchingMintDate}
+                handleGetMintDates={handleGetMintDates}
+                form={form}
+                selectedEntryType={selectedEntryType}
+                blockchainAsset={blockchainAsset}
+                setBlockchainAsset={setBlockchainAsset}
+                gallery={gallery}
+                setGallery={setGallery}
+                setAspectRatio={setAspectRatio}
+                source={source}
+              />
+            </form>
+          </Form>
+        </div>
+      ) : (
+        <div className="space-y-6 py-4">
+          <AddBlockchainEntriesButton
             source={source}
-          />
-        </form>
-      </Form>
+            onSave={() => setFormOpen(false)}
+          >
+            <Button
+              variant="default"
+              className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+            >
+              <BlockchainAssetEntryIcon className="size-12 text-neutral-400" />
+              <div className="text-left min-w-0">
+                <P className="font-bold text-lg ">{BLOCKCHAIN_ENTRY_COPY.title}</P>
+                <P className="text-sm text-neutral-400">
+                  {BLOCKCHAIN_ENTRY_COPY.description}s you {blockchainAddText}
+                </P>
+              </div>
+            </Button>
+          </AddBlockchainEntriesButton>
+
+          <Button
+            onClick={() => handleChooseContent(EntryTypes.Text)}
+            variant="outline"
+            className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+          >
+            <TextEntryIcon className="size-12 text-muted-foreground" />
+
+            <div className="text-left min-w-0">
+              <P className="font-bold text-lg">{TEXT_ENTRY_COPY.title}</P>
+              <P className="text-sm text-muted-foreground">
+                {TEXT_ENTRY_COPY.description}
+              </P>
+            </div>
+          </Button>
+          <Button
+            variant="default"
+            className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+            onClick={() => handleChooseContent(EntryTypes.Gallery)}
+          >
+            <GalleryEntryIcon className="size-12 text-neutral-400" />
+            <div className="text-left min-w-0">
+              <P className="font-bold text-lg ">{GALLERY_ENTRY_COPY.title}</P>
+              <P className="text-sm text-neutral-400">
+                {GALLERY_ENTRY_COPY.description} you {blockchainAddText}
+              </P>
+            </div>
+          </Button>
+        </div>
+      )}
     </SideDrawer>
   );
 };
