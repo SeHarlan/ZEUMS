@@ -1,9 +1,9 @@
+import { GalleryMediaItem } from "@/types/galleryItem";
 import { FC } from "react";
-import { H4 } from "../typography/Typography";
 import AssetViewer from "../assets/AssetViewer";
-import EntryButtons from "../timeline/EntryButtons";
-import { GalleryMediaItem} from "@/types/galleryItem";
 import ExpandableText from "../general/ExpandableText";
+import EntryButtons from "../timeline/EntryButtons";
+import { H4 } from "../typography/Typography";
 
 interface AssetItemDisplayProps {
   item: GalleryMediaItem;
