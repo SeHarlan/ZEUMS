@@ -1,21 +1,21 @@
 "use client";
-import { FC, useEffect, useMemo, useState } from "react";
-import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { GalleryItem, GalleryItemTypes } from "@/types/galleryItem";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
+import EditGalleryItemFormContent from "@/components/dashboard/editGalleryItems/editItemForm/EditItemFormContent";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
-import { addHttpsPrefix } from "@/utils/general";
-import EditGalleryItemFormContent from "@/components/dashboard/editGalleryItems/editItemForm/EditItemFormContent";
-import useGalleryById from "@/hooks/useGalleryById";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
+import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
+import useGalleryById from "@/hooks/useGalleryById";
+import { GalleryItem, GalleryItemTypes } from "@/types/galleryItem";
+import { addHttpsPrefix } from "@/utils/general";
+import { handleClientError } from "@/utils/handleError";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const formId = "edit-gallery-item-form";
 
@@ -143,6 +143,7 @@ const EditGalleryItemForm: FC<EditGalleryItemFormProps> = ({ isOpen, editingItem
           <EditGalleryItemFormContent
             form={form}
             selectedItemType={selectedItemType}
+            handleOpenChange={handleOpenChange}
           />
         </form>
       </Form>
