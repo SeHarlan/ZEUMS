@@ -233,6 +233,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
   }
   return (
     <SideDrawer
+     contentClassName="sm:max-w-lg px-2"
       triggerButton={
         <Button className="w-full" variant="outline">
           <P>Rearrange Items</P>
@@ -253,10 +254,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
         </Button>
       }
     >
-      <div
-        ref={containerRef}
-        className="w-full h-full flex flex-col"
-      >
+      <div ref={containerRef} className="w-full h-full flex flex-col">
         {isReady ? (
           <DndContext
             onDragStart={onDragStart}

@@ -1,6 +1,7 @@
 "use client";
 
 import { editTimelineSourceAtom } from "@/atoms/dashboard";
+import { PAGE_PADDING_X } from "@/components/general/PageContainer";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
 import { useUser } from "@/context/UserProvider";
 import { EntrySource } from "@/types/entry";
@@ -27,12 +28,14 @@ const EditTimeline: FC = () => {
     <div className="relative mb-2 md:mb-10">
       <EditTimelineBar />
       {entries.length === 0 ? (
-        <NewEntryFormButton
-          source={source}
-          buttonVariant="outline"
-          buttonClassName="h-40 rounded-lg mb-10"
-          buttonText="Add your first content!"
-        />
+        <div className={PAGE_PADDING_X}>
+          <NewEntryFormButton
+            source={source}
+            buttonVariant="outline"
+            buttonClassName="h-40 rounded-lg mb-10"
+            buttonText="Add your first content!"
+          />
+          </div>
       ) : (
         <TimelineSelect
           user={user}

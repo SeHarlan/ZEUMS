@@ -1,4 +1,5 @@
 import GalleryBase from "@/components/gallery/GalleryBase";
+import { PAGE_PADDING_X } from "@/components/general/PageContainer";
 import useGalleryById from "@/hooks/useGalleryById";
 import { FC } from "react";
 import EditableItem from "./EditableItem";
@@ -18,12 +19,14 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ galleryId }) => {
     <div className="">
       <EditGalleryBar galleryId={galleryId} />
       {isReady && !gallery?.items?.length ? (
-        <NewItemFormButton
-          galleryId={galleryId}
-          buttonVariant="outline"
-          buttonClassName="h-40"
-          buttonText="Create First Gallery Item"
-        />
+        <div className={PAGE_PADDING_X}>
+          <NewItemFormButton
+            galleryId={galleryId}
+            buttonVariant="outline"
+            buttonClassName="h-40"
+            buttonText="Create First Gallery Item"
+          />
+        </div>
       ) : (
         <GalleryBase
           gallery={gallery}

@@ -43,8 +43,9 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [gallery, setGallery] = useState<UserVirtualGalleryType | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
-  const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
   const [contentChosen, setContentChosen] = useState<boolean>(false);
+
+  const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
 
   const defaultValues: EntryFormValues = useMemo(() => ({
     entryType: EntryTypes.BlockchainAsset,
@@ -303,10 +304,10 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
       }
     >
       {contentChosen ? (
-        <div className="space-y-2">
+        <div className="space-y-6">
           <Button
             onClick={() => setContentChosen(false)}
-            className="w-full"
+            className="w-full mb-2"
             size="lg"
             variant="ghost"
           >

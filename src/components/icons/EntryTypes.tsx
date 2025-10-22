@@ -1,6 +1,6 @@
 import { EntryTypes } from "@/types/entry";
 import { GalleryItemTypes } from "@/types/galleryItem";
-import { CaptionsIcon, CpuIcon, GalleryVerticalIcon, ImageUpIcon } from "lucide-react"
+import { CaptionsIcon, CpuIcon, GalleryVerticalIcon, ImageUpIcon } from "lucide-react";
 
 export const BlockchainAssetEntryIcon = CpuIcon
 export const TextEntryIcon = CaptionsIcon;
@@ -14,9 +14,16 @@ export const EntryTypeIcons = {
   [EntryTypes.UserAsset]: UserAssetEntryIcon,
   [EntryTypes.Gallery]: GalleryEntryIcon,
 };
+
+
+export const BlockchainAssetGalleryItemIcon = BlockchainAssetEntryIcon;
+export const TextGalleryItemIcon = TextEntryIcon;
+export const UserAssetGalleryItemIcon = UserAssetEntryIcon;
+export const GalleryGalleryItemIcon = GalleryEntryIcon;
+
 export const GalleryItemTypeIcons = {
-  [GalleryItemTypes.BlockchainAsset]: BlockchainAssetEntryIcon,
-  [GalleryItemTypes.Text]: TextEntryIcon,
-  [GalleryItemTypes.UserAsset]: UserAssetEntryIcon,
-  [GalleryItemTypes.Gallery]: GalleryEntryIcon,
+  [GalleryItemTypes.BlockchainAsset]: BlockchainAssetGalleryItemIcon,
+  [GalleryItemTypes.Text]: TextGalleryItemIcon,
+  [GalleryItemTypes.UserAsset]: UserAssetGalleryItemIcon,
+  [GalleryItemTypes.Gallery]: GalleryGalleryItemIcon,
 };

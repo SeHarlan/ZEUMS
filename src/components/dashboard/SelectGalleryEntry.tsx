@@ -49,10 +49,6 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
         <CreateGalleryDialogButton
           source={source}
           buttonClassName="font-bold h-20"
-          
-          buttonText={
-            noGalleries ? "Create your first gallery!" : "Create New Gallery"
-          }
           buttonVariant={noGalleries ? "default" : "outline"}
         />
       </div>
