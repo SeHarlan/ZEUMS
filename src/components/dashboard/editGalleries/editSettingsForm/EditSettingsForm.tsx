@@ -1,26 +1,27 @@
 "use client";
-import { FC, useEffect, useMemo, useState } from "react";
-import { Button, LinkButton } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { GALLERY_ROUTE } from "@/constants/serverRoutes";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
-import useGalleryById from "@/hooks/useGalleryById";
-import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
-import { useUser } from "@/context/UserProvider";
-import { usePathname } from "next/navigation";
-import { EDIT_GALLERY, USER_GALLERY } from "@/constants/clientRoutes";
+import { Button, LinkButton } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { EyeIcon, ImagesIcon } from "lucide-react";
-import EditSettingsContent from "./EditSettingsFormContent";
-import { cn } from "@/utils/ui-utils";
+import { EDIT_GALLERY, USER_GALLERY } from "@/constants/clientRoutes";
+import { GALLERY_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
+import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
+import useGalleryById from "@/hooks/useGalleryById";
+import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
+import { ImageType } from "@/types/media";
+import { handleClientError } from "@/utils/handleError";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import { cn } from "@/utils/ui-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { EyeIcon, ImagesIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import EditSettingsContent from "./EditSettingsFormContent";
 
 const formId = "edit-gallery-form";
 
@@ -31,6 +32,8 @@ interface EditGallerySettingsProps {
 
 const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
+  const [bannerImage, setBannerImage] = useState<ImageType | null | undefined>(editingGallery?.bannerImage);
+
   const galleryId = editingGallery?._id?.toString() || "";
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
   const { revalidateUser } = useUser();
@@ -61,22 +64,28 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
     //isOpen means there is a gallery to edit
     if (isOpen) { 
       reset(defaultValues)
-    }else {
+    } else {
       reset(); // Clear form when drawer closes
     }
   }, [reset, defaultValues, isOpen]);
+
+  useEffect(() => {
+    if (editingGallery?.bannerImage && bannerImage === undefined) setBannerImage(editingGallery.bannerImage);
+  }, [editingGallery?.bannerImage, bannerImage]);
+
 
   const onSubmit = (data: UpsertGalleryFormValues) => {
     if (!editingGallery) return;
 
     setSubmitting(true);
 
-    const updatedGalleryData = {
+    const updatedGalleryData: Partial<GalleryType> = {
       _id: editingGallery._id,
       title: data.title,
       description: data.description,
       hideItemTitles: data.hideItemTitles,
       hideItemDescriptions: data.hideItemDescriptions,
+      bannerImage,
     };
 
     axios
@@ -130,25 +139,31 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         </Button>
       }
     >
-      <div className="grid sm:grid-cols-2 gap-4">
-        <LinkButton
-          href={viewGalleryPath}
-          className={cn("w-full", !notOnGalleryItemsPage && "col-span-2")}
-        >
-          View Gallery
-          <EyeIcon />
-        </LinkButton>
+      <div className="grid sm:grid-cols-2 gap-4 pt-4">
         {notOnGalleryItemsPage && (
-          <LinkButton href={EDIT_GALLERY(galleryId)} variant="outline" className="w-full">
-            Manage Gallery Items
-            <ImagesIcon />
-          </LinkButton>
+          <>
+            <LinkButton
+              href={EDIT_GALLERY(galleryId)}
+              variant="outline"
+              className="w-full"
+            >
+              Manage Gallery Items
+              <ImagesIcon />
+            </LinkButton>
+            <LinkButton
+              href={viewGalleryPath}
+              className={cn("w-full", !notOnGalleryItemsPage && "col-span-2")}
+            >
+              View Gallery
+              <EyeIcon />
+            </LinkButton>
+            <Separator className="col-span-2 mt-2 mb-6" />
+          </>
         )}
       </div>
-      <Separator className="my-6" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
-          <EditSettingsContent form={form} />
+          <EditSettingsContent form={form} bannerImage={bannerImage} setBannerImage={setBannerImage} />
         </form>
       </Form>
     </SideDrawer>

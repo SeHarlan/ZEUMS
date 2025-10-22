@@ -1,26 +1,26 @@
 "use client";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { useUser } from "@/context/UserProvider";
-import { ParsedBlockChainAsset } from "@/types/asset";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
-import NewItemFormContent from "./NewItemFormContent";
-import { SquarePlusIcon } from "lucide-react";
-import { addHttpsPrefix } from "@/utils/general";
-import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
-import { getLastGalleryRowIndex } from "@/utils/gallery";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
+import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
+import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
+import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
+import { getLastGalleryRowIndex } from "@/utils/gallery";
+import { addHttpsPrefix } from "@/utils/general";
+import { handleClientError } from "@/utils/handleError";
 import { cn } from "@/utils/ui-utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { ImagePlusIcon } from "lucide-react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import NewItemFormContent from "./NewItemFormContent";
 
 const formId = "new-gallery-item-form";
 
@@ -211,7 +211,7 @@ const NewItemForm: FC<NewItemFormProps> = ({
         >
           <P className="hidden md:block">{buttonText}</P>
           <P className="md:hidden">Add Item</P>
-          <SquarePlusIcon />
+          <ImagePlusIcon />
         </Button>
       }
       open={formOpen}

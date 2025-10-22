@@ -5,12 +5,11 @@ import { Maximize2Icon } from "lucide-react";
 import { FC } from "react";
 
 interface EditBarProps {
-  fixed?: boolean;
   children: React.ReactNode;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
-export const EditBar: FC<EditBarProps> = ({ fixed, children, isOpen, setIsOpen }) => {
+export const EditBar: FC<EditBarProps> = ({ children, isOpen, setIsOpen }) => {
   return (
     <>
       <div
@@ -32,23 +31,17 @@ export const EditBar: FC<EditBarProps> = ({ fixed, children, isOpen, setIsOpen }
       </div>
       <div
         className={cn(
-          fixed &&
-            "w-full max-w-2xl fixed bottom-0 left-1/2 -translate-x-1/2 z-20 pb-4",
-          !fixed && "py-4 mx-auto",
-          fixed && PAGE_PADDING_X,
-          fixed &&
-            cn(
-              "transition-all duration-400 ease-in-out",
-              "fill-mode-forwards zoom-in-10 fade-in-0 zoom-out-10 fade-out-0",
-              isOpen ? "animate-in bottom-0" : "animate-out -bottom-30"
-            )
+          "w-full max-w-2xl fixed bottom-0 left-1/2 -translate-x-1/2 z-20 pb-4",
+          PAGE_PADDING_X,
+          "transition-all duration-400 ease-in-out",
+          isOpen ? "opacity-100 bottom-0 scale-100" : "opacity-0 -bottom-30 scale-90"
+            
         )}
       >
         <div
           className={cn(
             "shadow-md border p-3 rounded-md",
-            "space-y-3",
-            fixed ? "bg-muted-blur" : "bg-muted"
+            "space-y-3 bg-muted-blur"
           )}
         >
           {children}

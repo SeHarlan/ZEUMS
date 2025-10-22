@@ -1,10 +1,10 @@
-import { GalleryType } from "@/types/gallery";
-import { GalleryItemBaseProps } from "./GalleryItemBase";
-import { FC, useMemo } from "react";
-import { cn } from "@/utils/ui-utils";
-import { cleanGalleryRows, initializeGalleryRows, processGalleryRows } from "@/utils/gallery";
 import useGalleryDimensions from "@/hooks/useGalleryDimensions";
+import { GalleryType } from "@/types/gallery";
 import { GalleryItemTypes } from "@/types/galleryItem";
+import { cleanGalleryRows, initializeGalleryRows, processGalleryRows } from "@/utils/gallery";
+import { cn } from "@/utils/ui-utils";
+import { FC, useMemo } from "react";
+import { GalleryItemBaseProps } from "./GalleryItemBase";
 
 interface GalleryBaseProps {
   gallery?: GalleryType | null;
@@ -16,7 +16,8 @@ interface GalleryBaseProps {
 const GAP = 50; //px
 const GAP_SMALL = 25; //px
 const MAX_HEIGHT_RATIO = 0.75;
-const PADDING = 25;
+const PADDING_DESKTOP = 50;
+const PADDING_MOBILE = 25;
 
 
 const GalleryBase: FC<GalleryBaseProps> = ({
@@ -27,6 +28,8 @@ const GalleryBase: FC<GalleryBaseProps> = ({
 }) => {
   const { containerRef, containerWidth, maxHeight, isDesktop, isReady } =
     useGalleryDimensions(true, MAX_HEIGHT_RATIO);
+  
+  const PADDING = isDesktop ? PADDING_DESKTOP : PADDING_MOBILE;
 
   const galleryRows = useMemo(() => {
     if (!gallery?.items?.length) return [];
@@ -44,7 +47,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
 
   return (
-    <div className="space-y-30 mb-30" ref={containerRef}>
+    <div className={cn("space-y-30 pb-30")} ref={containerRef}>
       {isReady &&
         galleryRows.map((row, index) => {
           const gap = row.length > 3 ? GAP_SMALL : GAP;

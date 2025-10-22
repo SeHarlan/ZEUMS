@@ -1,7 +1,8 @@
 
 import { Schema } from "mongoose";
-import { GalleryItem, GalleryMediaItem } from "./galleryItem";
 import { EntrySource } from "./entry";
+import { GalleryItem, GalleryMediaItem } from "./galleryItem";
+import { ImageType } from "./media";
 import { BaseUserType } from "./user";
 
 export enum GalleryDisplayTypes { 
@@ -19,6 +20,7 @@ export type BaseGalleryType = {
   source: EntrySource;
   hideItemTitles?: boolean;
   hideItemDescriptions?: boolean;
+  bannerImage?: ImageType | null;
 };
 
 type GalleryOwnerData = Pick<BaseUserType, "username" | "displayName" | "profileImage">;

@@ -181,7 +181,6 @@ export const swapToNewRowBefore = (rows: GalleryRowItem[][], activeRowItem: Gall
       position: [0, 0],
     },
   };
-
   //remove active item from old position
   const newRows: GalleryRowItem[][] = rows.map((row, index) => {
     if (index === activeRowItem.item.position[0]) {
@@ -223,6 +222,34 @@ export const swapToNewRowAfter = (rows: GalleryRowItem[][], activeRowItem: Galle
   return updateYPositions(newRows);
 }
 
+export const insertIntoNewRowAtIndex = (
+  rows: GalleryRowItem[][],
+  activeRowItem: GalleryRowItem,
+  index: number
+) => {
+  const updatedRowItem: GalleryRowItem = {
+    ...activeRowItem,
+    item: {
+      ...activeRowItem.item,
+      position: [index, 0],
+    },
+  };
+  //remove active item from old position
+  const newRows: GalleryRowItem[][] = rows.map((row, index) => {
+    if (index === activeRowItem.item.position[0]) {
+      return removeFromRow(row, activeRowItem);
+    }
+    return row; // Keep other rows unchanged
+  });
+
+  const updatedRows = [
+    ...newRows.slice(0, index),
+    [updatedRowItem],
+    ...newRows.slice(index),
+  ];
+  //update y positions
+  return updateYPositions(updatedRows);
+};
 
 
 interface SwapToExistingRowProps {

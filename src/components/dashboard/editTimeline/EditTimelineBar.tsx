@@ -13,13 +13,13 @@ import { getTimelineTabContent } from "@/utils/timeline";
 import { cn } from "@/utils/ui-utils";
 import { useAtom } from "jotai/react";
 import { Minimize2Icon } from "lucide-react";
-import { useState } from "react";
+import { FC, useState } from "react";
 import { EditBar } from "../EditBar";
 import EditDisplayFormButton from "./editDisplayForm/EditDisplayForm";
 import NewEntryFormButton from "./newEntryForm/NewEntryForm";
 import RearrangeEntriesButton from "./RearrangeEntries";
 
-export const EditTimelineBar = ({ fixed = true }: { fixed?: boolean }) => {
+export const EditTimelineBar:FC = () => {
   const { user } = useUser();
   const [tabValue, setTabValue] = useAtom(editTimelineSourceAtom);
   const [isOpen, setIsOpen] = useState(true);
@@ -32,20 +32,20 @@ export const EditTimelineBar = ({ fixed = true }: { fixed?: boolean }) => {
     }
   };
   return (
-    <EditBar fixed={fixed} isOpen={isOpen} setIsOpen={setIsOpen}>
-      <div className="grid grid-cols-[1fr_auto] md:grid-cols-6 w-full gap-2">
+    <EditBar isOpen={isOpen} setIsOpen={setIsOpen}>
+      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_4fr_1fr] w-full gap-2">
         <div className="size-px hidden md:block" />
         <Tabs
           defaultValue={content[0].value}
           value={tabValue}
           onValueChange={handleValueChange}
-          className="md:col-span-4 mx-auto w-full"
+          className="mx-auto w-full"
         >
           <TabsList className="w-full grid grid-cols-2 shadow-md h-fit p-0 border-none">
             {content.map((item, index) => (
               <TabsTrigger
                 value={item.value}
-                primaryActive={index === 1 || fixed}
+                primaryActive
               >
                 <Tooltip key={item.value}>
                   <TooltipTrigger asChild>
@@ -71,10 +71,10 @@ export const EditTimelineBar = ({ fixed = true }: { fixed?: boolean }) => {
       <div
         className={cn(
           "grid gap-2 w-full",
-          fixed ? "grid-cols-3" : "grid-cols-2"
+          "grid-cols-3"
         )}
       >
-        {fixed && <EditDisplayFormButton buttonVariant="outline" />}
+        <EditDisplayFormButton buttonVariant="outline" />
         <NewEntryFormButton source={source} buttonVariant="default" />
         <RearrangeEntriesButton
           source={source}

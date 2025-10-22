@@ -101,8 +101,8 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="lg" className={cn("w-full", buttonClassName)} variant={buttonVariant}>
-          <GalleryEntryIcon />
           <P>{buttonText}</P>
+          <GalleryEntryIcon />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

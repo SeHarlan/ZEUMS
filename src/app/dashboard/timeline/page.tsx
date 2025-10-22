@@ -4,7 +4,7 @@ import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButt
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import ProfileHero from "@/components/timeline/ProfileHero";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 import { useUser } from "@/context/UserProvider";
 
@@ -21,9 +21,8 @@ export default function EditTimelinePage() {
       <PageTurnRight path={EDIT_GALLERIES} />
       <Card className="pt-0 overflow-hidden">
         <ProfileHero publicUser={user} editMode/>
-        <CardContent>
-          <EditTimeline />
-        </CardContent>
+        <EditTimeline />
+
       </Card>
     </PageContainer>
   );

@@ -19,7 +19,7 @@ import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } f
 import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { ArrowLeftIcon, ImagesIcon } from "lucide-react";
+import { ArrowLeftIcon, ImagePlusIcon } from "lucide-react";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -281,7 +281,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
           variant={buttonVariant}
         >
           <P>{buttonText}</P>
-          <ImagesIcon className="hidden sm:block" />
+          <ImagePlusIcon className="hidden sm:block" />
         </Button>
       }
       open={formOpen}

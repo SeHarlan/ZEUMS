@@ -12,7 +12,7 @@ import { FC, useState } from "react";
 import { EditBar } from "../EditBar";
 import CreateGalleryDialogButton from "./CreateGalleryDialog";
 
-export const EditGalleriesBar:FC<{fixed?: boolean}> = ({fixed = true}) => { 
+export const EditGalleriesBar: FC = () => { 
   const { user } = useUser();
   const [tabValue, setTabValue] = useAtom(editTimelineSourceAtom);
   const [isOpen, setIsOpen] = useState(true);
@@ -25,20 +25,20 @@ export const EditGalleriesBar:FC<{fixed?: boolean}> = ({fixed = true}) => {
     }
   };
   return (
-    <EditBar fixed={fixed} isOpen={isOpen} setIsOpen={setIsOpen}>
-      <div className="grid grid-cols-[1fr_auto] md:grid-cols-6 w-full gap-2">
+    <EditBar isOpen={isOpen} setIsOpen={setIsOpen}>
+      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_4fr_1fr] w-full gap-2">
         <div className="size-px hidden md:block" />
         <Tabs
           defaultValue={content[0].value}
           value={tabValue}
           onValueChange={handleValueChange}
-          className="md:col-span-4 mx-auto w-full"
+          className="mx-auto w-full"
         >
           <TabsList className="w-full grid grid-cols-2 shadow-md h-fit p-0 border-none">
             {content.map((item, index) => (
               <TabsTrigger
                 value={item.value}
-                primaryActive={index === 1 || fixed}
+                primaryActive
               >
                 <Tooltip key={item.value}>
                   <TooltipTrigger asChild>
