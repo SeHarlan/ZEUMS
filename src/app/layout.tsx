@@ -101,7 +101,7 @@ export default function RootLayout({
             </UserContextProvider>
           </AuthContextProvider>
         </WalletContextProvider>
-        <Toaster position="top-center" />
+        <Toaster position="top-center" richColors/>
       </body>
     </html>
   );
