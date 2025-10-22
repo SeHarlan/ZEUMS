@@ -1,24 +1,23 @@
 "use client";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { BaseEntry, EntrySource, EntryTypes, isBlockchainAssetEntry, isGalleryEntry, TimelineEntry } from "@/types/entry";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { ENTRY_ROUTE } from "@/constants/serverRoutes";
-import { useUser } from "@/context/UserProvider";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
-import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
-import { addHttpsPrefix } from "@/utils/general";
-import EditEntryFormContent from "./EditEntryFormContent";
-import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { ENTRY_DATES_ROUTE, ENTRY_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
+import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { DateMap } from "@/types/asset";
+import { BaseEntry, EntrySource, EntryTypes, isBlockchainAssetEntry, isGalleryEntry, TimelineEntry } from "@/types/entry";
 import { getFirstBlockchainItem } from "@/utils/gallery";
+import { addHttpsPrefix } from "@/utils/general";
+import { handleClientError } from "@/utils/handleError";
+import { addPreciseCurrentTime, getTimelineKey, parseEntryDate, sortTimeline } from "@/utils/timeline";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import EditEntryFormContent from "./EditEntryFormContent";
 
 const formId = "edit-entry-form";
 
@@ -174,8 +173,8 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
       triggerButton={null}
       open={isOpen}
       onOpenChange={handleOpenChange}
-      title="Update Entry"
-      description="Edit an existing entry."
+      title="Update Content"
+      description="Edit existing content."
       actionButton={
         <Button
           onClick={() => form.handleSubmit(onSubmit)()} // Direct form submission
@@ -187,7 +186,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+        <form onSubmit={form.handleSubmit(onSubmit)} id={formId} >
           <EditEntryFormContent
             galleryId={galleryId}
             form={form}

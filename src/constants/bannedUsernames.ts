@@ -11,6 +11,9 @@ export const BANNED_USERNAMES = new Set([
   "media",
   "search",
   "not-found",
+  "timelines",
+  "gallery",
+  "galleries",
 
   // Critical reserved terms that could cause security or routing conflicts
   "admin",

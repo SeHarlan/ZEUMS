@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { Button, LinkButton } from "@/components/ui/button";
 import { MenuIcon, XIcon, ArrowLeft, MessageCircleQuestionIcon } from 'lucide-react';
 
@@ -11,7 +11,7 @@ import { useNavBarActions } from '@/context/NavBarActionsProvider';
 import SupportDialog from './SupportDialog';
 
 const NavBar: FC = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -26,24 +26,24 @@ const NavBar: FC = () => {
     setSupportOpen(true);
   }
 
-  useEffect(() => {
-    // Close the menu when the user clicks outside of it
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const menu = menuRef.current;
-      const button = buttonRef.current;
-      if (!menu?.contains(target) && !button?.contains(target)) {
-        setMenuOpen(false);
-      } else {
-        event.preventDefault();
-      }
-    };
+  // useEffect(() => {
+  //   // Close the menu when the user clicks outside of it
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+  //     const menu = menuRef.current;
+  //     const button = buttonRef.current;
+  //     if (!menu?.contains(target) && !button?.contains(target)) {
+  //       setMenuOpen(false);
+  //     } else {
+  //       event.preventDefault();
+  //     }
+  //   };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside);
+  //   };
+  // }, []);
 
   return (
     <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50">
@@ -70,7 +70,8 @@ const NavBar: FC = () => {
           "relative left-1/2 -translate-x-1/2",
           "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
           menuOpen ? "top-4 animate-in " : "-top-[14vh] animate-out ",
-          "md:top-4 lg:top-6 md:hover:animate-in"
+          "md:top-4 lg:top-6 "
+          // "md:hover:animate-in",
         )}
       >
         <NavMenu />
@@ -88,7 +89,8 @@ const NavBar: FC = () => {
             "relative flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
             "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
             menuOpen ? "right-0 animate-in " : "-right-[200%] animate-out",
-            "md:right-0 md:hover:animate-in"
+            "md:right-0 ",
+            // "md:hover:animate-in"
           )}
         >
           {actions}
@@ -101,7 +103,6 @@ const NavBar: FC = () => {
             <MessageCircleQuestionIcon className="size-6" />
           </Button>
         </div>
-  
 
         <Button
           variant={"outline"}

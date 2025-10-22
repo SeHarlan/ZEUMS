@@ -1,18 +1,53 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { BannerImage } from "@/components/timeline/BannerImage";
+import { Button } from "@/components/ui/button";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { UseFormReturn } from "react-hook-form";
-import { FC } from "react";
-import { UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { UpsertGalleryFormValues } from "@/forms/upsertGallery";
+import { ImageType } from "@/types/media";
+import { ImagePlusIcon, Trash2Icon } from "lucide-react";
+import { FC, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
+import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
 
 interface EditSettingsContentProps { 
   form: UseFormReturn<UpsertGalleryFormValues>;
+  bannerImage?: ImageType | null;
+  setBannerImage: (image?: ImageType | null) => void;
 }
 
-const EditSettingsContent: FC<EditSettingsContentProps> = ({form}) => { 
+const EditSettingsContent: FC<EditSettingsContentProps> = ({ form, bannerImage, setBannerImage }) => { 
+  const [bannerImageOpen, setBannerImageOpen] = useState(false);
   return (
     <div className="flex flex-col gap-y-6">
+      <div className="relative w-full h-fit">
+        <div className="absolute -top-2 -right-2 z-10 flex gap-2">
+          {bannerImage && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              onClick={() => setBannerImage(null)}
+            >
+              <Trash2Icon />
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant={bannerImage ? "outline" : "default"}
+            size="icon"
+            onClick={() => setBannerImageOpen(true)}
+          >
+            <ImagePlusIcon />
+          </Button>
+        </div>
+        <BannerImage
+          media={bannerImage || undefined}
+          className="text-5xl"
+          fallbackText={"Banner Image"}
+        />
+      </div>
       <FormField
         control={form.control}
         name="title"
@@ -67,6 +102,12 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({form}) => {
             <FormMessage />
           </FormItem>
         )}
+      />
+      <ChooseProfileImageDialog
+        imageVariant={"banner"}
+        setSelectedMedia={setBannerImage}
+        open={bannerImageOpen}
+        setOpen={setBannerImageOpen}
       />
     </div>
   );

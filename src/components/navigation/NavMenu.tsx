@@ -9,7 +9,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from 'next/link';
-import { ABOUT, COMING_SOON, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME, NOT_FOUND, USER_TIMELINE } from '@/constants/clientRoutes';
+import { ABOUT, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE, GALLERIES, HOME, NOT_FOUND, TIMELINES, USER_TIMELINE } from '@/constants/clientRoutes';
 import LoginButton from "../general/LoginButton"
 import { cn, truncate } from "@/utils/ui-utils";
 import { useUser } from "@/context/UserProvider";
@@ -77,26 +77,26 @@ const NavMenu: FC = () => {
           >
             Search Assets
           </Button>
-          <NavLink label="Timelines" href={COMING_SOON}  />
-          <NavLink label="Galleries" href={COMING_SOON}  />
+          <NavLink label="Timelines" href={TIMELINES}  />
+          <NavLink label="Galleries" href={GALLERIES}  />
         </NavDropDown>
 
-        <NavDropDown trigger={"Profile"}>
+        <NavDropDown trigger={"Manage"}>
           <NavLink
-            label="Profile Settings"
-            href={EDIT_PROFILE_DISPLAY}
+            label="Account Settings"
+            href={EDIT_PROFILE_ACCOUNT}
             disabled={!loggedIn}
             className="order-1" 
           />
           <NavLink
-            label="Edit Timeline"
+            label="My Timeline"
             href={EDIT_TIMELINE}
             disabled={!loggedIn}
             className="order-2"
             
           />
           <NavLink
-            label="Manage Galleries"
+            label="My Galleries"
             href={EDIT_GALLERIES}
             disabled={!loggedIn}
             className="order-3" 

@@ -1,9 +1,10 @@
-import { FC } from "react";
-import MediaThumbnail from "../media/MediaThumbnail";
+import { BANNER_RATIO, BANNER_RATIO_MOBILE } from "@/constants/ui";
+import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
+import { FC } from "react";
+import MediaThumbnail from "../media/MediaThumbnail";
 import { AspectRatio } from "../ui/aspect-ratio";
-import { BANNER_RATIO } from "@/constants/ui";
 
 interface BannerImageProps {
   media?: MediaType;
@@ -15,10 +16,13 @@ export const BannerImage: FC<BannerImageProps> = ({
   className,
   fallbackText = "ZEUMS",
 }) => {
+  const { isMd } = useBreakpoints();
+  
+  const ratio = isMd ? BANNER_RATIO : BANNER_RATIO_MOBILE;
   if (!media)
     return (
       <AspectRatio
-        ratio={BANNER_RATIO}
+        ratio={ratio}
         className={cn(
           "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
           "rounded-b-md font-serif",
@@ -37,7 +41,7 @@ export const BannerImage: FC<BannerImageProps> = ({
       alt={"Banner Image"}
       objectFit="object-cover"
       rounding="rounded-b-md"
-      ratio={BANNER_RATIO}
+      ratio={ratio}
       className={className}
     />
   );

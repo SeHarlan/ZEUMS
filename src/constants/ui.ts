@@ -1,5 +1,5 @@
 export const BANNER_RATIO = 3 / 1;
-
+export const BANNER_RATIO_MOBILE = 3/2;
 export const imageBreakpoints = {
   small: 500,
   medium: 800,

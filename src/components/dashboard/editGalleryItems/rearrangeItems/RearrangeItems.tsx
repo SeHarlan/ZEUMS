@@ -1,29 +1,30 @@
+import LoadingSpinner from "@/components/general/LoadingSpinner"
 import SideDrawer from "@/components/general/SideDrawer"
 import { P } from "@/components/typography/Typography"
 import { Button } from "@/components/ui/button"
-import useGalleryDimensions from "@/hooks/useGalleryDimensions"
-import { GalleryRowItem } from "@/types/ui/dashboard"
-import { cleanGalleryRows, initializeGalleryRows, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
-import { cn  } from "@/utils/ui-utils"
-import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
-import { rectSortingStrategy, SortableContext} from "@dnd-kit/sortable"
-import {  LayoutTemplateIcon, PlusSquare } from "lucide-react"
-import { FC, useEffect, useMemo,  useState } from "react"
-import LoadingSpinner from "@/components/general/LoadingSpinner"
-import SortableItem, { OverlayItem } from "./SortableItem"
-import useGalleryById from "@/hooks/useGalleryById"
-import axios from "axios"
 import { GALLERY_ITEM_POSITIONS_ROUTE } from "@/constants/serverRoutes"
-import { toast } from "sonner"
-import { handleClientError } from "@/utils/handleError"
-import { GalleryItemPositionUpdate } from "@/types/galleryItem"
-import type { BulkWriteResult } from "mongodb"
 import { useUser } from "@/context/UserProvider"
+import useGalleryById from "@/hooks/useGalleryById"
+import useGalleryDimensions from "@/hooks/useGalleryDimensions"
+import { GalleryItemPositionUpdate } from "@/types/galleryItem"
+import { GalleryRowItem } from "@/types/ui/dashboard"
+import { cleanGalleryRows, initializeGalleryRows, insertIntoNewRowAtIndex, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
+import { handleClientError } from "@/utils/handleError"
+import { cn } from "@/utils/ui-utils"
+import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable"
+import axios from "axios"
+import { LayoutTemplateIcon, PlusIcon, PlusSquareIcon } from "lucide-react"
+import type { BulkWriteResult } from "mongodb"
+import { FC, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+import SortableItem, { OverlayItem } from "./SortableItem"
 
 
 const GAP = 12;
 const DROP_AREA_ID_AFTER = "droppable-area-after";
 const DROP_AREA_ID_BEFORE = "droppable-area-before";
+const INSERT_ROW_ID_PREFIX = "insert-row-";
 const MAX_HEIGHT_RATIO = 0.33;
 
 interface RearrangeItemsProps {
@@ -113,6 +114,9 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
     if (active.id !== over.id) {
       const isNewRowAfter = over.id === DROP_AREA_ID_AFTER;
       const isNewRowBefore = over.id === DROP_AREA_ID_BEFORE;
+      const overIdString = over.id.toString();
+      const isInsertRow = overIdString.startsWith(INSERT_ROW_ID_PREFIX);
+      const insertRowIndex = isInsertRow ? parseInt(overIdString.split(INSERT_ROW_ID_PREFIX)[1]) : null;
 
       const cursorSide = getCursorSide(event)?.side;
 
@@ -127,6 +131,10 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
         }
         if (isNewRowBefore) {
           return swapToNewRowBefore(rows, activeRowItem);
+        }
+
+        if (insertRowIndex) {
+          return insertIntoNewRowAtIndex(rows, activeRowItem, insertRowIndex);
         }
 
         //Replace the over Item with the active item 
@@ -225,11 +233,11 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
   }
   return (
     <SideDrawer
+     contentClassName="sm:max-w-lg px-2"
       triggerButton={
-        <Button className="w-full">
-          <P className="hidden md:block">Rearrange Gallery Items</P>
-          <P className="md:hidden">Rearrange Items</P>
-          <LayoutTemplateIcon />
+        <Button className="w-full" variant="outline">
+          <P>Rearrange Items</P>
+          <LayoutTemplateIcon className="hidden md:block" />
         </Button>
       }
       open={formOpen}
@@ -246,11 +254,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
         </Button>
       }
     >
-      <div
-        ref={containerRef}
-        className="w-full h-full flex flex-col"
-        style={{ gap: GAP }}
-      >
+      <div ref={containerRef} className="w-full h-full flex flex-col">
         {isReady ? (
           <DndContext
             onDragStart={onDragStart}
@@ -264,30 +268,35 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
             <Droppable id={DROP_AREA_ID_BEFORE} />
 
             {galleryRows.map((row, rowIndex) => {
+              const insertRowId = INSERT_ROW_ID_PREFIX + rowIndex;
               return (
-                <div
-                  key={rowIndex}
-                  className={cn("flex justify-center flex-row items-center")}
-                  style={{ gap: GAP }}
-                >
-                  <SortableContext
-                    items={row.map((item) => item.item._id.toString())}
-                    strategy={rectSortingStrategy}
+                <div key={rowIndex}>
+                  {rowIndex !== 0 && (
+                    <DroppableInsertRow key={insertRowId} id={insertRowId} />
+                  )}
+                  <div
+                    className={cn("flex justify-center flex-row items-center")}
+                    style={{ gap: GAP }}
                   >
-                    {row.map((cell) => {
-                      const hoverSide =
-                        hoverData?.id === cell.item._id.toString()
-                          ? hoverData.side
-                          : null;
-                      return (
-                        <SortableItem
-                          key={cell.item._id.toString()}
-                          processedItem={cell}
-                          hoverSide={hoverSide}
-                        />
-                      );
-                    })}
-                  </SortableContext>
+                    <SortableContext
+                      items={row.map((item) => item.item._id.toString())}
+                      strategy={rectSortingStrategy}
+                    >
+                      {row.map((cell) => {
+                        const hoverSide =
+                          hoverData?.id === cell.item._id.toString()
+                            ? hoverData.side
+                            : null;
+                        return (
+                          <SortableItem
+                            key={cell.item._id.toString()}
+                            processedItem={cell}
+                            hoverSide={hoverSide}
+                          />
+                        );
+                      })}
+                    </SortableContext>
+                  </div>
                 </div>
               );
             })}
@@ -323,14 +332,35 @@ const  Droppable = ({ id }: { id: string }) => {
     <div
       ref={setNodeRef}
       className={cn(
-        "relative w-full pb-[25%] border-2 border-dashed rounded-md text-border duration-300",
-        isOver && "bg-muted text-muted-foreground border-muted-foreground shadow"
+        "relative w-full pb-[25%] border-2 border-dashed rounded-md text-border duration-300 my-4",
+        isOver &&
+          "bg-muted border-muted-foreground shadow  text-muted-foreground"
       )}
     >
       <div className="absolute-center w-full">
-        <PlusSquare className="mx-auto size-8" />
-        <P className="text-center text-sm">Drop here to create a new row</P>
+        <PlusSquareIcon className="mx-auto size-8" />
+        <P className={cn("text-center text-sm font-bold", isOver ? "text-muted-foreground" : "text-muted-foreground/50")}>Drop here to create a new row</P>
       </div>
     </div>
   );
 }
+
+const DroppableInsertRow = ({ id }: { id: string }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "relative w-full border-2 border-dashed rounded text-muted-foreground/50 duration-300 my-2",
+        isOver &&
+          "bg-muted border-muted-foreground shadow  text-muted-foreground"
+      )}
+    >
+      <PlusIcon className="mx-auto size-4" />
+    </div>
+  );
+};
+

@@ -1,19 +1,21 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
-import { 
-  BaseGalleryType, 
-  GalleryDisplayTypes,
-} from "@/types/gallery";
-import { EntrySource } from "@/types/entry";
-import { 
+import {
   GALLERY_ITEM_MODEL_KEY,
   GALLERY_ITEMS_FOREIGN_KEY,
   GALLERY_ITEMS_VIRTUAL,
-  GALLERY_TOTAL_ITEMS_VIRTUAL,
   GALLERY_MODEL_KEY,
   GALLERY_OWNER_DATA_FOREIGN_KEY,
   GALLERY_OWNER_FOREIGN_KEY,
+  GALLERY_TOTAL_ITEMS_VIRTUAL,
   USER_MODEL_KEY,
 } from "@/constants/databaseKeys";
+import { EntrySource } from "@/types/entry";
+import {
+  BaseGalleryType,
+  GalleryDisplayTypes,
+} from "@/types/gallery";
+import { GalleryItemTypes } from "@/types/galleryItem";
+import mongoose, { Document, Model, Schema } from "mongoose";
+import { MediaSchema } from "../Entry/media";
 
 // Document interface
 export interface GalleryDocument extends Document<Schema.Types.ObjectId>, BaseGalleryType { }
@@ -36,6 +38,7 @@ const GallerySchema = new Schema<GalleryDocument>(
       default: GalleryDisplayTypes.Justify,
       required: true,
     },
+    bannerImage: { type: MediaSchema },
     [GALLERY_OWNER_FOREIGN_KEY]: {
       type: Schema.Types.ObjectId,
       ref: USER_MODEL_KEY,
@@ -107,6 +110,21 @@ export const GalleryWithFirstTwoRowsPopulate = {
   options: { 
     sort: { "position.0": 1, "position.1": 1 } 
   },
+};
+
+// Populate configuration for gallery entries that includes only the first media item
+export const GalleryWithFirstMediaPopulate = {
+  path: GALLERY_ITEMS_VIRTUAL,
+  model: GALLERY_ITEM_MODEL_KEY,
+  match: { 
+    itemType: { 
+      $in: [GalleryItemTypes.BlockchainAsset, GalleryItemTypes.UserAsset] 
+    } 
+  },
+  options: { 
+    limit: 1,
+    sort: { "position.1": 1, "position.0": 1 }
+  }
 };
 
 // Create the model

@@ -1,4 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/utils/ui-utils";
+import { FC, ReactNode } from "react";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 import {
   Sheet,
   SheetClose,
@@ -9,9 +13,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./../ui/sheet";
-import { FC, ReactNode } from "react";
-import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
 
 interface SideDrawerProps { 
   title: string;
@@ -21,6 +22,7 @@ interface SideDrawerProps {
   actionButton?: ReactNode; 
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  contentClassName?: string;
 }
 
 const SideDrawer: FC<SideDrawerProps> = ({
@@ -31,11 +33,12 @@ const SideDrawer: FC<SideDrawerProps> = ({
   actionButton,
   open,
   onOpenChange, 
+  contentClassName,
 }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{triggerButton}</SheetTrigger>
-      <SheetContent className="grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-y-hidden h-full gap-0">
+      <SheetContent className={cn("grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-y-hidden h-full gap-0", contentClassName)}>
         <SheetHeader className="row-start-1">
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>
@@ -44,7 +47,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
         <div className="row-start-2 min-h-0 px-4">
           <Separator />
           <ScrollArea className="h-full">
-            <div className="p-3">{children}</div>
+            <div className="p-2">{children}</div>
           </ScrollArea>
           <Separator />
         </div>

@@ -1,26 +1,21 @@
+import ButtonEditor from "@/components/timeline/ButtonEditor";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
+  FormMessage
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { FC, useMemo } from "react";
-import { EntrySource } from "@/types/entry";
-import SelectBlockchainAsset from "../../SelectBlockchainAsset";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import { BLOCKCHAIN_ENTRY_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
-import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
-import ButtonEditor from "@/components/timeline/ButtonEditor";
+import { Textarea } from "@/components/ui/textarea";
 import { GalleryItemFormValues } from "@/forms/upsertGalleryItem";
-import { GalleryItemTypes } from "@/types/galleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { EntrySource } from "@/types/entry";
+import { GalleryItemTypes } from "@/types/galleryItem";
+import { FC, useMemo } from "react";
+import { UseFormReturn } from "react-hook-form";
+import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 
 interface NewItemFormContentProps { 
   form: UseFormReturn<GalleryItemFormValues>;
@@ -54,53 +49,6 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
 
   return (
     <div className="flex flex-col gap-y-6">
-      <FormField
-        control={form.control}
-        name="itemType"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Item Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger className="w-full text-md min-h-12">
-                  <SelectValue placeholder="Item type" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  value={GalleryItemTypes.BlockchainAsset}
-                  className="h-10 text-md"
-                >
-                  <BlockchainAssetEntryIcon className="min-h-6 min-w-6" />
-                  {BLOCKCHAIN_ENTRY_COPY.title}
-                </SelectItem>
-                <SelectItem
-                  value={GalleryItemTypes.Text}
-                  className="h-10 text-md"
-                >
-                  <TextEntryIcon className="min-h-6 min-w-6" />
-                  {TEXT_ENTRY_COPY.title}
-                </SelectItem>
-                {/* <SelectItem value={EntryTypes.UserAsset}>
-                  <UserAssetEntryIcon className="min-h-6 min-w-6"/>
-                  {USER_ASSET_ENTRY_COPY.title}
-                </SelectItem>
-                <SelectItem value={EntryTypes.Gallery}>
-                  <GalleryEntryIcon className="min-h-6 min-w-6"/>
-                  {GALLERY_ENTRY_COPY.title}
-                </SelectItem> */}
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              {GALLERY_ITEM_TYPE_COPY[selectedItemType].description}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <Separator />
-
       {isBlockchainEntry ? (
         <SelectBlockchainAsset
           usedAssetAddresses={usedAssetAddresses}

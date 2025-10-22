@@ -1,14 +1,14 @@
 "use client";
 
-import { TimelineEntry } from "@/types/entry";
-import { FC, Fragment, useMemo } from "react";
 import { H2, P } from "@/components/typography/Typography";
-import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
-import { EntryBaseProps } from "./EntryBase";
-import { Separator } from "../ui/separator";
-import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
-import { Button } from "../ui/button";
+import { TimelineEntry } from "@/types/entry";
 import { processTimelineEntries } from "@/utils/timeline";
+import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { FC, Fragment, useMemo } from "react";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import { EntryBaseProps } from "./EntryBase";
 
 interface TimelineBaseProps {
   entries: TimelineEntry[];
@@ -32,7 +32,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       return (
         <Fragment key={entry._id.toString()}>
           {showYear && (
-            <H2 className="w-fit sticky top-0 z-10 left-1/2 -translate-x-1/2 bg-background px-6 py-2 rounded-b-md text-muted-foreground shadow">
+            <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
               {entryYear}
             </H2>
           )}

@@ -1,28 +1,28 @@
+import { EntryTypeIcons } from "@/components/icons/EntryTypes";
+import ButtonEditor from "@/components/timeline/ButtonEditor";
+import { P } from "@/components/typography/Typography";
+import { Button, LinkButton } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, EditIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/textarea";
+import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { EntryFormValues } from "@/forms/upsertEntry";
+import { ENTRY_TYPE_COPY } from "@/textCopy/entryTypes";
+import { EntryTypes } from "@/types/entry";
 import { cn } from "@/utils/ui-utils";
 import { format } from "date-fns";
-import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { EntryFormValues } from "@/forms/upsertEntry";
-import { EntryTypes } from "@/types/entry";
+import { CalendarIcon, EditIcon } from "lucide-react";
 import { FC } from "react";
-import { Button, LinkButton } from "@/components/ui/button";
-import {  P } from "@/components/typography/Typography";
-import { ENTRY_TYPE_COPY } from "@/textCopy/entryTypes";
-import { EntryTypeIcons } from "@/components/icons/EntryTypes";
-import ButtonEditor from "@/components/timeline/ButtonEditor";
-import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { UseFormReturn } from "react-hook-form";
 
 interface EditEntryFormContentProps { 
   form: UseFormReturn<EntryFormValues>;
@@ -58,25 +58,28 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-y-6">
-      <div className="mt-3 space-y-1">
-        <div className="bg-muted rounded-md p-3 flex items-center justify-between">
-          <div className="flex gap-2 items-center">
-            <Icon className="min-w-6 min-h-6 text-muted-foreground" />
-            <P>{title}</P>
+    <div className="flex flex-col gap-y-6 py-4">
+      <div className=" space-y-3">
+        {isGalleryEntry && (
+          <LinkButton
+            href={EDIT_GALLERY(galleryId)}
+            className="w-full rounded-sm"
+            onClick={() => handleOpenChange(false)}
+            size="sm"
+          >
+            Edit Gallery Items
+            <EditIcon />
+          </LinkButton>
+        )}
+        <div className="bg-muted rounded-md h-fit p-5 flex items-center justify-start gap-5 ">
+          <Icon className="size-12 text-muted-foreground" />
+          <div className="text-left min-w-0">
+            <P className="font-bold text-lg ">{title}</P>
+            <P className="text-sm break-words text-muted-foreground">
+              {description}
+            </P>
           </div>
-          {isGalleryEntry && (
-            <LinkButton
-              href={EDIT_GALLERY(galleryId)}
-              className="h-6"
-              onClick={() => handleOpenChange(false)}
-            >
-              Edit Gallery Items
-              <EditIcon />
-            </LinkButton>
-          )}
         </div>
-        <P className="text-muted-foreground">{description}</P>
       </div>
 
       <FormField

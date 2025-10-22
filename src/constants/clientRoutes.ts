@@ -1,4 +1,3 @@
-import { EditProfileTab, EditProfileTabQueryParam } from "@/types/ui/dashboard";
 import { ChainIdsEnum } from "@/types/wallet";
 
 export const HOME = '/'; //landing page
@@ -10,19 +9,20 @@ export const COMING_SOON = '/coming-soon';
 export const NOT_FOUND = '/not-found';
 
 export const DASHBOARD = '/dashboard';
-export const EDIT_PROFILE = `${DASHBOARD}/profile`
-export const EDIT_PROFILE_ACCOUNT = `${EDIT_PROFILE}?${EditProfileTabQueryParam}=${EditProfileTab.ACCOUNT}`;
-export const EDIT_PROFILE_DISPLAY = `${EDIT_PROFILE}?${EditProfileTabQueryParam}=${EditProfileTab.DISPLAY}`;
+export const EDIT_PROFILE_ACCOUNT = `${DASHBOARD}/account`;
+export const EDIT_TIMELINE = `${DASHBOARD}/timeline`;
+export const EDIT_PROFILE_DISPLAY = EDIT_TIMELINE; //currently display info is edited in the timeline
 export const EDIT_GALLERIES = `${DASHBOARD}/galleries`;
 export const EDIT_GALLERY = (galleryId: string) => `${EDIT_GALLERIES}/${galleryId}`;
-export const EDIT_TIMELINE = `${DASHBOARD}/timeline`;
 
 export const MEDIA = '/media';
 export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
 export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
 export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
 
+export const TIMELINES = '/timelines';
 export const USER_TIMELINE = (username: string) => `/${username}`;
+export const GALLERIES = '/galleries';
 export const GALLERY = '/gallery';
 export const USER_GALLERY = (galleryId: string) => `${GALLERY}/${galleryId}`;
 export const BLOCKCHAIN_MEDIA_PATHS = {

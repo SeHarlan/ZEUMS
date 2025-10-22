@@ -14,7 +14,10 @@ export default function ProtectedLayout({
       <EditEntryContextProvider>
         <EditGallerySettingsContextProvider>
           <EditGalleryItemContextProvider>
-            {children}
+            <div className="bg-muted w-screen h-full min-h-screen">
+              {children}
+
+            </div>
           </EditGalleryItemContextProvider>
         </EditGallerySettingsContextProvider>
       </EditEntryContextProvider>

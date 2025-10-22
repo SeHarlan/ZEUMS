@@ -1,26 +1,31 @@
 "use client";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import SideDrawer from "@/components/general/SideDrawer";
+import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
+import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
+import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
+import useGalleryById from "@/hooks/useGalleryById";
+
+import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { EntrySource } from "@/types/entry";
 import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
-import { useForm } from "react-hook-form";
+import { getLastGalleryRowIndex } from "@/utils/gallery";
+import { addHttpsPrefix } from "@/utils/general";
+import { handleClientError } from "@/utils/handleError";
+import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { ArrowLeftIcon, ImagePlusIcon } from "lucide-react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { useUser } from "@/context/UserProvider";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import SideDrawer from "@/components/general/SideDrawer";
-import { P } from "@/components/typography/Typography";
+import AddBlockchainGalleryItems from "../AddBlockchainGalleryItems";
 import NewItemFormContent from "./NewItemFormContent";
-import { SquarePlusIcon } from "lucide-react";
-import { addHttpsPrefix } from "@/utils/general";
-import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
-import { getLastGalleryRowIndex } from "@/utils/gallery";
-import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
-import useGalleryById from "@/hooks/useGalleryById";
-import { EntrySource } from "@/types/entry";
-import { cn } from "@/utils/ui-utils";
 
 const formId = "new-gallery-item-form";
 
@@ -35,7 +40,7 @@ const NewItemForm: FC<NewItemFormProps> = ({
   galleryId,
   buttonClassName,
   buttonVariant = "default",
-  buttonText = "Add New Gallery Item",
+  buttonText = "Add Content",
 }) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { user, revalidateUser } = useUser();
@@ -43,6 +48,7 @@ const NewItemForm: FC<NewItemFormProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [contentChosen, setContentChosen] = useState<boolean>(false);
 
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
   const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(
@@ -70,6 +76,26 @@ const NewItemForm: FC<NewItemFormProps> = ({
     (selectedGalleryItemType === GalleryItemTypes.BlockchainAsset &&
       !blockchainAsset) ||
     !user;
+  
+  const blockchainAddText = source === EntrySource.Creator ? "created" : "collected";
+
+  
+  const getHeaderText = () => {
+    if (contentChosen) {
+      return GALLERY_ITEM_TYPE_COPY[selectedGalleryItemType];
+    }
+
+    return {
+      title: "Add Content",
+      description: `Add content to ${gallery?.title || "your gallery"}.`,
+    };
+  };
+  const headerText = getHeaderText();
+
+  const handleChooseContent = (itemType: GalleryItemTypes) => {
+    setContentChosen(true);
+    form.setValue("itemType", itemType);
+  };
 
   useEffect(() => {
     const isBlockchainAsset =
@@ -110,13 +136,24 @@ const NewItemForm: FC<NewItemFormProps> = ({
   }, [selectedGalleryItemType, reset, defaultValues]);
 
   const fullFormReset = () => {
-    setBlockchainAsset(null);
-    setAspectRatio(null);
-    reset(defaultValues);
-    prevBlockchainAssetRef.current = null;
-    prevGalleryItemTypeRef.current = GalleryItemTypes.BlockchainAsset;
+    //don't rest state till drawer has fully closed
+    setTimeout(() => {
+      setBlockchainAsset(null);
+      setAspectRatio(null);
+      reset(defaultValues);
+      prevBlockchainAssetRef.current = null;
+      prevGalleryItemTypeRef.current = GalleryItemTypes.BlockchainAsset;
+      setContentChosen(false);
+    }, 333);
   };
-
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!submitting) {
+      setFormOpen(newOpen);
+      if (!newOpen) {
+        fullFormReset();
+      }
+    }
+  };
   const onSubmit = (data: GalleryItemFormValues) => {
     if (!user || !gallery) return;
 
@@ -209,39 +246,107 @@ const NewItemForm: FC<NewItemFormProps> = ({
           variant={buttonVariant}
           className={cn("w-full", buttonClassName)}
         >
-          <P className="hidden md:block">{buttonText}</P>
-          <P className="md:hidden">Add Item</P>
-          <SquarePlusIcon />
+          <P>{buttonText}</P>
+          <ImagePlusIcon className="hidden sm:block" />
         </Button>
       }
       open={formOpen}
-      onOpenChange={setFormOpen}
-      title="Add New Item"
-      description="Add a new item to your gallery."
+      onOpenChange={handleOpenChange}
+      title={headerText.title}
+      description={headerText.description}
       actionButton={
-        <Button
-          form={formId}
-          type="submit"
-          className="w-full"
-          loading={submitting}
-          disabled={disableSubmit}
-        >
-          <P>Save New Item</P>
-        </Button>
+        contentChosen && (
+          <Button
+            form={formId}
+            type="submit"
+            className="w-full"
+            loading={submitting}
+            disabled={disableSubmit}
+          >
+            <P>Save {GALLERY_ITEM_TYPE_COPY[selectedGalleryItemType].title}</P>
+          </Button>
+        )
       }
     >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
-          <NewItemFormContent
-            form={form}
-            selectedItemType={selectedGalleryItemType}
-            blockchainAsset={blockchainAsset}
-            setBlockchainAsset={setBlockchainAsset}
-            setAspectRatio={setAspectRatio}
+      {contentChosen ? (
+        <div className="space-y-6">
+          <Button
+            onClick={() => setContentChosen(false)}
+            className="w-full mb-2"
+            size="lg"
+            variant="ghost"
+          >
+            <ArrowLeftIcon />
+            <P>Back to choose content</P>
+          </Button>
+          <Separator />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+              <NewItemFormContent
+                form={form}
+                selectedItemType={selectedGalleryItemType}
+                blockchainAsset={blockchainAsset}
+                setBlockchainAsset={setBlockchainAsset}
+                setAspectRatio={setAspectRatio}
+                galleryId={galleryId}
+              />
+            </form>
+          </Form>
+        </div>
+      ) : (
+        <div className="space-y-6 py-4">
+          <AddBlockchainGalleryItems
             galleryId={galleryId}
-          />
-        </form>
-      </Form>
+            onSave={() => setFormOpen(false)}
+          >
+            <Button
+              variant="default"
+              className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+            >
+              <BlockchainAssetEntryIcon className="size-12 text-neutral-400" />
+              <div className="text-left min-w-0">
+                <P className="font-bold text-lg ">
+                  {BLOCKCHAIN_GALLERY_ITEM_COPY.title}
+                </P>
+                <P className="text-sm text-neutral-400">
+                  {BLOCKCHAIN_GALLERY_ITEM_COPY.description}s you{" "}
+                  {blockchainAddText}
+                </P>
+              </div>
+            </Button>
+          </AddBlockchainGalleryItems>
+
+          <Button
+            onClick={() => handleChooseContent(GalleryItemTypes.Text)}
+            variant="outline"
+            className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+          >
+            <TextEntryIcon className="size-12 text-muted-foreground" />
+
+            <div className="text-left min-w-0">
+              <P className="font-bold text-lg">
+                {TEXT_GALLERY_ITEM_COPY.title}
+              </P>
+              <P className="text-sm text-muted-foreground">
+                {TEXT_GALLERY_ITEM_COPY.description}
+              </P>
+            </div>
+          </Button>
+          {/* <Button
+            variant="default"
+            className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+            onClick={() => handleChooseContent(GalleryItemTypes.Gallery)}
+          >
+            <GalleryGalleryItemIcon className="size-12 text-neutral-400" />
+            <div className="text-left min-w-0">
+              <P className="font-bold text-lg ">{GALLERY_GALLERY_ITEM_COPY.title}</P>
+              <P className="text-sm text-neutral-400">
+                {GALLERY_GALLERY_ITEM_COPY.description} you {blockchainAddText}
+              </P>
+            </div>
+          </Button> */}
+        </div>
+      )}
     </SideDrawer>
   );
 };

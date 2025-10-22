@@ -1,6 +1,7 @@
 "use client";
 
 import SolanaAssetSelect from "@/components/assets/SolanaAssetSelect";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -15,23 +16,31 @@ import { ImagesIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
-import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 
 export const MAX_SELECTED_ASSETS = 9;
 interface AddBlockchainEntriesProps {
   source: EntrySource;
+  children?: React.ReactNode;
+  onSave?: () => void;
 } 
-const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => { 
+
+const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({
+  source,
+  children,
+  onSave
+}) => {
   const { setUser, user } = useUser();
 
-  const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
-  const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] = useState<Set<string>>(new Set());
-  const [submitting, setSubmitting] = useState(false)
+  const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>(
+    []
+  );
+  const [optimisticallySelectedAssets, setOptimisticallySelectedAssets] =
+    useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
 
-
   const timelineKey = getTimelineKey(source);
-  
+
   const usedAssetAddresses = useMemo(() => {
     const currentTimeline = user?.[timelineKey] || [];
     const items =
@@ -44,15 +53,15 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
   const handleClear = () => {
     setSelectedAssets([]);
     setOptimisticallySelectedAssets(new Set());
-  }
+  };
 
-  const handleOpenChange = (open: boolean) => { 
+  const handleOpenChange = (open: boolean) => {
     setOpen(open);
     if (!open) handleClear();
-  }
-  
-  const handleAssetsAdd = async () => { 
-    setSubmitting(true)
+  };
+
+  const handleAssetsAdd = async () => {
+    setSubmitting(true);
 
     const entriesCreationData: TimelineBlockchainEntryCreation[] =
       selectedAssets.map((asset) => ({
@@ -61,19 +70,22 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
       }));
 
     axios
-      .post<{ createdEntries: TimelineEntry[], successfullyFetchedDates: number }>(ENTRY_ENTRIES_ROUTE, entriesCreationData)
+      .post<{
+        createdEntries: TimelineEntry[];
+        successfullyFetchedDates: number;
+      }>(ENTRY_ENTRIES_ROUTE, entriesCreationData)
       .then((response) => {
         const { createdEntries, successfullyFetchedDates } = response.data;
         const parsedCreatedEntries = parseEntryDates(createdEntries);
 
         if (successfullyFetchedDates < entriesCreationData.length) {
-          toast.info("Failed to be retrieve mint date for some entries", {
-            description: "You can try again inside the entries edit panel",
+          toast.info("Failed to be retrieve mint date for some artworks", {
+            description: "You can try again inside the artwork edit panel",
           });
         } else if (parsedCreatedEntries.length < entriesCreationData.length) {
-          toast.info("Some entries failed to be saved.");
+          toast.info("Some artworks failed to be saved.");
         } else {
-          toast.success("All entries saved!");
+          toast.success("All artworks saved!");
         }
 
         //Update the users timeline context with the new entry
@@ -81,7 +93,6 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
           if (!prevUser) return prevUser;
 
           const prevTimeline = prevUser[timelineKey] || [];
-
 
           //TODO-improvement - insert all entries directly into their slot (since they are all the same date here)
           const newTimeline = sortTimeline([
@@ -95,6 +106,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
           };
         });
 
+        onSave?.();
         handleOpenChange(false);
       })
       .catch((error) => {
@@ -107,22 +119,25 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
       .finally(() => {
         setSubmitting(false);
       });
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <P className="hidden md:block">Add Blockchain Assets</P>
-          <ImagesIcon />
-        </Button>
+        {children || (
+          <Button variant="outline" type="button">
+            <P className="hidden md:block">Add minted artworks</P>
+            <ImagesIcon />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="lg:max-w-4xl h-full flex flex-col">
         <DialogHeader className="flex-row justify-between items-center">
-          <DialogTitle className="w-fit">Select Blockchain Assets</DialogTitle>
+          <DialogTitle className="w-fit">
+            Select minted artworks
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            This dialog allows you to select blockchain assets to add to your
-            timeline.
+            This dialog allows you to add artworks to your timeline.
           </DialogDescription>
         </DialogHeader>
 
@@ -136,9 +151,9 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
             maxSelected={MAX_SELECTED_ASSETS}
             maxSelectWarningBody={
               <div className="flex flex-col gap-y-2 justify-center-safe p-4">
-                <P className="text-sm">
-                  Timelines shine when they stay simple. Try adding these assets
-                  to a gallery for a cleaner look.
+                <P className="text-sm text-center">
+                  If these are part of a collection or related works, consider
+                  adding them to a gallery instead
                 </P>
                 <CreateGalleryDialogButton source={source} />
               </div>
@@ -148,24 +163,27 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({ source }) => {
           />
         </div>
 
-             {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
-          <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
-        {/* <DialogFooter className=""> */}
+        {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
+        <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
+          {/* <DialogFooter className=""> */}
           {/* <div className="flex gap-2 flex-wrap items-center w-full sm:w-fit"> */}
-            <Button
-              type="button"
-              onClick={handleAssetsAdd}
-              loading={submitting}
-              disabled={selectedAssets.length === 0 || optimisticallySelectedAssets.size > 0}
-            >
-              Create Entries
-              <BlockchainAssetEntryIcon />
-            </Button>
+          <Button
+            type="button"
+            onClick={handleAssetsAdd}
+            loading={submitting}
+            disabled={
+              selectedAssets.length === 0 ||
+              optimisticallySelectedAssets.size > 0
+            }
+          >
+            Add Artworks
+            <BlockchainAssetEntryIcon />
+          </Button>
           {/* </div> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export default AddBlockchainEntries;

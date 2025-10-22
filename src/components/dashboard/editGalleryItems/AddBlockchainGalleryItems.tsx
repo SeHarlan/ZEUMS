@@ -29,9 +29,11 @@ import { toast } from "sonner";
 const DEFAULT_COLUMNS = 3;
 
 interface AddBlockchainGalleryItemsProps {
-  galleryId: string
+  galleryId: string;
+  children?: React.ReactNode;
+  onSave?: () => void;
 }
-const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ galleryId }) => {
+const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ galleryId, children, onSave }) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { revalidateUser } = useUser();
   const [selectedAssets, setSelectedAssets] = useState<ParsedBlockChainAsset[]>([]);
@@ -111,6 +113,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
           revalidateUser();
         }
 
+        onSave?.();
         handleOpenChange(false);
       })
       .catch((error) => {
@@ -128,10 +131,12 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
+        {children || (
         <Button variant="outline">
-          <P className="hidden md:block">Add Blockchain Gallery Items</P>
-          <ImagesIcon />
-        </Button>
+            <P className="hidden md:block">Add Blockchain Gallery Items</P>
+            <ImagesIcon />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="lg:max-w-4xl h-full flex flex-col">
         <DialogHeader className="flex-row justify-between items-center">

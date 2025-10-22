@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { FC, SyntheticEvent } from "react";

@@ -37,7 +37,7 @@ const PageHeading: FC<PageHeadingProps> = ({
   
   return (
     <div className={cn("mb-4 sm:mb-6", className)}>
-      <PageTitle text={title}/>
+      <PageTitle text={title} className="max-w-3/4  md:max-w-2/5"/>
       {subtitle ? (
         <PageSubtitle text={subtitle} className="mt-1" />
       ) : null}

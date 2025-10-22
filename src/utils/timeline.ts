@@ -1,4 +1,5 @@
 import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
+import { PublicUserType } from "@/types/user";
 
 export const getTimelineKey = (source: EntrySource) => {
   switch (source) {
@@ -105,3 +106,38 @@ export const processTimelineEntries = (
     });
   });
 }
+
+export const getTimelineTabContent = (user?: PublicUserType | null, useAllSources = false) => {
+  if (!user) return [];
+
+const useCreated = useAllSources || user?.createdTimelineEntries?.length;
+const useCollected = useAllSources || user?.collectedTimelineEntries?.length;
+
+  const contentMap = [
+    useCreated
+      ? {
+          title: "Created",
+          value: EntrySource.Creator,
+          entries: user.createdTimelineEntries,
+        }
+      : undefined,
+    useCollected
+      ? {
+          title: "Collected",
+          value: EntrySource.Collector,
+          entries: user.collectedTimelineEntries,
+        }
+      : undefined,
+  ];
+
+  const orderedContent =
+    user?.primaryTimeline === EntrySource.Collector
+      ? [contentMap[1], contentMap[0]]
+      : [contentMap[0], contentMap[1]];
+
+  const content = orderedContent.filter(
+    (item): item is NonNullable<typeof item> => Boolean(item)
+  );
+
+  return content;
+};
