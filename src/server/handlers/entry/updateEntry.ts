@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import connectToDatabase from "../../db/mongodb";
-import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
-import Entry, { GalleryEntryVirtual } from "../../models/Entry/Entry";
 import { BaseEntry } from "@/types/entry";
 import { removeUndefined } from "@/utils/general";
+import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
+import { NextRequest, NextResponse } from "next/server";
+import connectToDatabase from "../../db/mongodb";
+import Entry, { GalleryEntryVirtual } from "../../models/Entry/Entry";
 
 export async function updateEntryHandler(
   req: NextRequest

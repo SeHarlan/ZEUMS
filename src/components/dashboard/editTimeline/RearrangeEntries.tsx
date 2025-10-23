@@ -6,6 +6,7 @@ import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { ENTRY_DATES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
 import { isMediaGalleryItem } from "@/types/galleryItem";
 import { handleClientError } from "@/utils/handleError";
@@ -109,7 +110,7 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({
         if (bulkWriteResult.modifiedCount < updatesPayload.length) {
           toast.info("Some entry positions could not be updated.");
         } else {
-          toast.success("Entry positions updated!");
+          toast.success(`${TIMELINE_ENTRY_LABEL.capFullSingular} positions updated successfully!`);
         }
 
         //Update the users timeline context with the updated dates
@@ -222,8 +223,8 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({
       }
       open={drawerOpen}
       onOpenChange={handleOpenChange}
-      title="Rearrange Entries"
-      description="Quickly change the order and dates of entries"
+      title={`Rearrange ${TIMELINE_ENTRY_LABEL.capFullPlural}`}
+      description={`Quickly change the order and dates of your timeline content`}
       actionButton={
         <Button
           type="button"
@@ -303,7 +304,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
   ) : null;
 
   const useTitle = Boolean(entry.title);
-  const text = entry.title || entry.description || "Untitled Entry";
+  const text = entry.title || entry.description || `Untitled ${TIMELINE_ENTRY_LABEL}`;
 
   return (
     <div

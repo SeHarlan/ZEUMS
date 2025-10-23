@@ -72,7 +72,7 @@ const NavMenu: FC = () => {
             className={cn("w-full")}
             onClick={() => setSearchAssetOpen(true)}
           >
-            Search Assets
+            Search Artworks
           </Button>
           <NavLink label="Timelines" href={TIMELINES} />
           <NavLink label="Galleries" href={GALLERIES} />

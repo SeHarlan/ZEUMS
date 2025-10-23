@@ -11,6 +11,7 @@ import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGall
 import useGalleryById from "@/hooks/useGalleryById";
 
 import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
+import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
 import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
@@ -40,7 +41,7 @@ const NewItemForm: FC<NewItemFormProps> = ({
   galleryId,
   buttonClassName,
   buttonVariant = "default",
-  buttonText = "Add Content",
+  buttonText = `Add ${GALLERY_ITEM_LABEL.capFullPlural}`,
 }) => {
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { user, revalidateUser } = useUser();
@@ -86,8 +87,8 @@ const NewItemForm: FC<NewItemFormProps> = ({
     }
 
     return {
-      title: "Add Content",
-      description: `Add content to ${gallery?.title || "your gallery"}.`,
+      title: `Add ${GALLERY_ITEM_LABEL.capPlural}`,
+      description: `Add content to '${gallery?.title}'`,
     };
   };
   const headerText = getHeaderText();
