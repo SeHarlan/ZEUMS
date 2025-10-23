@@ -1,6 +1,6 @@
 import { EntrySource } from "@/types/entry";
 import { z } from "zod";
-import { urlSchema } from "./urlSchema";
+import { optionalUrlSchema } from "./urlSchema";
 
 // Helper function to validate social media handles (not URLs)
 const validateSocialHandle = (value: string | undefined) => {
@@ -52,7 +52,7 @@ export const profileDisplayFormSchema = z.object({
     tiktok: socialHandleSchema,
     telegram: socialHandleSchema,
     discord: socialHandleSchema,
-    website: urlSchema,
+    website: optionalUrlSchema,
     // facebook: socialHandleSchema,
   }),
   primaryTimeline: z.nativeEnum(EntrySource),

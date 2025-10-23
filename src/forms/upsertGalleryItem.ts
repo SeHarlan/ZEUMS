@@ -1,6 +1,6 @@
+import { GalleryItemTypes } from "@/types/galleryItem";
 import { z } from "zod";
 import { urlSchema } from "./urlSchema";
-import { GalleryItemTypes } from "@/types/galleryItem";
 
 // Form schema with Zod validation
 export const galleryItemFormSchema = z.object({
@@ -25,7 +25,7 @@ export const galleryItemFormSchema = z.object({
         text: z.string().min(1, {
           message: "Button text is required.",
         }),
-        url: urlSchema,
+        url: urlSchema
       })
     )
     .max(3, {
