@@ -29,8 +29,6 @@ const BasicNavDialog = () => {
     return () => clearTimeout(timer);
   }, []);
 
-
-
   return (
     <div
       ref={buttonRef}
@@ -57,7 +55,7 @@ const BasicNavDialog = () => {
         <div className={cn("flex flex-col gap-8")}>
           <GetStartedButton disabled={!showButton} />
 
-          <LinkButton href={aboutPath} variant="secondary" disabled={!showButton}>
+          <LinkButton href={aboutPath} variant="outline" disabled={!showButton}>
             Learn More
           </LinkButton>
         </div>

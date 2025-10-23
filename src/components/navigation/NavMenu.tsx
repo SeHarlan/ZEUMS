@@ -53,9 +53,7 @@ const NavMenu: FC = () => {
         onOpenChange={setSearchAssetOpen}
       />
 
-      <NavigationMenuList
-        className="gap-0 md:gap-1"
-      >
+      <NavigationMenuList className="gap-0 md:gap-1">
         <NavigationMenuItem className="size-9">
           <LinkButton
             href={HOME}
@@ -118,14 +116,12 @@ const NavMenu: FC = () => {
           />
 
           <NavigationMenuLink asChild>
-            <LinkButton
-              href={EDIT_PROFILE_ACCOUNT}
+            <Button
               className={cn(
-                "order-7 md:order-6 flex-row",
+                "order-7 md:order-6 flex-row cursor-auto",
                 !loggedIn && "font-serif" //for default Z when no user
               )}
               variant="secondary"
-              disabled={!loggedIn}
             >
               {loggedIn ? userDisplayName : noUserDisplayName}
 
@@ -142,7 +138,7 @@ const NavMenu: FC = () => {
                   </TooltipContent>
                 </Tooltip>
               )}
-            </LinkButton>
+            </Button>
           </NavigationMenuLink>
         </NavDropDown>
       </NavigationMenuList>

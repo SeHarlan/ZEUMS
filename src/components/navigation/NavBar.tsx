@@ -9,6 +9,7 @@ import { useNavBarActions } from '@/context/NavBarActionsProvider';
 import { useReturnPath } from '@/hooks/useReturnPath';
 import { cn } from '@/utils/ui-utils';
 import { useAtom } from "jotai";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import NavMenu from './NavMenu';
 import SupportDialog from './SupportDialog';
 
@@ -29,16 +30,14 @@ const NavBar: FC = () => {
   }
 
   return (
-    <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50" >
+    <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50">
       {/* Back Button - Left side */}
       {returnPath && (
         <LinkButton
           href={returnPath}
           variant="outline"
           size="icon"
-          className={cn(
-            "fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-12 md:size-10"
-          )}
+          className={cn("fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-10")}
         >
           <ArrowLeft className="size-5" />
         </LinkButton>
@@ -52,9 +51,8 @@ const NavBar: FC = () => {
           "transition-all duration-400 ease-in-out",
           "relative left-1/2 -translate-x-1/2",
           "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
-          menuOpen ? "top-4 animate-in " : "-top-[14vh] animate-out ",
+          menuOpen ? "top-2 animate-in " : "-top-[14vh] animate-out ",
           "md:top-4 lg:top-6 "
-          // "md:hover:animate-in",
         )}
       >
         <NavMenu />
@@ -63,27 +61,37 @@ const NavBar: FC = () => {
       {/* Menu Button - Right side */}
       <div
         className={cn(
-          "flex flex-col-reverse md:flex-row items-end gap-3 fixed z-90 right-4 lg:right-8",
-          "top-4 lg:top-8"
+          "flex flex-col-reverse md:flex-row  items-end gap-3 fixed z-90 right-4 lg:right-8",
+          "top-4 lg:top-8 overflow-hidden"
         )}
       >
         <div
           className={cn(
-            "relative flex flex-col md:flex-row items-end md:items-center gap-3 duration-400 ease-in-out",
-            "fill-mode-forwards zoom-in-90 fade-in-0 zoom-out-90 fade-out-0",
-            menuOpen ? "right-0 animate-in " : "-right-[200%] animate-out",
-            "md:right-0 ",
-            // "md:hover:animate-in"
+            "relative flex flex-col-reverse md:flex-row flex-wrap items-end md:items-center gap-3 duration-400",
+            "fill-mode-forwards zoom-in-80 fade-in-0 zoom-out-80 fade-out-0",
+            menuOpen
+              ? "top-0 right-0 animate-in "
+              : "right-0 md:-right-full -top-36 md:top-0 animate-out pointer-events-none"
           )}
         >
           {actions}
+
           <Button
             onClick={handleSupportClick}
             size="icon"
             variant="outline"
-            className="size-12 md:size-10"
+            className="size-10"
           >
-            <MessageCircleQuestionIcon className="size-6" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <MessageCircleQuestionIcon className="size-6" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                Need help?
+              </TooltipContent>
+            </Tooltip>
           </Button>
         </div>
 
@@ -92,7 +100,7 @@ const NavBar: FC = () => {
           size="icon"
           onClick={toggleMenu}
           ref={buttonRef}
-          className="size-12 md:size-10"
+          className="size-10 z-20"
         >
           {menuOpen ? (
             <XIcon className="size-5.5" />

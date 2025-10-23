@@ -2,9 +2,11 @@
 
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
+import { ShareButton } from "@/components/navigation/ShareButton";
 import EntryBase from "@/components/timeline/EntryBase";
 import ProfileHero from "@/components/timeline/ProfileHero";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
+import { NavBarActions } from "@/context/NavBarActionsProvider";
 import useUserByUsername from "@/hooks/useUserByUsername";
 import { useParams } from "next/navigation";
 
@@ -15,6 +17,9 @@ export default function UserTimelinePage() {
 
   return (
     <PageContainer maxWidth="large" noPadding>
+      <NavBarActions>
+        <ShareButton />
+      </NavBarActions>
       <FeedbackWrapper
         isLoading={isLoading}
         isError={isError}
