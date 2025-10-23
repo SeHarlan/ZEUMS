@@ -4,6 +4,7 @@ import { editTimelineSourceAtom } from "@/atoms/dashboard";
 import { PAGE_PADDING_X } from "@/components/general/PageContainer";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
 import { useUser } from "@/context/UserProvider";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { EntrySource } from "@/types/entry";
 import { useAtom } from "jotai/react";
 import { FC } from "react";
@@ -33,7 +34,7 @@ const EditTimeline: FC = () => {
             source={source}
             buttonVariant="outline"
             buttonClassName="h-40 rounded-lg mb-10"
-            buttonText="Add your first content!"
+            buttonText={`Add your first ${TIMELINE_ENTRY_LABEL.fullPlural}!`}
           />
           </div>
       ) : (

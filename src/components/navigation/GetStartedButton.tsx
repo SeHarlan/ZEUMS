@@ -1,10 +1,10 @@
 "use client";
 
-import { useUser } from "@/context/UserProvider";
-import { EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE } from "@/constants/clientRoutes";
-import { FC, useEffect, useState } from "react";
 import { Button, LinkButton } from "@/components/ui/button";
+import { EDIT_TIMELINE } from "@/constants/clientRoutes";
+import { useUser } from "@/context/UserProvider";
 import { useRouter } from "next/navigation";
+import { FC, useEffect, useState } from "react";
 
 
 const GetStartedButton: FC<{disabled?: boolean}> = ({disabled}) => {
@@ -20,7 +20,7 @@ const GetStartedButton: FC<{disabled?: boolean}> = ({disabled}) => {
 
   useEffect(() => {
     if (loggedIn && clicked) {
-      router.push(EDIT_PROFILE_ACCOUNT);
+      router.push(EDIT_TIMELINE);
     }
   }, [loggedIn, clicked, router]);
   
