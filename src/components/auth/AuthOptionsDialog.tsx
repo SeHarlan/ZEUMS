@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,20 +8,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { WalletIcon } from "lucide-react";
-import { FC, useEffect, useRef, useState } from "react";
+import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { OAuthProviderType } from "next-auth/providers/oauth-types";
-import { P } from "../typography/Typography";
-import { Separator } from "../ui/separator";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
-import { EmailIcon, GoogleIcon } from "../icons/Social";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { WalletIcon } from "lucide-react";
+import { OAuthProviderType } from "next-auth/providers/oauth-types";
 import { signIn } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import { FC, useEffect, useRef, useState } from "react";
+import { EmailIcon, GoogleIcon } from "../icons/Social";
+import { P } from "../typography/Typography";
+import { Separator } from "../ui/separator";
 interface AuthOptionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -77,9 +77,9 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xs">
         <DialogHeader>
-          <DialogTitle>Sign in to {TITLE_COPY}</DialogTitle>
+          <DialogTitle className="text-center">Sign in to {TITLE_COPY}</DialogTitle>
           <DialogDescription className="sr-only">
             Sign in options
           </DialogDescription>
@@ -88,7 +88,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
         <div className="space-y-3">
           <Button
             onClick={handleLoginWithWallet}
-            className={cn("w-full", !loading && "justify-start")}
+            className={cn("w-full")}
             loading={loading}
           >
             <WalletIcon />
@@ -105,7 +105,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
           <Button
             onClick={handleLoginWithEmail}
             variant="outline"
-            className={cn("w-full", !loading && "justify-start")}
+            className={cn("w-full")}
             loading={loading}
           >
             <EmailIcon />
@@ -115,7 +115,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
           <Button
             onClick={() => handleLoginWithProvider("google")}
             variant="outline"
-            className={cn("w-full", !loading && "justify-start")}
+            className={cn("w-full")}
             loading={loading}
           >
             <GoogleIcon/>

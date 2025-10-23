@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,20 +8,20 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import Link from 'next/link';
-import { ABOUT, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE, GALLERIES, HOME, NOT_FOUND, TIMELINES, USER_TIMELINE } from '@/constants/clientRoutes';
-import LoginButton from "../general/LoginButton"
-import { cn, truncate } from "@/utils/ui-utils";
-import { useUser } from "@/context/UserProvider";
 import { Separator } from "@/components/ui/separator";
-import { Button, LinkButton } from "@/components/ui/button";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { ABOUT, EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE, GALLERIES, HOME, NOT_FOUND, TIMELINES, USER_TIMELINE } from '@/constants/clientRoutes';
+import { useUser } from "@/context/UserProvider";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import SearchAssetDialog from "../assets/SearchAssetDialog";
-import { P } from "../typography/Typography";
-import Logo from "../general/Logo";
+import { cn, truncate } from "@/utils/ui-utils";
 import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { InfoIcon } from "lucide-react";
+import Link from 'next/link';
+import { FC, useState } from "react";
+import SearchAssetDialog from "../assets/SearchAssetDialog";
+import LoginButton from "../general/LoginButton";
+import Logo from "../general/Logo";
+import { P } from "../typography/Typography";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const NavMenu: FC = () => {
@@ -53,7 +53,9 @@ const NavMenu: FC = () => {
         onOpenChange={setSearchAssetOpen}
       />
 
-      <NavigationMenuList className="gap-0 md:gap-1">
+      <NavigationMenuList
+        className="gap-0 md:gap-1"
+      >
         <NavigationMenuItem className="size-9">
           <LinkButton
             href={HOME}
@@ -66,10 +68,7 @@ const NavMenu: FC = () => {
         </NavigationMenuItem>
 
         <NavDropDown trigger={"Explore"}>
-          <NavLink
-            label={`About ${TITLE_COPY}`}
-            href={ABOUT}
-          />
+          <NavLink label={`About ${TITLE_COPY}`} href={ABOUT} />
           <Button
             variant="ghost"
             className={cn("w-full")}
@@ -77,8 +76,8 @@ const NavMenu: FC = () => {
           >
             Search Assets
           </Button>
-          <NavLink label="Timelines" href={TIMELINES}  />
-          <NavLink label="Galleries" href={GALLERIES}  />
+          <NavLink label="Timelines" href={TIMELINES} />
+          <NavLink label="Galleries" href={GALLERIES} />
         </NavDropDown>
 
         <NavDropDown trigger={"Manage"}>
@@ -86,20 +85,19 @@ const NavMenu: FC = () => {
             label="Account Settings"
             href={EDIT_PROFILE_ACCOUNT}
             disabled={!loggedIn}
-            className="order-1" 
+            className="order-1"
           />
           <NavLink
             label="My Timeline"
             href={EDIT_TIMELINE}
             disabled={!loggedIn}
             className="order-2"
-            
           />
           <NavLink
             label="My Galleries"
             href={EDIT_GALLERIES}
             disabled={!loggedIn}
-            className="order-3" 
+            className="order-3"
           />
 
           <Separator className="w-full md:col-span-2 order-4" />
@@ -129,9 +127,7 @@ const NavMenu: FC = () => {
               variant="secondary"
               disabled={!loggedIn}
             >
-              <P>
-                {loggedIn ? userDisplayName : noUserDisplayName}
-              </P>
+              {loggedIn ? userDisplayName : noUserDisplayName}
 
               {walletMismatch && (
                 <Tooltip>
@@ -140,8 +136,8 @@ const NavMenu: FC = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     <P>
-                      You are currently connected to a wallet not associated with
-                      your account
+                      You are currently connected to a wallet not associated
+                      with your account
                     </P>
                   </TooltipContent>
                 </Tooltip>
@@ -162,14 +158,14 @@ interface NavDropDownProps {
 }
 const NavDropDown: FC<NavDropDownProps> = ({ children, trigger }) => { 
   return (
-    <NavigationMenuItem >
-      <NavigationMenuTrigger
-        className="rounded-sm text-md px-2 md:px-4"
-      >
+    <NavigationMenuItem>
+      <NavigationMenuTrigger className="rounded-sm text-md px-2 md:px-4">
         {trigger}
       </NavigationMenuTrigger>
       <NavigationMenuContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2"
+        >
           {children}
         </div>
       </NavigationMenuContent>

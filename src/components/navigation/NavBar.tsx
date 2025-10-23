@@ -1,17 +1,19 @@
 "use client";
 
-import React, { FC, useRef, useState } from 'react';
 import { Button, LinkButton } from "@/components/ui/button";
-import { MenuIcon, XIcon, ArrowLeft, MessageCircleQuestionIcon } from 'lucide-react';
+import { ArrowLeft, MenuIcon, MessageCircleQuestionIcon, XIcon } from 'lucide-react';
+import { FC, useRef, useState } from 'react';
 
-import { cn } from '@/utils/ui-utils';
-import NavMenu from './NavMenu';
-import { useReturnPath } from '@/hooks/useReturnPath';
+import { navBarVisibleAtom } from "@/atoms/navigation";
 import { useNavBarActions } from '@/context/NavBarActionsProvider';
+import { useReturnPath } from '@/hooks/useReturnPath';
+import { cn } from '@/utils/ui-utils';
+import { useAtom } from "jotai";
+import NavMenu from './NavMenu';
 import SupportDialog from './SupportDialog';
 
 const NavBar: FC = () => {
-  const [menuOpen, setMenuOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useAtom(navBarVisibleAtom);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -19,34 +21,15 @@ const NavBar: FC = () => {
   const { actions } = useNavBarActions();
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen((prev) => !prev);
   };
 
   const handleSupportClick = () => { 
     setSupportOpen(true);
   }
 
-  // useEffect(() => {
-  //   // Close the menu when the user clicks outside of it
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     const menu = menuRef.current;
-  //     const button = buttonRef.current;
-  //     if (!menu?.contains(target) && !button?.contains(target)) {
-  //       setMenuOpen(false);
-  //     } else {
-  //       event.preventDefault();
-  //     }
-  //   };
-
-  //   document.addEventListener("click", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("click", handleClickOutside);
-  //   };
-  // }, []);
-
   return (
-    <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50">
+    <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50" >
       {/* Back Button - Left side */}
       {returnPath && (
         <LinkButton
