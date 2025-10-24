@@ -43,5 +43,9 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 };
 
 export const copyTextToClipboard = async (text: string) => {
-  await navigator.clipboard.writeText(text);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    console.error("Failed to copy text to clipboard: ", error);
+  }
 };
