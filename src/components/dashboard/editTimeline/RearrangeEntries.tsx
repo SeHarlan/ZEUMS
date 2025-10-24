@@ -304,7 +304,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
   ) : null;
 
   const useTitle = Boolean(entry.title);
-  const text = entry.title || entry.description || `Untitled ${TIMELINE_ENTRY_LABEL}`;
+  const text = entry.title || entry.description || `Untitled ${TIMELINE_ENTRY_LABEL.capFullSingular}`;
 
   return (
     <div
