@@ -6,6 +6,7 @@ import { Form } from "@/components/ui/form";
 import { ENTRY_DATES_ROUTE, ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { DateMap } from "@/types/asset";
 import { BaseEntry, EntrySource, EntryTypes, isBlockchainAssetEntry, isGalleryEntry, TimelineEntry } from "@/types/entry";
 import { getFirstBlockchainItem } from "@/utils/gallery";
@@ -130,7 +131,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
         const { updatedEntry } = response.data;
         const parsedUpdatedEntry = parseEntryDate(updatedEntry)
 
-        toast.success("Entry updated!");
+        toast.success(`${TIMELINE_ENTRY_LABEL.capFullSingular} updated successfully!`);
 
         //Update the users timeline context with the edited entry
         setUser((prevUser) => {
@@ -153,7 +154,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
         onClose();
       })
       .catch((error) => {
-        toast.error("Failed to update entry.");
+        toast.error(`Failed to update ${TIMELINE_ENTRY_LABEL.fullSingular}.`);
         handleClientError({
           error,
           location: "EditEntryForm_onSubmit",
@@ -173,7 +174,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
       triggerButton={null}
       open={isOpen}
       onOpenChange={handleOpenChange}
-      title="Update Content"
+      title={`Update ${TIMELINE_ENTRY_LABEL.capFullSingular}`}
       description="Edit existing content."
       actionButton={
         <Button
@@ -181,7 +182,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
           className="w-full"
           loading={submitting}
         >
-          <P>Update Entry</P>
+          <P>Update {TIMELINE_ENTRY_LABEL.capFullSingular}</P>
         </Button>
       }
     >

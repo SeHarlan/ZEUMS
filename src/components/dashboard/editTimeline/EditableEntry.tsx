@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useEditEntry } from "@/context/EditEntryProvider";
 import { useUser } from "@/context/UserProvider";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey } from "@/utils/timeline";
 import axios from "axios";
@@ -34,7 +35,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
       .then((response) => {
         const { acknowledged, deletedCount } = response.data;
         if (acknowledged && deletedCount > 0) {
-          toast.info("Entry deleted successfully.");
+          toast.info(`${TIMELINE_ENTRY_LABEL.capFullSingular} deleted successfully.`);
 
           setUser((prevUser) => {
             if (!prevUser) return prevUser;
@@ -55,7 +56,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
         }
       })
       .catch((error) => {
-        toast.error("Failed to delete entry.");
+        toast.error(`Failed to delete ${TIMELINE_ENTRY_LABEL.capFullSingular}.`);
         handleClientError({
           error,
           location: "EditableEntry_handleDelete",
@@ -68,7 +69,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
 
   return (
     <div className="relative group/entry-preview">
-      <div className="z-10 absolute -top-5 -right-5 flex gap-2 group-hover/entry-preview:opacity-100 opacity-100 sm:opacity-25 transition-opacity duration-200">
+      <div className="z-10 absolute -top-5 right-6 sm:-right-5 flex gap-2 group-hover/entry-preview:opacity-100 opacity-100 sm:opacity-25 transition-opacity duration-200">
         <Button
           onClick={handleDelete}
           variant="destructive"

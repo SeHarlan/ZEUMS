@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PageContainer } from "@/components/general/PageContainer";
-import GlitchFeedback from "@/components/general/GlitchFeedback";
-import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { SUBTITLE_COPY } from "@/textCopy/mainCopy";
 import SearchAssetDialog from "@/components/assets/SearchAssetDialog";
-import { NavBarActions } from "@/context/NavBarActionsProvider";
-import { Button } from "@/components/ui/button";
-import { SearchIcon } from "lucide-react";
+import GlitchFeedback from "@/components/general/GlitchFeedback";
+import { PageContainer } from "@/components/general/PageContainer";
 import BasicNavDialog from "@/components/navigation/BasicNavDialog";
+import { Button } from "@/components/ui/button";
+import { NavBarActions } from "@/context/NavBarActionsProvider";
+import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { SearchIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function SearchPage() {
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
@@ -26,7 +25,7 @@ export default function SearchPage() {
           variant={"outline"}
           size="icon"
           onClick={() => setSearchAssetOpen((prev) => !prev)}
-          className="size-12 md:size-10"
+          className="size-10"
         >
           <SearchIcon className="size-5" />
         </Button>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ENTRY_ENTRIES_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource, EntryTypes, TimelineBlockchainEntryCreation, TimelineEntry } from "@/types/entry";
 import { handleClientError } from "@/utils/handleError";
@@ -110,7 +111,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({
         handleOpenChange(false);
       })
       .catch((error) => {
-        toast.error("Failed to create new entries.");
+        toast.error(`Failed to create new ${TIMELINE_ENTRY_LABEL.capFullPlural}.`);
         handleClientError({
           error,
           location: "AddBlockchainEntries_handleAssetsAdd",

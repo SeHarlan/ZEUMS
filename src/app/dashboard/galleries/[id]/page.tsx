@@ -22,8 +22,8 @@ const EditGalleryPage = () => {
   return (
     <PageContainer maxWidth="large">
       <PageHeading
-        title={`${gallery?.title || "Gallery"}`}
-        subtitle="Curate and manage your gallery content"
+        title="Manage Gallery"
+        subtitle="A focused collection of related artworks"
       />
 
       <PageTurnLeft path={EDIT_GALLERIES} />
@@ -44,7 +44,6 @@ const EditGalleryPage = () => {
           <GalleryHero gallery={gallery} editMode />
 
           <EditGalleryItems galleryId={id} />
-
         </Card>
       </FeedbackWrapper>
     </PageContainer>

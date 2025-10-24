@@ -1,26 +1,25 @@
 "use client";
-import { FC, useMemo, useState } from "react";
-import { StatelessFormItem } from "@/components/general/StatelessFormItem";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useUser } from "@/context/UserProvider";
-import axios from "axios";
-import { UserType } from "@/types/user";
-import { USER_ROUTE } from "@/constants/serverRoutes";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
-import { PublicKey } from "@solana/web3.js";
-import { CircleCheckIcon, WalletIcon, XIcon } from "lucide-react";
-import { cn } from "@/utils/ui-utils";
 import { AuthLinkingDialog } from "@/components/auth/AuthLinkingDialog";
+import { StatelessFormItem } from "@/components/general/StatelessFormItem";
+import { P } from "@/components/typography/Typography";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { USER_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
 import { useEmailValidation } from "@/hooks/useEmailValidation";
 import { useUsernameValidation } from "@/hooks/useUsernameValidation";
 import { useSolanaWalletVerification } from "@/hooks/useWalletVerification";
-import { Badge } from "@/components/ui/badge";
-import { truncate } from "@/utils/ui-utils";
-import { P } from "@/components/typography/Typography";
-import { getWalletsByChain, parseUserDates } from "@/utils/user";
+import { UserType } from "@/types/user";
 import { ChainIdsEnum } from "@/types/wallet";
+import { handleClientError } from "@/utils/handleError";
+import { cn, truncate } from "@/utils/ui-utils";
+import { getWalletsByChain, parseUserDates } from "@/utils/user";
+import { PublicKey } from "@solana/web3.js";
+import axios from "axios";
+import { CircleCheckIcon, WalletIcon, XIcon } from "lucide-react";
+import { FC, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const ProfileAccountForm: FC = () => {
   const { user, setUser } = useUser();
@@ -131,7 +130,7 @@ const ProfileAccountForm: FC = () => {
       <div>
         <StatelessFormItem
           label="Verified Email"
-          description="A verified email allows you to log in anywhere using accounts linked to your email."
+          description="A verified email allows you to log in anywhere using accounts linked to your email. Never shared or used without consent."
           errorMessage={emailError}
         >
           {verifiedEmail ? (
@@ -157,9 +156,6 @@ const ProfileAccountForm: FC = () => {
             </div>
           )}
         </StatelessFormItem>
-        <P className="text-muted-foreground text-sm italic">
-          Never shared or used without consent
-        </P>
       </div>
 
       <StatelessFormItem

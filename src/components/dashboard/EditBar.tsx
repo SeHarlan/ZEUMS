@@ -24,7 +24,7 @@ export const EditBar: FC<EditBarProps> = ({ children, isOpen, setIsOpen }) => {
           variant="outline"
           size="icon"
           onClick={() => setIsOpen(true)}
-          className="size-12 md:size-10"
+          className="size-10"
         >
           <Maximize2Icon />
         </Button>

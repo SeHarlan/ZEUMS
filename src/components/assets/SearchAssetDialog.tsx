@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrefixInput } from "@/components/ui/input";
-import { GiftIcon, SearchIcon } from "lucide-react";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
-import { ChainIdsEnum } from "@/types/wallet";
-import axios from "axios";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import AssetThumbnailCard from "./AssetThumbnailCard";
-import { handleServerError } from "@/utils/handleError";
 import { SEARCH_ASSETS_ROUTE, SEARCH_PARAM, SEARCH_RANDOMIZE_KEY } from "@/constants/serverRoutes";
-import { cn } from "@/utils/ui-utils";
-import ScrollableDialog from "../general/ScrollableDialog";
-import { P } from "../typography/Typography";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { ChainIdsEnum } from "@/types/wallet";
 import { isValidSolanaAddress } from "@/utils/asset";
-import Link from "next/link";
-import { MallowIcon } from "../icons/Social";
+import { handleServerError } from "@/utils/handleError";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import { cn } from "@/utils/ui-utils";
+import axios from "axios";
+import { GiftIcon, SearchIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import ScrollableDialog from "../general/ScrollableDialog";
+import { MallowIcon } from "../icons/Social";
+import { P } from "../typography/Typography";
+import AssetThumbnailCard from "./AssetThumbnailCard";
 
 interface SearchAssetDialogProps {
   open: boolean;
@@ -107,14 +107,14 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
       open={open}
       onOpenChange={onOpenChange}
       trigger={null}
-      title="Search Solana Blockchain Assets"
+      title="Search Solana Blockchain Artworks"
       wrapperClassName="bg-popover-blur sm:max-w-2xl"
     >
       <div className="space-y-1">
         <PrefixInput
           wrapperClassName="bg-background"
           icon={<SearchIcon className="size-4 text-muted-foreground" />}
-          placeholder="Search for assets by name or exact mint address"
+          placeholder="Search for art by name or exact mint address"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -136,7 +136,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
         <div className="w-full sm:w-auto">
           {searchResults.length && total > searchResults.length ? (
             <P className="text-sm text-muted-foreground">
-              Showing the most recent {searchResults.length} assets...
+              Showing the most recent {searchResults.length} artworks...
             </P>
           ) : null}
         </div>
@@ -149,7 +149,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
             className="w-full sm:w-43"
           >
             <GiftIcon />
-            Find random asset
+            Find random art
           </Button>
           <Button
             onClick={() => handleSearch()}
@@ -181,7 +181,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
           </div>
         ) : (
           <div className="text-sm text-center py-8  ">
-            No assets found. Try a different search term.
+            No art found. Try a different search term.
           </div>
         )
       ) : null}

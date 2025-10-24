@@ -1,6 +1,7 @@
 import GalleryBase from "@/components/gallery/GalleryBase";
 import { PAGE_PADDING_X } from "@/components/general/PageContainer";
 import useGalleryById from "@/hooks/useGalleryById";
+import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy";
 import { FC } from "react";
 import EditableItem from "./EditableItem";
 import { EditGalleryBar } from "./EditGalleryBar";
@@ -24,7 +25,7 @@ const EditGalleryItems: FC<EditGalleryItemsProps> = ({ galleryId }) => {
             galleryId={galleryId}
             buttonVariant="outline"
             buttonClassName="h-40"
-            buttonText="Create First Gallery Item"
+            buttonText={`Add your first ${GALLERY_ITEM_LABEL.fullPlural}!`}
           />
         </div>
       ) : (

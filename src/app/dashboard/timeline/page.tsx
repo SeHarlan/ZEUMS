@@ -8,21 +8,20 @@ import { Card } from "@/components/ui/card";
 import { EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
 import { useUser } from "@/context/UserProvider";
 
-
 export default function EditTimelinePage() { 
   const { user } = useUser();
   return (
     <PageContainer maxWidth="large">
       <PageHeading
-        title="Timeline"
-        subtitle="Create and edit timeline entries"
+        title="Manage Timeline"
+        subtitle="Highlighted artworks, galleries, and words that create a cohesive entry point into your creative world"
       />
+
       <PageTurnLeft path={EDIT_PROFILE_ACCOUNT} />
       <PageTurnRight path={EDIT_GALLERIES} />
       <Card className="pt-0 overflow-hidden">
-        <ProfileHero publicUser={user} editMode/>
+        <ProfileHero publicUser={user} editMode />
         <EditTimeline />
-
       </Card>
     </PageContainer>
   );

@@ -37,7 +37,7 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
   const galleryKey = getGalleryKey(source);
 
   const sourceText = source.charAt(0).toUpperCase() + source.slice(1);
-  const buttonText = `Create New ${sourceText} Gallery`;
+  const buttonText = `Add New ${sourceText} Gallery`;
   
   const form = useForm<UpsertGalleryFormValues>({
     resolver: zodResolver(upsertGalleryFormSchema),

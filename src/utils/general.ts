@@ -41,3 +41,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
   
   return debounced as T & { cancel: () => void };
 };
+
+export const copyTextToClipboard = async (text: string) => {
+  await navigator.clipboard.writeText(text);
+};

@@ -9,6 +9,7 @@ import { ENTRY_DATES_ROUTE, ENTRY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import { BLOCKCHAIN_ENTRY_COPY, ENTRY_TYPE_COPY, GALLERY_ENTRY_COPY, TEXT_ENTRY_COPY } from "@/textCopy/entryTypes";
+import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { DateMap, ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource, EntryTypes, TimelineEntry, TimelineEntryCreation } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
@@ -27,7 +28,7 @@ import AddBlockchainEntriesButton from "../AddBlockchainEntries";
 import NewEntryFormContent from "./NewEntryFormContent";
 
 const formId = "new-entry-form";
-
+const defaultTitle = `Add ${TIMELINE_ENTRY_LABEL.capPlural}`;
 interface NewEntryFormProps { 
   buttonClassName?: string;
   buttonVariant?: "default" | "outline" | "ghost" | "link" | "secondary";
@@ -35,7 +36,7 @@ interface NewEntryFormProps {
   source: EntrySource;
 }
 
-const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVariant = "default", buttonText = "Add Content"}) => {
+const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVariant = "default", buttonText = defaultTitle}) => {
   const { setUser } = useUser()
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -78,8 +79,8 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
     }
 
     return {
-      title: "Add Content",
-      description: `Add content to your ${source} timeline.`
+      title: defaultTitle,
+      description: `Connect galleries or add content to your ${source} timeline.`
     }
   }
   const headerText = getHeaderText();
@@ -240,7 +241,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
         const { createdEntry } = response.data;
         const parsedCreatedEntry = parseEntryDate(createdEntry);
 
-        toast.success("New entry created!");
+        toast.success(`New ${TIMELINE_ENTRY_LABEL.fullSingular} created successfully!`);
 
         //Update the users timeline context with the new entry
         setUser((prevUser) => {
@@ -263,7 +264,7 @@ const NewEntryForm: FC<NewEntryFormProps> = ({source,buttonClassName, buttonVari
         fullFormReset();
       })
       .catch((error) => {
-        toast.error("Failed to create new entry.");
+        toast.error(`Failed to create new ${TIMELINE_ENTRY_LABEL.fullSingular}.`);
         handleClientError({
           error,
           location: "NewEntryForm_onSubmit",

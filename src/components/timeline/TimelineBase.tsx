@@ -32,21 +32,22 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
       return (
         <Fragment key={entry._id.toString()}>
           {showYear && (
-            <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
-              {entryYear}
-            </H2>
-          )}
+             <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
+               {entryYear}
+             </H2>
+           )}
           {showDate && (
             <div className="flex justify-center">
               <div
                 className={cn(
                   "flex items-center",
                   flipDate
-                    ? "-translate-x-1/2 flex-row-reverse"
-                    : "translate-x-1/2"
+                  ? "-translate-x-1/2 flex-row-reverse"
+                  : "translate-x-1/2"
                 )}
-              >
-                <div className="z-0 h-px w-4 border-2 border-dashed border-muted" />
+                >
+             
+                <div className="z-0 h-px w-5 border-2 border-dashed border-muted" />
                 <P className={cn("text-lg text-muted-foreground px-2")}>
                   {entryDate}
                 </P>

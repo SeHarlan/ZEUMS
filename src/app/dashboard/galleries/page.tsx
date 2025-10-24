@@ -11,13 +11,13 @@ export default function EditGalleriesPage() {
   return (
     <PageContainer maxWidth="large">
       <PageHeading
-        title="Galleries"
-        subtitle="Create and manage your galleries"
+        title="Manage Galleries"
+        subtitle="Curated collections that expand on your creative story."
       />
       <PageTurnLeft path={EDIT_TIMELINE} />
       <Card>
         <CardContent>
-          <EditGalleries  />
+          <EditGalleries />
         </CardContent>
       </Card>
     </PageContainer>
