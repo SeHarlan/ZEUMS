@@ -1,21 +1,20 @@
 "use client"
 
-import Image from "next/image";
-import { FC, useState, useEffect } from "react";
+import { useImageFallback } from "@/hooks/useImageFallback";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { UserAssetEntry } from "@/types/entry";
+import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import { getMediaUrl } from "@/utils/media";
-import { 
-  ImageOffIcon, 
-  MonitorOffIcon 
-} from "lucide-react";
 import { cn } from "@/utils/ui-utils";
-import { MediaCategory } from "@/types/media";
-import VideoViewer from "../media/VideoViewer";
+import {
+  ImageOffIcon,
+  MonitorOffIcon
+} from "lucide-react";
+import Image from "next/image";
+import { FC, useState } from "react";
 import HtmlViewer from "../media/HtmlViewer";
 import ModelViewer from "../media/ModelViewer";
-import { UserAssetEntry } from "@/types/entry";
-import { useImageFallback } from "@/hooks/useImageFallback";
-import { isBlockchainImage, isUserImage } from "@/types/media";
-import { ParsedBlockChainAsset } from "@/types/asset";
+import VideoViewer from "../media/VideoViewer";
 
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
@@ -44,11 +43,6 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   const handleMediaError = () => {
     setMediaError(true);
   };
-
-  // Reset error state when asset changes
-  useEffect(() => {
-    setMediaError(false);
-  }, [asset.title, media.category]);
 
   const renderContent = () => {
     if (mediaError) {

@@ -37,9 +37,6 @@ const EditGalleryItemFormContent: FC<EditGalleryItemFormContentProps> = ({
 
 
   const isGalleryItem = galleryId && selectedItemType === GalleryItemTypes.Gallery;
-  const isBlockchainItem =
-    selectedItemType === GalleryItemTypes.BlockchainAsset;
-  
 
   return (
     <div className="flex flex-col gap-y-6 py-4">

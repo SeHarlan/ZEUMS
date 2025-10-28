@@ -34,7 +34,7 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
       .then((response) => {
         const { acknowledged, deletedCount } = response.data;
         if (acknowledged && deletedCount > 0) {
-          toast.info("Item deleted successfully.");
+          toast("Item deleted successfully.");
 
           mutateGallery((prev) => {
             if (!prev) return prev;

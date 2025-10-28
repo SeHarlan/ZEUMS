@@ -6,6 +6,7 @@ import { GalleryHero } from "@/components/gallery/GalleryHero";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
+import { GalleryOnboardingPopover } from "@/components/onboarding/GalleryOnbaording";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,12 +26,15 @@ const EditGalleryPage = () => {
         title="Manage Gallery"
         subtitle="A focused collection of related artworks"
       />
-
       <PageTurnLeft path={EDIT_GALLERIES} />
       <NavBarActions>
-        <LinkButton href={USER_GALLERY(id)} variant="outline">
-          <P className="">View Gallery</P>
-          <EyeIcon />
+        <LinkButton
+          href={USER_GALLERY(id)}
+          variant="outline"
+          className="size-10 md:w-fit"
+        >
+          <EyeIcon className="size-5 md:size-4" />
+          <P className="hidden md:block">View Gallery</P>
         </LinkButton>
       </NavBarActions>
       <FeedbackWrapper
@@ -46,6 +50,7 @@ const EditGalleryPage = () => {
           <EditGalleryItems galleryId={id} />
         </Card>
       </FeedbackWrapper>
+      <GalleryOnboardingPopover/>
     </PageContainer>
   );
 };

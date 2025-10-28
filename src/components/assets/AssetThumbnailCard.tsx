@@ -1,18 +1,18 @@
-import { FC, useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardFooter } from "../ui/card";
-import { P } from "../typography/Typography";
-import { cn } from "@/utils/ui-utils";
-import MediaThumbnail from "../media/MediaThumbnail";
-import { ParsedBlockChainAsset } from "@/types/asset";
+import { BANNER_RATIO } from "@/constants/ui";
 import { useAspectRatio } from "@/context/AspectRatioProvider";
-import { getImageAspectRatio, getMediaUrl } from "@/utils/media";
+import { ParsedBlockChainAsset } from "@/types/asset";
 import { ImageVariant, MediaCategory } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
-import { toast } from "sonner";
-import { BoxIcon, Code2Icon } from "lucide-react";
-import { BANNER_RATIO } from "@/constants/ui";
+import { getImageAspectRatio, getMediaUrl } from "@/utils/media";
+import { cn } from "@/utils/ui-utils";
 import { REQUEST_ABORTED_ERROR, REQUEST_FULL_ERROR, videoMetadataQueue } from "@/utils/videoMetadataPool";
+import { BoxIcon, Code2Icon } from "lucide-react";
+import { FC, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import LoadingSpinner from "../general/LoadingSpinner";
+import MediaThumbnail from "../media/MediaThumbnail";
+import { P } from "../typography/Typography";
+import { Card, CardContent, CardFooter } from "../ui/card";
 
 interface AssetThumbnailCardProps {
   asset: ParsedBlockChainAsset;
@@ -127,7 +127,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
       }
 
       if (error instanceof Error && error.message === REQUEST_FULL_ERROR) {
-        toast.info("Video asset queue is full", {
+        toast.info("Video loading queue is full", {
           description: "Please try again shortly",
         });
         return;

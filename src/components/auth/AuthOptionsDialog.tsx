@@ -1,5 +1,6 @@
 "use client";
 
+import { authLoadingAtom } from "@/atoms/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,11 +14,12 @@ import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useAtom } from "jotai";
 import { WalletIcon } from "lucide-react";
 import { OAuthProviderType } from "next-auth/providers/oauth-types";
 import { signIn } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import { EmailIcon, GoogleIcon } from "../icons/Social";
 import { P } from "../typography/Typography";
 import { Separator } from "../ui/separator";
@@ -32,7 +34,7 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
   const pathname = usePathname();
   const router = useRouter();
   const { setVisible } = useWalletModal();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useAtom(authLoadingAtom)
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const returnKey = getReturnKey(pathname);
@@ -68,7 +70,6 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
   };
 
   useEffect(() => {
-    setLoading(false);
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }

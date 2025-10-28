@@ -33,7 +33,6 @@ export const EditGalleryBar: FC<EditGalleryBarProps> = ({  galleryId }) => {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <EditGallerySettingsButton gallery={gallery} />
-        {/* <AddBlockchainGalleryItemsButton galleryId={galleryId} /> */}
         <RearrangeItemsButton galleryId={galleryId} />
       </div>
     </EditBar>

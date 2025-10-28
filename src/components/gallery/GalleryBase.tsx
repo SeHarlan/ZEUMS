@@ -31,9 +31,11 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   
   const PADDING = isDesktop ? PADDING_DESKTOP : PADDING_MOBILE;
 
+  const galleryItems = gallery?.items;
+
   const galleryRows = useMemo(() => {
-    if (!gallery?.items?.length) return [];
-    const galleryRows = initializeGalleryRows(gallery.items);
+    if (!galleryItems?.length) return [];
+    const galleryRows = initializeGalleryRows(galleryItems);
     const processedRows = processGalleryRows({
       galleryRows,
       gap: GAP,
@@ -44,7 +46,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
       maxHeight,
     });
     return cleanGalleryRows(processedRows);
-  }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
+  }, [galleryItems, PADDING, isDesktop, containerWidth, maxHeight]);
 
   return (
     <div className={cn("space-y-30 pb-30")} ref={containerRef}>

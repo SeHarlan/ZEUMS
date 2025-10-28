@@ -35,7 +35,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
       .then((response) => {
         const { acknowledged, deletedCount } = response.data;
         if (acknowledged && deletedCount > 0) {
-          toast.info(`${TIMELINE_ENTRY_LABEL.capFullSingular} deleted successfully.`);
+          toast(`${TIMELINE_ENTRY_LABEL.capFullSingular} deleted successfully.`);
 
           setUser((prevUser) => {
             if (!prevUser) return prevUser;
@@ -73,7 +73,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
         <Button
           onClick={handleDelete}
           variant="destructive"
-          disabled={disableButtons}
+          loading={deleting}
           size="icon"
         >
           <Trash2Icon />

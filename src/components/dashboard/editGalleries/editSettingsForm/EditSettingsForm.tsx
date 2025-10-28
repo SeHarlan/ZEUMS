@@ -70,7 +70,10 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   }, [reset, defaultValues, isOpen]);
 
   useEffect(() => {
-    if (editingGallery?.bannerImage && bannerImage === undefined) setBannerImage(editingGallery.bannerImage);
+    if (editingGallery?.bannerImage && bannerImage === undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBannerImage(editingGallery.bannerImage);
+    }
   }, [editingGallery?.bannerImage, bannerImage]);
 
 

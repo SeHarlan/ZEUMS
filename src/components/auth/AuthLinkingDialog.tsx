@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,19 +8,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { FC, useState } from "react";
-import { OAuthProviderType } from "next-auth/providers/oauth-types";
-import { cn } from "@/utils/ui-utils";
-import { EmailIcon, GoogleIcon } from "../icons/Social";
-import { usePathname, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { handleClientError } from "@/utils/handleError";
-import axios from "axios";
-import { toast } from "sonner";
 import { PENDING_AUTH_VERIFICATION_ROUTE } from "@/constants/serverRoutes";
-import { P } from "../typography/Typography";
+import { handleClientError } from "@/utils/handleError";
+import { cn } from "@/utils/ui-utils";
+import axios from "axios";
 import { InfoIcon } from "lucide-react";
+import { OAuthProviderType } from "next-auth/providers/oauth-types";
+import { signIn } from "next-auth/react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { FC, useState } from "react";
+import { toast } from "sonner";
+import { EmailIcon, GoogleIcon } from "../icons/Social";
+import { ONBOARDING_Z_INDEX } from "../onboarding/OnboardingPopover";
+import { P } from "../typography/Typography";
 
 interface AuthLinkingDialogProps {
   open: boolean;
@@ -93,7 +94,10 @@ export const AuthLinkingDialog: FC<AuthLinkingDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        style={{ zIndex: ONBOARDING_Z_INDEX + 3 }}
+      >
         <DialogHeader>
           <DialogTitle>Verifying Email</DialogTitle>
           <DialogDescription>Link this account to {email}</DialogDescription>

@@ -1,21 +1,17 @@
 import { editTimelineSourceAtom } from "@/atoms/dashboard";
+import { timelineOnboardingAtoms, TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useUser } from "@/context/UserProvider";
 import { isEntrySource } from "@/types/entry";
 import { getTimelineTabContent } from "@/utils/timeline";
 import { cn } from "@/utils/ui-utils";
-import { useAtom } from "jotai/react";
+import { useAtom, useAtomValue } from "jotai/react";
 import { Minimize2Icon } from "lucide-react";
 import { FC, useState } from "react";
 import { EditBar } from "../EditBar";
-import EditDisplayFormButton from "./editDisplayForm/EditDisplayForm";
+import EditProfileForm from "./editProfileForm/EditProfileForm";
 import NewEntryFormButton from "./newEntryForm/NewEntryForm";
 import RearrangeEntriesButton from "./RearrangeEntries";
 
@@ -23,6 +19,24 @@ export const EditTimelineBar:FC = () => {
   const { user } = useUser();
   const [tabValue, setTabValue] = useAtom(editTimelineSourceAtom);
   const [isOpen, setIsOpen] = useState(true);
+  const onboardingStage = useAtomValue(timelineOnboardingAtoms.stageAtom);
+  const onboardingActive = onboardingStage === "inProgress";
+
+  const { setStepRef: setChooseActiveSourceRef } = useTimelineSetter(
+    TimelineOnboardingKeys.ChooseActiveSource
+  );
+
+  const {
+    setStepRef: setEditProfileRef,
+    setStepComplete: setEditProfileComplete,
+  } = useTimelineSetter(TimelineOnboardingKeys.EditProfile);
+
+  const { setStepRef: setAddItemsRef, setStepComplete: setAddItemsComplete } =
+    useTimelineSetter(TimelineOnboardingKeys.AddItems);
+  
+    
+  const { setStepRef: setRearrangeItemsRef, setStepComplete: setRearrangeItemsComplete } = useTimelineSetter(TimelineOnboardingKeys.RearrangeItems);
+
 
   const source = tabValue;
   const content = getTimelineTabContent(user, true);
@@ -40,21 +54,16 @@ export const EditTimelineBar:FC = () => {
           value={tabValue}
           onValueChange={handleValueChange}
           className="mx-auto w-full"
+          ref={setChooseActiveSourceRef}
         >
           <TabsList className="w-full grid grid-cols-2 shadow-md h-fit p-0 border-none">
-            {content.map((item, index) => (
+            {content.map((item) => (
               <TabsTrigger
+                key={`timeline-tab-${item.value}`}
                 value={item.value}
                 primaryActive
               >
-                <Tooltip key={item.value}>
-                  <TooltipTrigger asChild>
-                    <P className="font-serif w-full h-full">{item.title}</P>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Edit your {item.value} timeline
-                  </TooltipContent>
-                </Tooltip>
+                <P className="font-serif w-full h-full">{item.title}</P>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -68,18 +77,26 @@ export const EditTimelineBar:FC = () => {
           <Minimize2Icon />
         </Button>
       </div>
-      <div
-        className={cn(
-          "grid gap-2 w-full",
-          "grid-cols-3"
-        )}
-      >
-        <EditDisplayFormButton buttonVariant="outline" />
-        <NewEntryFormButton source={source} buttonVariant="default" />
+      <div className={cn("grid gap-2 w-full", "grid-cols-3")}>
+        <EditProfileForm
+          buttonVariant="outline"
+          ref={setEditProfileRef}
+          onClick={setEditProfileComplete}
+          disableInteractOutside={onboardingActive}
+        />
+        <NewEntryFormButton
+          source={source}
+          buttonVariant="default"
+          ref={setAddItemsRef}
+          onClick={setAddItemsComplete}
+        />
+
         <RearrangeEntriesButton
           source={source}
           buttonVariant="outline"
-          buttonText="Rearange"
+          buttonText="Rearrange"
+          ref={setRearrangeItemsRef}
+          onClick={setRearrangeItemsComplete}
         />
       </div>
     </EditBar>

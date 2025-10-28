@@ -1,5 +1,6 @@
 "use client";
 
+import { rearrangeEntriesDrawerOpenAtom } from "@/atoms/dashboard";
 import SideDrawer from "@/components/general/SideDrawer";
 import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
@@ -24,10 +25,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import axios from "axios";
+import { useAtom } from "jotai";
 import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
 import type { BulkWriteResult } from "mongodb";
-import { FC, useMemo, useState } from "react";
+import { FC, forwardRef, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import NewEntryFormButton from "./newEntryForm/NewEntryForm";
 
 
 interface HoverData {
@@ -39,38 +42,35 @@ interface RearrangeEntriesProps {
   buttonClassName?: string;
   buttonVariant?: "default" | "outline" | "ghost" | "link" | "secondary";
   buttonText?: string;
+  onClick?: () => void;
 }
-const RearrangeEntries: FC<RearrangeEntriesProps> = ({
+const RearrangeEntries = forwardRef<HTMLButtonElement, RearrangeEntriesProps>(({
   source,
   buttonClassName,
   buttonVariant = "default",
   buttonText = "Rearrange Entries",
-}) => {
+  onClick,
+}, ref) => {
   const { user, setUser } = useUser();
 
   const [submitting, setSubmitting] = useState(false);
-  const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>(
-    []
-  );
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useAtom(rearrangeEntriesDrawerOpenAtom);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
+
   const timelineKey = getTimelineKey(source);
+  
+  const originalEntries = useMemo(() => user?.[timelineKey] || [], [user, timelineKey]);
 
-  const originalEntries = useMemo(() => {
-    const timelinesMap = {
-      [EntrySource.Creator]: user?.createdTimelineEntries,
-      [EntrySource.Collector]: user?.collectedTimelineEntries,
-    };
-    return timelinesMap[source] || [];
-  }, [source, user?.createdTimelineEntries, user?.collectedTimelineEntries]);
+  const [rearrangedEntries, setRearrangedEntries] = useState<TimelineEntry[]>(originalEntries);
+  
+  useEffect(() => {
+    //when open, sync state to current userEntries
+    if (!drawerOpen) return;
 
-  const handleOpenChange = (open: boolean) => {
-    setDrawerOpen(open);
-    if (open) {
-      // Reset rearranged entries when dialog opens
-      setRearrangedEntries([...originalEntries]);
-    }
-  };
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRearrangedEntries(originalEntries);
+  }, [originalEntries, drawerOpen])
+
 
   const saveRearrangement = async () => {
     // filter to just entries with changed dates
@@ -216,13 +216,15 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({
         <Button
           className={cn("w-full", buttonClassName)}
           variant={buttonVariant}
+          ref={ref}
+          onClick={onClick}
         >
           <P>{buttonText}</P>
           <ArrowDownUpIcon className="hidden sm:block" />
         </Button>
       }
       open={drawerOpen}
-      onOpenChange={handleOpenChange}
+      onOpenChange={setDrawerOpen}
       title={`Rearrange ${TIMELINE_ENTRY_LABEL.capFullPlural}`}
       description={`Quickly change the order and dates of your timeline content`}
       actionButton={
@@ -255,14 +257,21 @@ const RearrangeEntries: FC<RearrangeEntriesProps> = ({
                 );
               })
             ) : (
-              <P className="text-center">Add some entries to get started!</P>
+              <div className="p-4 space-y-4">
+                <P className="text-center ">
+                  Add some {TIMELINE_ENTRY_LABEL.fullPlural} to get started!
+                </P>
+                <NewEntryFormButton source={source} buttonVariant="default" />
+              </div>
             )}
           </div>
         </SortableContext>
       </DndContext>
     </SideDrawer>
   );
-};
+});
+
+RearrangeEntries.displayName = "RearrangeEntries";
 
 export default RearrangeEntries;
 

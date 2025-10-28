@@ -1,7 +1,7 @@
 import { PublicUserType } from "@/types/user";
 import { getDisplayName } from "@/utils/user";
 import { FC } from "react";
-import EditDisplayFormButton from "../dashboard/editTimeline/editDisplayForm/EditDisplayForm";
+import EditProfileFormButton from "../dashboard/editTimeline/editProfileForm/EditProfileForm";
 import { PAGE_PADDING_X } from "../general/PageContainer";
 import { Blockquote, H1 } from "../typography/Typography";
 import { BannerImage } from "./BannerImage";
@@ -34,7 +34,7 @@ const ProfileHero: FC<ProfileHeroProps> = ({ publicUser, editMode = false }) => 
             </div>
             <H1>{displayName}</H1>
             {editMode && (
-              <EditDisplayFormButton buttonClassName="shadow-md w-fit absolute -top-2 left-0 lg:left-auto lg:right-0 lg:translate-x-3/4 -translate-y-3/4 lg:translate-y-0" />
+              <EditProfileFormButton buttonClassName="shadow-md w-fit absolute -top-2 left-0 lg:left-auto lg:right-0 lg:translate-x-3/4 -translate-y-3/4 lg:translate-y-0" />
             )}
           </div>
           <DisplaySocials socialHandles={publicUser?.socialHandles || {}} />

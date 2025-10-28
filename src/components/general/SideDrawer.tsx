@@ -23,6 +23,7 @@ interface SideDrawerProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   contentClassName?: string;
+  disableInteractOutside?: boolean;
 }
 
 const SideDrawer: FC<SideDrawerProps> = ({
@@ -34,11 +35,15 @@ const SideDrawer: FC<SideDrawerProps> = ({
   open,
   onOpenChange, 
   contentClassName,
+  disableInteractOutside = false,
 }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{triggerButton}</SheetTrigger>
-      <SheetContent className={cn("grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-y-hidden h-full gap-0", contentClassName)}>
+      <SheetContent
+        onInteractOutside={disableInteractOutside ? (e) => e.preventDefault() : undefined}
+        className={cn("grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-y-hidden h-full gap-0", contentClassName)}
+      >
         <SheetHeader className="row-start-1">
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>

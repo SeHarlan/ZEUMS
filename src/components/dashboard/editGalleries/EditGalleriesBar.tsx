@@ -1,8 +1,8 @@
 import { editTimelineSourceAtom } from "@/atoms/dashboard";
+import { GalleriesOnboardingKeys, useGalleriesSetter } from "@/atoms/onboarding/editGalleries";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUser } from "@/context/UserProvider";
 import { isEntrySource } from "@/types/entry";
 import { getTimelineTabContent } from "@/utils/timeline";
@@ -16,9 +16,12 @@ export const EditGalleriesBar: FC = () => {
   const { user } = useUser();
   const [tabValue, setTabValue] = useAtom(editTimelineSourceAtom);
   const [isOpen, setIsOpen] = useState(true);
-
   const source = tabValue;
+
   const content = getTimelineTabContent(user, true);
+
+  const { setStepRef: setChooseSourceRef } = useGalleriesSetter(GalleriesOnboardingKeys.ChooseSource);
+  const { setStepRef: setCreateGalleryRef, setStepComplete: setCreateGalleryActive } = useGalleriesSetter(GalleriesOnboardingKeys.CreateGallery);
   const handleValueChange = (value: string) => {
     if (isEntrySource(value)) {
       setTabValue(value);
@@ -33,21 +36,16 @@ export const EditGalleriesBar: FC = () => {
           value={tabValue}
           onValueChange={handleValueChange}
           className="mx-auto w-full"
+          ref={setChooseSourceRef}
         >
           <TabsList className="w-full grid grid-cols-2 shadow-md h-fit p-0 border-none">
             {content.map((item, index) => (
               <TabsTrigger
+                key={`gallery-tab-${item.value}-${index}`}
                 value={item.value}
                 primaryActive
               >
-                <Tooltip key={item.value}>
-                  <TooltipTrigger asChild>
-                    <P className="font-serif w-full h-full">{item.title}</P>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Edit your {item.value} galleries
-                  </TooltipContent>
-                </Tooltip>
+                <P className="font-serif w-full h-full">{item.title}</P>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -61,7 +59,7 @@ export const EditGalleriesBar: FC = () => {
           <Minimize2Icon />
         </Button>
       </div>
-      <CreateGalleryDialogButton source={source} />
+      <CreateGalleryDialogButton source={source} ref={setCreateGalleryRef} onClick={setCreateGalleryActive}  />
     </EditBar>
   );
 }

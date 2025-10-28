@@ -15,7 +15,7 @@ import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { cn, truncate } from "@/utils/ui-utils";
 import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { InfoIcon } from "lucide-react";
+import { EyeIcon, InfoIcon } from "lucide-react";
 import Link from 'next/link';
 import { FC, useState } from "react";
 import SearchAssetDialog from "../assets/SearchAssetDialog";
@@ -100,22 +100,21 @@ const NavMenu: FC = () => {
 
           <Separator className="w-full md:col-span-2 order-4" />
 
-          <NavigationMenuLink asChild>
-            <LinkButton
-              href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
-              className="md:col-span-2 w-full order-5"
-              disabled={!loggedIn}
-            >
-              Go to my timeline
-            </LinkButton>
-          </NavigationMenuLink>
+          <LinkButton
+            href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
+            className="w-full order-5  md:col-span-2 "
+            disabled={!loggedIn}
+          >
+            <EyeIcon />
+            Published Timeline
+          </LinkButton>
 
-          <LoginButton
-            className="order-6 md:order-7"
-            variant={loggedIn ? "outline" : "default"}
-          />
+            <LoginButton
+              className="order-6 md:order-7"
+              variant={loggedIn ? "outline" : "default"}
+            />
 
-          <NavigationMenuLink asChild>
+            {/* <NavigationMenuLink asChild> */}
             <Button
               className={cn(
                 "order-7 md:order-6 flex-row cursor-auto",
@@ -139,7 +138,7 @@ const NavMenu: FC = () => {
                 </Tooltip>
               )}
             </Button>
-          </NavigationMenuLink>
+  
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>

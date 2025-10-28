@@ -1,3 +1,4 @@
+import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
 import { BannerImage } from "@/components/timeline/BannerImage";
 import { ProfileImage } from "@/components/timeline/ProfileImage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -18,7 +19,7 @@ import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
 ;
 
-interface EditDisplayFormContentProps {
+interface EditProfileFormContentProps {
   user: UserType | null;
   form: UseFormReturn<ProfileDisplayFormValues>;
   bannerImage?: ImageType;
@@ -26,7 +27,7 @@ interface EditDisplayFormContentProps {
   setProfileImage: (image?: ImageType) => void;
   setBannerImage: (image?: ImageType) => void;
 }
-const EditDisplayFormContent: FC<EditDisplayFormContentProps> = ({
+const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
   user,
   form,
   bannerImage,
@@ -37,37 +38,47 @@ const EditDisplayFormContent: FC<EditDisplayFormContentProps> = ({
   const [profileImageOpen, setProfileImageOpen] = useState(false);
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
 
+  const {setStepRef: setPrimaryTimelineRef} = useTimelineSetter(
+    TimelineOnboardingKeys.ChoosePrimaryTimeline
+  );
+
   return (
     <div className="flex flex-col space-y-6 py-4">
       <FormField
         control={form.control}
         name="primaryTimeline"
         render={({ field }) => (
-          <FormItem className="">
-            <FormLabel>Primary Timeline</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger className="">
-                  <SelectValue placeholder="Primary Timeline" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value={EntrySource.Creator}>Created</SelectItem>
-                <SelectItem value={EntrySource.Collector}>Collected</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              The timeline that will be displayed first when viewing your
-              profile.
-            </FormDescription>
-            <FormMessage />
+          <FormItem>
+            <div className="grid gap-2"
+              ref={setPrimaryTimelineRef}
+            >
+              <FormLabel>Primary Timeline</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="">
+                    <SelectValue placeholder="Primary Timeline" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value={EntrySource.Creator}>Created</SelectItem>
+                  <SelectItem value={EntrySource.Collector}>
+                    Collected
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                The timeline that will be displayed first when viewing your
+                profile.
+              </FormDescription>
+              <FormMessage />
+            </div>
           </FormItem>
         )}
       />
       <div className="relative w-full h-fit">
         <Button
           type="button"
-          variant={!!user?.bannerImage ? "outline" : "default"}
+          variant={user?.bannerImage ? "outline" : "default"}
           size="icon"
           className="absolute -top-2 -right-2 z-10 "
           onClick={() => setBannerImageOpen(true)}
@@ -84,7 +95,7 @@ const EditDisplayFormContent: FC<EditDisplayFormContentProps> = ({
         <div className="relative size-20 sm:size-26 flex-shrink-0">
           <Button
             type="button"
-            variant={!!user?.profileImage ? "outline" : "default"}
+            variant={user?.profileImage ? "outline" : "default"}
             size="icon"
             className="absolute top-0 right-0 z-10 "
             onClick={() => setProfileImageOpen(true)}
@@ -184,4 +195,4 @@ const EditDisplayFormContent: FC<EditDisplayFormContentProps> = ({
   );
 };
 
-export default EditDisplayFormContent;
+export default EditProfileFormContent;

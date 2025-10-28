@@ -6,8 +6,8 @@ import { GALLERY_ITEM_POSITIONS_ROUTE } from "@/constants/serverRoutes"
 import { useUser } from "@/context/UserProvider"
 import useGalleryById from "@/hooks/useGalleryById"
 import useGalleryDimensions from "@/hooks/useGalleryDimensions"
+import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy"
 import { GalleryItemPositionUpdate } from "@/types/galleryItem"
-import { GalleryRowItem } from "@/types/ui/dashboard"
 import { cleanGalleryRows, initializeGalleryRows, insertIntoNewRowAtIndex, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
 import { handleClientError } from "@/utils/handleError"
 import { cn } from "@/utils/ui-utils"
@@ -18,6 +18,7 @@ import { LayoutTemplateIcon, PlusIcon, PlusSquareIcon } from "lucide-react"
 import type { BulkWriteResult } from "mongodb"
 import { FC, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+import NewItemFormButton from "../newItemForm/NewItemForm"
 import SortableItem, { OverlayItem } from "./SortableItem"
 
 
@@ -44,10 +45,27 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
   const [submitting, setSubmitting] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
-  const [rearrangedRows, setRearrangedRows] = useState<GalleryRowItem[][]>([]);
-  
   const { containerRef, containerWidth, maxHeight, isReady, getDimensions } =
     useGalleryDimensions(false, MAX_HEIGHT_RATIO);
+  
+  const galleryItems = gallery?.items;
+
+  const initRearrangedRows = useMemo(() => {
+    if (!galleryItems) return [];
+    const initRows = initializeGalleryRows(galleryItems);
+    //remove stray empty rows/cells and update positions
+    return cleanGalleryRows(initRows);
+  }, [galleryItems]);
+
+  const [rearrangedRows, setRearrangedRows] = useState(initRearrangedRows);
+  
+  useEffect(() => {
+    if (!formOpen) return;
+    console.log("SYCNING")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRearrangedRows(initRearrangedRows);
+  }, [formOpen, initRearrangedRows])
+
 
   useEffect(() => {
     //because of form dom handling we need to manually set dimensions again for the initial render
@@ -57,18 +75,6 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
       requestAnimationFrame(getDimensions);
     }
   }, [getDimensions, isReady, formOpen]);
-
-  useEffect(() => {
-    //initial load of gallery items when the form is open
-    if (!gallery?.items || !formOpen) return;
-    const initRows = initializeGalleryRows(gallery.items);
-    //remove stray empty rows/cells and update positions
-    const cleanedRows = cleanGalleryRows(initRows);
-    setRearrangedRows(cleanedRows);
-
-    //reset rearrangedRows when the form is closed
-    return () => setRearrangedRows([]);
-  }, [gallery?.items, formOpen]);
 
   const galleryRows = useMemo(() => {
     return processGalleryRows({
@@ -233,7 +239,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
   }
   return (
     <SideDrawer
-     contentClassName="sm:max-w-lg px-2"
+      contentClassName="sm:max-w-lg px-2"
       triggerButton={
         <Button className="w-full" variant="outline">
           <P>Rearrange Items</P>
@@ -256,62 +262,73 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
     >
       <div ref={containerRef} className="w-full h-full flex flex-col">
         {isReady ? (
-          <DndContext
-            onDragStart={onDragStart}
-            onDragMove={onDragMove}
-            onDragEnd={handleDragEnd}
-            collisionDetection={closestCenter}
-            //don't add this back in unless you code a way to track the mouse position reliably
-            //currently if restricted the mouse position gets stuck in the middle when the hover object is large
-            // modifiers={[restrictToFirstScrollableAncestor]}
-          >
-            <Droppable id={DROP_AREA_ID_BEFORE} />
-
-            {galleryRows.map((row, rowIndex) => {
-              const insertRowId = INSERT_ROW_ID_PREFIX + rowIndex;
-              return (
-                <div key={rowIndex}>
-                  {rowIndex !== 0 && (
-                    <DroppableInsertRow key={insertRowId} id={insertRowId} />
-                  )}
-                  <div
-                    className={cn("flex justify-center flex-row items-center")}
-                    style={{ gap: GAP }}
-                  >
-                    <SortableContext
-                      items={row.map((item) => item.item._id.toString())}
-                      strategy={rectSortingStrategy}
+          galleryRows?.length ? (
+            <DndContext
+              onDragStart={onDragStart}
+              onDragMove={onDragMove}
+              onDragEnd={handleDragEnd}
+              collisionDetection={closestCenter}
+              //don't add this back in unless you code a way to track the mouse position reliably
+              //currently if restricted the mouse position gets stuck in the middle when the hover object is large
+              // modifiers={[restrictToFirstScrollableAncestor]}
+            >
+              <Droppable id={DROP_AREA_ID_BEFORE} />
+              {galleryRows.map((row, rowIndex) => {
+                const insertRowId = INSERT_ROW_ID_PREFIX + rowIndex;
+                return (
+                  <div key={rowIndex}>
+                    {rowIndex !== 0 && (
+                      <DroppableInsertRow key={insertRowId} id={insertRowId} />
+                    )}
+                    <div
+                      className={cn(
+                        "flex justify-center flex-row items-center"
+                      )}
+                      style={{ gap: GAP }}
                     >
-                      {row.map((cell) => {
-                        const hoverSide =
-                          hoverData?.id === cell.item._id.toString()
-                            ? hoverData.side
-                            : null;
-                        return (
-                          <SortableItem
-                            key={cell.item._id.toString()}
-                            processedItem={cell}
-                            hoverSide={hoverSide}
-                          />
-                        );
-                      })}
-                    </SortableContext>
+                      <SortableContext
+                        items={row.map((item) => item.item._id.toString())}
+                        strategy={rectSortingStrategy}
+                      >
+                        {row.map((cell) => {
+                          const hoverSide =
+                            hoverData?.id === cell.item._id.toString()
+                              ? hoverData.side
+                              : null;
+                          return (
+                            <SortableItem
+                              key={cell.item._id.toString()}
+                              processedItem={cell}
+                              hoverSide={hoverSide}
+                            />
+                          );
+                        })}
+                      </SortableContext>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-            <Droppable id={DROP_AREA_ID_AFTER} />
+                );
+              })}
 
-            <DragOverlay>
-              {activeId ? (
-                <OverlayItem
-                  activeId={activeId}
-                  processedItems={galleryRows}
-                  containerWidth={containerWidth}
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+              <Droppable id={DROP_AREA_ID_AFTER} />
+
+              <DragOverlay>
+                {activeId ? (
+                  <OverlayItem
+                    activeId={activeId}
+                    processedItems={galleryRows}
+                    containerWidth={containerWidth}
+                  />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          ) : (
+            <div className="p-4 space-y-4">
+              <P className="text-center ">
+                Add some {GALLERY_ITEM_LABEL.fullPlural} to get started!
+              </P>
+              <NewItemFormButton galleryId={galleryId} />
+            </div>
+          )
         ) : (
           <LoadingSpinner className="absolute-center" iconClass="size-10" />
         )}
