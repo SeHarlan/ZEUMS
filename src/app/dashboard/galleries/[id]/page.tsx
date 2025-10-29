@@ -6,7 +6,7 @@ import { GalleryHero } from "@/components/gallery/GalleryHero";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import { GalleryOnboardingPopover } from "@/components/onboarding/GalleryOnbaording";
+import { GalleryOnboardingPopover } from "@/components/onboarding/GalleryOnboarding";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,7 +50,7 @@ const EditGalleryPage = () => {
           <EditGalleryItems galleryId={id} />
         </Card>
       </FeedbackWrapper>
-      <GalleryOnboardingPopover/>
+      <GalleryOnboardingPopover />
     </PageContainer>
   );
 };

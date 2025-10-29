@@ -1,3 +1,4 @@
+import { rearrangeGalleryItemsDrawerOpenAtom } from "@/atoms/dashboard"
 import LoadingSpinner from "@/components/general/LoadingSpinner"
 import SideDrawer from "@/components/general/SideDrawer"
 import { P } from "@/components/typography/Typography"
@@ -14,9 +15,10 @@ import { cn } from "@/utils/ui-utils"
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable"
 import axios from "axios"
+import { useAtom } from "jotai"
 import { LayoutTemplateIcon, PlusIcon, PlusSquareIcon } from "lucide-react"
 import type { BulkWriteResult } from "mongodb"
-import { FC, useEffect, useMemo, useState } from "react"
+import { forwardRef, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import NewItemFormButton from "../newItemForm/NewItemForm"
 import SortableItem, { OverlayItem } from "./SortableItem"
@@ -30,6 +32,7 @@ const MAX_HEIGHT_RATIO = 0.33;
 
 interface RearrangeItemsProps {
   galleryId: string;
+  onClick?: () => void;
 }
 
 interface HoverData {
@@ -37,11 +40,11 @@ interface HoverData {
   side: "left" | "right";
 
 }
-const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => { 
+const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ galleryId, onClick }, ref) => { 
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { revalidateUser } = useUser();
 
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useAtom(rearrangeGalleryItemsDrawerOpenAtom);
   const [submitting, setSubmitting] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoverData, setHoverData] = useState<HoverData | null>(null);
@@ -241,7 +244,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
     <SideDrawer
       contentClassName="sm:max-w-lg px-2"
       triggerButton={
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="outline" ref={ref} onClick={onClick}>
           <P>Rearrange Items</P>
           <LayoutTemplateIcon className="hidden md:block" />
         </Button>
@@ -335,7 +338,7 @@ const RearrangeItems: FC<RearrangeItemsProps> = ({ galleryId }) => {
       </div>
     </SideDrawer>
   );
-}
+})
 
 export default RearrangeItems;
 

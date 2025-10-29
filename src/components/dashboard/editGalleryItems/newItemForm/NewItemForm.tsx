@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useAtom } from "jotai";
 import { ArrowLeftIcon, ImagePlusIcon } from "lucide-react";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import AddBlockchainGalleryItems from "../AddBlockchainGalleryItems";
@@ -37,14 +37,17 @@ interface NewItemFormProps {
   buttonClassName?: string;
   buttonVariant?: "default" | "outline" | "ghost" | "link";
   buttonText?: string;
+  onClick?: () => void;
 }
 
-const NewItemForm: FC<NewItemFormProps> = ({
+const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
   galleryId,
   buttonClassName,
   buttonVariant = "default",
   buttonText = `Add ${GALLERY_ITEM_LABEL.capFullPlural}`,
-}) => {
+  onClick,
+}, ref) => {
+
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { user, revalidateUser } = useUser();
   const [formOpen, setFormOpen] = useAtom(newGalleryItemFormOpenAtom)
@@ -248,6 +251,8 @@ const NewItemForm: FC<NewItemFormProps> = ({
         <Button
           variant={buttonVariant}
           className={cn("w-full", buttonClassName)}
+          ref={ref}
+          onClick={onClick}
         >
           <P>{buttonText}</P>
           <ImagePlusIcon className="hidden sm:block" />
@@ -352,6 +357,8 @@ const NewItemForm: FC<NewItemFormProps> = ({
       )}
     </SideDrawer>
   );
-};
+});
+
+NewItemForm.displayName = "NewItemForm";
 
 export default NewItemForm;

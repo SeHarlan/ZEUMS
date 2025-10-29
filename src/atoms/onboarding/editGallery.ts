@@ -2,9 +2,8 @@ import { createOnboardingAtoms } from "./factory";
 
 export const GalleryOnboardingKeys = {
   "AddItems": "addItems",
-  "RearrangeItems": "rearrangeItems",
   "EditSettings": "editSettings",
-  "PersonalizeSettings": "personalizeSettings",
+  "RearrangeItems": "rearrangeItems",
   "LinkInYourGallery": "linkInYourGallery",
 } as const;
 

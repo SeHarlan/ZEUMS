@@ -1,20 +1,23 @@
 "use client";
 
+import { editGalleryItemAtom } from "@/atoms/dashboard";
 import GalleryItemBase, { GalleryItemBaseProps } from "@/components/gallery/GalleryItemBase";
 import { Button } from "@/components/ui/button";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
-import { useEditGalleryItem } from "@/context/EditGalleryItemProvider";
 import { useUser } from "@/context/UserProvider";
 import useGalleryById from "@/hooks/useGalleryById";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
+import { useAtom } from "jotai";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { DeleteResult } from "mongoose";
 import { FC, useState } from "react";
 import { toast } from "sonner";
+;
 
 const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription }) => {
-  const { openEditDrawer, isOpen } = useEditGalleryItem();
+  const [editingItem, setEditingItem] = useAtom(editGalleryItemAtom);
+  const isOpen = Boolean(editingItem);
   const { mutateGallery } = useGalleryById(item.parentGalleryId.toString());
   const { revalidateUser } = useUser();
   
@@ -23,7 +26,7 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
   const disableButtons = deleting || isOpen;
 
   const handleEdit = () => {
-    openEditDrawer(item);
+    setEditingItem(item);
   };
 
   const handleDelete = async () => {

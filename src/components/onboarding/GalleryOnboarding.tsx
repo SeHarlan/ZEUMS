@@ -1,17 +1,21 @@
 import {
-  addTimelineEntriesFormOpenAtom,
-  rearrangeEntriesDrawerOpenAtom
+  newGalleryItemFormOpenAtom,
+  rearrangeGalleryItemsDrawerOpenAtom
 } from "@/atoms/dashboard";
 import { galleryOnboardingAtoms, GalleryOnboardingKeys } from "@/atoms/onboarding/editGallery";
 import { INITIALIZED_KEY } from "@/atoms/onboarding/onboardingStages";
+import { useEditGallerySettings } from "@/context/EditGallerySettingsProvider";
 import { useAtomValue } from "jotai";
 import { OnboardingPopover } from "./OnboardingPopover";
 
 export const GalleryOnboardingPopover = () => {
-  const addItemsOpen = useAtomValue(addTimelineEntriesFormOpenAtom);
-  const rearrangeItemsOpen = useAtomValue(rearrangeEntriesDrawerOpenAtom);
+  const addItemsOpen = useAtomValue(newGalleryItemFormOpenAtom);
+  const rearrangeItemsOpen = useAtomValue(rearrangeGalleryItemsDrawerOpenAtom);
 
-  const pause = addItemsOpen || rearrangeItemsOpen;
+  const { editingGallery } = useEditGallerySettings();
+  const editSettingsOpen = Boolean(editingGallery);
+  
+  const pause = addItemsOpen || rearrangeItemsOpen || editSettingsOpen;
 
   return (
     <OnboardingPopover
@@ -20,14 +24,15 @@ export const GalleryOnboardingPopover = () => {
       steps={{
         [INITIALIZED_KEY]: {
           content: {
-            title: `Welcome to your Gallery editor!`,
+            title: "Welcome to your Gallery editor!",
             description: "",
             body: (
               <div>
                 <ul className="pl-4 mt-2 list-disc mb-2">
                   <li>
                     <strong>Add Items: </strong>
-                    Add all your related artworks, as well as text to add context.
+                    Add all your related artworks, as well as text to add
+                    context.
                   </li>
                   <li>
                     <strong>Edit Profile: </strong>
@@ -54,22 +59,16 @@ export const GalleryOnboardingPopover = () => {
             description: "Rearrange your items to get started.",
           },
         },
+        [GalleryOnboardingKeys.LinkInYourGallery]: {
+          content: {
+            title: "Thats it remember to link Link your gallery",
+            description: "Link your gallery to get started.",
+          },
+        },
         [GalleryOnboardingKeys.EditSettings]: {
           content: {
             title: "Edit your settings",
             description: "Edit your settings to get started.",
-          },
-        },
-        [GalleryOnboardingKeys.PersonalizeSettings]: {
-          content: {
-            title: "Personalize your settings",
-            description: "Personalize your settings to get started.",
-          },
-        },
-        [GalleryOnboardingKeys.LinkInYourGallery]: {
-          content: {
-            title: "Link your gallery",
-            description: "Link your gallery to get started.",
           },
         },
       }}
