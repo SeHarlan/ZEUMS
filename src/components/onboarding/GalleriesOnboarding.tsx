@@ -38,9 +38,7 @@ export const GalleriesOnboardingPopover = () => {
             title: "Choose your gallery type",
             body: (
               <P className="text-muted-foreground text-center">
-                Like timelines, galleries are organized by source - your own
-                work (<strong>Created</strong>) or art you've collected (
-                <strong>Collected</strong>).
+                Like timelines, galleries are organized by source - <strong>Created</strong> or <strong>Collected</strong>.
               </P>
             ),
           },
@@ -49,7 +47,7 @@ export const GalleriesOnboardingPopover = () => {
           content: {
             title: "Create a new gallery",
             description:
-              "Your selected category determines the gallery type. Once created, you'll be redirected to its editor.",
+              "The currently selected category determines the kind of gallery being created. Once its name is saved, you'll be redirected to its editor.",
           },
         },
       }}

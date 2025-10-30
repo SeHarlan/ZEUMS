@@ -86,7 +86,7 @@ export const GalleryOnboardingPopover = () => {
               <div className="space-y-2">
                 <SupportLinks buttonVariantOverride="link" />
                 <P className="text-center text-muted-foreground text-sm px-8">
-                  *You can always find these links anytime by clicking the{" "}
+                  *You can find these links anytime by clicking the{" "}
                   <MessageCircleQuestionIcon className="inline-block size-4" />{" "}
                   icon in the top-right corner.
                 </P>

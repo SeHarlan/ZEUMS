@@ -1,4 +1,4 @@
-export const TITLE_COPY = "ZEUMS";
+export const TITLE_COPY = "Zeums";
 export const SUBTITLE_COPY = "Celebrate your digital history";
 
 
