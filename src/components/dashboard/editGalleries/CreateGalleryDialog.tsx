@@ -19,7 +19,7 @@ import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { forwardRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -27,8 +27,12 @@ interface CreateGalleryDialogProps {
   source: EntrySource;
   buttonClassName?: string;
   buttonVariant?: "default" | "outline" | "ghost" | "link";
+  onClick?: () => void;
 }
-const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, buttonClassName, buttonVariant = "default" }) => {
+const CreateGalleryDialogButton = forwardRef<
+  HTMLButtonElement,
+  CreateGalleryDialogProps
+>(({ source, buttonClassName, buttonVariant = "default", onClick }, ref) => {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { setUser } = useUser();
@@ -38,7 +42,7 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
 
   const sourceText = source.charAt(0).toUpperCase() + source.slice(1);
   const buttonText = `Add New ${sourceText} Gallery`;
-  
+
   const form = useForm<UpsertGalleryFormValues>({
     resolver: zodResolver(upsertGalleryFormSchema),
     defaultValues: {
@@ -59,7 +63,7 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
       .post<{ newGallery: BaseGalleryType }>(GALLERY_ROUTE, createGalleryData)
       .then((response) => {
         const { newGallery } = response.data;
-        
+
         toast.success("Gallery created successfully!");
         // Update user context with new gallery
         setUser((prevUser) => {
@@ -73,7 +77,7 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
         // Reset form and close dialog
         form.reset();
         setOpen(false);
-        
+
         router.push(EDIT_GALLERY(newGallery._id.toString()));
       })
       .catch((error) => {
@@ -100,7 +104,13 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="lg" className={cn("w-full", buttonClassName)} variant={buttonVariant}>
+        <Button
+          size="lg"
+          className={cn("w-full", buttonClassName)}
+          variant={buttonVariant}
+          ref={ref}
+          onClick={onClick}
+        >
           <P>{buttonText}</P>
           <GalleryEntryIcon />
         </Button>
@@ -165,6 +175,8 @@ const CreateGalleryDialogButton: FC<CreateGalleryDialogProps> = ({ source, butto
       </DialogContent>
     </Dialog>
   );
-};
+});
+
+CreateGalleryDialogButton.displayName = "CreateGalleryDialogButton";
 
 export default CreateGalleryDialogButton;

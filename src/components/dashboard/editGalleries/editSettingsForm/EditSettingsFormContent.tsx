@@ -19,8 +19,9 @@ interface EditSettingsContentProps {
 
 const EditSettingsContent: FC<EditSettingsContentProps> = ({ form, bannerImage, setBannerImage }) => { 
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
+
   return (
-    <div className="flex flex-col gap-y-6">
+    <div className="h-fit space-y-6">
       <div className="relative w-full h-fit">
         <div className="absolute -top-2 -right-2 z-10 flex gap-2">
           {bannerImage && (
@@ -48,61 +49,71 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({ form, bannerImage, 
           fallbackText={"Banner Image"}
         />
       </div>
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Title</FormLabel>
-            <FormControl>
-              <Input placeholder="Enter gallery title" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Description</FormLabel>
-            <FormControl>
-              <Textarea placeholder="Enter gallery description" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
-      <FormField
-        control={form.control}
-        name="hideItemTitles"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Hide Item Titles</FormLabel>
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter gallery title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={form.control}
-        name="hideItemDescriptions"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Hide Item Descriptions</FormLabel>
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Enter gallery description" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hideItemTitles"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hide Item Titles</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hideItemDescriptions"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hide Item Descriptions</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
       <ChooseProfileImageDialog
         imageVariant={"banner"}
         setSelectedMedia={setBannerImage}

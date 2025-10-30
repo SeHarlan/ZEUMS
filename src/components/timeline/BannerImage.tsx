@@ -24,7 +24,7 @@ export const BannerImage: FC<BannerImageProps> = ({
       <AspectRatio
         ratio={ratio}
         className={cn(
-          "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
+          "flex justify-center items-center bg-border/75 text-muted-foreground overflow-hidden",
           "rounded-b-md font-serif",
           className
         )}

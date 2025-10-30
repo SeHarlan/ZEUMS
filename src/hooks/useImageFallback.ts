@@ -1,6 +1,7 @@
+import { useHasErroredImage } from "@/atoms/media";
 import { MediaType } from "@/types/media";
 import { getImageUrlSources } from "@/utils/media";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseImageFallbackProps {
   media: MediaType;
@@ -11,13 +12,14 @@ interface UseImageFallbackProps {
 export const useImageFallback = ({ media, onFinalError, unoptimized }: UseImageFallbackProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
-  const [finalErrorCalled, setFinalErrorCalled] = useState(false);
+  const [hasErrored, setHasErrored] = useHasErroredImage(media);
   
   const onLoad = () => setLoaded(true);
   const sources = getImageUrlSources(media, unoptimized);
-  const isError = useMemo(() =>
-    imageIndex >= sources.length
-  , [imageIndex, sources]);
+
+  const errorCount = imageIndex;
+  const isError = hasErrored || errorCount >= sources.length;
+  const finalErrorCalled = useRef(false);
     
   const onError = useCallback(() => {
     if(isError) return;
@@ -28,12 +30,16 @@ export const useImageFallback = ({ media, onFinalError, unoptimized }: UseImageF
   }, [isError]);   
 
   useEffect(() => {
-    //if error count/index is exactly 1 over source length, call onFinalError
-    if (isError && !finalErrorCalled && onFinalError) {
+    //separate blocks in case hasErrored is true on remount
+    if (isError && !finalErrorCalled.current && onFinalError) {
       onFinalError();
-      setFinalErrorCalled(true);
+      finalErrorCalled.current = true;
     }
-  }, [imageIndex, onFinalError, finalErrorCalled, isError]);
+
+    if (isError && !hasErrored) {
+      setHasErrored(true);
+    }
+  }, [isError, hasErrored, setHasErrored, onFinalError]);
 
   const imageUrl = sources[imageIndex] || "";
   const isFallbackActive = imageIndex > 0;

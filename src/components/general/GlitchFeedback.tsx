@@ -2,7 +2,7 @@
 import { H1, P } from "@/components/typography/Typography";
 import { handleClientError } from "@/utils/handleError";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, useState, useEffect, FC } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 interface GlitchTextMeshProps {
@@ -329,13 +329,14 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         textTexture.image.width,
         textTexture.image.height
       );
-      shaderMaterial.uniforms.dpr.value = window.devicePixelRatio || 1; // Update DPR
     }
   }, [size, shaderMaterial, textTexture]);
 
   // Animation loop
   useFrame((state) => {
     if (meshRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
+      shaderMaterial.uniforms.dpr.value = window.devicePixelRatio || 1; // Update DPR
       shaderMaterial.uniforms.time.value = 100 + (state.clock.elapsedTime % 50);
       shaderMaterial.uniforms.mouse.value.copy(mousePos);
       shaderMaterial.uniforms.glitchIntensity.value = glitchIntensity;
@@ -413,6 +414,8 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
 // WebGL detection function
 const isWebGLSupported = (): boolean => {
+  if (typeof window === 'undefined' || !document) return false;
+
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -445,13 +448,8 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   title,
   subtitle
 }) => {
-  const [webglSupported, setWebglSupported] = useState(true);
+  const webglSupported = isWebGLSupported();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    // Check WebGL support on mount
-    setWebglSupported(isWebGLSupported());
-  }, []);
 
   if (!webglSupported) {
     return (

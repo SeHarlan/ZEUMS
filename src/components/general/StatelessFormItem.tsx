@@ -1,6 +1,6 @@
-import * as React from "react"
-import { cn } from "@/utils/ui-utils"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/utils/ui-utils"
+import * as React from "react"
 import { P } from "../typography/Typography"
 
 interface StatelessFormItemProps extends React.ComponentProps<"div"> {
@@ -25,6 +25,7 @@ function StatelessFormItem({
     >
       <Label
         className={cn(!!errorMessage && "text-destructive")}
+       
       >
         {label}
       </Label>

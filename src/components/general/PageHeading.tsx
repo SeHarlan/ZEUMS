@@ -9,7 +9,7 @@ interface PageTitleProps {
 
 export const PageTitle: FC<PageTitleProps> = ({ text, className }) => { 
   return (
-    <H1 className={className}>
+    <H1 className={cn("max-w-7/8 md:max-w-1/3 lg:max-w-5/14", className)}>
       {text}
     </H1>
   );
@@ -38,7 +38,7 @@ const PageHeading: FC<PageHeadingProps> = ({
 }) => {  
   return (
     <div className={cn("mb-4 sm:mb-6", className)}>
-      <PageTitle text={title} className="max-w-3/4  md:max-w-2/5"/>
+      <PageTitle text={title} />
       {subtitle ? (
         <PageSubtitle text={subtitle} className="mt-1" />
       ) : null}

@@ -1,14 +1,14 @@
-import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { PlusIcon, Trash2 } from "lucide-react";
+import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { P } from "../typography/Typography";
 import { Badge } from "../ui/badge";
 
@@ -46,8 +46,8 @@ const ButtonEditor = <T extends FormWithButtons>({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-3">
         <P className="text-sm font-medium">Buttons</P>
         <Button
           type="button"
@@ -63,7 +63,7 @@ const ButtonEditor = <T extends FormWithButtons>({
 
       {fields.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Add up to 3 buttons
+          Add up to 3 buttons that link to external sites.
         </p>
       )}
 

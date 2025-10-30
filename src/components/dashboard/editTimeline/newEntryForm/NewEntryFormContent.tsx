@@ -54,7 +54,6 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   source
 }) => {
   const {user} = useUser();
-  
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
   const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
 

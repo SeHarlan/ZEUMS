@@ -1,29 +1,31 @@
 "use client";
 
-import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
+import { authLoadingAtom } from "@/atoms/auth";
+import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
+import { USER_ROUTE } from "@/constants/serverRoutes";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { UserType } from "@/types/user";
+import { SignInMessage } from "@/utils/auth";
+import { handleClientError } from "@/utils/handleError";
+import { truncate } from "@/utils/ui-utils";
+import { activeSolanaWalletIsInUserWallets, parseUserDates } from "@/utils/user";
+import { useWallet } from "@solana/wallet-adapter-react";
+import axios from "axios";
+import base58 from "bs58";
+import { useSetAtom } from "jotai";
+import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import {
-  useContext,
-  useState,
   createContext,
   Dispatch,
   SetStateAction,
-  useEffect,
   useCallback,
-  useRef,
+  useContext,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { SignInMessage } from "@/utils/auth";
-import axios from "axios";
-import base58 from "bs58";
 import { toast } from "sonner";
-import { truncate } from "@/utils/ui-utils";
-import { handleClientError } from "@/utils/handleError";
-import { USER_ROUTE } from "@/constants/serverRoutes";
-import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
-import { activeSolanaWalletIsInUserWallets, parseUserDates } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -60,6 +62,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const setAuthLoading = useSetAtom(authLoadingAtom);
 
   const signingInRef = useRef(false);
   
@@ -121,7 +124,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error(res.error);
       }
     } catch (error) {
-      
+      setAuthLoading(false);
+
       handleClientError({
         error,
         location: "useAuth_handleWalletAuthSignIn",
@@ -131,7 +135,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       signingInRef.current = false;
     }
-  }, [signMessage, publicKey, logOutUser]);
+  }, [signMessage, publicKey, logOutUser, setAuthLoading]);
 
   useEffect(() => {
     // wallet is connected but user is not logged in

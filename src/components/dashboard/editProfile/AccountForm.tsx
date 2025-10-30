@@ -1,4 +1,8 @@
 "use client";
+import { AccountOnboardingKeys, accountOnboardingAtoms, useAccountSetter } from "@/atoms/onboarding/editAccount";
+import { galleriesOnboardingAtoms } from "@/atoms/onboarding/editGalleries";
+import { galleryOnboardingAtoms } from "@/atoms/onboarding/editGallery";
+import { timelineOnboardingAtoms } from "@/atoms/onboarding/editTimeline";
 import { AuthLinkingDialog } from "@/components/auth/AuthLinkingDialog";
 import { StatelessFormItem } from "@/components/general/StatelessFormItem";
 import { P } from "@/components/typography/Typography";
@@ -13,16 +17,22 @@ import { useSolanaWalletVerification } from "@/hooks/useWalletVerification";
 import { UserType } from "@/types/user";
 import { ChainIdsEnum } from "@/types/wallet";
 import { handleClientError } from "@/utils/handleError";
+import { clearOnboardingStorage } from "@/utils/storage";
 import { cn, truncate } from "@/utils/ui-utils";
 import { getWalletsByChain, parseUserDates } from "@/utils/user";
 import { PublicKey } from "@solana/web3.js";
 import axios from "axios";
+import { useSetAtom } from "jotai";
 import { CircleCheckIcon, WalletIcon, XIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const ProfileAccountForm: FC = () => {
   const { user, setUser } = useUser();
+  const setAccountOnboardingStage = useSetAtom(accountOnboardingAtoms.stageAtom)
+  const setTimelineOnboardingStage = useSetAtom(timelineOnboardingAtoms.stageAtom)
+  const setGalleriesOnboardingStage = useSetAtom(galleriesOnboardingAtoms.stageAtom)
+  const setGalleryOnboardingStage = useSetAtom(galleryOnboardingAtoms.stageAtom)
   
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -41,6 +51,13 @@ const ProfileAccountForm: FC = () => {
   } = useUsernameValidation(user?.username);
   const [verifyOpen, setVerifyOpen] = useState(false);
 
+  const { setStepRef: setEmailRef } = useAccountSetter(
+    AccountOnboardingKeys.VerifiedEmail
+  );
+  const { setStepRef: setWalletsRef } = useAccountSetter(
+    AccountOnboardingKeys.VerifiedWallets
+  );
+
   const verifiedEmail = user?.authUser?.email;
   const verifiedSolanaWallets = getWalletsByChain(user)[ChainIdsEnum.SOLANA];
 
@@ -57,6 +74,15 @@ const ProfileAccountForm: FC = () => {
       return false;
     }
   }, [user?.username]);
+
+  const handleOnboardingReset = () => {
+    setAccountOnboardingStage("notStarted");
+    setTimelineOnboardingStage("notStarted");
+    setGalleriesOnboardingStage("notStarted");
+    setGalleryOnboardingStage("notStarted");
+    clearOnboardingStorage();
+    //TODO reset all onboarding atoms here
+  }
 
   const onUsernameSubmit = async () => {
     if (!usernameIsValid) return;
@@ -132,6 +158,7 @@ const ProfileAccountForm: FC = () => {
           label="Verified Email"
           description="A verified email allows you to log in anywhere using accounts linked to your email. Never shared or used without consent."
           errorMessage={emailError}
+          ref={setEmailRef}
         >
           {verifiedEmail ? (
             <Button className="w-full justify-start" disabled>
@@ -159,6 +186,7 @@ const ProfileAccountForm: FC = () => {
       </div>
 
       <StatelessFormItem
+        ref={setWalletsRef}
         label="Verified Wallets"
         description="Verified wallets allow you to sign in and prove ownership of digital assets."
       >
@@ -196,6 +224,7 @@ const ProfileAccountForm: FC = () => {
           ) : null}
 
           {/* Add new wallet button */}
+
           <Button
             onClick={verifyWallet}
             loading={isVerifying}
@@ -207,6 +236,14 @@ const ProfileAccountForm: FC = () => {
           </Button>
         </div>
       </StatelessFormItem>
+
+      <Button
+        onClick={handleOnboardingReset}
+        variant="link"
+        className="mx-auto block"
+      >
+        Reset Onboarding Walkthroughs
+      </Button>
 
       <AuthLinkingDialog
         open={verifyOpen}

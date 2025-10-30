@@ -1,13 +1,13 @@
+import useGalleryDimensions from "@/hooks/useGalleryDimensions";
 import { GalleryType } from "@/types/gallery";
-import { MiniGalleryItemBase } from "./GalleryItemBase";
-import { FC,  useMemo } from "react";
-import { cn } from "@/utils/ui-utils";
 import {
   cleanGalleryRows,
   initializeGalleryRows,
   processGalleryRows,
 } from "@/utils/gallery";
-import useGalleryDimensions from "@/hooks/useGalleryDimensions";
+import { cn } from "@/utils/ui-utils";
+import { FC, useMemo } from "react";
+import { MiniGalleryItemBase } from "./GalleryItemBase";
 
 interface GalleryBaseProps {
   gallery?: GalleryType | null;
@@ -22,9 +22,11 @@ const MiniGalleryBase: FC<GalleryBaseProps> = ({
   const { containerRef, containerWidth, maxHeight, isDesktop, isReady } =
     useGalleryDimensions(false, MAX_HEIGHT_RATIO, true);
 
+  const galleryItems = gallery?.items;
+  
   const galleryRows = useMemo(() => {
-    if (!gallery?.items?.length) return [];
-    const galleryRows = initializeGalleryRows(gallery.items);
+    if (!galleryItems?.length) return [];
+    const galleryRows = initializeGalleryRows(galleryItems);
     const processedRows = processGalleryRows({
       galleryRows,
       gap: GAP,
@@ -33,7 +35,7 @@ const MiniGalleryBase: FC<GalleryBaseProps> = ({
       maxHeight,
     });
     return cleanGalleryRows(processedRows);
-  }, [gallery?.items, containerWidth, maxHeight, isDesktop]);
+  }, [galleryItems, containerWidth, maxHeight, isDesktop]);
 
   return (
     <div className="space-y-3" ref={containerRef}>

@@ -1,24 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LinkButton } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import { HOME } from "@/constants/clientRoutes";
 import { P } from "@/components/typography/Typography";
+import { LinkButton } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HOME } from "@/constants/clientRoutes";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
 
-  const [error, setError] = useState<string | null>(null);
-  const [errorDescription, setErrorDescription] = useState<string | null>(null);
+  const error= searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
 
   useEffect(() => {
-    if(error) return;
-
-    setError(searchParams.get("error"))
-    setErrorDescription(searchParams.get("error_description"))
+    if (error) return;
 
     // Clean up URL parameters after a delay
     const timer = setTimeout(() => {

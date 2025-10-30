@@ -1,18 +1,18 @@
 "use client";
 
-import { FC, useState } from "react";
+import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { P } from "@/components/typography/Typography";
-import { useUser } from "@/context/UserProvider";
-import axios from "axios";
-import { toast } from "sonner";
-import { handleClientError } from "@/utils/handleError";
 import { GALLERY_ROUTE } from "@/constants/serverRoutes";
-import { UserVirtualGalleryType } from "@/types/gallery";
+import { useUser } from "@/context/UserProvider";
 import { EntrySource } from "@/types/entry";
+import { UserVirtualGalleryType } from "@/types/gallery";
 import { getGalleryKey } from "@/utils/gallery";
+import { handleClientError } from "@/utils/handleError";
+import axios from "axios";
 import { DeleteResult } from "mongoose";
+import { FC, useState } from "react";
+import { toast } from "sonner";
 
 interface DeleteGalleryDialogProps {
   gallery: UserVirtualGalleryType | null;
@@ -38,7 +38,7 @@ const DeleteGalleryDialog: FC<DeleteGalleryDialogProps> = ({
       .then((response) => {
         const { acknowledged, deletedCount } = response.data;
         if (acknowledged && deletedCount > 0) {
-          toast.info("Gallery deleted successfully.");
+          toast("Gallery deleted successfully.");
 
           setUser((prevUser) => {
             if (!prevUser) return prevUser;

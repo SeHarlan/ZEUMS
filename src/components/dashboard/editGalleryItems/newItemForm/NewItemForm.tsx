@@ -10,6 +10,7 @@ import { useUser } from "@/context/UserProvider";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
 
+import { newGalleryItemFormOpenAtom } from "@/atoms/dashboard";
 import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
 import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy";
 import { ParsedBlockChainAsset } from "@/types/asset";
@@ -21,8 +22,9 @@ import { handleClientError } from "@/utils/handleError";
 import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useAtom } from "jotai";
 import { ArrowLeftIcon, ImagePlusIcon } from "lucide-react";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import AddBlockchainGalleryItems from "../AddBlockchainGalleryItems";
@@ -35,17 +37,20 @@ interface NewItemFormProps {
   buttonClassName?: string;
   buttonVariant?: "default" | "outline" | "ghost" | "link";
   buttonText?: string;
+  onClick?: () => void;
 }
 
-const NewItemForm: FC<NewItemFormProps> = ({
+const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
   galleryId,
   buttonClassName,
   buttonVariant = "default",
   buttonText = `Add ${GALLERY_ITEM_LABEL.capFullPlural}`,
-}) => {
+  onClick,
+}, ref) => {
+
   const { gallery, mutateGallery } = useGalleryById(galleryId);
   const { user, revalidateUser } = useUser();
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useAtom(newGalleryItemFormOpenAtom)
   const [submitting, setSubmitting] = useState(false);
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
@@ -246,6 +251,8 @@ const NewItemForm: FC<NewItemFormProps> = ({
         <Button
           variant={buttonVariant}
           className={cn("w-full", buttonClassName)}
+          ref={ref}
+          onClick={onClick}
         >
           <P>{buttonText}</P>
           <ImagePlusIcon className="hidden sm:block" />
@@ -350,6 +357,8 @@ const NewItemForm: FC<NewItemFormProps> = ({
       )}
     </SideDrawer>
   );
-};
+});
+
+NewItemForm.displayName = "NewItemForm";
 
 export default NewItemForm;

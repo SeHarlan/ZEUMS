@@ -1,12 +1,11 @@
-import useSWRImmutable from "swr/immutable";
-import { handleClientError } from "@/utils/handleError";
-import axios from "axios";
 import { ASSETS_SOLANA_ROUTE } from "@/constants/serverRoutes";
 import { GetSolanaAssetsProps, ParsedBlockChainAsset } from "@/types/asset";
+import { handleClientError } from "@/utils/handleError";
+import axios from "axios";
+import useSWRImmutable from "swr/immutable";
 
 const solanaAssetFetcher = async (props: GetSolanaAssetsProps) => {
   if (!props.publicKeys?.length) return [];
-  console.time("solanaAssetFetcher");
   return axios
     .post<ParsedBlockChainAsset[]>(ASSETS_SOLANA_ROUTE, props)
     .then((res) => res.data)

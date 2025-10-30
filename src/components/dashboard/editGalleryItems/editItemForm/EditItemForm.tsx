@@ -1,4 +1,5 @@
 "use client";
+import { editGalleryItemAtom } from "@/atoms/dashboard";
 import EditGalleryItemFormContent from "@/components/dashboard/editGalleryItems/editItemForm/EditItemFormContent";
 import SideDrawer from "@/components/general/SideDrawer";
 import { P } from "@/components/typography/Typography";
@@ -13,19 +14,20 @@ import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useAtom } from "jotai";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const formId = "edit-gallery-item-form";
 
-interface EditGalleryItemFormProps { 
-  isOpen: boolean;
-  editingItem: GalleryItem | null;
-  onClose: () => void;
-}
+const EditGalleryItemForm: FC = () => {
+  const [editingItem, setEditingItem] = useAtom(editGalleryItemAtom);
+  const isOpen = Boolean(editingItem);
+  const onClose = () => {
+    setEditingItem(null);
+  };
 
-const EditGalleryItemForm: FC<EditGalleryItemFormProps> = ({ isOpen, editingItem, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
 
   const selectedItemType = editingItem?.itemType || GalleryItemTypes.BlockchainAsset;

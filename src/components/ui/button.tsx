@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
-import { cn } from "@/utils/ui-utils"
+import { cn } from "@/utils/ui-utils";
 import { Loader2Icon } from "lucide-react";
 import Link from "next/link";
 
@@ -56,13 +56,17 @@ function Button({
     className?.includes("fixed") ||
     className?.includes("sticky") ||
     className?.includes("static");
-  
-  if (loading) {
+    const hasPositionStyle = !!props.style?.position && props.style.position !== "static";
+    
+    
+    const noPositioning = !hasPositionClass && !hasPositionStyle;
+    
+    if (loading) {
     return (
       <button
         className={cn(
           buttonVariants({ variant, size, className }),
-          !hasPositionClass && "relative" //set position if it isn't so the loader can be centered
+          noPositioning && "relative" //set position if it isn't so the loader can be centered
         )}
         disabled
         {...props}
@@ -128,5 +132,5 @@ function LinkButton({
   );
 }
 
-export { Button, LinkButton, buttonVariants }
+export { Button, buttonVariants, LinkButton };
 

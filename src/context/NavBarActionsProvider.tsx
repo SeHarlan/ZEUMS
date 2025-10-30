@@ -38,19 +38,12 @@ export const useSetNavBarActions = () => {
 
 export const NavBarActions: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const setActions = useSetNavBarActions();
-  const [isMounted, setIsMounted] = useState(false);
-
-  //only setActions once mounted to avoid hydration errors
-  useEffect(() => { 
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
-    
+
     setActions(children);
     return () => setActions(null);
-  }, [children, setActions, isMounted]);
+  }, [children, setActions]);
 
   return null;
 };

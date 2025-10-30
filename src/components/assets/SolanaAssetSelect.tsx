@@ -16,6 +16,8 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import { ImageVariant } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
 import { isValidSolanaAddress } from "@/utils/asset";
+import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import { usePathname } from "next/navigation";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { Button, LinkButton } from "../ui/button";
 import { PrefixInput } from "../ui/input";
@@ -54,8 +56,11 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 200);
   const [selectedSource, setSelectedSource] = useState<EntrySource>(EntrySource.Collector);
-
   const { user } = useUser();
+  const pathname = usePathname();
+  
+  const returnKey = getReturnKey(pathname);
+  const addWalletPath = EDIT_PROFILE_ACCOUNT + makeReturnQueryParam(returnKey);
 
   const solanaPublicKeys = useMemo(
     () => getWalletsByChain(user)[ChainIdsEnum.SOLANA],
@@ -188,9 +193,9 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       return (
         <div className="flex flex-col items-center justify-center gap-4">
           <P className="text-muted-foreground text-center">
-            No verified wallet found
+            You'll need to add a verified wallet to use this feature
           </P>
-          <LinkButton href={EDIT_PROFILE_ACCOUNT}>
+          <LinkButton href={addWalletPath}>
             <WalletIcon />
             Add wallet
           </LinkButton>

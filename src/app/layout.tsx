@@ -12,6 +12,7 @@ import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
 import { cn } from "@/utils/ui-utils";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { Analytics } from "@vercel/analytics/next";
+import { Provider as AtomProvider } from "jotai";
 import type { Metadata } from "next";
 import { DM_Mono, DM_Sans, DM_Serif_Text } from "next/font/google";
 import { Suspense } from "react";
@@ -83,6 +84,7 @@ export default function RootLayout({
         )}
       >
         <Analytics />
+        <AtomProvider>
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
@@ -100,8 +102,13 @@ export default function RootLayout({
               </ResponsiveProvider>
             </UserContextProvider>
           </AuthContextProvider>
-        </WalletContextProvider>
-        <Toaster position="bottom-center" richColors={true} closeButton={true} />
+          </WalletContextProvider>
+        </AtomProvider>
+        <Toaster
+          position="bottom-right"
+          richColors={true}
+          closeButton={true}
+        />
       </body>
     </html>
   );

@@ -1,12 +1,12 @@
 "use client";
-import Image from "next/image";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { FC, SyntheticEvent } from "react";
-import { ImageOffIcon } from "lucide-react";
-import { cn } from "@/utils/ui-utils";
-import { MediaType } from "@/types/media";
-import { useImageFallback } from "@/hooks/useImageFallback";
 import { imageBreakpoints } from "@/constants/ui";
+import { useImageFallback } from "@/hooks/useImageFallback";
+import { MediaType } from "@/types/media";
+import { cn } from "@/utils/ui-utils";
+import { ImageOffIcon } from "lucide-react";
+import Image from "next/image";
+import { FC, SyntheticEvent } from "react";
+import { AspectRatio } from "../ui/aspect-ratio";
 
 interface MediaThumbnailProps {
   media: MediaType;

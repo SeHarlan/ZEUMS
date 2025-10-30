@@ -6,7 +6,7 @@ import { UserVirtualGalleryType } from "@/types/gallery";
 import { getGalleryKey } from "@/utils/gallery";
 import { cn } from "@/utils/ui-utils";
 import { TrashIcon } from "lucide-react";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { P } from "../typography/Typography";
 import CreateGalleryDialogButton from "./editGalleries/CreateGalleryDialog";
 
@@ -21,7 +21,6 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
   setEntryGallery,
   source,
 }) => {
-  const [selectedGallery, setSelectedGallery] = useState<UserVirtualGalleryType | null>(null);
   const { user } = useUser();
   const galleryKey = getGalleryKey(source);
   const galleries = user?.[galleryKey] || [];
@@ -29,7 +28,6 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
   const noGalleries = galleries.length === 0;
   const handleRemoveGallery = () => {
     setEntryGallery(null);
-    setSelectedGallery(null);
   };
 
   if (entryGallery === null) {
@@ -40,9 +38,6 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
             key={gallery._id.toString()}
             gallery={gallery}
             setGallery={setEntryGallery}
-            isSelected={
-              selectedGallery?._id.toString() === gallery._id.toString()
-            }
           />
         ))}
 
@@ -67,7 +62,7 @@ const SelectGalleryEntry: FC<SelectGalleryEntryProps> = ({
         <TrashIcon />
       </Button>
 
-      <GalleryCard gallery={entryGallery} isSelected={false} />
+      <GalleryCard gallery={entryGallery} />
     </div>
   );
 };
@@ -78,10 +73,9 @@ export default SelectGalleryEntry;
 interface GalleryCardProps {
   gallery: UserVirtualGalleryType;
   setGallery?: (gallery: UserVirtualGalleryType | null) => void;
-  isSelected: boolean;
 }
 
-const GalleryCard: FC<GalleryCardProps> = ({ gallery, setGallery, isSelected }) => {
+const GalleryCard: FC<GalleryCardProps> = ({ gallery, setGallery }) => {
   const media = gallery?.items?.[0]?.media;
   const handleClick = () => {
     setGallery?.(gallery);

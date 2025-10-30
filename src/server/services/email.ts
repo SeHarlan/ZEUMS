@@ -231,20 +231,16 @@ export async function sendMagicLinkEmail({
   appName: string;
   }) {
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: from,
-      to: [to],
-      subject: `Sign in to ${appName}`,
-      html: createMagicLinkEmailTemplate({ magicLink, appName }),
-    });
+  const { data, error } = await resend.emails.send({
+    from: from,
+    to: [to],
+    subject: `Sign in to ${appName}`,
+    html: createMagicLinkEmailTemplate({ magicLink, appName }),
+  });
 
-    if (error) {
-      throw error
-    }
-
-    return { success: true, messageId: data?.id };
-  } catch (error) {
-    throw error;
+  if (error) {
+    throw error
   }
+
+  return { success: true, messageId: data?.id };
 }

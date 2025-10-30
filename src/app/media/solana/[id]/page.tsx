@@ -11,7 +11,7 @@ export default function SolanaAssetPage() {
 
   useEffect(() => {
     router.push(SOLANA_MEDIA(id));
-  }, [])
+  }, [id, router])
   
   return null
 }
