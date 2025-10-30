@@ -6,13 +6,10 @@ import {
 } from "@/atoms/dashboard";
 import { galleryOnboardingAtoms, GalleryOnboardingKeys } from "@/atoms/onboarding/editGallery";
 import { INITIALIZED_KEY } from "@/atoms/onboarding/onboardingStages";
-import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 import { useEditGallerySettings } from "@/context/EditGallerySettingsProvider";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { useAtomValue } from "jotai";
 import { MessageCircleQuestionIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { SupportLinks } from "../navigation/SupportDialog";
 import { P } from "../typography/Typography";
 import { OnboardingPopover } from "./OnboardingPopover";
@@ -20,15 +17,10 @@ import { OnboardingPopover } from "./OnboardingPopover";
 export const GalleryOnboardingPopover = () => {
   const addItemsOpen = useAtomValue(newGalleryItemFormOpenAtom);
   const rearrangeItemsOpen = useAtomValue(rearrangeGalleryItemsDrawerOpenAtom);
-  const pathname = usePathname();
   const { editingGallery } = useEditGallerySettings();
   const editSettingsOpen = Boolean(editingGallery);
   
   const pause = addItemsOpen || rearrangeItemsOpen || editSettingsOpen;
-
-  const returnKey = getReturnKey(pathname);
-  const timelineUrl = EDIT_TIMELINE + makeReturnQueryParam(returnKey);
-
 
   return (
     <OnboardingPopover

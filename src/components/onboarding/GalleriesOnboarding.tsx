@@ -22,7 +22,7 @@ export const GalleriesOnboardingPopover = () => {
                 </li>
                 <li>
                   Click the <EditIcon className="size-4 inline-block" /> icon to
-                  edit general settings. Click the card to go to it's{" "}
+                  edit general settings. Click the card to go to its{" "}
                   <strong>gallery editor</strong> page
                 </li>
                 <P className="text-muted-foreground text-sm text-center pr-4 mt-2">

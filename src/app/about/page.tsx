@@ -11,7 +11,6 @@ export default function About() {
     <PageContainer maxWidth="small" className="space-y-8">
       <PageHeading
         title={`About us`}
-        // subtitle={`${TITLE_COPY} - ${SUBTITLE_COPY}`}
       />
 
       <Blockquote className="font-bold not-italic">
