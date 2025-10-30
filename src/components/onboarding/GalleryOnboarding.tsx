@@ -37,7 +37,7 @@ export const GalleryOnboardingPopover = () => {
                 <ul className="pl-4 mt-2 list-disc mb-2">
                   <li>
                     <strong>Add Items: </strong>
-                    Import related artworks and add text for context.
+                    import related artworks and add text for context.
                   </li>
                   <li>
                     <strong>Edit Settings: </strong>
