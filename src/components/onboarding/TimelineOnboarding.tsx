@@ -72,11 +72,11 @@ export const TimelineOnboardingPopover = () => {
             body: (
               <div className="space-y-2">
                 <P className="text-muted-foreground text-center">
-                  Your timelines are separated by source. Your own
-                  work (<strong>Created</strong>) or artwork you've acquired (<strong>Collected</strong>).
+                  Your timelines are separated by source.
+                  Work you've made (<strong>Created</strong>) or artwork you own (<strong>Collected</strong>).
                 </P>
                 <P className="text-muted-foreground text-center text-sm">
-                  *If one doesn't apply, leave it blank and it won't appear
+                  *If one doesn't apply, leave it empty and it won't appear
                   publicly.
                 </P>
               </div>
