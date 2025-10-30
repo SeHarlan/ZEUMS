@@ -24,12 +24,12 @@ export const AccountOnboardingPopover = () => {
             body: (
               <ul className="list-disc pl-4 text-foreground">
                 <li>
-                  <strong>Connect blockchain wallets </strong>to showcase
-                  artworks you&apos;ve collected or created.
+                  <strong>Connect blockchain wallets </strong>
+                  showcase artworks you&apos;ve collected or created.
                 </li>
                 <li>
-                  <strong>Verify your email </strong>to securely access your
-                  account from any device.
+                  <strong>Verify your email </strong>
+                  securely access your account from any device.
                 </li>
               </ul>
             ),
@@ -53,12 +53,13 @@ export const AccountOnboardingPopover = () => {
           content: {
             title: "All done! Now let's checkout your timeline editor.",
             description: navigateDescription,
-            body:
+            body: (
               <div className="w-full flex justify-center items-center gap-2 font-medium">
                 <P>Manage</P>
                 <MoveRightIcon className="size-4 text-muted-foreground" />
                 <P>My Timeline</P>
               </div>
+            ),
           },
         },
       }}

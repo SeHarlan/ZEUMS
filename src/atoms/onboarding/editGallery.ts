@@ -5,6 +5,7 @@ export const GalleryOnboardingKeys = {
   "EditSettings": "editSettings",
   "RearrangeItems": "rearrangeItems",
   "LinkInYourGallery": "linkInYourGallery",
+  "Support": "support",
 } as const;
 
 export const GALLERY_ONBOARDING_STORAGE_KEY = "zeumsGalleryOnboarding";

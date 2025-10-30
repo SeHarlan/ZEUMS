@@ -18,34 +18,40 @@ const SupportDialog: FC<SupportDialogProps> = ({ open, onOpenChange }) => {
           <DialogTitle>Support</DialogTitle>
           <DialogDescription>
             <P className="my-2">
-            Have a question, found a bug, or want to suggest a new feature?
+              Have a question, found a bug, or just wanna say hello?
             </P>
             <P> 
-            Join our Telegram support chat for the quickest response or contact us on X.
+              Reach out to us on X or join our Telegram channel for the quickest response.
             </P>
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <a
-            href={TELEGRAM_SUPPORT_INVITE}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="w-full">
-              <TelegramIcon />
-              Join Telegram Support
-            </Button>
-          </a>
-          <a href={X_URL} target="_blank" rel="noopener noreferrer">
-            <Button className="w-full" variant="outline">
-              <TwitterIcon />
-              Find us on X
-            </Button>
-          </a>
-        </div>
+        <SupportLinks />
       </DialogContent>
     </Dialog>
   );
 };
   
 export default SupportDialog;
+
+export const SupportLinks: FC<{buttonVariantOverride?: "outline" | "link"}> = ({buttonVariantOverride }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+      <a href={X_URL} target="_blank" rel="noopener noreferrer">
+        <Button className="w-full" variant={buttonVariantOverride || "outline"}>
+          <TwitterIcon />
+          Find us on X
+        </Button>
+      </a>
+      <a
+        href={TELEGRAM_SUPPORT_INVITE}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Button className="w-full" variant={buttonVariantOverride || "default"}>
+          <TelegramIcon />
+          Join Telegram Support
+        </Button>
+      </a>
+    </div>
+  );
+};
