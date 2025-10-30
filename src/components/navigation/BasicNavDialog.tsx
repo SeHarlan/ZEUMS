@@ -38,7 +38,7 @@ const BasicNavDialog = () => {
     >
       <div
         className={cn(
-          "space-y-4 bg-popover-blur border rounded-lg py-6 px-8 md:px-12",
+          "space-y-6 bg-popover-blur border rounded-lg py-6 px-8 md:px-12",
           "transition-all duration-500 fill-mode-forwards",
           "w-full max-w-full",
           !buttonReady && "opacity-0",
@@ -47,12 +47,12 @@ const BasicNavDialog = () => {
             : "animate-out zoom-out-90 fade-out-0"
         )}
       >
-        <div className="text-center whitespace-nowrap">
+        <div className="text-center whitespace-nowrap space-y-2">
           <H1>{TITLE_COPY}</H1>
           <P className="text-sm text-muted-foreground ">{SUBTITLE_COPY}</P>
         </div>
 
-        <div className={cn("flex flex-col gap-8")}>
+        <div className={cn("flex flex-col gap-4")}>
           <GetStartedButton disabled={!showButton} />
 
           <LinkButton href={aboutPath} variant="outline" disabled={!showButton}>

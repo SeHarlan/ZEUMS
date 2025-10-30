@@ -1,3 +1,5 @@
+"use client";
+
 import {
   newGalleryItemFormOpenAtom,
   rearrangeGalleryItemsDrawerOpenAtom
@@ -10,7 +12,6 @@ import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { useAtomValue } from "jotai";
 import { MessageCircleQuestionIcon } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SupportLinks } from "../navigation/SupportDialog";
 import { P } from "../typography/Typography";
@@ -36,28 +37,27 @@ export const GalleryOnboardingPopover = () => {
       steps={{
         [INITIALIZED_KEY]: {
           content: {
-            title: "Welcome to your Gallery editor!",
+            title: "Welcome to the Gallery editor!",
             description:
-              "Manage your gallery, where you can exhibit an entire collection in a customizable space.",
+              "Curate a collection and customize the page to perfectly showcase your artwork.",
             body: (
               <div>
                 <ul className="pl-4 mt-2 list-disc mb-2">
                   <li>
                     <strong>Add Items: </strong>
-                    showcase all your related artworks, as well as text for
-                    added context.
+                    Import related artworks and add text for context.
                   </li>
                   <li>
                     <strong>Edit Settings: </strong>
-                    fine tune and personalize your gallery.
+                    fine-tune and personalize your gallery.
                     <br />
                     <span className="text-muted-foreground text-sm">
-                      More customization options coming soon!
+                      More customization options coming soon.
                     </span>
                   </li>
                   <li>
                     <strong>Rearrange Items: </strong>
-                    drag and drop your items into an ultra flexible grid to get
+                    drag and drop your items inside an ultra flexible grid to get
                     the exact layout you want.
                   </li>
                 </ul>
@@ -69,52 +69,34 @@ export const GalleryOnboardingPopover = () => {
           content: {
             title: "Add items to your gallery",
             description:
-              "This is where you'll add the individual elements, media and text blocks that make up your gallery.",
+              "Add artworks, media, and text blocks — the building blocks of your gallery.",
           },
         },
         [GalleryOnboardingKeys.EditSettings]: {
           content: {
             title: "Edit your settings",
-            description:
-              "Add a banner image and change settings to customize your gallery.",
+            description: "Add a banner image and customize your gallery.",
           },
         },
         [GalleryOnboardingKeys.RearrangeItems]: {
           content: {
             title: "Rearrange your items",
             description:
-              "Design a unique layout and flow. Drag and drop your items into flexible rows that adapt the various aspect ratios.",
-          },
-        },
-        [GalleryOnboardingKeys.LinkInYourGallery]: {
-          content: {
-            title: `That's it for the Gallery overview!`,
-            description: "",
-            body: (
-              <div>
-                <P className="text-center space-y-2 text-muted-foreground">
-                  Don't forget to link to this gallery in your{" "}
-                  <Link href={timelineUrl} className="underline">
-                    timeline
-                  </Link>
-                  !
-                </P>
-              </div>
-            ),
+              "Design a unique visual flow. Drag and drop your items into flexible rows that adapt to various aspect ratios.",
           },
         },
         [GalleryOnboardingKeys.Support]: {
           content: {
-            title: `Thank you for joining ${TITLE_COPY}! We can't wait to see what you create here!`,
+            title: `Thank you for joining ${TITLE_COPY}! We can't wait to see what you create.`,
             description:
-              "If you have any questions or feedback, reach out to us on X or join our Telegram channel.",
+              "Questions or feedback? Reach out on X (Twitter) or join our Telegram.",
             body: (
               <div className="space-y-2">
                 <SupportLinks buttonVariantOverride="link" />
                 <P className="text-center text-muted-foreground text-sm px-8">
-                  *You can always find these links later by clicking the{" "}
-                  <MessageCircleQuestionIcon className="inline-block size-4" /> icon in
-                  the top right corner of the screen.
+                  *You can always find these links anytime by clicking the{" "}
+                  <MessageCircleQuestionIcon className="inline-block size-4" />{" "}
+                  icon in the top-right corner.
                 </P>
               </div>
             ),

@@ -4,7 +4,6 @@ export const GalleryOnboardingKeys = {
   "AddItems": "addItems",
   "EditSettings": "editSettings",
   "RearrangeItems": "rearrangeItems",
-  "LinkInYourGallery": "linkInYourGallery",
   "Support": "support",
 } as const;
 

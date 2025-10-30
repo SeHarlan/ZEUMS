@@ -4,21 +4,20 @@ import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import GetStartedButton from "@/components/navigation/GetStartedButton";
 import { Blockquote, H3, P } from "@/components/typography/Typography";
-import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 
 export default function About() {
   return (
     <PageContainer maxWidth="small" className="space-y-8">
-
       <PageHeading
-        title={`About ${TITLE_COPY}`}
-        subtitle={`${SUBTITLE_COPY}`}
+        title={`About us`}
+        // subtitle={`${TITLE_COPY} - ${SUBTITLE_COPY}`}
       />
 
       <Blockquote className="font-bold not-italic">
-        A platform for artists and collectors to organize and showcase their digital art.
+        {TITLE_COPY} is a platform for artists and collectors. A space to easily
+        exhibit your art on personalized pages and tell your story.
       </Blockquote>
-
 
       <section className="space-y-4">
         <H3>Why {TITLE_COPY}?</H3>
@@ -36,18 +35,18 @@ export default function About() {
         <H3>What You Can Do</H3>
         <ul className="list-disc pl-6 space-y-3 text-base leading-relaxed">
           <li>
-            <strong>Curate Your Personal Timeline:</strong>Craft your digital
+            <strong>Curate Your Personal Timeline:</strong> Craft your
             history as a cohesive narrative.
           </li>
           <li>
             <strong>Integrate Blockchain Assets:</strong> Showcase digital
             assets you&apos;ve created or collected with on-chain provenance.
-            Currently supporting Solana, with Tezos and Ethereum on the horizon.
+            <span className="text-muted-foreground text-sm"> *Currently supporting Solana, with Tezos and Ethereum coming soon.</span>
           </li>
           <li>
             <strong>Create Galleries:</strong> Design dedicated exhibition pages
-            for collections and related works, while keeping your timeline
-            refined and powerful.
+            for entire collections, while keeping your timeline
+            refined and engaging.
           </li>
         </ul>
       </section>
@@ -55,9 +54,9 @@ export default function About() {
       <section className="space-y-4">
         <H3>The Vision</H3>
         <P>
-          What began as a passion project by digital-generative artist EV3 has
-          grown into a mission to help shape and uplift the digital art
-          Renaissance. {TITLE_COPY} makes digital art feel real—not just for
+          What began as a passion project by generative-glitch artist EV3 has
+          grown into a mission to help shape and uplift a burgeoning art movement.
+          We want {TITLE_COPY} to help make digital art feel real, not just for
           insiders, but for everyone. By giving artists and collectors tools to
           present their work with clarity and context, we preserve today&apos;s
           creative moment for the future.
@@ -80,7 +79,8 @@ export default function About() {
       <section className="space-y-4">
         <H3>Join the Movement</H3>
         <P>
-          Gather scattered images, posts, and links in one curated space. Share your story and your art with the world.
+          Easily gather scattered images, posts, and links into one curated space. Create galleries to exhibit collections.
+          Showcase your favorite pieces and craft your story in a timeline to bring it all together. Join {TITLE_COPY} to start celebrating your digital history today!
         </P>
       </section>
 

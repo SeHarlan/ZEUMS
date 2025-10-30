@@ -1,5 +1,7 @@
 import { galleriesOnboardingAtoms, GalleriesOnboardingKeys } from "@/atoms/onboarding/editGalleries";
 import { INITIALIZED_KEY } from "@/atoms/onboarding/onboardingStages";
+import { EditIcon } from "lucide-react";
+import { P } from "../typography/Typography";
 import { OnboardingPopover } from "./OnboardingPopover";
 
 export const GalleriesOnboardingPopover = () => {
@@ -9,19 +11,24 @@ export const GalleriesOnboardingPopover = () => {
       steps={{
         [INITIALIZED_KEY]: {
           content: {
-            title: `Welcome to your Galleries Management Page!`,
-            description: `Create and edit your galleries settings. These are curated collections where viewers can explore your art in depth.`,
+            title: "Welcome to Galleries",
+            description:
+              "Create and manage curated collections where people can explore your art in depth.",
             body: (
               <ul className="list-disc pl-4 text-foreground">
                 <li>
-                  Choose between your <strong>Created</strong> or{" "}
-                  <strong>Collected</strong> galleries
+                  Choose between <strong>Created</strong> and{" "}
+                  <strong>Collected</strong> galleries.
                 </li>
                 <li>
-                  Once you've created one, add it to your{" "}
-                  <strong>timeline</strong> or share it as a{" "}
-                  <strong>standalone page</strong>.
+                  Click the <EditIcon className="size-4 inline-block" /> icon to
+                  edit general settings. Click the card to go to it's{" "}
+                  <strong>gallery editor</strong> page
                 </li>
+                <P className="text-muted-foreground text-sm text-center pr-4 mt-2">
+                  After creating a gallery, add it to your <strong>timeline</strong>{" "}
+                  or share it as a<strong> standalone page</strong>.
+                </P>
               </ul>
             ),
           },
@@ -29,14 +36,20 @@ export const GalleriesOnboardingPopover = () => {
         [GalleriesOnboardingKeys.ChooseSource]: {
           content: {
             title: "Choose your gallery type",
-            description:
-              "Similar to timelines, galleries are categorized by their content's source."
+            body: (
+              <P className="text-muted-foreground text-center">
+                Like timelines, galleries are organized by source - your own
+                work (<strong>Created</strong>) or art you've collected (
+                <strong>Collected</strong>).
+              </P>
+            ),
           },
         },
         [GalleriesOnboardingKeys.CreateGallery]: {
           content: {
             title: "Create a new gallery",
-            description: "The type will be based on the category you chose in the previous step.",
+            description:
+              "Your selected category determines the gallery type. Once created, you'll be redirected to its editor.",
           },
         },
       }}
