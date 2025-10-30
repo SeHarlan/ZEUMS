@@ -3,7 +3,7 @@
 import DeleteGalleryDialog from "@/components/dashboard/editGalleries/DeleteGalleryDialog";
 import EditGallerySettings from "@/components/dashboard/editGalleries/editSettingsForm/EditSettingsForm";
 import { UserVirtualGalleryType } from "@/types/gallery";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 interface EditGallerySettingsContextType {
   editingGallery: UserVirtualGalleryType | null;
   galleryToDelete: UserVirtualGalleryType | null;
@@ -53,18 +53,18 @@ const EditGallerySettingsContextProvider: React.FC<EditGallerySettingsProviderPr
     setGalleryToDelete(null);
   };
 
-
+  const value = useMemo(() => ({
+    editingGallery,
+    galleryToDelete,
+    openEditDrawer,
+    closeEditDrawer,
+    openDeleteDrawer,
+    closeDeleteDrawer,
+  }), [editingGallery, galleryToDelete]);
 
   return (
     <EditGallerySettingsContext.Provider
-      value={{
-        editingGallery,
-        galleryToDelete,
-        openEditDrawer,
-        closeEditDrawer,
-        openDeleteDrawer,
-        closeDeleteDrawer,
-      }}
+      value={value}
     >
       {children}
 

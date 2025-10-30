@@ -1,9 +1,9 @@
 import { MiniGalleryItemBase } from "@/components/gallery/GalleryItemBase";
-import { GripVerticalIcon } from "lucide-react";
 import { GalleryRowItem } from "@/types/ui/dashboard";
-import { FC } from "react";
-import { useSortable } from "@dnd-kit/sortable";
 import { cn } from "@/utils/ui-utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { GripVerticalIcon } from "lucide-react";
+import { FC } from "react";
 
 interface SortableItemProps {
   processedItem: GalleryRowItem;
@@ -40,7 +40,7 @@ const SortableItem: FC<SortableItemProps> = ({ processedItem, hoverSide }) => {
       {...listeners}
       {...attributes}
     >
-      <GripVerticalIcon className="absolute z-20 -left-2 top-1/2 -translate-y-1/2 bg-muted rounded w-4 h-8 shrink-0" />
+      <GripVerticalIcon className="shadow border absolute z-20 -left-2 top-1/2 -translate-y-1/2 bg-muted rounded w-4 h-8 shrink-0" />
       <div
         className={cn(
           "flex-shrink-0 rounded-md",
@@ -80,7 +80,7 @@ export const OverlayItem: FC<OverlayItemProps> = ({ processedItems, activeId }) 
       className="z-20 relative w-full h-fit cursor-grabbing bg-muted rounded-md"
       style={{ maxWidth: width }}
     >
-      <GripVerticalIcon className="absolute z-20 -left-2 top-1/2 -translate-y-1/2 bg-muted rounded w-4 h-8 shrink-0" />
+      <GripVerticalIcon className="shadow border absolute z-20 -left-2 top-1/2 -translate-y-1/2 bg-muted rounded w-4 h-8 shrink-0" />
       <div className="flex-shrink-0 rounded-md shadow-lg">
         <MiniGalleryItemBase item={item} priority />
       </div>

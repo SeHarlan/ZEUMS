@@ -31,9 +31,10 @@ export const TimelineOnboardingPopover = () => {
       steps={{
         [INITIALIZED_KEY]: {
           content: {
-            title: `Welcome to your ${TITLE_COPY} timeline editor!`,
+            title: `Welcome to your ${TITLE_COPY} Timeline editor!`,
             description:
-              "Manage your timelines, where people will learn about you, view highlighted artworks and find your galleries.",
+              `This timeline is your homepage, the entryway into your creative world. 
+              Introduce yourself, highlight favorite artworks, and connect your galleries.`,
             body: (
               <div>
                 <ul className="pl-4 mt-2 list-disc mb-2">
@@ -44,18 +45,17 @@ export const TimelineOnboardingPopover = () => {
                   <li>
                     <strong>Add Items: </strong>
                     highlight specific artworks, add context with text, and
-                    connect to your galleries.
+                    connect your galleries.
                   </li>
                   <li>
                     <strong>Rearrange: </strong>
-                    easily reposition your items to get the most cohesive flow.
+                    easily reposition your items to get the most natural flow.
                   </li>
                 </ul>
                 <div className="text-muted-foreground text-center text-sm">
                   <P>
                     <strong>Galleries </strong>
-                    are pages dedicated to showcasing entire collections of
-                    related artworks. If you would rather create a gallery first{" "}
+                    are pages dedicated to showcasing different collections. If you would rather create a gallery first{" "}
                     <Link href={EDIT_GALLERIES} className="underline">
                       click here
                     </Link>
@@ -69,22 +69,32 @@ export const TimelineOnboardingPopover = () => {
         [TimelineOnboardingKeys.ChooseActiveSource]: {
           content: {
             title: "Choose the timeline you want to edit",
-            description:
-              "If one of these doesn't apply to you, just leave it empty and it will be removed from the public view.",
+            body: (
+              <div className="space-y-2">
+                <P className="text-muted-foreground text-center">
+                  Your timelines are separated by source. Your own
+                  work (<strong>Created</strong>) or artwork you've acquired (<strong>Collected</strong>).
+                </P>
+                <P className="text-muted-foreground text-center text-sm">
+                  *If one doesn't apply, leave it blank and it won't appear
+                  publicly.
+                </P>
+              </div>
+            ),
           },
         },
         [TimelineOnboardingKeys.EditProfile]: {
           content: {
             title: "Edit your profile",
             description:
-              "This is information that applies to all timelines: your profile images, bio, social media links, etc.",
+              "Choose your primary timeline and update details that appear across timelines like your profile image, bio, and social links.",
           },
         },
         [TimelineOnboardingKeys.ChoosePrimaryTimeline]: {
           content: {
             title: "Choose your primary timeline",
             description:
-              "This will be your default timeline. If you have multiple timelines with content, it will be the first one presented publicly.",
+              "If you have multiple timelines, this will be the first one visitors see when they go to your homepage.",
           },
           onPrevious: () => setEditProfileFormOpen(false),
           onActive: () => setEditProfileFormOpen(true),
@@ -93,7 +103,7 @@ export const TimelineOnboardingPopover = () => {
           content: {
             title: "Save your profile",
             description:
-              "Once you've made changes to your profile, click the button below to save them.",
+              "Once you've made updates, click this button to save your changes.",
           },
           onActive: () => setEditProfileFormOpen(true),
           onNext: () => setEditProfileFormOpen(false),
@@ -102,19 +112,26 @@ export const TimelineOnboardingPopover = () => {
           content: {
             title: "Add items to your timeline",
             description:
-              "Highlight your favorite artworks, add text to guide viewers through your history, and link to your galleries for a deeper look at your collections.",
+              "Showcase artworks, add context with text, and connect galleries for a deeper look at your collections.",
           },
         },
         [TimelineOnboardingKeys.RearrangeItems]: {
           content: {
             title: "Rearrange your items",
             description:
-              "Change the position of text and the dates of artworks or galleries, which will also determine their order",
+              "Adjust the order of artworks and text to shape the visual flow of your timeline.",
+            body: (
+              <P className="text-muted-foreground text-sm text-center">
+                *Item dates will change automatically to match their new
+                position.
+              </P>
+            ),
           },
         },
         [TimelineOnboardingKeys.goToGalleries]: {
           content: {
-            title: "You've completed the timeline overview! Now let's go to your galleries page.",
+            title:
+              "Your galleries page is next",
             description: navigateDescription,
             body: (
               <div className="w-full flex justify-center items-center gap-2 font-medium">
@@ -122,7 +139,7 @@ export const TimelineOnboardingPopover = () => {
                 <MoveRightIcon className="size-4 text-muted-foreground" />
                 <P>My Galleries</P>
               </div>
-            )
+            ),
           },
         },
       }}

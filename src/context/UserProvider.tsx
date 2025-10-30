@@ -135,7 +135,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       signingInRef.current = false;
     }
-  }, [signMessage, publicKey, logOutUser]);
+  }, [signMessage, publicKey, logOutUser, setAuthLoading]);
 
   useEffect(() => {
     // wallet is connected but user is not logged in

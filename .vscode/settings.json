@@ -22,6 +22,7 @@
     "source.organizeImports": "always"
   },
   "typescript.preferences.autoImportFileExcludePatterns": [
-    "@radix-ui/**"
+    "@radix-ui/**",
+    "next/router"
   ]
 }
