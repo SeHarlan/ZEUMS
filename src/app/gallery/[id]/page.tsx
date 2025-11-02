@@ -13,9 +13,10 @@ const GalleryPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (gallery?.ownerData?.username && gallery?.title) {
+    const newPath = USER_GALLERY(gallery?.ownerData?.username, gallery?.title);
+    if (newPath !== "#") {
       // Redirect to the new route with username and gallery name
-      router.replace(USER_GALLERY(gallery.ownerData.username, gallery.title));
+      router.replace(newPath);
     }
   }, [gallery, router]);
 

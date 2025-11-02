@@ -20,10 +20,7 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
   const pathname = usePathname();
 
   const returnKey = getReturnKey(pathname);
-  const galleryLink =
-    (entry.gallery?.ownerData?.username && entry.gallery?.title
-      ? USER_GALLERY(entry.gallery.ownerData.username, entry.gallery.title)
-      : "#") + makeReturnQueryParam(returnKey);
+  const galleryLink = USER_GALLERY(entry.gallery?.ownerData?.username, entry.gallery?.title) + makeReturnQueryParam(returnKey);
 
   const handleClick = () => {
     router.push(galleryLink);

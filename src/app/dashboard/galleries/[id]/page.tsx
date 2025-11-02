@@ -22,9 +22,7 @@ const EditGalleryPage = () => {
   const { gallery, isLoading, isError } = useGalleryById(id);
   const { user } = useUser();
 
-  const viewGalleryHref = user?.username && gallery?.title 
-    ? USER_GALLERY(user.username, gallery.title)
-    : "#";
+  const viewGalleryHref = USER_GALLERY(user?.username, gallery?.title);
 
   return (
     <PageContainer maxWidth="large">
@@ -38,7 +36,6 @@ const EditGalleryPage = () => {
           href={viewGalleryHref}
           variant="outline"
           className="size-10 md:w-fit"
-          disabled={!user?.username || !gallery?.title}
         >
           <EyeIcon className="size-5 md:size-4" />
           <P className="hidden md:block">View Gallery</P>

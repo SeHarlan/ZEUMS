@@ -42,9 +42,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
 
   const returnKey = getReturnKey(pathname);
-  const viewGalleryPath = user?.username && editingGallery?.title
-    ? USER_GALLERY(user.username, editingGallery.title) + makeReturnQueryParam(returnKey)
-    : "#";
+  const viewGalleryPath = USER_GALLERY(user?.username, editingGallery?.title) + makeReturnQueryParam(returnKey);
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
