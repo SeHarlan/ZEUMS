@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
@@ -80,13 +81,9 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
         control={form.control}
         name="hideCreatorDates"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Hide Created Timeline Dates</FormLabel>
-              <FormDescription>
-                Hide year and day-month from your Created timeline entries
-              </FormDescription>
-            </div>
+          <FormItem>
+            <FormLabel>Hide Created Timeline Dates</FormLabel>
+
             <FormControl>
               <Switch
                 checked={field.value}
@@ -100,13 +97,8 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
         control={form.control}
         name="hideCollectorDates"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <FormLabel className="text-base">Hide Collected Timeline Dates</FormLabel>
-              <FormDescription>
-                Hide year and day-month from your Collected timeline entries
-              </FormDescription>
-            </div>
+          <FormItem>
+            <FormLabel>Hide Collected Timeline Dates</FormLabel>
             <FormControl>
               <Switch
                 checked={field.value}
@@ -116,6 +108,9 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
           </FormItem>
         )}
       />
+
+      <Separator />
+      
       <div className="relative w-full h-fit">
         <Button
           type="button"
