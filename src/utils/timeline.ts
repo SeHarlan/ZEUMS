@@ -58,7 +58,8 @@ export interface ProcessedEntry {
 }
 export const processTimelineEntries = (
   entries: TimelineEntry[],
-  cb: (processedEntry: ProcessedEntry) => React.ReactNode
+  cb: (processedEntry: ProcessedEntry) => React.ReactNode,
+  hideDates = false
 ) => {
   let assetIndex = 0;
   let dateIndex = 0;
@@ -79,10 +80,10 @@ export const processTimelineEntries = (
     });
 
     const entryYear = entry.date.getFullYear();
-    const showYear = entryYear !== lastYear; // Show year only if it's different from the last one
+    const showYear = hideDates ? false : (entryYear !== lastYear); // Show year only if it's different from the last one and dates are not hidden
     if (showYear) lastYear = entryYear; // Update the lastYear
 
-    const showDate = showYear || (entryDate !== lastDate); // Show date only if it's different from the last one
+    const showDate = hideDates ? false : (showYear || (entryDate !== lastDate)); // Show date only if it's different from the last one and dates are not hidden
     if (showDate) {
       lastDate = entryDate; // Update the lastDate
       dateIndex++;
