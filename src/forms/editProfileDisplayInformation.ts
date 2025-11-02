@@ -56,6 +56,8 @@ export const profileDisplayFormSchema = z.object({
     // facebook: socialHandleSchema,
   }),
   primaryTimeline: z.nativeEnum(EntrySource),
+  hideCreatorDates: z.boolean().optional(),
+  hideCollectorDates: z.boolean().optional(),
   // websites: z.array(z.string().url()).optional().transform((val) => (val === "" ? undefined : val)),
 });
 
