@@ -12,6 +12,7 @@ import { LinkButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EDIT_GALLERIES, USER_GALLERY } from "@/constants/clientRoutes";
 import { NavBarActions } from "@/context/NavBarActionsProvider";
+import { useUser } from "@/context/UserProvider";
 import useGalleryById from "@/hooks/useGalleryById";
 import { EyeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -19,6 +20,11 @@ import { useParams } from "next/navigation";
 const EditGalleryPage = () => {
   const { id } = useParams<{ id: string }>();
   const { gallery, isLoading, isError } = useGalleryById(id);
+  const { user } = useUser();
+
+  const viewGalleryHref = user?.username && gallery?.title 
+    ? USER_GALLERY(user.username, gallery.title)
+    : "#";
 
   return (
     <PageContainer maxWidth="large">
@@ -29,9 +35,10 @@ const EditGalleryPage = () => {
       <PageTurnLeft path={EDIT_GALLERIES} />
       <NavBarActions>
         <LinkButton
-          href={USER_GALLERY(id)}
+          href={viewGalleryHref}
           variant="outline"
           className="size-10 md:w-fit"
+          disabled={!user?.username || !gallery?.title}
         >
           <EyeIcon className="size-5 md:size-4" />
           <P className="hidden md:block">View Gallery</P>

@@ -40,7 +40,9 @@ export default function GalleriesPage() {
 const GalleryCard: FC<{ gallery: PublicGalleryType }> = ({ gallery }) => {
   const router = useRouter();
   const handleClick = () => {
-    router.push(USER_GALLERY(gallery._id.toString()));
+    if (gallery.ownerData?.username && gallery.title) {
+      router.push(USER_GALLERY(gallery.ownerData.username, gallery.title));
+    }
   };
 
   // Get the first item's media for the thumbnail

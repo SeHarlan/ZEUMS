@@ -36,13 +36,15 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
 
   const galleryId = editingGallery?._id?.toString() || "";
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
-  const { revalidateUser } = useUser();
+  const { revalidateUser, user } = useUser();
   const pathname = usePathname();
 
   const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
 
   const returnKey = getReturnKey(pathname);
-  const viewGalleryPath = USER_GALLERY(galleryId) + makeReturnQueryParam(returnKey);
+  const viewGalleryPath = user?.username && editingGallery?.title
+    ? USER_GALLERY(user.username, editingGallery.title) + makeReturnQueryParam(returnKey)
+    : "#";
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
