@@ -15,17 +15,18 @@ export const parseSolanaAssets = (
   for (const asset of rawAssets) {
     const { content, creators, ownership, id } = asset;
 
-
-    ///////FILTER OUT SPAM NFTs
-    if (!content || isSpamNft(asset)) continue;
+    // Skip assets without required content
+    if (!content || !content.links || !content.metadata) continue;
     
     // Must have proper content
     const imageUrl = content.links?.image;
     if (!imageUrl) continue;
     if (!content.metadata?.name) continue;
-    //////
 
     if(isCollectionNft(asset)) continue;
+
+    // Check if asset is likely spam (but don't filter it out)
+    const likelySpam = isSpamNft(asset);
 
     const attributes: BlockchainAttribute[] = content.metadata.attributes
       ?.length
@@ -97,6 +98,7 @@ export const parseSolanaAssets = (
       attributes,
       media,
       collection,
+      likelySpam,
     };
 
     const isEdition =

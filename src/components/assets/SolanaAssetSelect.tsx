@@ -72,12 +72,17 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     source: source === "choose" ? selectedSource : source,
   });
 
+  // Filter out spam assets and apply search
   const filteredAssets = useMemo(() => {
     if (!solanaAssets || solanaAssets.length === 0) return [];
-    // No search term, return all assets
-    if (!debouncedSearch || debouncedSearch.length < 1) return solanaAssets;
+    
+    // First filter out spam assets
+    const nonSpamAssets = solanaAssets.filter(asset => !asset.likelySpam);
+    
+    // No search term, return all non-spam assets
+    if (!debouncedSearch || debouncedSearch.length < 1) return nonSpamAssets;
 
-    return solanaAssets.filter(
+    return nonSpamAssets.filter(
       (asset) => {
         if (isValidSolanaAddress(debouncedSearch)) { 
           return asset.tokenAddress
@@ -92,6 +97,12 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       }
     );
   }, [solanaAssets, debouncedSearch]);
+
+  // Count spam assets
+  const spamCount = useMemo(() => {
+    if (!solanaAssets || solanaAssets.length === 0) return 0;
+    return solanaAssets.filter(asset => asset.likelySpam).length;
+  }, [solanaAssets]);
 
   const assetsPage = useMemo(() => {
     return (
@@ -332,6 +343,12 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         perPage={perPage}
         totalItems={totalItems}
       />
+      
+      {spamCount > 0 && (
+        <P className="text-muted-foreground text-center text-sm">
+          {spamCount} {spamCount === 1 ? 'item' : 'items'} hidden (likely spam)
+        </P>
+      )}
     </div>
   );
 };

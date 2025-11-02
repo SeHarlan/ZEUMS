@@ -28,4 +28,5 @@ export type ParsedBlockChainAsset = Omit<
   "owner" | "source" | "date" | "_id"
 > & {
   collection?: BlockchainCollection;
+  likelySpam?: boolean;
 };

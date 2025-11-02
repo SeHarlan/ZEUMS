@@ -32,10 +32,14 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
 }) => {
   const pathname = usePathname();
 
-  const { solanaAssets: childrenAssets } = useSolanaAssets({
+  const { solanaAssets: allChildrenAssets } = useSolanaAssets({
     publicKeys: [asset.tokenAddress],
     source: EntrySource.Collector,
   });
+  
+  // Filter out spam from children assets
+  const childrenAssets = allChildrenAssets?.filter(asset => !asset.likelySpam);
+  const childrenSpamCount = allChildrenAssets?.filter(asset => asset.likelySpam).length || 0;
   
   const returnKey = getReturnKey(pathname, asset.tokenAddress);
 
@@ -116,6 +120,11 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
                   />
                 ))}
               </div>
+              {childrenSpamCount > 0 && (
+                <P className="text-muted-foreground text-sm mt-2">
+                  {childrenSpamCount} {childrenSpamCount === 1 ? 'item' : 'items'} hidden (likely spam)
+                </P>
+              )}
             </MetadataSection>
           </>
         )}
