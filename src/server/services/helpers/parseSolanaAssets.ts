@@ -1,6 +1,6 @@
 import { BlockchainCollection, ParsedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
-import { GetAssetResponse, File, Interface } from "@/types/helius";
+import { File, GetAssetResponse, Interface } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
 import { solanaSpamCreatorAddresses, solanaWhiteListedCollectionAddresses } from "./addressLists";
@@ -14,7 +14,6 @@ export const parseSolanaAssets = (
 
   for (const asset of rawAssets) {
     const { content, creators, ownership, id } = asset;
-
 
     ///////FILTER OUT SPAM NFTs
     if (!content || isSpamNft(asset)) continue;

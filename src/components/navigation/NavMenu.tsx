@@ -106,7 +106,7 @@ const NavMenu: FC = () => {
             disabled={!loggedIn}
           >
             <EyeIcon />
-            Published Timeline
+            Public Timeline
           </LinkButton>
 
             <LoginButton

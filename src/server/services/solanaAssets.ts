@@ -1,6 +1,6 @@
 import { GetSolanaAssetsProps } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
-import { GetAssetResponseList, GetAssetResponse as AssetResponse } from "@/types/helius";
+import { GetAssetResponse as AssetResponse, GetAssetResponseList } from "@/types/helius";
 import axios from "axios";
 
 type GetAssetResponse = {
@@ -13,12 +13,12 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
   const maxBatch = 1000
   const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`;
 
-  const method =
+  const method = 
     source === EntrySource.Collector
       ? "getAssetsByOwner"
       : "getAssetsByCreator";
   
-  const sourceParamKey =
+  const sourceParamKey = 
     source === EntrySource.Collector
       ? "ownerAddress" : "creatorAddress";
 
@@ -28,11 +28,9 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
     let continueFetching = true;
     while (continueFetching) {
 
-      console.time(`getAllSolanaAssets-page-${page}`);
-
       const params = {
         jsonrpc: "2.0",
-        id: `zeumz-${publicKey}-${page}`,
+        id: `zeums-${publicKey}-${page}`,
         method,
         params: {
           [sourceParamKey]: publicKey,
@@ -56,7 +54,6 @@ export const getAllSolanaAssets = async ({ publicKeys, source }: GetSolanaAssets
           return res.data.result;
         })
             
-      console.timeEnd(`getAllSolanaAssets-page-${page}`);
       if (!res || res.items.length == 0) {
         continueFetching = false
         break;

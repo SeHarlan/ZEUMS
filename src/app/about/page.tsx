@@ -54,11 +54,11 @@ export default function About() {
         <H3>The Vision</H3>
         <P>
           What began as a passion project by generative-glitch artist EV3 has
-          grown into a mission to help shape and uplift a burgeoning art movement.
-          We want {TITLE_COPY} to help make digital art feel real, not just for
+          grown into a mission to help uplift a burgeoning art movement.
+          {TITLE_COPY} is here to make digital art feel real, not just for
           insiders, but for everyone. By giving artists and collectors tools to
-          present their work with clarity and context, we preserve today&apos;s
-          creative moment for the future.
+          present their artworks with clarity and context, we will help today&apos;s
+          creative movement thrive and preserve it for the future.
         </P>
       </section>
 

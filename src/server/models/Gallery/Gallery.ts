@@ -88,6 +88,9 @@ GallerySchema.virtual(GALLERY_OWNER_DATA_FOREIGN_KEY, {
   justOne: true,
 });
 
+// Add compound index to ensure unique gallery names per user
+GallerySchema.index({ [GALLERY_OWNER_FOREIGN_KEY]: 1, title: 1 }, { unique: true });
+
 export const GalleryWithItemsPopulate = {
   path: GALLERY_ITEMS_VIRTUAL,
   model: GALLERY_ITEM_MODEL_KEY,
