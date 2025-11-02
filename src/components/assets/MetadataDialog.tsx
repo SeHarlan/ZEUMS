@@ -39,7 +39,7 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
   
   // Filter out spam from children assets
   const childrenAssets = allChildrenAssets?.filter(asset => !asset.likelySpam);
-  const childrenSpamCount = allChildrenAssets?.filter(asset => asset.likelySpam).length || 0;
+  const childrenSpamCount = (allChildrenAssets?.length || 0) - (childrenAssets?.length || 0);
   
   const returnKey = getReturnKey(pathname, asset.tokenAddress);
 

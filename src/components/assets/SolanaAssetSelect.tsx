@@ -98,11 +98,8 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     );
   }, [solanaAssets, debouncedSearch]);
 
-  // Count spam assets
-  const spamCount = useMemo(() => {
-    if (!solanaAssets || solanaAssets.length === 0) return 0;
-    return solanaAssets.filter(asset => asset.likelySpam).length;
-  }, [solanaAssets]);
+  // Calculate spam count by subtraction
+  const spamCount = (solanaAssets?.length || 0) - filteredAssets.length;
 
   const assetsPage = useMemo(() => {
     return (
