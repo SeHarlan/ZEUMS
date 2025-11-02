@@ -23,6 +23,8 @@ export type BaseUserType = {
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
   primaryTimeline?: EntrySource;
+  hideCreatorDates?: boolean;
+  hideCollectorDates?: boolean;
   // websites?: Website[];
 };
 

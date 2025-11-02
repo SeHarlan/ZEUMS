@@ -13,9 +13,10 @@ import { EntryBaseProps } from "./EntryBase";
 interface TimelineBaseProps {
   entries: TimelineEntry[];
   EntryComponent: React.FC<EntryBaseProps>;
+  hideDates?: boolean;
 }
 
-const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
+const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false}) => {
 
   const renderedEntries = useMemo(() => {
     return processTimelineEntries(entries, (processedEntry) => {
@@ -58,8 +59,8 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent}) => {
           <EntryComponent entry={entry} flip={flipEntry} />
         </Fragment>
       );
-    });
-  }, [entries, EntryComponent]);
+    }, hideDates);
+  }, [entries, EntryComponent, hideDates]);
 
   const handleScrollToBottom = () => {
     const viewport = getMainScrollAreaViewport();
