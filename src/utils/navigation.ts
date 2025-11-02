@@ -47,8 +47,10 @@ export const getReturnPath = (returnKey: string): string => {
   }
 
   if (returnKey.includes(USER_GALLERY_RETURN_KEY)) {
-    const id = returnKey.split(specialSplitter)[1];
-    return USER_GALLERY(id);
+    const parts = returnKey.split(specialSplitter);
+    const username = parts[1];
+    const galleryname = parts[2];
+    return USER_GALLERY(username, galleryname);
   }
 
   if (returnKey.includes(SOLANA_ASSET_RETURN_KEY)) {
@@ -93,9 +95,24 @@ export const getReturnKey = (currentPath?: string, id?: string): string => {
       .split(`${GALLERY}/`)
       .pop();
     if (galleryId && !galleryId.includes(GALLERY)) {
+      // This is the old route format - we'll still support it for now
       return USER_GALLERY_RETURN_KEY + specialSplitter + galleryId;
     }
     return GALLERY_RETURN_KEY;
+  }
+
+  // Check if we're on a username/galleryname route (new format)
+  const sections = currentPath.split("?")[0].split("/").filter(Boolean);
+  if (sections.length === 2 && sections[0] && sections[1]) {
+    // Could be either timeline or gallery - try to determine
+    // If we got here and haven't matched other patterns, it's likely a gallery
+    // We'll check if it's a known non-gallery pattern first
+    if (sections[1] !== "timeline" && !currentPath.includes(EDIT_GALLERIES) && !currentPath.includes(GALLERY)) {
+      // Assume it's a gallery: /username/galleryname
+      return USER_GALLERY_RETURN_KEY + specialSplitter + sections[0] + specialSplitter + sections[1];
+    }
+    // Otherwise assume it's a timeline
+    return USER_TIMELINE_RETURN_KEY + specialSplitter + sections[0];
   }
 
 
@@ -105,12 +122,6 @@ export const getReturnKey = (currentPath?: string, id?: string): string => {
   if (currentPath.includes(ABOUT)) return ABOUT_RETURN_KEY;
   if (currentPath.includes(SEARCH)) return SEARCH_RETURN_KEY;
   if (currentPath === HOME) return LANDING_RETURN_KEY;
-
-  const sections = currentPath.split("/");
-  if (sections.length === 2) {
-    //assume we are on a users timeline
-    return USER_TIMELINE_RETURN_KEY + specialSplitter + sections[1];
-  }
   
   return LANDING_RETURN_KEY;
 };
