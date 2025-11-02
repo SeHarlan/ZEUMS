@@ -15,7 +15,6 @@ export const ENTRY_DATES_ROUTE = `${ENTRY_ROUTE}/dates`;
 export const ENTRY_ENTRIES_ROUTE = `${ENTRY_ROUTE}/entries`;
 
 export const GALLERY_ROUTE = `${API_ROUTE}/gallery`;
-export const GALLERY_BY_ID_ROUTE = (id: string) => `${GALLERY_ROUTE}/${id}`;
 
 export const GALLERY_ITEM_ROUTE = `${API_ROUTE}/gallery-item`;
 export const GALLERY_ITEM_ITEMS_ROUTE = `${GALLERY_ITEM_ROUTE}/items`;
@@ -27,6 +26,15 @@ export const PUBLIC_USER_ROUTE = `${PUBLIC_ROUTE}/user`;
 export const PUBLIC_USER_BY_USERNAME_ROUTE = (username: string) =>
   `${PUBLIC_USER_ROUTE}/${username}`;
 export const PUBLIC_GALLERY_ROUTE = `${PUBLIC_ROUTE}/gallery`;
+
+export const GALLERY_BY_USERNAME_AND_NAME_ROUTE = (
+  username: string,
+  galleryName: string
+) => `${PUBLIC_GALLERY_ROUTE}/${username}/${galleryName}`;
+
+/** Deprecated: use GALLERY_BY_USERNAME_AND_NAME_ROUTE instead */
+export const GALLERY_BY_ID_ROUTE = (id: string) => `${PUBLIC_ROUTE}/galleryById/${id}`;
+
 
 export const SEARCH_ROUTE = `${PUBLIC_ROUTE}/search`;
 export const SEARCH_ASSETS_ROUTE = `${SEARCH_ROUTE}/assets`;

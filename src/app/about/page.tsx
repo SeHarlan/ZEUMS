@@ -1,5 +1,6 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import GetStartedButton from "@/components/navigation/GetStartedButton";
@@ -7,6 +8,7 @@ import { Blockquote, H3, P } from "@/components/typography/Typography";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
 
 export default function About() {
+  useShowReturnButton();
   return (
     <PageContainer maxWidth="small" className="space-y-8">
       <PageHeading

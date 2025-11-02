@@ -1,5 +1,6 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import GalleryBase from "@/components/gallery/GalleryBase";
 import { GalleryHero } from "@/components/gallery/GalleryHero";
 import GalleryItemBase from "@/components/gallery/GalleryItemBase";
@@ -12,13 +13,18 @@ import { EDIT_GALLERY } from "@/constants/clientRoutes";
 import { NavBarActions } from "@/context/NavBarActionsProvider";
 import { useUser } from "@/context/UserProvider";
 import useGalleryByUsernameAndName from "@/hooks/useGalleryByUsernameAndName";
+import { decodeGalleryNameFromUrl } from "@/utils/urlEncoding";
 import { EditIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 
 const GalleryPage = () => {
-  const { username, galleryname } = useParams<{ username: string; galleryname: string }>();
-  const { gallery, isLoading, isError } = useGalleryByUsernameAndName(username, galleryname);
+  const { username, galleryName: encodedGalleryName } = useParams<{ username: string; galleryName: string }>();
+  const galleryName = encodedGalleryName ? decodeGalleryNameFromUrl(encodedGalleryName) : null;
+
+  const { gallery, isLoading, isError } = useGalleryByUsernameAndName(username, galleryName);
   const { user: loggedInUser } = useUser();
+
+  useShowReturnButton()
   
   const isUsersPage = loggedInUser?._id === gallery?.owner
 
@@ -44,7 +50,7 @@ const GalleryPage = () => {
         noDataSubtitle="Gallery not found"
       >
         <GalleryHero gallery={gallery} />
-        <GalleryBase gallery={gallery} ItemComponent={GalleryItemBase} />
+        <GalleryBase gallery={gallery} ItemComponent={GalleryItemBase} hideItemTitles={gallery?.hideItemTitles} hideItemDescriptions={gallery?.hideItemDescriptions} />
       </FeedbackWrapper>
     </PageContainer>
   );

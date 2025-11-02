@@ -1,14 +1,15 @@
+import { GALLERY_OWNER_FOREIGN_KEY } from "@/constants/databaseKeys";
+import { standardErrorResponses } from "@/utils/server";
 import { NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import { standardErrorResponses } from "@/utils/server";
 import Gallery, { GalleryWithBasicOwnerPopulate, GalleryWithItemsPopulate } from "../../models/Gallery/Gallery";
 import User from "../../models/User";
-import { GALLERY_OWNER_FOREIGN_KEY } from "@/constants/databaseKeys";
 
 export async function getGalleryByUsernameAndNameHandler(
   username: string,
   galleryName: string
 ): Promise<NextResponse> {
+
   await connectToDatabase();
 
   try {

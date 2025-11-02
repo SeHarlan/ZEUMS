@@ -8,12 +8,11 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import { ChainIdsEnum } from "@/types/wallet";
 import { isValidSolanaAddress } from "@/utils/asset";
 import { handleServerError } from "@/utils/handleError";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import axios from "axios";
 import { GiftIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ScrollableDialog from "../general/ScrollableDialog";
 import { MallowIcon } from "../icons/Social";
@@ -33,7 +32,6 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
   const [hasSearched, setHasSearched] = useState(false);
   const [total, setTotal] = useState(0);
   const router = useRouter();
-  const pathname = usePathname();
 
   const resetSearch = () => { 
     setSearchResults([]);
@@ -94,7 +92,7 @@ const SearchAssetDialog: React.FC<SearchAssetDialogProps> = ({ open, onOpenChang
 
   const handleAssetClick = (tokenAddress: string) => {
     // Navigate to the asset page when clicked
-    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](tokenAddress) + makeReturnQueryParam(getReturnKey(pathname)));
+    router.push(BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](tokenAddress))
     
     setTimeout(() => {
       onOpenChange(false)

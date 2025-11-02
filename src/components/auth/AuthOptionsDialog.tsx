@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { AUTH_EMAIL_SIGNIN } from "@/constants/serverRoutes";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useAtom } from "jotai";
@@ -36,9 +35,8 @@ export const AuthOptionsDialog: FC<AuthOptionsDialogProps> = ({ open, onOpenChan
   const { setVisible } = useWalletModal();
   const [loading, setLoading] = useAtom(authLoadingAtom)
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const returnKey = getReturnKey(pathname);
-  const emailSignInPath = AUTH_EMAIL_SIGNIN + makeReturnQueryParam(returnKey);
+  
+  const emailSignInPath = AUTH_EMAIL_SIGNIN;
 
   const handleLoginWithWallet = () => {
     setLoading(true);

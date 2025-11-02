@@ -12,7 +12,6 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
 import { ImageType } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -41,8 +40,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
 
   const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
 
-  const returnKey = getReturnKey(pathname);
-  const viewGalleryPath = USER_GALLERY(user?.username, editingGallery?.title) + makeReturnQueryParam(returnKey);
+  const viewGalleryPath = USER_GALLERY(user?.username, editingGallery?.title);
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",

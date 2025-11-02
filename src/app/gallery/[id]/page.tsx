@@ -2,6 +2,7 @@
 
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
+import { P } from "@/components/typography/Typography";
 import { USER_GALLERY } from "@/constants/clientRoutes";
 import useGalleryById from "@/hooks/useGalleryById";
 import { useParams, useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ const GalleryPage = () => {
 
   useEffect(() => {
     const newPath = USER_GALLERY(gallery?.ownerData?.username, gallery?.title);
-    if (newPath !== "#") {
+    if (newPath) {
       // Redirect to the new route with username and gallery name
       router.replace(newPath);
     }
@@ -28,9 +29,7 @@ const GalleryPage = () => {
         hasData={!!gallery}
         noDataSubtitle="Gallery not found"
       >
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <p>Redirecting...</p>
-        </div>
+        <P className="absolute-center">Redirecting...</P>
       </FeedbackWrapper>
     </PageContainer>
   );

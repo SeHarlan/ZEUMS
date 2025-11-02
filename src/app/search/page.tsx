@@ -1,5 +1,6 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import SearchAssetDialog from "@/components/assets/SearchAssetDialog";
 import GlitchFeedback from "@/components/general/GlitchFeedback";
 import { PageContainer } from "@/components/general/PageContainer";
@@ -12,6 +13,8 @@ import { useEffect, useState } from "react";
 
 export default function SearchPage() {
   const [searchAssetOpen, setSearchAssetOpen] = useState(false);
+  useShowReturnButton();
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchAssetOpen(true);

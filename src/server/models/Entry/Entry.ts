@@ -1,20 +1,20 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
-import { 
-  BaseEntry, 
-  EntryTypes, 
-  EntryButton,
-  EntrySource,
-} from "@/types/entry";
+import { ENTRY_DISCRIMINATOR_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, GALLERY_ENTRY_LOCAL_FIELD, GALLERY_ENTRY_VIRTUAL, GALLERY_MODEL_KEY, USER_MODEL_KEY } from "@/constants/databaseKeys";
 import type {
+  BaseGalleryEntry,
+  BlockchainAssetEntry,
   TextEntry,
   UserAssetEntry,
-  BlockchainAssetEntry,
-  BaseGalleryEntry,
 } from "@/types/entry";
-import { MediaSchema } from "./media";
-import { ENTRY_DISCRIMINATOR_KEY, ENTRY_FOREIGN_KEY, ENTRY_MODEL_KEY, GALLERY_ENTRY_LOCAL_FIELD, GALLERY_ENTRY_VIRTUAL, GALLERY_MODEL_KEY, USER_MODEL_KEY } from "@/constants/databaseKeys";
-import { GalleryWithFirstTwoRowsPopulate } from "../Gallery/Gallery";
+import {
+  BaseEntry,
+  EntryButton,
+  EntrySource,
+  EntryTypes,
+} from "@/types/entry";
 import { ChainIdsEnum } from "@/types/wallet";
+import mongoose, { Document, Model, Schema } from "mongoose";
+import { GalleryWithBasicOwnerPopulate, GalleryWithFirstTwoRowsPopulate } from "../Gallery/Gallery";
+import { MediaSchema } from "./media";
 
 // Document interfaces
 export interface EntryDocument extends Document, Omit<BaseEntry, "_id"> {
@@ -181,7 +181,7 @@ GalleryEntrySchema.virtual(GALLERY_ENTRY_VIRTUAL, {
 export const GalleryEntryVirtual = {
   path: GALLERY_ENTRY_VIRTUAL,
   model: GALLERY_MODEL_KEY,
-  populate: GalleryWithFirstTwoRowsPopulate,
+  populate: [GalleryWithFirstTwoRowsPopulate, GalleryWithBasicOwnerPopulate],
 };
 
 
@@ -190,9 +190,6 @@ const GalleryEntry = Entry.discriminators?.[EntryTypes.Gallery] ||
 
 // Export models
 export {
-  Entry as default,
-  TextEntry,
-  UserAssetEntry,
-  BlockchainAssetEntry,
-  GalleryEntry
+  BlockchainAssetEntry, Entry as default, GalleryEntry, TextEntry,
+  UserAssetEntry
 };

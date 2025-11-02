@@ -1,5 +1,6 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
 import { ShareButton } from "@/components/navigation/ShareButton";
@@ -20,6 +21,7 @@ export default function UserTimelinePage() {
   const { username } = useParams<{ username: string }>();
   const { user: timelineUser, isLoading, isError } = useUserByUsername(username);
   const { user: loggedInUser } = useUser();
+  useShowReturnButton();
   
   const isUsersPage = loggedInUser?._id.toString() === timelineUser?._id.toString();
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useShowReturnButton } from '@/atoms/navigation';
 import FullAssetViewer from '@/components/assets/FullAssetViewer';
 import AssetMetadataDialog from '@/components/assets/MetadataDialog';
 import FeedbackWrapper from '@/components/general/FeedbackWrapper';
@@ -15,12 +16,10 @@ import { useState } from 'react';
 export default function SolanaAssetPage() {
   const { id }= useParams<{id: string}>()
   const { solanaAsset, isLoading, isError } = useSolanaAsset(id);
-  // const [searchAssetOpen, setSearchAssetOpen] = useState(false);
   const [metadataOpen, setMetadataOpen] = useState(false);
 
-  // const handleSearch =() => {
-  //   setSearchAssetOpen(true);
-  // }
+  useShowReturnButton();
+
 
   const handleViewMetadata = () => { 
     setMetadataOpen(true);
@@ -39,21 +38,9 @@ export default function SolanaAssetPage() {
           <BlockchainAssetEntryIcon />
           <span className="hidden lg:block">Metadata</span>
         </Button>
-        {/* <Button
-          variant={"outline"}
-          size="icon"
-          onClick={handleSearch}
-          className="size-10"
-        >
-          <SearchIcon className="size-5" />
-        </Button> */}
         <ShareButton />
       </NavBarActions>
 
-      {/* <SearchAssetDialog
-        open={searchAssetOpen}
-        onOpenChange={setSearchAssetOpen}
-      /> */}
       {solanaAsset && (
         <AssetMetadataDialog
           open={metadataOpen}

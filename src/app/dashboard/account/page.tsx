@@ -1,5 +1,6 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import {
   AccountOnboardingKeys,
   useAccountSetter,
@@ -16,6 +17,7 @@ import { EDIT_TIMELINE } from "@/constants/clientRoutes";
 
 export default function EditProfilePage() {
   const {setStepComplete, setStepRef} = useAccountSetter(AccountOnboardingKeys.GoToTimeline);
+  useShowReturnButton();
   return (
     <PageContainer maxWidth="full" noPadding>
       <PageTurnRight

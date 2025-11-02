@@ -1,13 +1,14 @@
-import useSWR from "swr";
+import { GALLERY_BY_USERNAME_AND_NAME_ROUTE } from "@/constants/serverRoutes";
+import { PublicGalleryType } from "@/types/gallery";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
-import { PublicGalleryType } from "@/types/gallery";
+import useSWR from "swr";
 
-const galleryByUsernameAndNameFetcher = async (username: string, galleryname: string) => {
-  if (!username || !galleryname) return null;
+const galleryByUsernameAndNameFetcher = async (username: string, galleryName: string) => {
+  if (!username || !galleryName) return null;
 
   return axios
-    .get<{ gallery: PublicGalleryType }>(`/api/public/gallery/${username}/${galleryname}`)
+    .get<{ gallery: PublicGalleryType }>(GALLERY_BY_USERNAME_AND_NAME_ROUTE(username, galleryName))
     .then((res) => {
       return res.data.gallery;
     })
@@ -22,11 +23,11 @@ const galleryByUsernameAndNameFetcher = async (username: string, galleryname: st
 
 const useGalleryByUsernameAndName = (
   username: string | null | undefined,
-  galleryname: string | null | undefined
+  galleryName: string | null | undefined
 ) => {
   const { data, error, isLoading, mutate } = useSWR(
-    username && galleryname ? `gallery-${username}-${galleryname}` : null,
-    () => galleryByUsernameAndNameFetcher(username!, galleryname!)
+    username && galleryName ? `gallery-${username}-${galleryName}` : null,
+    () => galleryByUsernameAndNameFetcher(username!, galleryName!)
   );
 
   return {

@@ -1,9 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { signIn } from "next-auth/react";
+import { returnPathAtom } from "@/atoms/navigation";
+import { StatelessFormItem } from "@/components/general/StatelessFormItem";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -11,19 +10,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, ArrowLeft } from "lucide-react";
-import { handleClientError } from "@/utils/handleError";
+import { Input } from "@/components/ui/input";
 import { HOME } from "@/constants/clientRoutes";
-import { useReturnPath } from "@/hooks/useReturnPath";
 import { useEmailValidation } from "@/hooks/useEmailValidation";
-import { StatelessFormItem } from "@/components/general/StatelessFormItem";
+import { handleClientError } from "@/utils/handleError";
+import { useAtomValue } from "jotai";
+import { ArrowLeft, Mail } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
 export default function MagicLinkPage() {
   const { email, setEmail, isValid, error } = useEmailValidation();
   const [isLoading, setIsLoading] = useState(false);
 
-  const callbackUrl = useReturnPath();
+  //TODO make sure this call back works, may need to add base url
+  const callbackUrl = useAtomValue(returnPathAtom);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

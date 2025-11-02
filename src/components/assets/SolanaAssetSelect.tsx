@@ -16,8 +16,6 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import { ImageVariant } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
 import { isValidSolanaAddress } from "@/utils/asset";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
-import { usePathname } from "next/navigation";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { Button, LinkButton } from "../ui/button";
 import { PrefixInput } from "../ui/input";
@@ -57,10 +55,8 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 200);
   const [selectedSource, setSelectedSource] = useState<EntrySource>(EntrySource.Collector);
   const { user } = useUser();
-  const pathname = usePathname();
-  
-  const returnKey = getReturnKey(pathname);
-  const addWalletPath = EDIT_PROFILE_ACCOUNT + makeReturnQueryParam(returnKey);
+
+  const addWalletPath = EDIT_PROFILE_ACCOUNT;
 
   const solanaPublicKeys = useMemo(
     () => getWalletsByChain(user)[ChainIdsEnum.SOLANA],
