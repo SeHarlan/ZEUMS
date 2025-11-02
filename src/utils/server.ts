@@ -1,10 +1,11 @@
+import { DUPLICATE_KEY_ERROR, UNAUTHORIZED_ERROR } from "@/constants/errors";
+import { getAuthOptions } from "@/server/handlers/auth/nextAuthOptions";
+import { MongoServerError } from "mongodb";
 import { getServerSession, User as NextAuthUser } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthOptions } from "@/server/handlers/auth/nextAuthOptions";
 import { handleServerError } from "./handleError";
 
 
-const UNAUTHORIZED_ERROR = "Unauthorized Session Request";
 export async function getAuthSessionUser(req: NextRequest): Promise<NextAuthUser> {
   const authSession = await getServerSession(getAuthOptions(req));
   
@@ -34,7 +35,9 @@ export function standardErrorResponses({
     report,
   });
 
-  //
+  if (error instanceof MongoServerError && error.code === 11000) {
+    return NextResponse.json({ error: DUPLICATE_KEY_ERROR }, { status: 400 });
+  }
   if (error instanceof Error && error.message === UNAUTHORIZED_ERROR) {
     return NextResponse.json({ error: UNAUTHORIZED_ERROR }, { status: 401 });
   }

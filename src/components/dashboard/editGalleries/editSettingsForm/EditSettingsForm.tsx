@@ -5,6 +5,7 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { EDIT_GALLERY, USER_GALLERY } from "@/constants/clientRoutes";
+import { DUPLICATE_KEY_ERROR } from "@/constants/errors";
 import { GALLERY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
@@ -107,7 +108,15 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         onClose();
       })
       .catch((error) => {
-        toast.error("Failed to update gallery.");
+        const duplicateKeyError = error?.response?.data?.error === DUPLICATE_KEY_ERROR
+        const description = duplicateKeyError
+          ? "You already have a gallery with this title."
+          : undefined;
+        
+        toast.error("Failed to update gallery.", {
+          description,
+        });
+
         handleClientError({
           error,
           location: "EditGallerySettings_onSubmit",
