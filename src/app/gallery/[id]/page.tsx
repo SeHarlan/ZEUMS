@@ -2,6 +2,7 @@
 
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
+import { USER_GALLERY } from "@/constants/clientRoutes";
 import useGalleryById from "@/hooks/useGalleryById";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -14,7 +15,7 @@ const GalleryPage = () => {
   useEffect(() => {
     if (gallery?.ownerData?.username && gallery?.title) {
       // Redirect to the new route with username and gallery name
-      router.replace(`/${gallery.ownerData.username}/${gallery.title}`);
+      router.replace(USER_GALLERY(gallery.ownerData.username, gallery.title));
     }
   }, [gallery, router]);
 
