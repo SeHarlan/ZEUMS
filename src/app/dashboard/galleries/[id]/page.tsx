@@ -1,6 +1,5 @@
 "use client";
 
-import { useShowReturnButton } from "@/atoms/navigation";
 import EditGalleryItems from "@/components/dashboard/editGalleryItems/EditGalleryItems";
 import { PageTurnLeft } from "@/components/dashboard/PageTurnButtons";
 import { GalleryHero } from "@/components/gallery/GalleryHero";
@@ -22,7 +21,6 @@ const EditGalleryPage = () => {
   const { id } = useParams<{ id: string }>();
   const { gallery, isLoading, isError } = useGalleryById(id);
   const { user } = useUser();
-  useShowReturnButton();
 
   const viewGalleryHref = USER_GALLERY(user?.username, gallery?.title);
 

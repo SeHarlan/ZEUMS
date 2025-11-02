@@ -19,12 +19,16 @@ export const useShowReturnButton = () => {
 
   useEffect(() => {
     setShow(true);
-
     return () => {
       setShow(false);
     }
   }, [setShow])
 };
+
+export const getReturnPathAtom = atom((get) => {
+  const paths = get(pathHistoryAtom);
+  return paths[paths.length - 2];
+})
 
 export const useReturnPath = () => {
   const [paths, setPaths] = useAtom(pathHistoryAtom);
@@ -33,19 +37,18 @@ export const useReturnPath = () => {
 
   // Clear return path when pathname changes (but not on initial mount)
   useEffect(() => {
+    setPaths((prev) => {
+      if (prev[prev.length - 1] === pathname) {
+        return prev;
+      }
+      const newHistory = [...prev, pathname];
 
-      setPaths((prev) => {
-        if (prev[prev.length - 1] === pathname) {
-          return prev;
-        }
-        const newHistory = [...prev, pathname];
+      if (newHistory.length > MAX_HISTORY_LENGTH) {
+        newHistory.shift();
+      }
 
-        if (newHistory.length > MAX_HISTORY_LENGTH) {
-          newHistory.shift();
-        }
-
-        return newHistory;
-      });
+      return newHistory;
+    });
   }, [pathname, setPaths]);
 
   const callReturnPath = () => {

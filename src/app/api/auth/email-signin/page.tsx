@@ -1,6 +1,6 @@
 "use client";
 
-import { returnPathAtom } from "@/atoms/navigation";
+import { getReturnPathAtom } from "@/atoms/navigation";
 import { StatelessFormItem } from "@/components/general/StatelessFormItem";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,7 @@ export default function MagicLinkPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   //TODO make sure this call back works, may need to add base url
-  const callbackUrl = useAtomValue(returnPathAtom);
+  const callbackUrl = useAtomValue(getReturnPathAtom);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
