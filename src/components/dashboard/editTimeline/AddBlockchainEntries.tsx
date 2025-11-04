@@ -18,7 +18,7 @@ import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateGalleryDialogButton from "../editGalleries/CreateGalleryDialog";
 
-export const MAX_SELECTED_ASSETS = 9;
+export const MAX_SELECTED_ASSETS = 8;
 interface AddBlockchainEntriesProps {
   source: EntrySource;
   children?: React.ReactNode;
@@ -132,7 +132,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="lg:max-w-4xl h-full flex flex-col">
+      <DialogContent className="lg:max-w-4xl h-full flex flex-col gap-2">
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="w-fit">
             Select minted artworks
@@ -164,8 +164,8 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({
           />
         </div>
 
-        {/* sm is the break point where the footer becomes full width (and when the pagination would overlap) */}
-        <DialogFooter className="sm:absolute sm:bottom-6 sm:right-6">
+        {/* lg is the break point where the footer becomes full width (and when the pagination would overlap) */}
+        <DialogFooter className="lg:absolute lg:bottom-6 lg:right-6" >
           {/* <DialogFooter className=""> */}
           {/* <div className="flex gap-2 flex-wrap items-center w-full sm:w-fit"> */}
           <Button
@@ -176,6 +176,7 @@ const AddBlockchainEntries: FC<AddBlockchainEntriesProps> = ({
               selectedAssets.length === 0 ||
               optimisticallySelectedAssets.size > 0
             }
+            className="w-full lg:w-fit"
           >
             Add Artworks
             <BlockchainAssetEntryIcon />

@@ -2,7 +2,7 @@ import { useUser } from "@/context/UserProvider";
 import { useDebouncedState } from "@/hooks/useDebounce";
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { EntrySource, isEntrySource } from "@/types/entry";
-import { cn } from "@/utils/ui-utils";
+import { cn, truncate } from "@/utils/ui-utils";
 import { getWalletsByChain } from "@/utils/user";
 import { SearchIcon, WalletIcon } from "lucide-react";
 import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useMemo, useState } from "react";
@@ -12,15 +12,16 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 
 import { EDIT_PROFILE_ACCOUNT } from "@/constants/clientRoutes";
-import { ParsedBlockChainAsset } from "@/types/asset";
+import { ParsedBlockChainAsset, SkippedAssetReason } from "@/types/asset";
 import { ImageVariant } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
-import { isValidSolanaAddress } from "@/utils/asset";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { usePathname } from "next/navigation";
 import LoadingSpinner from "../general/LoadingSpinner";
 import { Button, LinkButton } from "../ui/button";
 import { PrefixInput } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import AssetThumbnailCard from "./AssetThumbnailCard";
@@ -32,6 +33,7 @@ interface SolanaAssetSelectProps {
   setSelectAssets: Dispatch<SetStateAction<ParsedBlockChainAsset[]>>;
   optimisticallySelectedAssets: Set<string>;
   setOptimisticallySelectedAssets: Dispatch<SetStateAction<Set<string>>>;
+  /** @defaults 20 */
   perPage?: number;
   /** @defaults 1 */
   maxSelected?: number;
@@ -44,8 +46,9 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   source,
   selectedAssets,
   setSelectAssets,
-  perPage = 12, // Default to 20 if not provided
-  maxSelected = 1, // Default to 1 if not provided
+  perPage = 20,
+  /** Default to 1 if not provided */
+  maxSelected = 1,
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
   imageVariant = "default",
@@ -55,62 +58,61 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 }) => {
   const [page, debouncedPage, setPage] = useDebouncedState(0, 200);
   const [search, debouncedSearch, setSearch] = useDebouncedState("", 200);
-  const [selectedSource, setSelectedSource] = useState<EntrySource>(EntrySource.Collector);
+  const [selectedSource, setSelectedSource] = useState<EntrySource>(
+    EntrySource.Collector
+  );
   const { user } = useUser();
   const pathname = usePathname();
-  
-  const returnKey = getReturnKey(pathname);
-  const addWalletPath = EDIT_PROFILE_ACCOUNT + makeReturnQueryParam(returnKey);
-
   const solanaPublicKeys = useMemo(
     () => getWalletsByChain(user)[ChainIdsEnum.SOLANA],
     [user]
   );
 
-  const { solanaAssets, isLoading } = useSolanaAssets({
-    publicKeys: solanaPublicKeys,
+  const [activePublicKey, setActivePublicKey] = useState(solanaPublicKeys[0]);
+
+  const returnKey = getReturnKey(pathname);
+  const addWalletPath = EDIT_PROFILE_ACCOUNT + makeReturnQueryParam(returnKey);
+
+  const {
+    solanaAssets: solanaAssetsPage,
+    skippedAssets,
+    isLoading,
+    grandTotal,
+    isError,
+    duplicateEditionCount
+  } = useSolanaAssets({
+    publicKey: activePublicKey,
     source: source === "choose" ? selectedSource : source,
+    limit: perPage,
+    page: debouncedPage,
+    searchTerm: debouncedSearch,
   });
 
-  // Filter out spam assets and apply search
-  const filteredAssets = useMemo(() => {
-    if (!solanaAssets || solanaAssets.length === 0) return [];
-    
-    // First filter out spam assets
-    const nonSpamAssets = solanaAssets.filter(asset => !asset.likelySpam);
-    
-    // No search term, return all non-spam assets
-    if (!debouncedSearch || debouncedSearch.length < 1) return nonSpamAssets;
+  //mallow search api is set at 30 per page
+  const actualPerPage = !!search ? 30 : perPage;
 
-    return nonSpamAssets.filter(
-      (asset) => {
-        if (isValidSolanaAddress(debouncedSearch)) { 
-          return asset.tokenAddress
-          .toLowerCase()
-          .includes(debouncedSearch.toLowerCase()) 
-        }
-
-        return asset.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        asset.collection?.name
-          ?.toLowerCase()
-          .includes(debouncedSearch.toLowerCase())
-      }
-    );
-  }, [solanaAssets, debouncedSearch]);
-
+  
   // Calculate spam count by subtraction
-  const spamCount = (solanaAssets?.length || 0) - filteredAssets.length;
+  const parseSkipped = () => {
+    const collectionNfts = [];
+    const spamNfts = [];
+    const brokenContentNfts = [];
+    if (skippedAssets) {
+      for (const asset of skippedAssets) {
+        if (asset.reason === SkippedAssetReason.COLLECTION_NFT) {
+          collectionNfts.push(asset);
+        } else if (asset.reason === SkippedAssetReason.LIKELY_SPAM) {
+          spamNfts.push(asset);
+        } else if (asset.reason === SkippedAssetReason.BROKEN_CONTENT) {
+          brokenContentNfts.push(asset);
+        }
+      }
+    }
+    return { collectionNfts, spamNfts, brokenContentNfts };
+  }
 
-  const assetsPage = useMemo(() => {
-    return (
-      filteredAssets?.slice(
-        debouncedPage * perPage,
-        (debouncedPage + 1) * perPage
-      ) || []
-    );
-  }, [filteredAssets, debouncedPage, perPage]);
-
-  const totalItems = filteredAssets?.length || 0;
+  const { collectionNfts, spamNfts, brokenContentNfts } = parseSkipped();
+  const skippedCount = collectionNfts.length + spamNfts.length + duplicateEditionCount + brokenContentNfts.length;
 
   const selectedAddresses = useMemo(() => {
     return selectedAssets?.map((asset) => asset.tokenAddress);
@@ -126,11 +128,11 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     if (debouncedSearch) {
       setPage(0); // Reset page to 0 when search term changes
     }
-  }, [debouncedSearch, setPage]);
+  }, [debouncedSearch, setPage, activePublicKey]);
 
   const handleClear = () => {
     setSelectAssets([]);
-    setOptimisticallySelectedAssets(new Set()); 
+    setOptimisticallySelectedAssets(new Set());
     setSearch("");
   };
 
@@ -164,19 +166,17 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
     if (isSelected) {
       //delete from list
-      setSelectAssets(prev => 
-        prev?.filter((a) => a.tokenAddress !== asset.tokenAddress) || []
+      setSelectAssets(
+        (prev) =>
+          prev?.filter((a) => a.tokenAddress !== asset.tokenAddress) || []
       );
     } else {
-      setSelectAssets(prev => {
+      setSelectAssets((prev) => {
         if (prev && prev?.length >= maxSelected) {
-          return prev
+          return prev;
         }
-        return [
-          ...(prev || []),
-          mergeAspectRatio(asset, aspectRatio),
-        ]
-    });
+        return [...(prev || []), mergeAspectRatio(asset, aspectRatio)];
+      });
     }
   };
 
@@ -197,7 +197,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
       return <LoadingSpinner iconClass="size-14" />;
     }
 
-    if (!solanaAssets?.length) {
+    if (solanaAssetsPage === null || isError) {
       return (
         <div className="flex flex-col items-center justify-center gap-4">
           <P className="text-muted-foreground text-center">
@@ -213,12 +213,27 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
     return <P className="text-muted-foreground text-center">No assets found</P>;
   };
+
   return (
     <div className="h-full flex flex-col gap-2">
-      <div className="flex justify-between flex-wrap gap-2">
+      <div className="grid lg:grid-cols-2 gap-x-4 gap-y-2 place-items-end px-2">
+        <div className="w-full">
+          <P className="text-sm text-muted-foreground">Active Wallet</P>
+          <Select value={activePublicKey} onValueChange={setActivePublicKey}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a wallet" />
+            </SelectTrigger>
+            <SelectContent>
+              {solanaPublicKeys.map((publicKey) => (
+                <SelectItem key={publicKey} value={publicKey}>
+                  {truncate(publicKey)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {withSearch ? (
           <PrefixInput
-            wrapperClassName="sm:max-w-sm"
             icon={<SearchIcon className="size-4 text-muted-foreground" />}
             placeholder="Search assets"
             value={search}
@@ -227,28 +242,25 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         ) : (
           <div />
         )}
-        {maxSelected > 1 ? (
-          <Button
-            onClick={handleClear}
-            variant={"outline"}
-            className="w-full sm:w-fit"
-          >
-            Clear
-          </Button>
-        ) : null}
       </div>
       {source === "choose" ? (
         <Tabs
-          onValueChange={(value) => isEntrySource(value) && setSelectedSource(value)}
+          onValueChange={(value) =>
+            isEntrySource(value) && setSelectedSource(value)
+          }
           value={selectedSource}
         >
           <TabsList className="w-full font-serif">
-            <TabsTrigger primaryActive value={EntrySource.Collector}>Collected</TabsTrigger>
-            <TabsTrigger primaryActive value={EntrySource.Creator}>Created</TabsTrigger>
+            <TabsTrigger primaryActive value={EntrySource.Collector}>
+              Collected
+            </TabsTrigger>
+            <TabsTrigger primaryActive value={EntrySource.Creator}>
+              Created
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       ) : null}
-      <ScrollArea className="flex-1 min-h-0 pr-3">
+      <ScrollArea className="flex-1 min-h-0">
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
             <P className="text-lg font-bold">
@@ -260,13 +272,13 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
         <div
           className={cn(
-            "grid gap-4 h-full py-2",
+            "grid gap-4 h-full p-2",
             imageVariant === "banner"
               ? "grid-cols-1 lg:grid-cols-2"
               : "grid-cols-2 lg:grid-cols-4"
           )}
         >
-          {assetsPage.map((asset) => {
+          {solanaAssetsPage?.map((asset) => {
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
             );
@@ -285,7 +297,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
                     <AssetThumbnailCard
                       asset={asset}
                       imageVariant={imageVariant}
-                      className={cn("border-3 border-transparent opacity-50")}
+                      className={cn("border-3 opacity-50")}
                     />
                   </TooltipTrigger>
                   <TooltipContent>
@@ -324,28 +336,72 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
             );
           })}
         </div>
+        {skippedCount > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <P className="text-muted-foreground text-center w-full p-4 underline cursor-pointer">
+                {skippedCount} {skippedCount === 1 ? "item" : "items"} hidden
+              </P>
+            </PopoverTrigger>
+            <PopoverContent className="text-sm">
+              {duplicateEditionCount > 0 && (
+                <P>{duplicateEditionCount} duplicate editions hidden.</P>
+              )}
+              {collectionNfts.length > 0 && (
+                <div>
+                  <P>{collectionNfts.length} Collection NFTs hidden:</P>
+                  <P className="text-muted-foreground">
+                    {collectionNfts?.map((asset) => asset.title).join(", ")}
+                  </P>
+                </div>
+              )}
+              {spamNfts.length > 0 && (
+                <div>
+                  <P>{spamNfts.length} likely spam hidden:</P>
+                  <P className="text-muted-foreground">
+                    {spamNfts?.map((asset) => asset.title).join(", ")}
+                  </P>
+                </div>
+              )}
+              {brokenContentNfts.length > 0 && (
+                <P>
+                  {brokenContentNfts.length} assets with broken content hidden.
+                </P>
+              )}
+            </PopoverContent>
+          </Popover>
+        )}
       </ScrollArea>
 
-      {assetsPage.length === 0 ? (
+      {!solanaAssetsPage?.length ? (
         <div className="w-full h-full flex items-center justify-center">
           {renderFeedback()}
         </div>
       ) : null}
 
       <Separator />
-
-      <Pagination
-        page={page}
-        setPage={setPage}
-        perPage={perPage}
-        totalItems={totalItems}
-      />
-      
-      {spamCount > 0 && (
-        <P className="text-muted-foreground text-center text-sm">
-          {spamCount} {spamCount === 1 ? 'item' : 'items'} hidden (likely spam)
-        </P>
-      )}
+      <div className="flex justify-between flex-wrap-reverse gap-2 items-center">
+        {maxSelected > 1 ? (
+          <Button
+            onClick={handleClear}
+            variant={"outline"}
+            className="w-full lg:w-fit"
+          >
+            Clear
+          </Button>
+        ) : null}
+        <Pagination
+          page={page}
+          setPage={setPage}
+          perPage={actualPerPage}
+          totalItems={grandTotal}
+        />
+        {maxSelected > 1 ? (
+          <Button variant={"outline"} className="invisible hidden lg:block" >
+            Clear
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 };
