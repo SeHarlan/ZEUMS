@@ -1,21 +1,21 @@
 "use client";
 
-import { FC, useState } from "react";
 import { Button, LinkButton } from "@/components/ui/button";
-import { ExternalLink, Copy, Check } from "lucide-react";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import ScrollableDialog from "../general/ScrollableDialog";
-import { P, H3 } from "../typography/Typography";
 import { Separator } from "@/components/ui/separator";
-import { cn, truncate } from "@/utils/ui-utils";
-import { BlockchainAttribute, EntrySource } from "@/types/entry";
-import useSolanaAssets from "@/hooks/useSolanaAssets";
-import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
-import MediaThumbnail from "../media/MediaThumbnail";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
+import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
+import useSolanaAssets from "@/hooks/useSolanaAssets";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { BlockchainAttribute, EntrySource } from "@/types/entry";
 import { ChainIdsEnum } from "@/types/wallet";
 import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import { cn, truncate } from "@/utils/ui-utils";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { FC, useState } from "react";
+import ScrollableDialog from "../general/ScrollableDialog";
+import MediaThumbnail from "../media/MediaThumbnail";
+import { H3, P } from "../typography/Typography";
 
 
 interface AssetMetadataDialogProps {
@@ -33,8 +33,9 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
   const pathname = usePathname();
 
   const { solanaAssets: childrenAssets } = useSolanaAssets({
-    publicKeys: [asset.tokenAddress],
+    publicKey: asset.tokenAddress,
     source: EntrySource.Collector,
+    page: 1,
   });
   
   const returnKey = getReturnKey(pathname, asset.tokenAddress);

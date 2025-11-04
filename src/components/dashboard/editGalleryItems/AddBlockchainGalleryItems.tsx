@@ -138,7 +138,7 @@ const AddBlockchainGalleryItems: FC<AddBlockchainGalleryItemsProps> = ({ gallery
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="lg:max-w-4xl h-full flex flex-col">
+      <DialogContent className="lg:max-w-4xl h-full flex flex-col gap-2">
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="w-fit">Select Blockchain Gallery Items</DialogTitle>
           <DialogDescription className="sr-only">

@@ -19,6 +19,8 @@ export interface MallowExploreRequest {
     | "lowest-price";
   filter: {
     search: string;
+    artists?: string[];
+    collectors?: string[];
   };
 }
 export interface MallowArtwork {

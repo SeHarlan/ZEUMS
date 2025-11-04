@@ -5,6 +5,23 @@ export interface GetSolanaAssetsProps {
   source: EntrySource;
 }
 
+export interface GetSolanaAssetsPageProps {
+  publicKey: string;
+  source: EntrySource;
+  /** starts at 0 */
+  page: number;
+  /** currently limited to <= 30 by Mallow API */
+  limit?: number;
+  searchTerm?: string;
+}
+export interface GetSolanaAssetsPageResponse {
+  parsedAssets: ParsedBlockChainAsset[];
+  skippedAssets: SkippedBlockChainAsset[];
+  duplicateEditionCount: number;
+  total: number;
+  grandTotal?: number;
+}
+
 export interface GetSolanaAssetProps {
   mintAddress: string;
 }
@@ -28,4 +45,16 @@ export type ParsedBlockChainAsset = Omit<
   "owner" | "source" | "date" | "_id"
 > & {
   collection?: BlockchainCollection;
+};
+
+export enum SkippedAssetReason {
+  LIKELY_SPAM = "likelySpam",
+  COLLECTION_NFT = "collectionNft",
+  BROKEN_CONTENT = "brokenContent",
+}
+export type SkippedBlockChainAsset = Pick<
+  BlockchainAssetEntry,
+  "tokenAddress" | "title" | "description"
+  > & {
+  reason: SkippedAssetReason;
 };

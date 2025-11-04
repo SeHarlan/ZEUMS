@@ -1,31 +1,46 @@
-import { BlockchainCollection, ParsedBlockChainAsset } from "@/types/asset";
+import { BlockchainCollection, ParsedBlockChainAsset, SkippedAssetReason, SkippedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
-import { GetAssetResponse, File, Interface } from "@/types/helius";
+import { File, GetAssetResponse, Interface, Scope } from "@/types/helius";
 import { BlockchainImage, BlockchainMedia, CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
-import { solanaSpamCreatorAddresses, solanaWhiteListedCollectionAddresses } from "./addressLists";
+import { solanaSpamCreatorAddresses } from "./addressLists";
 
 
-export const parseSolanaAssets = (
+export const parseHeliusAssets = (
   rawAssets: GetAssetResponse[]
-): ParsedBlockChainAsset[] => {
+) => {
   const parsedAssets: ParsedBlockChainAsset[] = [];
+  const skippedAssets: SkippedBlockChainAsset[] = [];
   const editionMap: Record<string, ParsedBlockChainAsset> = {}; 
+  let editionCount = 0;
 
   for (const asset of rawAssets) {
-    const { content, creators, ownership, id } = asset;
+    const { content, creators, ownership, id, authorities } = asset;
 
-
-    ///////FILTER OUT SPAM NFTs
-    if (!content || isSpamNft(asset)) continue;
-    
     // Must have proper content
-    const imageUrl = content.links?.image;
-    if (!imageUrl) continue;
-    if (!content.metadata?.name) continue;
-    //////
+    const imageUrl = content?.links?.image;
+    const name = content?.metadata?.name;
 
-    if(isCollectionNft(asset)) continue;
+    const likelySpam = isSpamNft(asset);
+    const isCollection = isCollectionNft(asset);
+    const isBroken = !imageUrl || !name;
+
+
+    if (isBroken || likelySpam || isCollection) {
+      let reason = SkippedAssetReason.BROKEN_CONTENT;
+      if (likelySpam) reason = SkippedAssetReason.LIKELY_SPAM;
+      if (isCollection) reason = SkippedAssetReason.COLLECTION_NFT;
+
+      skippedAssets.push({
+        tokenAddress: id,
+        title: name || "broken - n/a",
+        description: content?.metadata?.description,
+        reason,
+      });
+      continue;
+    }
+
+    // Check if asset is likely spam (but don't filter it out)
 
     const attributes: BlockchainAttribute[] = content.metadata.attributes
       ?.length
@@ -34,6 +49,9 @@ export const parseSolanaAssets = (
           value: a.value,
         }))
       : [];
+    const updateAuthority = authorities?.find((authority) =>
+      authority.scopes.includes(Scope.FULL)
+    );
 
     const onChainCreators =
       creators?.map((creator) => ({
@@ -42,11 +60,19 @@ export const parseSolanaAssets = (
         verified: creator.verified,
       })) || [];
 
+    if (!onChainCreators.length && updateAuthority) {
+      onChainCreators.push({
+        address: updateAuthority.address,
+        share: 0, //unknown
+        verified: false, //unknown
+      });
+    }
+
     const onChainOwner = {
       address: ownership.owner,
     };
 
-    const assetGrouping = asset.grouping?.length ? asset.grouping[0] : null
+    const assetGrouping = asset.grouping?.length ? asset.grouping[0] : null;
 
     const collection: BlockchainCollection | undefined = assetGrouping
       ? {
@@ -56,7 +82,7 @@ export const parseSolanaAssets = (
           description: assetGrouping.collection_metadata?.description,
         }
       : undefined;
-    
+
     //parse media and figure out category
     const { imageCdnUrl, videoUrl, htmlUrl, vrUrl } = parseSolanaMedia({
       files: content?.files || [],
@@ -90,7 +116,7 @@ export const parseSolanaAssets = (
       blockchain: ChainIdsEnum.SOLANA,
       entryType: EntryTypes.BlockchainAsset,
       tokenAddress: id,
-      title: content.metadata.name,
+      title: name,
       description: content.metadata.description,
       onChainCreators,
       onChainOwner,
@@ -103,6 +129,7 @@ export const parseSolanaAssets = (
       asset.supply?.print_max_supply || asset.supply?.edition_number;
 
     if (isEdition) {
+      editionCount++;
       //replace key url characters for a safe string
       const editionKey = imageUrl.replaceAll(/[^a-zA-Z0-9]/g, "-");
 
@@ -118,16 +145,9 @@ export const parseSolanaAssets = (
   const editions = Object.values(editionMap);
   parsedAssets.push(...editions);
 
-  const sortedAssets = parsedAssets.sort((a, b) => {
-    // Sort by title, then by token address
-    if (a.title < b.title) return -1;
-    if (a.title > b.title) return 1;
-    if (a.tokenAddress < b.tokenAddress) return -1;
-    if (a.tokenAddress > b.tokenAddress) return 1;
-    return 0;
-  });
+  const duplicateEditionCount = editionCount - editions.length;
   
-  return sortedAssets;
+  return { parsedAssets, skippedAssets, duplicateEditionCount };
 };  
 
 type ParseSolanaMediaProps = {
@@ -182,13 +202,14 @@ function isSpamNft(asset: GetAssetResponse): boolean {
   const { content, creators, grouping, authorities } = asset;
   if (!content || !content.links || !content.metadata) return true;
 
-  const hasVerifiedCreator = creators?.some((c) => c.verified);
-  const whiteListedCollection =
-    grouping?.[0]?.group_value &&
-    solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
+  //this has been too strict, find new way
+  // const hasVerifiedCreator = creators?.some((c) => c.verified);
+  // const whiteListedCollection =
+  //   grouping?.[0]?.group_value &&
+  //   solanaWhiteListedCollectionAddresses.has(grouping[0].group_value);
 
   // no verified creator,  or whitelisted/verified collection -> is spam
-  if (!hasVerifiedCreator && !whiteListedCollection) return true;
+  // if (!hasVerifiedCreator && !whiteListedCollection) return true;
 
   // Must not have excessive authorities (spam indicator)
   if (authorities && authorities.length > 5) return true;
