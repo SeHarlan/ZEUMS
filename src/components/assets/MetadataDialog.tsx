@@ -31,8 +31,9 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
 
 
   const { solanaAssets: childrenAssets } = useSolanaAssets({
-    publicKeys: [asset.tokenAddress],
+    publicKey: asset.tokenAddress,
     source: EntrySource.Collector,
+    page: 1,
   });
   
   
