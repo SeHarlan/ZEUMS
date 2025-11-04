@@ -74,6 +74,8 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
           // facebook: user?.socialHandles?.facebook || "",
         },
         primaryTimeline: user?.primaryTimeline || EntrySource.Collector,
+        hideCreatorDates: user?.hideCreatorDates ?? false,
+        hideCollectorDates: user?.hideCollectorDates ?? true,
         // websites: user?.websites || [],
       }),
       [user]

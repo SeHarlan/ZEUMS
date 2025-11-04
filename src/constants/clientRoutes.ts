@@ -1,4 +1,5 @@
 import { ChainIdsEnum } from "@/types/wallet";
+import { encodeGalleryNameForUrl } from "@/utils/urlEncoding";
 
 export const HOME = '/'; //landing page
 export const SEARCH = '/search';
@@ -24,7 +25,9 @@ export const TIMELINES = '/timelines';
 export const USER_TIMELINE = (username: string) => `/${username}`;
 export const GALLERIES = '/galleries';
 export const GALLERY = '/gallery';
-export const USER_GALLERY = (galleryId: string) => `${GALLERY}/${galleryId}`;
+export const USER_GALLERY = (username?: string | null, galleryName?: string | null) => 
+  username && galleryName ? `/${username}/${encodeGalleryNameForUrl(galleryName)}` : "";
+export const USER_GALLERY_BY_ID = (galleryId: string) => `${GALLERY}/${galleryId}`; // Deprecated: redirects to new route
 export const BLOCKCHAIN_MEDIA_PATHS = {
   [ChainIdsEnum.SOLANA]: SOLANA_MEDIA,
   [ChainIdsEnum.TEZOS]: TEZOS_MEDIA,

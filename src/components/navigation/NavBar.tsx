@@ -1,14 +1,13 @@
 "use client";
 
-import { Button, LinkButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, MenuIcon, MessageCircleQuestionIcon, XIcon } from 'lucide-react';
 import { FC, useRef, useState } from 'react';
 
-import { navBarVisibleAtom } from "@/atoms/navigation";
+import { navBarVisibleAtom, showReturnButtonAtom, useReturnPath } from "@/atoms/navigation";
 import { useNavBarActions } from '@/context/NavBarActionsProvider';
-import { useReturnPath } from '@/hooks/useReturnPath';
 import { cn } from '@/utils/ui-utils';
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import NavMenu from './NavMenu';
 import SupportDialog from './SupportDialog';
@@ -18,7 +17,12 @@ const NavBar: FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [supportOpen, setSupportOpen] = useState(false);
-  const returnPath = useReturnPath();
+
+  const callReturnPath = useReturnPath();
+
+  const showReturnButton = useAtomValue(showReturnButtonAtom)
+  
+
   const { actions } = useNavBarActions();
 
   const toggleMenu = () => {
@@ -32,15 +36,15 @@ const NavBar: FC = () => {
   return (
     <div className="group/nav-bar fixed w-full h-0 top-0 left-0 z-50">
       {/* Back Button - Left side */}
-      {returnPath && (
-        <LinkButton
-          href={returnPath}
+      {showReturnButton && (
+        <Button
+          onClick={callReturnPath}
           variant="outline"
           size="icon"
           className={cn("fixed z-100 left-4 lg:left-8 top-4 lg:top-8 size-10")}
         >
           <ArrowLeft className="size-5" />
-        </LinkButton>
+        </Button>
       )}
 
       <div
@@ -88,9 +92,7 @@ const NavBar: FC = () => {
                   <MessageCircleQuestionIcon className="size-6" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent>
-                Need help?
-              </TooltipContent>
+              <TooltipContent>Need help?</TooltipContent>
             </Tooltip>
           </Button>
         </div>

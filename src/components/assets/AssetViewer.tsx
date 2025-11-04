@@ -1,21 +1,20 @@
 "use client"
 
-import Image from "next/image";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { FC, useState } from "react";
-import { getMediaUrl } from "@/utils/media";
-import { BoxIcon, Code2Icon, FullscreenIcon, ImageOffIcon, VideoOffIcon } from "lucide-react";
-import { cn } from "@/utils/ui-utils";
-import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
-import VideoViewer from "../media/VideoViewer";
-import { LinkButton } from "../ui/button";
-import { usePathname, useRouter } from "next/navigation";
-import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
-import { useImageFallback } from "@/hooks/useImageFallback";
 import { imageBreakpoints } from "@/constants/ui";
+import { useImageFallback } from "@/hooks/useImageFallback";
+import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
 import { BlockchainAssetGalleryItem, isBlockchainAssetGalleryItem, isGalleryItem, UserAssetGalleryItem } from "@/types/galleryItem";
+import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
+import { getMediaUrl } from "@/utils/media";
+import { cn } from "@/utils/ui-utils";
+import { BoxIcon, Code2Icon, FullscreenIcon, ImageOffIcon, VideoOffIcon } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
+import VideoViewer from "../media/VideoViewer";
+import { AspectRatio } from "../ui/aspect-ratio";
+import { LinkButton } from "../ui/button";
 
 
 type Asset =
@@ -39,7 +38,6 @@ const AssetViewer: FC<AssetViewerProps> = ({
   className,
   unoptimized = false,
 }) => {
-  const pathname = usePathname();
   const router = useRouter();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
@@ -68,12 +66,9 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
   const isVideoOrImage = isVideo || isImage;
 
-  const basePath = isBlockchainAsset
+  const newPagePath = isBlockchainAsset
     ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
     : USER_MEDIA(asset._id.toString());
-
-  const returnKey = getReturnKey(pathname);
-  const newPagePath = basePath + makeReturnQueryParam(returnKey);
 
   const goToMediaPage = () => {
     router.push(newPagePath);

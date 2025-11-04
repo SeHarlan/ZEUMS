@@ -5,6 +5,7 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { EDIT_GALLERY, USER_GALLERY } from "@/constants/clientRoutes";
+import { DUPLICATE_KEY_ERROR } from "@/constants/errors";
 import { GALLERY_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { upsertGalleryFormSchema, UpsertGalleryFormValues } from "@/forms/upsertGallery";
@@ -12,7 +13,6 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
 import { ImageType } from "@/types/media";
 import { handleClientError } from "@/utils/handleError";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -36,13 +36,12 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
 
   const galleryId = editingGallery?._id?.toString() || "";
   const { mutateGallery, isLoading } = useGalleryById(galleryId);
-  const { revalidateUser } = useUser();
+  const { revalidateUser, user } = useUser();
   const pathname = usePathname();
 
   const notOnGalleryItemsPage = !pathname.includes(EDIT_GALLERY(galleryId));
 
-  const returnKey = getReturnKey(pathname);
-  const viewGalleryPath = USER_GALLERY(galleryId) + makeReturnQueryParam(returnKey);
+  const viewGalleryPath = USER_GALLERY(user?.username, editingGallery?.title);
 
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
@@ -109,7 +108,15 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         onClose();
       })
       .catch((error) => {
-        toast.error("Failed to update gallery.");
+        const duplicateKeyError = error?.response?.data?.error === DUPLICATE_KEY_ERROR
+        const description = duplicateKeyError
+          ? "You already have a gallery with this title."
+          : undefined;
+        
+        toast.error("Failed to update gallery.", {
+          description,
+        });
+
         handleClientError({
           error,
           location: "EditGallerySettings_onSubmit",

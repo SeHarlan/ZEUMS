@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { EntrySource } from "@/types/entry";
@@ -75,6 +77,40 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="hideCreatorDates"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hide Created Timeline Dates</FormLabel>
+
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="hideCollectorDates"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hide Collected Timeline Dates</FormLabel>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <Separator />
+      
       <div className="relative w-full h-fit">
         <Button
           type="button"

@@ -20,7 +20,7 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
   const isOpen = Boolean(editingItem);
   const { mutateGallery } = useGalleryById(item.parentGalleryId.toString());
   const { revalidateUser } = useUser();
-  
+
   const [deleting, setDeleting] = useState(false);
 
   const disableButtons = deleting || isOpen;
@@ -80,6 +80,7 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
           onClick={handleDelete}
           variant="destructive"
           disabled={disableButtons}
+          loading={deleting}
           size="icon"
         >
           <Trash2Icon />

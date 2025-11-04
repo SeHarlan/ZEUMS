@@ -74,6 +74,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
           onClick={handleDelete}
           variant="destructive"
           loading={deleting}
+          disabled={disableButtons}
           size="icon"
         >
           <Trash2Icon />

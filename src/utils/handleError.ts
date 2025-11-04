@@ -22,7 +22,7 @@ export const handleClientError = ({ error, location, report }: ErrorArgs) => {
   }
 }
 
-const getErrorMessage = (error: Error | unknown): string => {
+export const getErrorMessage = (error: Error | unknown): string => {
   // Handle Error objects
   if (error instanceof Error) {
     return error.message || error.toString();

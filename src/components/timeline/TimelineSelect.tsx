@@ -23,12 +23,23 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({ user, EntryComponent, 
       setTabValue(value);
     }
   } : undefined;
+
+  const getHideDates = (source: EntrySource) => {
+    if (source === EntrySource.Creator) {
+      return user?.hideCreatorDates ?? false;
+    } else if (source === EntrySource.Collector) {
+      return user?.hideCollectorDates ?? true;
+    }
+    return false;
+  };
+
   return (
     <div className={cn(PAGE_PADDING_X, "py-4")}>
       {content.length <= 1 ? (
         <TimelineBase
           entries={content[0]?.entries || []}
           EntryComponent={EntryComponent}
+          hideDates={getHideDates(content[0]?.value || EntrySource.Creator)}
         />
       ) : (
         <Tabs
@@ -55,6 +66,7 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({ user, EntryComponent, 
               <TimelineBase
                 entries={item.entries}
                 EntryComponent={EntryComponent}
+                hideDates={getHideDates(item.value)}
               />
             </TabsContent>
           ))}

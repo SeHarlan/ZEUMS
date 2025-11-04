@@ -1,15 +1,14 @@
+import { USER_GALLERY } from "@/constants/clientRoutes";
 import { GalleryEntry } from "@/types/entry";
 import { cn } from "@/utils/ui-utils";
+import { ArrowRightIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { H3 } from "../typography/Typography";
-import ExpandableText from "../general/ExpandableText";
-import EntryButtons from "./EntryButtons";
-import { LinkButton } from "../ui/button";
-import { ArrowRightIcon} from "lucide-react";
-import { USER_GALLERY } from "@/constants/clientRoutes";
-import { usePathname, useRouter } from "next/navigation";
 import MiniGalleryBase from "../gallery/MiniGalleryBase";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
+import ExpandableText from "../general/ExpandableText";
+import { H3 } from "../typography/Typography";
+import { LinkButton } from "../ui/button";
+import EntryButtons from "./EntryButtons";
 interface GalleryEntryDisplayProps {
   entry: GalleryEntry;
   flip?: boolean;
@@ -17,11 +16,8 @@ interface GalleryEntryDisplayProps {
 
 const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const galleryLink = USER_GALLERY(entry.gallery?.ownerData?.username, entry.gallery?.title);
 
-  const returnKey = getReturnKey(pathname);
-  const galleryLink =
-    USER_GALLERY(entry.galleryId.toString()) + makeReturnQueryParam(returnKey); ;
 
   const handleClick = () => {
     router.push(galleryLink);

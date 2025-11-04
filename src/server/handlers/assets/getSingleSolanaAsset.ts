@@ -1,4 +1,4 @@
-import { parseSolanaAssets } from "@/server/services/helpers/parseSolanaAssets";
+import { parseHeliusAssets } from "@/server/services/helpers/parseHeliusAssets";
 import { getSingleSolanaAsset } from "@/server/services/singleSolanaAsset";
 import { standardErrorResponses } from "@/utils/server";
 import { NextResponse } from "next/server";
@@ -12,7 +12,8 @@ export async function getSingleSolanaAssetHandler(
     }
 
     const rawAsset = await getSingleSolanaAsset(mintAddress);
-    const asset = parseSolanaAssets([rawAsset])[0];
+    const {parsedAssets} = parseHeliusAssets([rawAsset]);
+    const asset = parsedAssets[0];
 
     return NextResponse.json({ asset }, { status: 200 });
   } catch (error) {

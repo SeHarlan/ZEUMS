@@ -2,10 +2,9 @@
 import { navBarVisibleAtom } from "@/atoms/navigation";
 import { H1, P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
-import { ABOUT, LANDING_RETURN_KEY } from "@/constants/clientRoutes";
+import { ABOUT } from "@/constants/clientRoutes";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
-import { makeReturnQueryParam } from "@/utils/navigation";
 import { cn } from "@/utils/ui-utils";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +17,7 @@ const BasicNavDialog = () => {
   const [buttonReady, setButtonReady] = useState(false);
   const { isMd } = useBreakpoints();
 
-  const aboutPath = ABOUT + makeReturnQueryParam(LANDING_RETURN_KEY);
+  const aboutPath = ABOUT;
 
   const showButton = navBarVisible && (buttonVisible || !isMd);
 
