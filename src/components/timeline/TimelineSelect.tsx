@@ -54,7 +54,8 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({ user, EntryComponent, 
                 value={item.value}
                 className="w-fit px-4 bg-transparent border-border data-[state=active]:border-primary 
                 hover:border-primary/25 data-[state=active]:text-base data-[state=active]:shadow-none 
-                rounded-none border-0  border-b-3  transition-[border-color] duration-400"
+                rounded-none border-0  border-b-3  transition-[border-color] duration-400
+                dark:data-[state=active]:bg-transparent"
               >
                 <P className="font-serif">{item.title}</P>
               </TabsTrigger>

@@ -49,7 +49,9 @@ function TabsTrigger({
         //customized
         "cursor-pointer data-[state=active]:font-bold hover:bg-background/75 transition-colors duration-250",
         primaryActive &&
-          "rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:bg-border",
+          `rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:bg-border
+          dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground`,
+        
         className
       )}
       {...props}

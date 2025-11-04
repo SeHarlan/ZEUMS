@@ -14,7 +14,7 @@ interface GalleryBaseProps {
 }
 
 const GAP = 12;
-const MAX_HEIGHT_RATIO = 0.50;
+const MAX_HEIGHT_RATIO = .75;
 
 const MiniGalleryBase: FC<GalleryBaseProps> = ({
   gallery,

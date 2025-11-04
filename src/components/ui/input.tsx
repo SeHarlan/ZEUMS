@@ -1,8 +1,8 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/utils/ui-utils"
-import { P } from "../typography/Typography";
+import { cn } from "@/utils/ui-utils";
 import { ReactNode } from "react";
+import { P } from "../typography/Typography";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -40,6 +40,7 @@ function PrefixInput({
         "group/input-wrapper relative flex h-9 w-full rounded-md border bg-transparent transition-[color,box-shadow] outline-none border-input",
         "has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-ring/50 has-[input:focus-visible]:ring-[3px]",
         "has-[input[aria-invalid='true']]:ring-destructive/20 dark:has-[input[aria-invalid='true']]:ring-destructive/40 has-[input[aria-invalid='true']]:border-destructive",
+        "dark:bg-input/30",
         wrapperClassName
       )}
       onClick={(e) => {
@@ -67,7 +68,7 @@ function PrefixInput({
         type={type}
         data-slot="input"
         className={cn(
-          "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30",
+          "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground ",
           "h-full w-full border-0 bg-transparent pr-3 pl-1 py-1 text-base shadow-xs outline-none",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           "focus:outline-none focus-visible:ring-0 focus-visible:border-transparent",
@@ -79,4 +80,5 @@ function PrefixInput({
   );
 }
 
-export { Input, PrefixInput }
+export { Input, PrefixInput };
+

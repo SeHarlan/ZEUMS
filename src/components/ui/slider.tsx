@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
+import * as React from "react"
 
 import { cn } from "@/utils/ui-utils"
 
@@ -40,14 +40,14 @@ function Slider({
       <SliderPrimitive.Track
         data-slot="slider-track"
         className={cn(
-          reversed ? "bg-primary" : "bg-muted",
+          reversed ? "bg-primary dark:bg-muted" : "bg-muted dark:bg-primary",
           "relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
         )}
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            reversed ? "bg-muted" : "bg-primary",
+            reversed ? "bg-muted dark:bg-primary" : "bg-primary dark:bg-muted",
             "absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
           )}
         />
