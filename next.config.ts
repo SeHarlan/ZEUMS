@@ -55,6 +55,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+  outputFileTracingIncludes: {
+    "/api/image": ["./node_modules/sharp/**/*"],
+  },
 };
 
 export default nextConfig;
