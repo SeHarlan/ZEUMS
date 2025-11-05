@@ -1,7 +1,6 @@
 export const runtime = "nodejs"; // sharp needs Node/serverless, not Edge
 
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 
 const LONG_CACHE_CONTROL =
   "public, max-age=7776000, immutable, s-maxage=31536000, stale-while-revalidate=86400, stale-if-error=604800";
@@ -14,35 +13,35 @@ const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 const HIGH_QUALITY_THRESHOLD = 70;
 
 
-// // Lazy-load Sharp with module-level caching
-// let sharpPromise: Promise<typeof import("sharp")> | null = null;
-// let sharpModule: typeof import("sharp") | null = null;
+// Lazy-load Sharp with module-level caching
+let sharpPromise: Promise<typeof import("sharp")> | null = null;
+let sharpModule: typeof import("sharp") | null = null;
 
-// async function getSharp(): Promise<typeof import("sharp")> {
-//   // If already loaded, return synchronously
-//   if (sharpModule) {
-//     return sharpModule;
-//   }
+async function getSharp(): Promise<typeof import("sharp")> {
+  // If already loaded, return synchronously
+  if (sharpModule) {
+    return sharpModule;
+  }
 
-//   // If already loading, wait for it
-//   if (sharpPromise) {
-//     return sharpPromise;
-//   }
+  // If already loading, wait for it
+  if (sharpPromise) {
+    return sharpPromise;
+  }
 
-//   // Start loading
-//   sharpPromise = import("sharp")
-//     .then((module) => {
-//       sharpModule = module.default;
-//       return sharpModule;
-//     })
-//     .catch((error) => {
-//       // Reset on error so we can retry
-//       sharpPromise = null;
-//       throw error;
-//     });
+  // Start loading
+  sharpPromise = import("sharp")
+    .then((module) => {
+      sharpModule = module.default;
+      return sharpModule;
+    })
+    .catch((error) => {
+      // Reset on error so we can retry
+      sharpPromise = null;
+      throw error;
+    });
 
-//   return sharpPromise;
-// }
+  return sharpPromise;
+}
 
 /**
  * Validates that the request is coming from zeum domain or localhost (will be in next auth url)
@@ -196,20 +195,20 @@ export async function resizeImageHandler(
   }
   const buf = Buffer.from(await res.arrayBuffer());
 
-  // // Load Sharp (cached after first load)
-  // let sharp: typeof import("sharp");
-  // try {
-  //   sharp = await getSharp();
-  // } catch (error: unknown) {
-  //   console.error("Failed to load sharp module:", error);
-  //   return NextResponse.json(
-  //     { error: "Image processing unavailable" },
-  //     {
-  //       status: 503,
-  //       headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" },
-  //     }
-  //   );
-  // }
+  // Load Sharp (cached after first load)
+  let sharp: typeof import("sharp");
+  try {
+    sharp = await getSharp();
+  } catch (error: unknown) {
+    console.error("Failed to load sharp module:", error);
+    return NextResponse.json(
+      { error: "Image processing unavailable" },
+      {
+        status: 503,
+        headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" },
+      }
+    );
+  }
 
   if (animateGif) {
     let metadata;
