@@ -10,25 +10,23 @@ import {
   UserMedia,
 } from "@/types/media";
 
-export const getImageUrlSources = (media: MediaType, unoptimized = true): string[] => {
-  const cdn = media.imageCdn;
+export const getImageUrlSources = (media: MediaType): string[] => {
+  // const cdn = media.imageCdn;
 
   const sources = [];
 
+  //TODO depricate all mutlitple source logic
   //try CDNs first
-  if (cdn) {
-    const { type, cdnId } = cdn;
-    if (type === CdnIdType.HELIUS_URL) {
-      //else use original url for optimization
-      // only use helius url for unoptimized images
-      if (unoptimized) { 
-        sources.push(cdnId);
-      }
-    } else if (type === CdnIdType.CLOUDINARY_ID) {
-      // TODO: Cloudinary, will need to construct this URL
-      sources.push(cdnId);
-    }
-  }
+  // if (cdn) {
+  //   const { type, cdnId } = cdn;
+  //   if (type === CdnIdType.HELIUS_URL) {
+  //     //only use this when quality doesnt matter cause we
+
+  //   } else if (type === CdnIdType.CLOUDINARY_ID) {
+  //     // TODO: Cloudinary, will need to construct this URL
+  //     sources.push(cdnId);
+  //   }
+  // }
 
   if (isBlockchainMedia(media) || isBlockchainImage(media)) {
     // For blockchain media, include the original url
@@ -103,3 +101,4 @@ export const isGif = (media: MediaType) => {
 
   return isGif;
 }
+

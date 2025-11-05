@@ -1,5 +1,5 @@
 "use client";
-import { imageBreakpoints } from "@/constants/ui";
+import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
@@ -23,10 +23,10 @@ interface MediaThumbnailProps {
   ratio?: number;
   className?: string;
   alt?: string;
-  size?: "small" | "medium" | "full";
+  size?: ImageSizing;
   priority?: boolean;
   noPadding?: boolean;
-  unoptimized?: boolean;
+  quality?: number;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -38,10 +38,10 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   ratio = 1,
   className,
   alt,
-  size = "small",
+  size = "xs",
   priority,
   noPadding,
-  unoptimized = true,
+  quality = 50,
 }) => {
   const {
     isLoaded,
@@ -50,7 +50,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError: handleFallbackError,
     onLoad: handleFallbackLoad,
-  } = useImageFallback({media, onFinalError: onError, unoptimized});
+  } = useImageFallback({ media, onFinalError: onError });
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();
@@ -61,14 +61,15 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     //broken image
     if (isError) return <ImageOffIcon className="size-8" />;
 
-    const width = imageBreakpoints[size];
+    const width = imageSizing[size];
     const height = width / ratio;
 
     return (
       <Image
         height={height}
         width={width}
-        unoptimized={unoptimized}
+        sizes={`${width}px`}
+        quality={quality}
         loading={priority ? "eager" : "lazy"}
         onError={handleFallbackError}
         onLoad={handleLoad}
@@ -90,7 +91,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
         rounding,
         isLoading && "animate-skeleton-shimmer",
-        (objectFit === "object-contain" && !noPadding) && "p-2",
+        objectFit === "object-contain" && !noPadding && "p-2",
         className
       )}
     >

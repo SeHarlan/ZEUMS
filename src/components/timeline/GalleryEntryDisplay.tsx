@@ -33,7 +33,7 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
         )}
         onClick={handleClick}
       >
-        <MiniGalleryBase gallery={entry.gallery} />
+        <MiniGalleryBase gallery={entry.gallery} imageSize="sm"/>
       </div>
 
       <div

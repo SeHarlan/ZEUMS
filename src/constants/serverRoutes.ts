@@ -45,6 +45,8 @@ export const AUTH_ROUTE = `${API_ROUTE}/auth`;
 export const AUTH_VERIFY_REQUEST_ROUTE = `${AUTH_ROUTE}/verify-request`;
 export const AUTH_ERROR_ROUTE = `${AUTH_ROUTE}/error`;
 
+export const IMAGE_PROXY_ROUTE = `${API_ROUTE}/image`;
+
 //custom auth
 export const PENDING_AUTH_VERIFICATION_ROUTE = `${AUTH_ROUTE}/pending-auth-verification`;
 export const AUTH_EMAIL_SIGNIN = `${AUTH_ROUTE}/email-signin`;
