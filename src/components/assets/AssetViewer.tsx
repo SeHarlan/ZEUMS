@@ -1,6 +1,6 @@
 "use client"
 
-import { MD_BREAKPOINT } from "@/constants/breakpoints";
+import { MAX_SIZE_DIVISOR, MD_BREAKPOINT } from "@/constants/breakpoints";
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
 import { imageSizing } from "@/constants/ui";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
@@ -37,26 +37,26 @@ const AssetViewer: FC<AssetViewerProps> = ({
   asset,
   aspectRatio = "media-defined",
   objectFit = "object-contain",
-  /** caps at 3 to align with next config device sizes */
+  /** caps at MAX_SIZE_DIVISOR to align with next config device sizes */
   sizeDivisor = 1,
   className,
 }) => {
   const router = useRouter();
-  const { isSm, isMd, isLg, isXl, is2Xl} = useBreakpoints();
+  const { isSm, isMd, isLg, isXl, is2Xl } = useBreakpoints();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback({media: asset.media});
+    useImageFallback({ media: asset.media });
 
   const [videoError, setVideoError] = useState(false);
 
   const media = asset.media;
   const alt = asset.title || "Asset Image";
 
-  const aspectRatioValue = 
+  const aspectRatioValue =
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
 
-  const cappedDivisor = Math.min(sizeDivisor, 3);
-  
+  const cappedDivisor = Math.min(sizeDivisor, MAX_SIZE_DIVISOR);
+
   const getWidth = () => {
     // Get base width based on breakpoint
     let baseWidth: number;
@@ -80,15 +80,16 @@ const AssetViewer: FC<AssetViewerProps> = ({
     const percentage = 100 / cappedDivisor;
     return `(min-width: ${MD_BREAKPOINT}px) ${percentage}vw`;
   };
-  
+
   const width = getWidth();
   const height = width / aspectRatioValue;
 
-  const isBlockchainAsset = isEntry(asset) && isBlockchainAssetEntry(asset)
-    || isGalleryItem(asset) && isBlockchainAssetGalleryItem(asset);
+  const isBlockchainAsset =
+    (isEntry(asset) && isBlockchainAssetEntry(asset)) ||
+    (isGalleryItem(asset) && isBlockchainAssetGalleryItem(asset));
 
   const isVideo = media.category === MediaCategory.Video;
-  
+
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
   //video will handle its own loading state
