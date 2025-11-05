@@ -93,6 +93,7 @@ const GalleryBase: FC<GalleryBaseProps> = ({
                         item={cell.item}
                         hideTitle={hideItemTitles}
                         hideDescription={hideItemDescriptions}
+                        sizeDivisor={Math.min(row.length, 4)}
                       />
                     </div>
                   </div>

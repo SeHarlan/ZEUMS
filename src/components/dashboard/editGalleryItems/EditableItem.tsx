@@ -15,7 +15,7 @@ import { FC, useState } from "react";
 import { toast } from "sonner";
 ;
 
-const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription }) => {
+const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription, sizeDivisor }) => {
   const [editingItem, setEditingItem] = useAtom(editGalleryItemAtom);
   const isOpen = Boolean(editingItem);
   const { mutateGallery } = useGalleryById(item.parentGalleryId.toString());
@@ -94,7 +94,7 @@ const EditableItem: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescripti
           <EditIcon />
         </Button>
       </div>
-      <GalleryItemBase item={item} hideTitle={hideTitle} hideDescription={hideDescription} />
+      <GalleryItemBase item={item} hideTitle={hideTitle} hideDescription={hideDescription} sizeDivisor={sizeDivisor} />
     </div>
   );
 };

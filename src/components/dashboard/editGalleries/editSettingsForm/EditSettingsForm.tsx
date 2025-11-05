@@ -46,8 +46,8 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
   const defaultValues: Partial<UpsertGalleryFormValues> = useMemo(() => ({
     title: editingGallery?.title || "",
     description: editingGallery?.description || "",
-    hideItemTitles: editingGallery?.hideItemTitles || false,
-    hideItemDescriptions: editingGallery?.hideItemDescriptions || false,
+    hideItemTitles: editingGallery?.hideItemTitles ?? false,
+    hideItemDescriptions: editingGallery?.hideItemDescriptions ?? true,
   }), [editingGallery])
 
   const form = useForm<UpsertGalleryFormValues>({

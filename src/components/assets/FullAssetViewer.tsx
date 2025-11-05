@@ -19,16 +19,14 @@ import VideoViewer from "../media/VideoViewer";
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
   className?: string;
-  unoptimized?: boolean;
 }
 
 const FullAssetViewer: FC<FullAssetViewerProps> = ({
   asset,
   className,
-  unoptimized = false,
 }) => {
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback({media: asset.media, unoptimized});
+    useImageFallback({media: asset.media});
 
   const [mediaError, setMediaError] = useState(false);
 
@@ -78,7 +76,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       default:
         return (
           <Image
-            unoptimized={unoptimized}
+            quality={100}
             loading="eager"
             priority
             fill
@@ -109,7 +107,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       {/* Blurred background image */}
       <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-500">
         <Image
-          unoptimized={unoptimized}
+          quality={10}
           loading="eager"
           priority
           fill

@@ -307,7 +307,6 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
         media={media}
         alt={entry.title}
         rounding="rounded-sm"
-        size="small"
       />
     </div>
   ) : null;

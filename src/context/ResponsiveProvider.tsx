@@ -33,10 +33,15 @@ const initialBreakpoints = typeof window == "undefined" ? {
 }
 
 type ResponsiveContextType = {
+  /** \> 640px */
   isSm: boolean;
+  /** \> 768px */
   isMd: boolean;
+  /** \> 1024px */
   isLg: boolean;
+  /** \> 1280px */
   isXl: boolean;
+  /** \> 1536px */
   is2Xl: boolean;
 };
 

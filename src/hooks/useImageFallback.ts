@@ -6,16 +6,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface UseImageFallbackProps {
   media: MediaType;
   onFinalError?: () => void;
-  unoptimized?: boolean;
 }
 
-export const useImageFallback = ({ media, onFinalError, unoptimized }: UseImageFallbackProps) => {
+export const useImageFallback = ({ media, onFinalError}: UseImageFallbackProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
   const [hasErrored, setHasErrored] = useHasErroredImage(media);
   
   const onLoad = () => setLoaded(true);
-  const sources = getImageUrlSources(media, unoptimized);
+  const sources = getImageUrlSources(media);
 
   const errorCount = imageIndex;
   const isError = hasErrored || errorCount >= sources.length;

@@ -1,7 +1,8 @@
 "use client"
 
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
-import { imageBreakpoints } from "@/constants/ui";
+import { imageSizing } from "@/constants/ui";
+import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
 import { BlockchainAssetGalleryItem, isBlockchainAssetGalleryItem, isGalleryItem, UserAssetGalleryItem } from "@/types/galleryItem";
@@ -28,30 +29,51 @@ interface AssetViewerProps {
   objectFit?: "object-cover" | "object-contain";
   aspectRatio?: "square" | "media-defined";
   className?: string;
-  unoptimized?: boolean;
+  sizeDivisor?: number;
 }
 
 const AssetViewer: FC<AssetViewerProps> = ({
   asset,
   aspectRatio = "media-defined",
   objectFit = "object-contain",
+  sizeDivisor = 1,
   className,
-  unoptimized = false,
 }) => {
   const router = useRouter();
+  const { isSm, isMd, isLg, isXl, is2Xl} = useBreakpoints();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback({media: asset.media, unoptimized});
+    useImageFallback({media: asset.media});
 
   const [videoError, setVideoError] = useState(false);
 
   const media = asset.media;
   const alt = asset.title || "Asset Image";
 
-  const aspectRatioValue =
+  const aspectRatioValue = 
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
+
   
-  const width = imageBreakpoints.full;
+  const getWidth = () => {
+    // Get base width based on breakpoint
+    let baseWidth: number;
+    if (is2Xl) baseWidth = imageSizing["2xl"];
+    else if (isXl) baseWidth = imageSizing.xl;
+    else if (isLg) baseWidth = imageSizing.lg;
+    else if (isMd) baseWidth = imageSizing.lg;
+    else if (isSm) baseWidth = imageSizing.sm;
+    else baseWidth = imageSizing.xs;
+
+    // Account for device pixel ratio for high-DPI displays
+    // Cap at 3x to balance quality and file size
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    const maxDpr = 3;
+    const effectiveDpr = Math.min(dpr, maxDpr);
+    
+    return Math.round((baseWidth * effectiveDpr) / sizeDivisor);
+  };
+  
+  const width = getWidth();
   const height = width / aspectRatioValue;
 
   const isBlockchainAsset = isEntry(asset) && isBlockchainAssetEntry(asset)
@@ -95,7 +117,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     return (
       <Image
         onClick={goToMediaPage}
-        unoptimized={unoptimized}
+        quality={90}
         width={width}
         height={height}
         loading="lazy"

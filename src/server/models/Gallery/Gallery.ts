@@ -56,7 +56,7 @@ const GallerySchema = new Schema<GalleryDocument>(
     },
     hideItemDescriptions: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   {
