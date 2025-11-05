@@ -1,5 +1,7 @@
+export const runtime = "nodejs"; // sharp needs Node/serverless, not Edge
+
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
+// import sharp from "sharp";
 
 const LONG_CACHE_CONTROL =
   "public, max-age=7776000, immutable, s-maxage=31536000, stale-while-revalidate=86400, stale-if-error=604800";
@@ -17,7 +19,7 @@ const HIGH_QUALITY_THRESHOLD = 70;
 function validateOrigin(req: NextRequest): boolean {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
-    
+
   try {
     // Check origin header
     if (origin) {
@@ -37,7 +39,7 @@ function validateOrigin(req: NextRequest): boolean {
   } catch {
     return false;
   }
-  
+
   return false;
 }
 
@@ -47,19 +49,24 @@ function validateOrigin(req: NextRequest): boolean {
 function validateUrl(src: string): boolean {
   try {
     const url = new URL(src);
-    
+
     // Must be http or https
     if (url.protocol !== "http:" && url.protocol !== "https:") {
       return false;
     }
-    
+
     const hostname = url.hostname.toLowerCase();
-    
+
     // Block localhost variants
-    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.startsWith("127.")) {
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname.startsWith("127.")
+    ) {
       return false;
     }
-    
+
     // Block private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
     if (hostname.startsWith("10.") || hostname.startsWith("192.168.")) {
       return false;
@@ -72,18 +79,18 @@ function validateUrl(src: string): boolean {
         return false;
       }
     }
-    
+
     // Block link-local and metadata service IPs
     if (hostname.startsWith("169.254.")) {
       return false;
     }
-    
+
     return true;
   } catch {
     return false;
   }
 }
-  
+
 export async function resizeImageHandler(
   req: NextRequest
 ): Promise<NextResponse> {
@@ -108,10 +115,13 @@ export async function resizeImageHandler(
 
   // Basic URL validation
   if (!validateUrl(src)) {
-    return NextResponse.json({ error: "Invalid or unsafe src" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid or unsafe src" },
+      { status: 400 }
+    );
   }
 
-  if (serverCache) { 
+  if (serverCache) {
     //TODO: implement server cache
   }
 
@@ -119,7 +129,7 @@ export async function resizeImageHandler(
   const controller = new AbortController();
   const timeoutMs = 8000; // 8 seconds
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  
+
   let res: Response;
   try {
     res = await fetch(src, { redirect: "follow", signal: controller.signal });
@@ -143,7 +153,7 @@ export async function resizeImageHandler(
       }
     );
   }
-  
+
   if (!res.ok) {
     return NextResponse.json(
       { error: "Bad upstream" },
@@ -156,15 +166,28 @@ export async function resizeImageHandler(
   const buf = Buffer.from(await res.arrayBuffer());
 
 
-  if (animateGif) { 
+  let sharp: typeof import("sharp");
+  
+  try {
+    sharp = (await import("sharp")).default 
+  } catch (error: unknown) {
+    console.error("Failed to load sharp module:", error);
+    return NextResponse.json(
+      { error: "Image processing unavailable" },
+      { status: 503, headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" } }
+    );
+  }
+
+  if (animateGif) {
     let metadata;
     try {
+      
       metadata = await sharp(buf).metadata();
     } catch (error: unknown) {
       console.error(error);
       return NextResponse.json({ error: "Invalid image" }, { status: 400 });
     }
-  
+
     // If GIF , return original (Sharp can't preserve animation when resizing/converting)
     if (metadata.format === "gif") {
       const contentType = res.headers.get("content-type") || "image/gif";

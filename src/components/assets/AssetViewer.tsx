@@ -55,7 +55,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const aspectRatioValue =
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
 
-  const cappedDivisor = Math.min(sizeDivisor, MAX_SIZE_DIVISOR);
+  const cappedDivisor = Math.max(1, Math.min(sizeDivisor, MAX_SIZE_DIVISOR));
 
   const getWidth = () => {
     // Get base width based on breakpoint
