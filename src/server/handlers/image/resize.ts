@@ -1,5 +1,3 @@
-export const runtime = "nodejs"; // sharp needs Node/serverless, not Edge
-
 import { NextRequest, NextResponse } from "next/server";
 
 const LONG_CACHE_CONTROL =
