@@ -11,11 +11,11 @@ const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 const HIGH_QUALITY_THRESHOLD = 70;
 
 
-// Lazy-load Sharp with module-level caching
-let sharpPromise: Promise<typeof import("sharp")> | null = null;
-let sharpModule: typeof import("sharp") | null = null;
+// Lazy-load @img/sharp with module-level caching
+let sharpPromise: Promise<typeof import("@img/sharp")> | null = null;
+let sharpModule: typeof import("@img/sharp") | null = null;
 
-async function getSharp(): Promise<typeof import("sharp")> {
+async function getSharp(): Promise<typeof import("@img/sharp")> {
   // If already loaded, return synchronously
   if (sharpModule) {
     return sharpModule;
@@ -27,10 +27,11 @@ async function getSharp(): Promise<typeof import("sharp")> {
   }
 
   // Start loading
-  sharpPromise = import("sharp")
+  sharpPromise = import("@img/sharp")
     .then((module) => {
-      sharpModule = module.default;
-      return sharpModule;
+      const sharpExport = (module?.default ?? module) as typeof import("@img/sharp");
+      sharpModule = sharpExport;
+      return sharpExport;
     })
     .catch((error) => {
       // Reset on error so we can retry
@@ -132,7 +133,6 @@ export async function resizeImageHandler(
   //high quality assets will generally be public facing so we should present the best/optimized version
   //default in loader is 70 so these will be false by default
   const serverCache = q && q > HIGH_QUALITY_THRESHOLD;
-  const animateGif = q && q > HIGH_QUALITY_THRESHOLD;
 
   if (!src) return NextResponse.json({ error: "Missing src" }, { status: 400 });
 
@@ -193,12 +193,12 @@ export async function resizeImageHandler(
   }
   const buf = Buffer.from(await res.arrayBuffer());
 
-  // Load Sharp (cached after first load)
-  let sharp: typeof import("sharp");
+  // Load @img/sharp (cached after first load)
+  let sharpLib: typeof import("@img/sharp");
   try {
-    sharp = await getSharp();
+    sharpLib = await getSharp();
   } catch (error: unknown) {
-    console.error("Failed to load sharp module:", error);
+    console.error("Failed to load @img/sharp module:", error);
     return NextResponse.json(
       { error: "Image processing unavailable" },
       {
@@ -208,18 +208,21 @@ export async function resizeImageHandler(
     );
   }
 
-  if (animateGif) {
+  const upstreamContentType = res.headers.get("content-type");
+
+  if (upstreamContentType?.toLowerCase().includes("image/gif")) {
     let metadata;
     try {
-      metadata = await sharp(buf).metadata();
+      metadata = await sharpLib(buf, { animated: true }).metadata();
     } catch (error: unknown) {
-      console.error(error);
+      console.error("Failed to read GIF metadata:", error);
       return NextResponse.json({ error: "Invalid image" }, { status: 400 });
     }
 
-    // If GIF , return original (Sharp can't preserve animation when resizing/converting)
-    if (metadata.format === "gif") {
-      const contentType = res.headers.get("content-type") || "image/gif";
+    const isAnimatedGif = (metadata.pages ?? 1) > 1;
+
+    if (isAnimatedGif) {
+      const contentType = upstreamContentType || "image/gif";
       return new NextResponse(new Uint8Array(buf), {
         headers: {
           "Content-Type": contentType,
@@ -237,8 +240,8 @@ export async function resizeImageHandler(
 
   let out: Buffer;
   let type: string;
-  try {
-    let pipeline = sharp(buf);
+    try {
+      let pipeline = sharpLib(buf);
 
     // only resize if width defined
     if (w && !isNaN(w)) {

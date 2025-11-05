@@ -55,6 +55,17 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+  webpack: (config) => {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      "@img/sharp-libvips-dev/include": false,
+      "@img/sharp-libvips-dev/cplusplus": false,
+      "@img/sharp-wasm32/versions": false,
+    };
+
+    return config;
+  },
 };
 
 export default nextConfig;
