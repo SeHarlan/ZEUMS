@@ -1,27 +1,50 @@
+import { LG_BREAKPOINT, MD_BREAKPOINT, SM_BREAKPOINT, TWO_XL_BREAKPOINT, XL_BREAKPOINT, XS_BREAKPOINT } from "@/constants/breakpoints";
 import type { NextConfig } from "next";
+const getSizeMultiples = (breakpoint: number) => {
+  //divisions account for smaller images in grids ( up to 3 divisions), multiples account for devices with higher pixel density
+  return [
+    Math.round(breakpoint / 3),
+    Math.round(breakpoint / 2),
+    breakpoint,
+    breakpoint * 2,
+    breakpoint * 3,
+  ];
+};
+const allSizes = [
+  ...getSizeMultiples(XS_BREAKPOINT),
+  ...getSizeMultiples(SM_BREAKPOINT),
+  ...getSizeMultiples(MD_BREAKPOINT),
+  ...getSizeMultiples(LG_BREAKPOINT),
+  ...getSizeMultiples(XL_BREAKPOINT),
+  ...getSizeMultiples(TWO_XL_BREAKPOINT),
+];
+
+const uniqueSizes = [...new Set(allSizes)];
 
 const nextConfig: NextConfig = {
   images: {
     loader: "custom",
     loaderFile: "src/utils/imageLoader.ts",
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.helius-rpc.com",
-      },
-      {
-        protocol: "https",
-        hostname: "arweave.net",
-      },
-      {
-        protocol: "https",
-        hostname: "www.arweave.net",
-      },
-      {
-        protocol: "https",
-        hostname: "ipfs.io",
-      },
-    ],
+    deviceSizes: uniqueSizes,
+    //Depricated, only used for default next loader
+    // remotePatterns: [
+    //   {
+    //     protocol: "https",
+    //     hostname: "cdn.helius-rpc.com",
+    //   },
+    //   {
+    //     protocol: "https",
+    //     hostname: "arweave.net",
+    //   },
+    //   {
+    //     protocol: "https",
+    //     hostname: "www.arweave.net",
+    //   },
+    //   {
+    //     protocol: "https",
+    //     hostname: "ipfs.io",
+    //   },
+    // ],
   },
   //allow ngrok-free.app domains for development
   allowedDevOrigins: ["*.ngrok-free.app", "*.ngrok.app"],

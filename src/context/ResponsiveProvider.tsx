@@ -1,16 +1,11 @@
 "use client";
 
+import { LG_BREAKPOINT, MD_BREAKPOINT, SM_BREAKPOINT, TWO_XL_BREAKPOINT, XL_BREAKPOINT, XS_BREAKPOINT } from "@/constants/breakpoints";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 
-//matches tailwind default breakpoints
-export const SM_BREAKPOINT = 640 as const;
-export const MD_BREAKPOINT = 768 as const;
-export const LG_BREAKPOINT = 1024 as const;
-export const XL_BREAKPOINT = 1280 as const;
-export const TWO_XL_BREAKPOINT = 1536 as const;
-
 const breakpoints = {
+  isXs: `(min-width: ${XS_BREAKPOINT}px)`,
   isSm: `(min-width: ${SM_BREAKPOINT}px)`,
   isMd: `(min-width: ${MD_BREAKPOINT}px)`,
   isLg: `(min-width: ${LG_BREAKPOINT}px)`,
@@ -19,12 +14,14 @@ const breakpoints = {
 } as const;
 
 const initialBreakpoints = typeof window == "undefined" ? {
+  isXs: false,
   isSm: false,
   isMd: false,
   isLg: false,
   isXl: false,
   is2Xl: false,
 } : {
+  isXs: window.matchMedia(breakpoints.isXs).matches,
   isSm: window.matchMedia(breakpoints.isSm).matches,
   isMd: window.matchMedia(breakpoints.isMd).matches,
   isLg: window.matchMedia(breakpoints.isLg).matches,
@@ -33,6 +30,8 @@ const initialBreakpoints = typeof window == "undefined" ? {
 }
 
 type ResponsiveContextType = {
+  /** \> 420px */
+  isXs: boolean;
   /** \> 640px */
   isSm: boolean;
   /** \> 768px */

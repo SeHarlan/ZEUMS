@@ -34,14 +34,15 @@ export const BannerImage: FC<BannerImageProps> = ({
     );
   
   const getWidth = () => {
-      // sizing up for better quality
-      if (isXl) return "2xl";
-      if (isLg) return "xl";
-      if (isMd) return "lg";
-      return "md";
+    // sizing up for better quality
+    if (isXl) return "2xl";
+    if (isLg) return "xl";
+    if (isMd) return "lg";
+    return "md";
   };
   
   const width = getWidth();
+  
   return (
     <MediaThumbnail
       quality={90}

@@ -1,5 +1,6 @@
 "use client"
 
+import { MD_BREAKPOINT } from "@/constants/breakpoints";
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
 import { imageSizing } from "@/constants/ui";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
@@ -36,6 +37,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   asset,
   aspectRatio = "media-defined",
   objectFit = "object-contain",
+  /** caps at 3 to align with next config device sizes */
   sizeDivisor = 1,
   className,
 }) => {
@@ -53,6 +55,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   const aspectRatioValue = 
     aspectRatio === "square" ? 1 : media.aspectRatio || 1;
 
+  const cappedDivisor = Math.min(sizeDivisor, 3);
   
   const getWidth = () => {
     // Get base width based on breakpoint
@@ -64,13 +67,18 @@ const AssetViewer: FC<AssetViewerProps> = ({
     else if (isSm) baseWidth = imageSizing.sm;
     else baseWidth = imageSizing.xs;
 
-    // Account for device pixel ratio for high-DPI displays
-    // Cap at 3x to balance quality and file size
-    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-    const maxDpr = 3;
-    const effectiveDpr = Math.min(dpr, maxDpr);
-    
-    return Math.round((baseWidth * effectiveDpr) / sizeDivisor);
+    //grids should shrink to single column at md breakpoint
+    if (isMd) return Math.round(baseWidth / cappedDivisor);
+    else return baseWidth;
+  };
+
+  const getSizes = () => {
+    if (cappedDivisor === 1 || !isMd) {
+      return "100vw"; // Full width
+    }
+
+    const percentage = 100 / cappedDivisor;
+    return `(min-width: ${MD_BREAKPOINT}px) ${percentage}vw`;
   };
   
   const width = getWidth();
@@ -120,6 +128,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
         quality={90}
         width={width}
         height={height}
+        sizes={getSizes()}
         loading="lazy"
         onError={onError}
         onLoad={onLoad}

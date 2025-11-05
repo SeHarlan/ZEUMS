@@ -68,6 +68,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
       <Image
         height={height}
         width={width}
+        sizes={`${width}px`}
         quality={quality}
         loading={priority ? "eager" : "lazy"}
         onError={handleFallbackError}

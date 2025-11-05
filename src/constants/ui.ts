@@ -1,4 +1,4 @@
-import { LG_BREAKPOINT, MD_BREAKPOINT, SM_BREAKPOINT, TWO_XL_BREAKPOINT, XL_BREAKPOINT } from "@/context/ResponsiveProvider";
+import { LG_BREAKPOINT, MD_BREAKPOINT, SM_BREAKPOINT, TWO_XL_BREAKPOINT, XL_BREAKPOINT } from "@/constants/breakpoints";
 
 export const BANNER_RATIO = 3 / 1;
 export const BANNER_RATIO_MOBILE = 3/2;
