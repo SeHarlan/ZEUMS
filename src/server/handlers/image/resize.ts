@@ -5,6 +5,66 @@ const LONG_CACHE_CONTROL =
   "public, max-age=7776000, immutable, s-maxage=31536000, stale-while-revalidate=86400, stale-if-error=604800";
 
 const SHORT_CACHE_CONTROL = "public, max-age=86400, s-maxage=604800";
+
+const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
+
+/**
+ * Validates that the request is coming from zeum domain or localhost (will be in next auth url)
+ */
+function validateOrigin(req: NextRequest): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+    
+  // In production, must be from zeum domain
+  if (origin?.includes(ZEUM_DOMAIN) || referer?.includes(ZEUM_DOMAIN)) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Basic URL validation - ensures it's a valid http/https URL and blocks unsafe hosts
+ */
+function validateUrl(src: string): boolean {
+  try {
+    const url = new URL(src);
+    
+    // Must be http or https
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return false;
+    }
+    
+    const hostname = url.hostname.toLowerCase();
+    
+    // Block localhost variants
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.startsWith("127.")) {
+      return false;
+    }
+    
+    // Block private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+    if (hostname.startsWith("10.") || hostname.startsWith("192.168.")) {
+      return false;
+    }
+    // Block 172.16.0.0/12 (172.16-31.x.x)
+    if (hostname.startsWith("172.")) {
+      const parts = hostname.split(".");
+      const secondOctet = parseInt(parts[1] || "0", 10);
+      if (secondOctet >= 16 && secondOctet <= 31) {
+        return false;
+      }
+    }
+    
+    // Block link-local and metadata service IPs
+    if (hostname.startsWith("169.254.")) {
+      return false;
+    }
+    
+    return true;
+  } catch {
+    return false;
+  }
+}
   
 export async function resizeImageHandler(
   req: NextRequest
@@ -23,12 +83,49 @@ export async function resizeImageHandler(
 
   if (!src) return NextResponse.json({ error: "Missing src" }, { status: 400 });
 
+  // Validate request origin
+  if (!validateOrigin(req)) {
+    return NextResponse.json({ error: "Invalid or unsafe src" }, { status: 400 });
+  }
+
+  // Basic URL validation
+  if (!validateUrl(src)) {
+    return NextResponse.json({ error: "Invalid or unsafe src" }, { status: 400 });
+  }
+
   if (serverCache) { 
     //TODO: implement server cache
   }
 
-  // Fetch original
-  const res = await fetch(src, { redirect: "follow" });
+  // Fetch original with timeout
+  const controller = new AbortController();
+  const timeoutMs = 8000; // 8 seconds
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  let res: Response;
+  try {
+    res = await fetch(src, { redirect: "follow", signal: controller.signal });
+    clearTimeout(timeoutId);
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      return NextResponse.json(
+        { error: "Upstream timeout" },
+        {
+          status: 504,
+          headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" },
+        }
+      );
+    }
+    return NextResponse.json(
+      { error: "Bad upstream" },
+      {
+        status: 500,
+        headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" },
+      }
+    );
+  }
+  
   if (!res.ok) {
     return NextResponse.json(
       { error: "Bad upstream" },
@@ -68,28 +165,40 @@ export async function resizeImageHandler(
   const toAvif = accept.includes("image/avif");
   const toWebp = accept.includes("image/webp");
 
-  let pipeline = sharp(buf);
-
-  // only resize if width defined
-  if (w && !isNaN(w)) {
-    // optionally still enforce a max cap
-    pipeline = pipeline.resize({
-      width: w,
-      withoutEnlargement: true,
-    });
-  }
-
   let out: Buffer;
   let type: string;
-  if (toAvif) {
-    out = await pipeline.avif({ quality: q || 50 }).toBuffer();
-    type = "image/avif";
-  } else if (toWebp) {
-    out = await pipeline.webp({ quality: q || 60 }).toBuffer();
-    type = "image/webp";
-  } else {
-    out = await pipeline.jpeg({ quality: q || 70, mozjpeg: true }).toBuffer();
-    type = "image/jpeg";
+  try {
+    let pipeline = sharp(buf);
+
+    // only resize if width defined
+    if (w && !isNaN(w)) {
+      // optionally still enforce a max cap
+      pipeline = pipeline.resize({
+        width: w,
+        withoutEnlargement: true,
+      });
+    }
+
+    if (toAvif) {
+      out = await pipeline.avif({ quality: q || 50 }).toBuffer();
+      type = "image/avif";
+    } else if (toWebp) {
+      out = await pipeline.webp({ quality: q || 60 }).toBuffer();
+      type = "image/webp";
+    } else {
+      out = await pipeline.jpeg({ quality: q || 70, mozjpeg: true }).toBuffer();
+      type = "image/jpeg";
+    }
+  } catch (error: unknown) {
+    console.error("Image processing failed:", error);
+    return new NextResponse("Image processing error", {
+      status: 500,
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": SHORT_CACHE_CONTROL,
+        Vary: "Accept",
+      },
+    });
   }
 
   return new NextResponse(new Uint8Array(out), {

@@ -60,7 +60,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     if (is2Xl) baseWidth = imageSizing["2xl"];
     else if (isXl) baseWidth = imageSizing.xl;
     else if (isLg) baseWidth = imageSizing.lg;
-    else if (isMd) baseWidth = imageSizing.lg;
+    else if (isMd) baseWidth = imageSizing.md;
     else if (isSm) baseWidth = imageSizing.sm;
     else baseWidth = imageSizing.xs;
 

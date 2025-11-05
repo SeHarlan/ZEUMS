@@ -44,7 +44,7 @@ const AssetThumbnailCard: FC<AssetThumbnailCardProps> = ({
     if (asset.media.category === MediaCategory.Video || ratioExists) return;
 
     const ratio = getImageAspectRatio(imageElement);
-    console.log("🚀 ~ handleLoad ~ ratio:", ratio)
+
     setAspectRatio(asset, ratio);
     if (optimisticClick) {
       onClick?.(ratio);

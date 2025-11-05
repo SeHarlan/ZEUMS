@@ -12,5 +12,5 @@ export default function resizeLoader({
   width: number;
   quality?: number;  
 }) {
-  return `${IMAGE_PROXY_ROUTE}?src=${src}&w=${width}&q=${quality}&v=${VERSION}`;
+  return `${IMAGE_PROXY_ROUTE}?src=${encodeURIComponent(src)}&w=${width}&q=${quality}&v=${VERSION}`;
 };
