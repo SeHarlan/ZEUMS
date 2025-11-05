@@ -14,35 +14,35 @@ const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 const HIGH_QUALITY_THRESHOLD = 70;
 
 
-// Lazy-load Sharp with module-level caching
-let sharpPromise: Promise<typeof import("sharp")> | null = null;
-let sharpModule: typeof import("sharp") | null = null;
+// // Lazy-load Sharp with module-level caching
+// let sharpPromise: Promise<typeof import("sharp")> | null = null;
+// let sharpModule: typeof import("sharp") | null = null;
 
-async function getSharp(): Promise<typeof import("sharp")> {
-  // If already loaded, return synchronously
-  if (sharpModule) {
-    return sharpModule;
-  }
+// async function getSharp(): Promise<typeof import("sharp")> {
+//   // If already loaded, return synchronously
+//   if (sharpModule) {
+//     return sharpModule;
+//   }
 
-  // If already loading, wait for it
-  if (sharpPromise) {
-    return sharpPromise;
-  }
+//   // If already loading, wait for it
+//   if (sharpPromise) {
+//     return sharpPromise;
+//   }
 
-  // Start loading
-  sharpPromise = import("sharp")
-    .then((module) => {
-      sharpModule = module.default;
-      return sharpModule;
-    })
-    .catch((error) => {
-      // Reset on error so we can retry
-      sharpPromise = null;
-      throw error;
-    });
+//   // Start loading
+//   sharpPromise = import("sharp")
+//     .then((module) => {
+//       sharpModule = module.default;
+//       return sharpModule;
+//     })
+//     .catch((error) => {
+//       // Reset on error so we can retry
+//       sharpPromise = null;
+//       throw error;
+//     });
 
-  return sharpPromise;
-}
+//   return sharpPromise;
+// }
 
 /**
  * Validates that the request is coming from zeum domain or localhost (will be in next auth url)
