@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const getSizeMultiples = (breakpoint: number) => {
   //divisions account for smaller images in grids ( up to 3 divisions), multiples account for devices with higher pixel density
   return [
+    Math.round(breakpoint / 4),
     Math.round(breakpoint / 3),
     Math.round(breakpoint / 2),
     breakpoint,
@@ -19,7 +20,10 @@ const allSizes = [
   ...getSizeMultiples(TWO_XL_BREAKPOINT),
 ];
 
-const uniqueSizes = [...new Set(allSizes)];
+let uniqueSizes = [...new Set(allSizes)]
+uniqueSizes.sort((a, b) => a - b);
+uniqueSizes = uniqueSizes.slice(uniqueSizes.length - 25); //maximum of 25, remove the smallest sizes
+
 
 const nextConfig: NextConfig = {
   images: {

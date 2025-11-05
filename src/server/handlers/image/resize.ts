@@ -8,6 +8,9 @@ const SHORT_CACHE_CONTROL = "public, max-age=86400, s-maxage=604800";
 
 const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 
+/** default loader quality is 70 */
+const HIGH_QUALITY_THRESHOLD = 70;
+
 /**
  * Validates that the request is coming from zeum domain or localhost (will be in next auth url)
  */
@@ -15,9 +18,24 @@ function validateOrigin(req: NextRequest): boolean {
   const origin = req.headers.get("origin");
   const referer = req.headers.get("referer");
     
-  // In production, must be from zeum domain
-  if (origin?.includes(ZEUM_DOMAIN) || referer?.includes(ZEUM_DOMAIN)) {
-    return true;
+  try {
+    // Check origin header
+    if (origin) {
+      const originUrl = new URL(origin);
+      if (originUrl.origin === new URL(ZEUM_DOMAIN).origin) {
+        return true;
+      }
+    }
+
+    // Check referer header
+    if (referer) {
+      const refererUrl = new URL(referer);
+      if (refererUrl.origin === new URL(ZEUM_DOMAIN).origin) {
+        return true;
+      }
+    }
+  } catch {
+    return false;
   }
   
   return false;
@@ -78,14 +96,14 @@ export async function resizeImageHandler(
 
   //high quality assets will generally be public facing so we should present the best/optimized version
   //default in loader is 70 so these will be false by default
-  const serverCache = q && q > 70;
-  const animateGif = q && q > 70;
+  const serverCache = q && q > HIGH_QUALITY_THRESHOLD;
+  const animateGif = q && q > HIGH_QUALITY_THRESHOLD;
 
   if (!src) return NextResponse.json({ error: "Missing src" }, { status: 400 });
 
   // Validate request origin
   if (!validateOrigin(req)) {
-    return NextResponse.json({ error: "Invalid or unsafe src" }, { status: 400 });
+    return NextResponse.json({ error: "Unauthorized origin" }, { status: 403 });
   }
 
   // Basic URL validation
