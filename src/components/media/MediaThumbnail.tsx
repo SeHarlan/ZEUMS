@@ -38,7 +38,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   ratio = 1,
   className,
   alt,
-  size = "xs",
+  size = "thumbnail",
   priority,
   noPadding,
   quality = 50,

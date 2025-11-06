@@ -9,6 +9,7 @@ const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 
 /** default loader quality is 70 */
 const HIGH_QUALITY_THRESHOLD = 70;
+const TIMEOUT_MS = 16000;
 
 
 // Lazy-load Sharp with module-level caching
@@ -155,7 +156,7 @@ export async function resizeImageHandler(
 
   // Fetch original with timeout
   const controller = new AbortController();
-  const timeoutMs = 8000; // 8 seconds
+  const timeoutMs = TIMEOUT_MS; // 8 seconds
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   let res: Response;
