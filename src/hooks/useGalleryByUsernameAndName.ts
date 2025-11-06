@@ -29,6 +29,7 @@ const useGalleryByUsernameAndName = (
     username && galleryName ? `gallery-${username}-${galleryName}` : null,
     () => galleryByUsernameAndNameFetcher(username!, galleryName!)
   );
+  console.log("🚀 ~ useGalleryByUsernameAndName ~ error:", error)
 
   return {
     gallery: data,

@@ -19,6 +19,8 @@ import { useParams } from "next/navigation";
 
 const GalleryPage = () => {
   const { username, galleryName: encodedGalleryName } = useParams<{ username: string; galleryName: string }>();
+  console.log("🚀 ~ GalleryPage ~ encodedGalleryName:", encodedGalleryName)
+  console.log("🚀 ~ GalleryPage ~ username:", username)
   const galleryName = encodedGalleryName ? decodeGalleryNameFromUrl(encodedGalleryName) : null;
 
   const { gallery, isLoading, isError } = useGalleryByUsernameAndName(username, galleryName);
