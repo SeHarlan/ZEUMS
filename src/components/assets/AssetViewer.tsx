@@ -1,8 +1,7 @@
 "use client"
 
-import { MAX_SIZE_DIVISOR, MD_BREAKPOINT } from "@/constants/breakpoints";
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
-import { imageSizing } from "@/constants/ui";
+import { imageSizing, MAX_SIZE_DIVISOR, MD_BREAKPOINT } from "@/constants/ui";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
@@ -42,7 +41,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
   className,
 }) => {
   const router = useRouter();
-  const { isSm, isMd, isLg, isXl, is2Xl } = useBreakpoints();
+  const { isMd, isLg, isXl, is2Xl } = useBreakpoints();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
     useImageFallback({ media: asset.media });
@@ -64,8 +63,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     else if (isXl) baseWidth = imageSizing.xl;
     else if (isLg) baseWidth = imageSizing.lg;
     else if (isMd) baseWidth = imageSizing.md;
-    else if (isSm) baseWidth = imageSizing.sm;
-    else baseWidth = imageSizing.xs;
+    else baseWidth = imageSizing.sm;
 
     //grids should shrink to single column at md breakpoint
     if (isMd) return Math.round(baseWidth / cappedDivisor);

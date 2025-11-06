@@ -1,5 +1,5 @@
 
-import { MD_BREAKPOINT } from "@/constants/breakpoints";
+import { MD_BREAKPOINT } from "@/constants/ui";
 import { debounce } from "@/utils/general";
 import { useCallback, useEffect, useState } from "react";
 
