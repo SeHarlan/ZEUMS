@@ -16,7 +16,7 @@ export const BannerImage: FC<BannerImageProps> = ({
   className,
   fallbackText = "ZEUMS",
 }) => {
-  const { isMd } = useBreakpoints();
+  const { isMd, isLg, isXl, is2Xl} = useBreakpoints();
   
   const ratio = isMd ? BANNER_RATIO : BANNER_RATIO_MOBILE;
   if (!media)
@@ -33,10 +33,20 @@ export const BannerImage: FC<BannerImageProps> = ({
       </AspectRatio>
     );
   
+  const getWidth = () => {
+    if (is2Xl) return "2xl";
+    if (isXl) return "xl";
+    if (isLg) return "lg";
+    if (isMd) return "md";
+    return "sm";
+  };
+  
+  const width = getWidth();
+  
   return (
     <MediaThumbnail
-      unoptimized={false}
-      size="full"
+      quality={90}
+      size={width}
       media={media}
       alt={"Banner Image"}
       objectFit="object-cover"

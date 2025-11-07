@@ -1,14 +1,8 @@
 "use client";
 
+import { LG_BREAKPOINT, MD_BREAKPOINT, SM_BREAKPOINT, TWO_XL_BREAKPOINT, XL_BREAKPOINT } from "@/constants/ui";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-
-//matches tailwind default breakpoints
-export const SM_BREAKPOINT = 640 as const;
-export const MD_BREAKPOINT = 768 as const;
-export const LG_BREAKPOINT = 1024 as const;
-export const XL_BREAKPOINT = 1280 as const;
-export const TWO_XL_BREAKPOINT = 1536 as const;
 
 const breakpoints = {
   isSm: `(min-width: ${SM_BREAKPOINT}px)`,
@@ -33,10 +27,15 @@ const initialBreakpoints = typeof window == "undefined" ? {
 }
 
 type ResponsiveContextType = {
+  /** \> 640px */
   isSm: boolean;
+  /** \> 768px */
   isMd: boolean;
+  /** \> 1024px */
   isLg: boolean;
+  /** \> 1280px */
   isXl: boolean;
+  /** \> 1536px */
   is2Xl: boolean;
 };
 

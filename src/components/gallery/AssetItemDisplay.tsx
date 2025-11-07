@@ -10,12 +10,13 @@ interface AssetItemDisplayProps {
   hideTitle?: boolean;
   hideDescription?: boolean;
   hideButtons?: boolean;
+  sizeDivisor?: number;
 }
 
-const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons }) => {
+const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons, sizeDivisor}) => {
   return (
     <div>
-      <AssetViewer asset={item} />
+      <AssetViewer asset={item} sizeDivisor={sizeDivisor} />
 
       {(!hideTitle || !hideDescription) && (
         <div className="relative h-fit mt-3">

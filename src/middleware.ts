@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,10 +10,11 @@ export async function middleware(request: NextRequest) {
 
   // Allow public routes to pass through
   const isPublicRoute = pathname.includes("/public");
-
+  
   const isAssetRoute = pathname.includes("/assets");
+  const isImageRoute = pathname.includes("/image");
 
-  if (isPublicRoute || isAuthRoute || isAssetRoute) {
+  if (isPublicRoute || isAuthRoute || isAssetRoute || isImageRoute) {
     return NextResponse.next();
   }
 

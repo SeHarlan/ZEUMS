@@ -1,3 +1,4 @@
+import { ImageSizing } from "@/constants/ui";
 import useGalleryDimensions from "@/hooks/useGalleryDimensions";
 import { GalleryType } from "@/types/gallery";
 import {
@@ -11,13 +12,15 @@ import { MiniGalleryItemBase } from "./GalleryItemBase";
 
 interface GalleryBaseProps {
   gallery?: GalleryType | null;
+  imageSize?: ImageSizing;
 }
 
 const GAP = 12;
-const MAX_HEIGHT_RATIO = 0.50;
+const MAX_HEIGHT_RATIO = .75;
 
 const MiniGalleryBase: FC<GalleryBaseProps> = ({
   gallery,
+  imageSize,
 }) => {
   const { containerRef, containerWidth, maxHeight, isDesktop, isReady } =
     useGalleryDimensions(false, MAX_HEIGHT_RATIO, true);
@@ -56,7 +59,7 @@ const MiniGalleryBase: FC<GalleryBaseProps> = ({
                   className={cn("relative duration-200 w-full h-fit")}
                   style={{ maxWidth: cell.width }}
                 >
-                  <MiniGalleryItemBase item={cell.item} />
+                  <MiniGalleryItemBase item={cell.item} imageSize={imageSize} />
                 </div>
               ))}
             </div>

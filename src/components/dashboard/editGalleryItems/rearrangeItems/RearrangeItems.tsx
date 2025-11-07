@@ -64,7 +64,6 @@ const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ gal
   
   useEffect(() => {
     if (!formOpen) return;
-    console.log("SYCNING")
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRearrangedRows(initRearrangedRows);
   }, [formOpen, initRearrangedRows])

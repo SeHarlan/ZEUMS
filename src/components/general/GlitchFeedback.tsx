@@ -460,7 +460,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   }
 
   return (
-    <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10">
+    <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10 dark:invert">
       <Canvas
         ref={canvasRef}
         orthographic
