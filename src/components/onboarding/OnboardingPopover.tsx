@@ -43,20 +43,33 @@ export const OnboardingPopover = <T extends string>({
   });
 
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
-  const [centerPosition, setCenterPosition] = useState<{ x: number, y: number } | null>(null);
+  const [centerPosition, setCenterPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const [stepProps, setStep] = useAtom(atom);
-  const { activeTriggerElement, totalSteps, activeIndex, activeStep, completedSteps, stage } = stepProps;
+  const {
+    activeTriggerElement,
+    totalSteps,
+    activeIndex,
+    activeStep,
+    completedSteps,
+    stage,
+  } = stepProps;
   const isFirstStep = activeIndex === 0;
   const isLastStep = activeIndex === totalSteps - 1;
-  const activeStepProps = (!pause && activeStep) ? steps[activeStep] : null;
+  const activeStepProps = !pause && activeStep ? steps[activeStep] : null;
   const activeContent = activeStepProps?.content;
   const stageNotStarted = stage === "notStarted";
   const stageComplete = stage === "complete";
   const hideOnboarding = pause || stageComplete;
 
   //true by default, false if allowPageInteractivity is explicitly set to false
-  const allowPageInteractivity = activeStepProps?.allowPageInteractivity === undefined ? true : activeStepProps.allowPageInteractivity;
+  const allowPageInteractivity =
+    activeStepProps?.allowPageInteractivity === undefined
+      ? true
+      : activeStepProps.allowPageInteractivity;
 
   const triggerNext = activeStepProps?.triggerNext;
   const onPrevious = activeStepProps?.onPrevious;
@@ -65,10 +78,10 @@ export const OnboardingPopover = <T extends string>({
 
   const handleSkip = () => {
     setStep("complete");
-  }
+  };
   const handleGetStarted = () => {
     setStep("inProgress");
-  }
+  };
 
   const handleNext = useCallback(() => {
     setStep("next");
@@ -227,20 +240,13 @@ export const OnboardingPopover = <T extends string>({
   }, [triggerRect, contentDimensions, hideOnboarding, centerPosition]);
 
   const getMaskRect = (padding: number) => {
-    if (!triggerRect || hideOnboarding) return {
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-      width: 0,
-      height: 0,
-      radius: 0,
-    };
+    if (!triggerRect || hideOnboarding) return null;
     if (stageNotStarted && centerPosition) {
       return {
         x: centerPosition.x - contentDimensions.width / 2,
         y: centerPosition.y - contentDimensions.height / 2,
         width: contentDimensions.width,
         height: contentDimensions.height,
-        radius: 12,
       };
     }
     return {
@@ -251,14 +257,60 @@ export const OnboardingPopover = <T extends string>({
       radius: 12,
     };
   };
-  
+
   const maskRect = getMaskRect(16);
+
+  // helper: build a feathered rounded-rect mask as a data-URI SVG
+  const buildMaskDataUri = ({
+    x,
+    y,
+    width,
+    height,
+    radius = 12,
+    feather = 6,
+    viewportW = window.innerWidth,
+    viewportH = window.innerHeight,
+  }: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    radius?: number;
+    feather?: number;
+    viewportW?: number;
+    viewportH?: number;
+  }) => {
+    const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${viewportW}" height="${viewportH}">
+  <defs>
+    <filter id="f" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="${feather}" />
+    </filter>
+    <mask id="m" maskUnits="userSpaceOnUse">
+      <rect width="100%" height="100%" fill="white"/>
+      <rect x="${x}" y="${y}" width="${width}" height="${height}"
+            rx="${radius}" ry="${radius}" fill="black" filter="url(#f)"/>
+    </mask>
+  </defs>
+  <rect width="100%" height="100%" fill="white" mask="url(#m)"/>
+</svg>`;
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  };
+
+  // in your component:
+  const maskImage = useMemo(
+    () => {
+      if(!maskRect) return undefined;
+      return buildMaskDataUri({ ...maskRect, feather: 6 });
+    },
+    [maskRect]
+  );
 
   if (hideOnboarding) return null;
 
   return createPortal(
     <>
-      <svg
+      {/* <svg
         width={"100%"}
         height={"100%"}
         className="fixed inset-0 pointer-events-none"
@@ -270,8 +322,12 @@ export const OnboardingPopover = <T extends string>({
             <feFlood floodColor="black" floodOpacity="1" />
             <feComposite in2="offset" operator="in" />
           </filter>
-         
-            <mask id="blur-mask">
+          {maskRect && (
+            <mask
+              id="blur-mask"
+              maskUnits="userSpaceOnUse"
+              maskContentUnits="userSpaceOnUse"
+            >
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               <rect
                 x={maskRect.x}
@@ -284,24 +340,35 @@ export const OnboardingPopover = <T extends string>({
                 filter="url(#drop-shadow)"
               />
             </mask>
-          
+          )}
         </defs>
-      </svg>
-
+        <rect x="0" y="0" width="100%" height="100%" fill="black" opacity="0.5" mask="url(#blur-mask)" />
+        
+      </svg> */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-[2px]",
-          
-          //"pointer-events-none" prevents the scrim from capturing clicks, this allows the page to be interacted with
-          allowPageInteractivity ? "cursor-auto pointer-events-none" : "cursor-not-allowed"
+          "fixed inset-0",
+          allowPageInteractivity
+            ? "cursor-auto pointer-events-none"
+            : "cursor-not-allowed"
         )}
         style={{
           zIndex: ONBOARDING_Z_INDEX,
-          mask: `url(#blur-mask)`,
-          WebkitMask: `url(#blur-mask)`,
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(2px)",
+          WebkitBackdropFilter: "blur(2px)",
+
+          // critical: use the data-URI image, not a fragment url(#…)
+          WebkitMaskImage: maskImage,
+          maskImage: maskImage,
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskSize: "100% 100%",
+          maskSize: "100% 100%",
+          WebkitMaskPosition: "0 0",
+          maskPosition: "0 0",
         }}
       />
-
       <div
         className={cn(
           "fixed p-4 w-fit duration-500 transition-all ease-in-out min-w-xs max-w-lg max-h-screen overflow-auto pointer-events-auto"
