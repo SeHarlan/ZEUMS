@@ -227,13 +227,20 @@ export const OnboardingPopover = <T extends string>({
   }, [triggerRect, contentDimensions, hideOnboarding, centerPosition]);
 
   const getMaskRect = (padding: number) => {
-    if (!triggerRect || hideOnboarding) return null;
+    if (!triggerRect || hideOnboarding) return {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      width: 0,
+      height: 0,
+      radius: 0,
+    };
     if (stageNotStarted && centerPosition) {
       return {
         x: centerPosition.x - contentDimensions.width / 2,
         y: centerPosition.y - contentDimensions.height / 2,
         width: contentDimensions.width,
         height: contentDimensions.height,
+        radius: 12,
       };
     }
     return {
@@ -263,7 +270,7 @@ export const OnboardingPopover = <T extends string>({
             <feFlood floodColor="black" floodOpacity="1" />
             <feComposite in2="offset" operator="in" />
           </filter>
-          {maskRect && (
+         
             <mask id="blur-mask">
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               <rect
@@ -277,7 +284,7 @@ export const OnboardingPopover = <T extends string>({
                 filter="url(#drop-shadow)"
               />
             </mask>
-          )}
+          
         </defs>
       </svg>
 
