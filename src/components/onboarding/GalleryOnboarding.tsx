@@ -42,10 +42,6 @@ export const GalleryOnboardingPopover = () => {
                   <li>
                     <strong>Edit Settings: </strong>
                     fine-tune and personalize your gallery.
-                    <br />
-                    <span className="text-muted-foreground text-sm">
-                      More customization options coming soon.
-                    </span>
                   </li>
                   <li>
                     <strong>Rearrange Items: </strong>
