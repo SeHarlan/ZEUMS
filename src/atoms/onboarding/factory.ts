@@ -49,8 +49,6 @@ export const createOnboardingAtoms = <T extends string>(storageKey: string, keys
     const setRefTrigger = useSetAtom(refTriggerAtom);
     const setStepComplete = () => setOnboardingStep(key);
     const setStepRef = (el: HTMLElement | null) => {    
-      // console.log("🚀 ~ setStepRef ~ el:", el)
-      // if(!el) return;
       refStore[key] = el;
       setRefTrigger(prev => prev + 1); // Trigger rerender
     };

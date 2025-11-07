@@ -310,41 +310,6 @@ export const OnboardingPopover = <T extends string>({
 
   return createPortal(
     <>
-      {/* <svg
-        width={"100%"}
-        height={"100%"}
-        className="fixed inset-0 pointer-events-none"
-      >
-        <defs>
-          <filter id="drop-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
-            <feOffset dx="0" dy="0" result="offset" />
-            <feFlood floodColor="black" floodOpacity="1" />
-            <feComposite in2="offset" operator="in" />
-          </filter>
-          {maskRect && (
-            <mask
-              id="blur-mask"
-              maskUnits="userSpaceOnUse"
-              maskContentUnits="userSpaceOnUse"
-            >
-              <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              <rect
-                x={maskRect.x}
-                y={maskRect.y}
-                width={maskRect.width}
-                height={maskRect.height}
-                fill="black"
-                rx={maskRect.radius}
-                ry={maskRect.radius}
-                filter="url(#drop-shadow)"
-              />
-            </mask>
-          )}
-        </defs>
-        <rect x="0" y="0" width="100%" height="100%" fill="black" opacity="0.5" mask="url(#blur-mask)" />
-        
-      </svg> */}
       <div
         className={cn(
           "fixed inset-0",
