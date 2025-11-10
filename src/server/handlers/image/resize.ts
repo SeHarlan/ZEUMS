@@ -169,7 +169,16 @@ export async function resizeImageHandler(
   const timeoutMs = TIMEOUT_MS;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  // Check if already aborted (can happen if client cancelled before handler started)
+  if (req.signal.aborted) {
+    console.log("Aborting request!!!!!!!");
+    
+    clearTimeout(timeoutId);
+    return new NextResponse(null, { status: 499 });
+  }
+
   req.signal.addEventListener("abort", () => {
+    console.log("!!!!!!!Aborting request");
     controller.abort();
     clearTimeout(timeoutId);
   });
