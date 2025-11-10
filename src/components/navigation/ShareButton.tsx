@@ -11,7 +11,7 @@ export const ShareButton = () => {
   const pathname = usePathname();
 
   const handleShareClick = () => {
-    const fullURL = `ZEUMS.art${pathname}`;
+    const fullURL = `Zeums.art${pathname}`;
     copyTextToClipboard(fullURL).then(() => {
       setUrlCopied(true);
       toast.success("Ready to share!", {
