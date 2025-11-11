@@ -82,10 +82,14 @@ export const getSolanaAssetsPage = async ({
 }: GetSolanaAssetsPageProps) => {
   const method = getMethod(source);
   const sourceParamKey = getSourceParamKey(source);
+  console.log(
+    "🚀 ~ getSolanaAssetsPage ~ params.params.limit:",
+    limit
+  );
 
   const params = {
     jsonrpc: "2.0",
-    id: `zeums-${publicKey}-${page}-${limit}`,
+    id: `z-${publicKey}-${limit}-${page}`,
     method,
     params: {
       [sourceParamKey]: publicKey,
@@ -94,7 +98,7 @@ export const getSolanaAssetsPage = async ({
       options: {
         showUnverifiedCollections: true,
         // showCollectionMetadata: true,
-        showGrandTotal: page === 0
+        showGrandTotal: page === 0,
       },
 
       sortBy: {
@@ -107,7 +111,8 @@ export const getSolanaAssetsPage = async ({
   return axios
     .post<GetAssetResponse>(heliusUrl, params)
     .then((res) => {
+      console.log("🚀 ~ getSolanaAssetsPage ~ res:", res)
       return res.data.result;
     });
 };
-
+    

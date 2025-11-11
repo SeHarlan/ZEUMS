@@ -43,6 +43,7 @@ export async function getSolanaOnChainAssetsHandler(req: NextRequest): Promise<N
     //page and limit are also available if needed
     const {items, total, grand_total } = await getSolanaAssetsPage(props);
 
+
     const {parsedAssets, skippedAssets, duplicateEditionCount} = parseHeliusAssets(items);
     
     const assetPageResponse: GetSolanaAssetsPageResponse = {
