@@ -12,8 +12,7 @@ const Logo = ({ className = "size-24" }: { className?: string }) => {
       alt={TITLE_COPY + " Logo"}
       width={256}
       height={256}
-      className={cn("flex - 0 object - contain dark: invert",
-        className)}
+      className={cn("flex-0 object-contain dark:invert", className)}
     />
   );
 };
