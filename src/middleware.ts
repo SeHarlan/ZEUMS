@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(
       JSON.stringify({
         success: false,
-        message: "Authentication for ZEUMS access is required",
+        message: "Authentication for Zeums access is required",
       }),
       {
         status: 401,

@@ -146,7 +146,7 @@ export const parseHeliusAssets = (
   parsedAssets.push(...editions);
 
   const duplicateEditionCount = editionCount - editions.length;
-  
+
   return { parsedAssets, skippedAssets, duplicateEditionCount };
 };  
 
@@ -202,7 +202,7 @@ function isSpamNft(asset: GetAssetResponse): boolean {
   const { content, creators, authorities } = asset;
   if (!content || !content.links || !content.metadata) return true;
 
-  //this has been too strict, find new way
+  //TODO this has been too strict, find new way
   // const hasVerifiedCreator = creators?.some((c) => c.verified);
   // const whiteListedCollection =
   //   grouping?.[0]?.group_value &&

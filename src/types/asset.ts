@@ -10,7 +10,7 @@ export interface GetSolanaAssetsPageProps {
   source: EntrySource;
   /** starts at 0 */
   page: number;
-  /** currently limited to <= 30 by Mallow API */
+  /** 100 - 1000 */
   limit?: number;
   searchTerm?: string;
 }

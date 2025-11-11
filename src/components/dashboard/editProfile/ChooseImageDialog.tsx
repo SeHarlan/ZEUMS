@@ -50,7 +50,6 @@ const ChooseProfileImageDialog: FC<ChooseProfileImageDialogProps> = ({
 
         <div className="flex-1 min-h-0">
           <SolanaAssetSelect
-            perPage={imageVariant === "banner" ? 16 : 20}
             selectedAssets={selectedAssets}
             setSelectAssets={setSelectedAssets}
             source={"choose"}

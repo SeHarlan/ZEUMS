@@ -32,7 +32,10 @@ interface SolanaAssetSelectProps {
   setSelectAssets: Dispatch<SetStateAction<ParsedBlockChainAsset[]>>;
   optimisticallySelectedAssets: Set<string>;
   setOptimisticallySelectedAssets: Dispatch<SetStateAction<Set<string>>>;
-  /** @defaults 20 */
+  /** 
+   * 100 - 1000 
+   * @defaults 100 
+   * */
   perPage?: number;
   /** @defaults 1 */
   maxSelected?: number;
@@ -45,8 +48,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   source,
   selectedAssets,
   setSelectAssets,
-  perPage = 20,
-  /** Default to 1 if not provided */
+  perPage = 100,
   maxSelected = 1,
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
@@ -86,8 +88,11 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     searchTerm: debouncedSearch,
   });
 
-  //mallow search api is set at 30 per page
+  //mallow search api is hard set at 30 per page
   const actualPerPage = !!search ? 30 : perPage;
+
+  const changedPageKey = solanaAssetsPage?.[0]?.tokenAddress;
+
 
   
   // Calculate spam count by subtraction
@@ -258,7 +263,8 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           </TabsList>
         </Tabs>
       ) : null}
-      <ScrollArea className="flex-1 min-h-0">
+      
+      <ScrollArea className="flex-1 min-h-0" key={changedPageKey}>
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
             <P className="text-lg font-bold">
@@ -395,7 +401,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
           totalItems={grandTotal}
         />
         {maxSelected > 1 ? (
-          <Button variant={"outline"} className="invisible hidden lg:block" >
+          <Button variant={"outline"} className="invisible hidden lg:block">
             Clear
           </Button>
         ) : null}

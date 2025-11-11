@@ -436,9 +436,7 @@ const FallbackText: FC<GlitchTextMeshProps> = ({
   return (
     <div className="w-full h-full flex flex-col justify-center items-center space-y-8">
       <H1 className="text-center text-7xl lg:text-9xl">{title}</H1>
-      <P className="text-center text-xl lg:text-2xl pb-12">
-        {subtitle}
-      </P>
+      <P className="text-center text-xl lg:text-2xl pb-12">{subtitle}</P>
     </div>
   );
 }
@@ -453,7 +451,7 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
 
   if (!webglSupported) {
     return (
-      <div className="absolute inset-0 left-0 top-0 w-full h-full overflow-hidden font">
+      <div className="absolute inset-0 left-0 top-0 w-full h-full overflow-hidden">
         <FallbackText title={title} subtitle={subtitle} />;
       </div>
     )

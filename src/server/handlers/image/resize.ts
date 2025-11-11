@@ -9,7 +9,7 @@ const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 
 /** default loader quality is 70 */
 const HIGH_QUALITY_THRESHOLD = 70;
-const TIMEOUT_MS = 16000;
+const TIMEOUT_MS = 10000;
 
 
 // Lazy-load Sharp with module-level caching
@@ -40,6 +40,16 @@ async function getSharp(): Promise<typeof import("sharp")> {
     });
 
   return sharpPromise;
+}
+
+/**
+ * Checks if the request has been aborted and returns a 499 response if so
+ */
+function checkAborted(req: NextRequest): NextResponse | null {
+  if (req.signal.aborted) {
+    return new NextResponse(null, { status: 499 });
+  }
+  return null;
 }
 
 /**
@@ -154,10 +164,24 @@ export async function resizeImageHandler(
     //TODO: implement server cache
   }
 
-  // Fetch original with timeout
+  // Combine client abort signal with timeout
   const controller = new AbortController();
-  const timeoutMs = TIMEOUT_MS; // 8 seconds
+  const timeoutMs = TIMEOUT_MS;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  // Check if already aborted (can happen if client cancelled before handler started)
+  if (req.signal.aborted) {
+    console.log("Aborting request!!!!!!!");
+    
+    clearTimeout(timeoutId);
+    return new NextResponse(null, { status: 499 });
+  }
+
+  req.signal.addEventListener("abort", () => {
+    console.log("!!!!!!!Aborting request");
+    controller.abort();
+    clearTimeout(timeoutId);
+  });
 
   let res: Response;
   try {
@@ -165,9 +189,10 @@ export async function resizeImageHandler(
     clearTimeout(timeoutId);
   } catch (error: unknown) {
     clearTimeout(timeoutId);
+        
     if (error instanceof Error && error.name === "AbortError") {
       return NextResponse.json(
-        { error: "Upstream timeout" },
+        { error: "Aborted by client or timeout" },
         {
           status: 504,
           headers: { "Cache-Control": SHORT_CACHE_CONTROL, Vary: "Accept" },
@@ -192,7 +217,10 @@ export async function resizeImageHandler(
       }
     );
   }
+  
   const buf = Buffer.from(await res.arrayBuffer());
+  const abortResponseAfterBuffer = checkAborted(req);
+  if (abortResponseAfterBuffer) return abortResponseAfterBuffer;
 
   // Load Sharp (cached after first load)
   let sharp: typeof import("sharp");
@@ -250,6 +278,10 @@ export async function resizeImageHandler(
       });
     }
 
+    // Check for abort before expensive operations
+    const abortResponseBeforeProcessing = checkAborted(req);
+    if (abortResponseBeforeProcessing) return abortResponseBeforeProcessing;
+
     if (toAvif) {
       out = await pipeline.avif({ quality: q || 50 }).toBuffer();
       type = "image/avif";
@@ -261,6 +293,10 @@ export async function resizeImageHandler(
       type = "image/jpeg";
     }
   } catch (error: unknown) {
+    // Don't log errors for aborted requests
+    const abortResponse = checkAborted(req);
+    if (abortResponse) return abortResponse;
+    
     console.error("Image processing failed:", error);
     return new NextResponse("Image processing error", {
       status: 500,

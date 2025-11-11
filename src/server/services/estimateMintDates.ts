@@ -1,5 +1,5 @@
-import { Connection, PublicKey } from "@solana/web3.js";
 import { DateMap } from "@/types/asset";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 class SolanaConnectionManager {
   private static instance: Connection;
@@ -15,11 +15,24 @@ class SolanaConnectionManager {
   }
 }
 
-export const getMintDates = async (mintAddresses: string[]): Promise<DateMap> => {   
+export const getMintDates = async (mintAddresses: string[]): Promise<DateMap> => {
   const dateMap: DateMap = {};
-  for (const mintAddress of mintAddresses) {
-    dateMap[mintAddress] = await getMintDate(mintAddress);
-  }
+  // for (const mintAddress of mintAddresses) {
+  //   dateMap[mintAddress] = await getMintDate(mintAddress);
+  // }
+  // Parallel version:
+  const promises = mintAddresses.map(async (mintAddress) => {
+    const date = await getMintDate(mintAddress);
+    return { mintAddress, date };
+  });
+
+  const results = await Promise.allSettled(promises);
+  results.forEach((result) => {
+    if (result.status === "fulfilled") {
+      dateMap[result.value.mintAddress] = result.value.date;
+    }
+  });
+  
   return dateMap;
 }
 

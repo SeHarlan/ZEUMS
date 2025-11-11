@@ -1,5 +1,6 @@
 import { BANNER_RATIO, BANNER_RATIO_MOBILE } from "@/constants/ui";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { FC } from "react";
@@ -14,7 +15,7 @@ interface BannerImageProps {
 export const BannerImage: FC<BannerImageProps> = ({
   media,
   className,
-  fallbackText = "ZEUMS",
+  fallbackText = TITLE_COPY,
 }) => {
   const { isMd, isLg, isXl, is2Xl} = useBreakpoints();
   

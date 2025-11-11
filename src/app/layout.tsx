@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     title: TITLE_COPY,
     description: SUBTITLE_COPY,
     images: ["/og-image.png"],
-    creator: "@ZEUMS_art",
+    creator: "@Zeums_art",
   },
 };
 
