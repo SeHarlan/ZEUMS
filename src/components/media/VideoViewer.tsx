@@ -47,7 +47,10 @@ const mimeTypes: Record<string, string> = {
   wmv: "video/x-ms-wmv",
 };
 
-
+const BUFFERING_DELAY = 1_000; //time before buffering message shows
+const LOADING_TIMEOUT = 30_000; //30 seconds - before before showing long load time message
+const REMOVE_RENDER_DELAY = 5_000//5 seconds - remove from dom after delay
+const RENDER_DEBOUNCE_DELAY = 300; //300ms - debounce render state update to prevent mounting and unmounting too quickly
 interface VideoViewerProps {
   src: string;
   poster?: string;
@@ -63,13 +66,76 @@ interface VideoViewerProps {
   onError?: ((e: unknown) => void);
 }
 
-const BUFFERING_DELAY = 500;
-const LOADING_TIMEOUT = 30_000; //30 seconds
+const VideoViewer: FC<VideoViewerProps> = ({containerClassName, ...props}) => {
+  const { inView, ref: containerRef } = useInView({rootMargin: "200px", mobileRootMargin: "0px"});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
-const VideoViewer: FC<VideoViewerProps> = ({
+  const showLoadingState = isLoading || isBuffering;
+
+  const setIsLoadingCallback = useCallback((isLoading: boolean) => {
+    setIsLoading(isLoading);
+  }, []);
+  const setIsBufferingCallback = useCallback((isBuffering: boolean) => {
+    setIsBuffering(isBuffering);
+  }, []);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (inView) {
+      timeout = setTimeout(() => {
+        setShouldRender(true);
+      }, RENDER_DEBOUNCE_DELAY);
+
+    } else {
+      timeout = setTimeout(() => {
+        setShouldRender(false);
+
+        //also reset parent state
+        setIsLoading(true);
+        setIsBuffering(false);
+      }, REMOVE_RENDER_DELAY);
+    }
+    return () => clearTimeout(timeout);
+  }, [inView])
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative group/video w-full h-full flex justify-center items-center",
+        showLoadingState && "animate-skeleton-shimmer",
+        containerClassName
+      )}
+    >
+      {shouldRender && (
+        <VideoViewerCore
+          {...props}
+          containerRef={containerRef}
+          isLoading={isLoading}
+          isBuffering={isBuffering}
+          setIsLoading={setIsLoadingCallback}
+          setIsBuffering={setIsBufferingCallback}
+          inView={inView}
+        />
+      )}
+    </div>
+  );
+};
+
+interface VideoViewerCoreProps extends Omit<VideoViewerProps, "containerClassName"> {
+  isLoading: boolean;
+  isBuffering: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  setIsBuffering: (isBuffering: boolean) => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  inView: boolean;
+}
+
+const VideoViewerCore: FC<VideoViewerCoreProps> = ({
   src,
   poster,
-  containerClassName,
   className,
   controls = false,
   minimalControls,
@@ -78,29 +144,31 @@ const VideoViewer: FC<VideoViewerProps> = ({
   loop = true,
   onLoadedMetadata,
   onError,
+  isLoading,
+  isBuffering,
+  setIsLoading,
+  setIsBuffering,
+  containerRef,
+  inView
 }) => {
   const defaultMuted = autoPlay ? true : muted;
 
   const controlsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(defaultMuted);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
   const [userPaused, setUserPaused] = useState(false);
 
-  const { inView } = useInView({ passedRef: containerRef });
-
+  //these prevent unneeded event listeners and other checks
   const useCurrentTime = controls && !minimalControls;
+  const isSimpleVideo = !controls && !minimalControls;
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -127,6 +195,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
   const handleVideoPlayError = useCallback((error: unknown) => {
     setIsLoading(false);
     setIsPlaying(false);
+    setIsBuffering(false);
 
     // More comprehensive autoplay error detection
     const isAutoplayError = error &&
@@ -145,14 +214,15 @@ const VideoViewer: FC<VideoViewerProps> = ({
       setFailedToPlayMessage("error");
       onError?.(error);
     }
-  }, [onError, handleAutoplayError]);
+  }, [onError, handleAutoplayError, setIsLoading, setIsBuffering]);
 
   const handleLoadingTimeout = useCallback(() => {
     console.warn("Video loading timeout");
     setIsLoading(false);
+    setIsBuffering(false);
     setIsPlaying(false);
     setFailedToPlayMessage("loading-timeout");
-  }, []);
+  }, [setIsLoading, setIsBuffering]);
 
 
   const videoIsStopped = (video: HTMLVideoElement) => {
@@ -209,7 +279,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   const toggleFullscreen = useCallback(() => {
     const video = videoRef.current as FullscreenVideoElement;
-    if (!video) return;
+    if (!video || isSimpleVideo) return;
 
     const doc = document as FullscreenDocument;
 
@@ -258,7 +328,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
         doc.msExitFullscreen();
       }
     }
-  }, []);
+  }, [isSimpleVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -305,16 +375,12 @@ const VideoViewer: FC<VideoViewerProps> = ({
       setFailedToPlayMessage(null);
       setIsBuffering(false);
       setIsLoading(false);
-
-      //commenting out for now because forced autoplay was causing issues on safari
-      // // Handle autoplay - only attempt if video is ready and not already playing
-      // if (autoPlay && videoIsStopped(video)) {       
-      //   video.play().catch(handleVideoPlayError);
-      // }
     };
 
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-    const handlePlay = () => {setIsPlaying(true)};
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
     const handlePause = () => setIsPlaying(false);
     const handleError = (e: Event) => {
       handleVideoPlayError(e);
@@ -337,9 +403,10 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
     return () => {
       clearTimeout(bufferingTimeout);
-      clearTimeout(loadingTimeout); 
+      clearTimeout(loadingTimeout);
 
-      if (useCurrentTime) video.removeEventListener("timeupdate", handleTimeUpdate);
+      if (useCurrentTime)
+        video.removeEventListener("timeupdate", handleTimeUpdate);
 
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("canplaythrough", handleCanPlayThrough);
@@ -350,10 +417,20 @@ const VideoViewer: FC<VideoViewerProps> = ({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("error", handleError);
     };
-  }, [defaultMuted, onLoadedMetadata, onError, useCurrentTime, autoPlay, handleVideoPlayError, handleLoadingTimeout]);
+  }, [
+    defaultMuted,
+    onLoadedMetadata,
+    onError,
+    useCurrentTime,
+    autoPlay,
+    handleVideoPlayError,
+    handleLoadingTimeout,
+    setIsBuffering,
+    setIsLoading,
+  ]);
 
-  //pause when not in view and play when in view and not paused
-  //only autoplay again if autoPlay is true and the user hasnt manually paused
+  // //pause when not in view and play when in view and not paused
+  // //only autoplay again if autoPlay is true and the user hasnt manually paused
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -373,6 +450,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
 
   // Listen for fullscreen changes
   useEffect(() => {
+    if (isSimpleVideo) return;
     const doc = document as FullscreenDocument;
     const video = videoRef.current;
 
@@ -418,10 +496,11 @@ const VideoViewer: FC<VideoViewerProps> = ({
         video.removeEventListener("webkitendfullscreen", handleExitFullscreen);
       }
     };
-  }, []);
+  }, [isSimpleVideo]);
 
   // Unified pointer/touch/mouse behavior
   useEffect(() => {
+    if (isSimpleVideo) return;
     const container = containerRef.current;
     const video = videoRef.current;
     const controls = controlsRef.current;
@@ -487,31 +566,31 @@ const VideoViewer: FC<VideoViewerProps> = ({
       container.removeEventListener('pointerdown', handlePointerDown as EventListener);
     };
 
-  }, [showControls, handleVideoPlayError]);  
+  }, [showControls, handleVideoPlayError, isSimpleVideo, containerRef]);  
+
 
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "relative group/video w-full h-full flex justify-center items-center",
-        (isLoading || isBuffering) && "animate-skeleton-shimmer",
-        containerClassName
-      )}
-    >
+    <>
       {!isPlaying && failedToPlayMessage && (
         <div
           ref={feedbackRef}
-          className=" z-50 absolute-center flex flex-col justify-center items-center gap-4 bg-popover-blur p-2 rounded-md"
+          className=" z-10 absolute-center flex flex-col justify-center items-center gap-2 sm:gap-4 bg-popover-blur p-2 rounded-md"
         >
           {failedToPlayMessage === "loading-timeout" && (
-            <div className="text-center">
+            <div className="text-center text-xs">
               <P>Video failed to load in a reasonable amount of time.</P>
               <P>You may try again.</P>
             </div>
           )}
-          <Button onClick={togglePlay} size="lg" loading={isLoading}>
-            Play <PlayIcon className="" />
+          <Button onClick={togglePlay} loading={isLoading}>
+            Play <PlayIcon />
           </Button>
+        </div>
+      )}
+
+      {isBuffering && (
+        <div className="z-10 absolute-center bg-popover-blur px-3 py-1 rounded-md">
+          <P>Buffering...</P>
         </div>
       )}
       <video
@@ -556,7 +635,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Button
                 variant="secondary"
                 size="icon"
@@ -613,7 +692,7 @@ const VideoViewer: FC<VideoViewerProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

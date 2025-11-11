@@ -16,5 +16,13 @@
   "css.validate": false,
   "editor.quickSuggestions": {
     "strings": true
-  }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always"
+  },
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "@radix-ui/**",
+    "next/router"
+  ]
 }

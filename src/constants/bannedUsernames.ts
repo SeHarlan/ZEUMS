@@ -11,6 +11,9 @@ export const BANNED_USERNAMES = new Set([
   "media",
   "search",
   "not-found",
+  "timelines",
+  "gallery",
+  "galleries",
 
   // Critical reserved terms that could cause security or routing conflicts
   "admin",
@@ -78,5 +81,5 @@ export const isUsernameBanned = (username: string): boolean => {
  */
 export const generateRandomFallbackUsername = (originalUsername: string): string => {
   const randomNumbers = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `z_${randomNumbers}_${originalUsername.toLowerCase().trim()}`;
+  return `z_${randomNumbers}_${originalUsername.trim()}`;
 };

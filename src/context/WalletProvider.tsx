@@ -28,6 +28,7 @@ const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   // );
 
   const handleError = useCallback((error: WalletError) => {
+
     handleClientError({
       error,
       location: "WalletContextProvider_handleError",

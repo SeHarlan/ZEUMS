@@ -1,7 +1,7 @@
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
-import { AspectRatio } from "../ui/aspect-ratio";
 import MediaThumbnail from "../media/MediaThumbnail";
+import { AspectRatio } from "../ui/aspect-ratio";
 
 interface ProfileImageProps {
   media?: MediaType;
@@ -20,7 +20,7 @@ export const ProfileImage = ({
       <AspectRatio
         ratio={1}
         className={cn(
-          "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
+          "flex justify-center items-center bg-border/75 text-muted-foreground overflow-hidden",
           "rounded-full font-serif",
           className
         )}
@@ -31,6 +31,7 @@ export const ProfileImage = ({
 
   return (
     <MediaThumbnail
+      quality={85}
       media={media}
       alt={"Profile Image"}
       objectFit="object-cover"

@@ -1,0 +1,257 @@
+"use client";
+import { AccountOnboardingKeys, accountOnboardingAtoms, useAccountSetter } from "@/atoms/onboarding/editAccount";
+import { galleriesOnboardingAtoms } from "@/atoms/onboarding/editGalleries";
+import { galleryOnboardingAtoms } from "@/atoms/onboarding/editGallery";
+import { timelineOnboardingAtoms } from "@/atoms/onboarding/editTimeline";
+import { AuthLinkingDialog } from "@/components/auth/AuthLinkingDialog";
+import { StatelessFormItem } from "@/components/general/StatelessFormItem";
+import { P } from "@/components/typography/Typography";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { USER_ROUTE } from "@/constants/serverRoutes";
+import { useUser } from "@/context/UserProvider";
+import { useEmailValidation } from "@/hooks/useEmailValidation";
+import { useUsernameValidation } from "@/hooks/useUsernameValidation";
+import { useSolanaWalletVerification } from "@/hooks/useWalletVerification";
+import { UserType } from "@/types/user";
+import { ChainIdsEnum } from "@/types/wallet";
+import { handleClientError } from "@/utils/handleError";
+import { clearOnboardingStorage } from "@/utils/storage";
+import { cn, truncate } from "@/utils/ui-utils";
+import { getWalletsByChain, parseUserDates } from "@/utils/user";
+import { PublicKey } from "@solana/web3.js";
+import axios from "axios";
+import { useSetAtom } from "jotai";
+import { CircleCheckIcon, WalletIcon, XIcon } from "lucide-react";
+import { FC, useMemo, useState } from "react";
+import { toast } from "sonner";
+
+const ProfileAccountForm: FC = () => {
+  const { user, setUser } = useUser();
+  const setAccountOnboardingStage = useSetAtom(accountOnboardingAtoms.stageAtom)
+  const setTimelineOnboardingStage = useSetAtom(timelineOnboardingAtoms.stageAtom)
+  const setGalleriesOnboardingStage = useSetAtom(galleriesOnboardingAtoms.stageAtom)
+  const setGalleryOnboardingStage = useSetAtom(galleryOnboardingAtoms.stageAtom)
+  
+  const [submitting, setSubmitting] = useState(false);
+  const {
+    email,
+    setEmail,
+    error: emailError,
+    isValid: emailIsValid,
+    checkEmailUniqueness,
+  } = useEmailValidation(user?.authUser?.email, { uniquenessCheck: "AuthUser" });
+  const {
+    username,
+    setUsername,
+    error: usernameError,
+    isValid: usernameIsValid,
+    checkUsernameUniqueness,
+  } = useUsernameValidation(user?.username);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
+  const { setStepRef: setEmailRef } = useAccountSetter(
+    AccountOnboardingKeys.VerifiedEmail
+  );
+  const { setStepRef: setWalletsRef } = useAccountSetter(
+    AccountOnboardingKeys.VerifiedWallets
+  );
+
+  const verifiedEmail = user?.authUser?.email;
+  const verifiedSolanaWallets = getWalletsByChain(user)[ChainIdsEnum.SOLANA];
+
+  const canRemoveWallet = verifiedSolanaWallets.length > 1 || !!verifiedEmail
+
+  const { verifyWallet, removeWallet, isVerifying, verifiedPublicKey } = useSolanaWalletVerification();
+
+  const usernameIsWallet = useMemo(() => {
+    if (!user?.username) return false;
+
+    try {
+      return PublicKey.isOnCurve(user.username);
+    } catch {
+      return false;
+    }
+  }, [user?.username]);
+
+  const handleOnboardingReset = () => {
+    setAccountOnboardingStage("notStarted");
+    setTimelineOnboardingStage("notStarted");
+    setGalleriesOnboardingStage("notStarted");
+    setGalleryOnboardingStage("notStarted");
+    clearOnboardingStorage();
+    //TODO reset all onboarding atoms here
+  }
+
+  const onUsernameSubmit = async () => {
+    if (!usernameIsValid) return;
+
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkUsernameUniqueness(username);
+    if (!isUnique) return;
+
+    setSubmitting(true);
+
+
+    const userData: Partial<UserType> = { username }
+
+    axios
+      .patch<{ user: UserType }>(USER_ROUTE, userData)
+      .then((response) => {
+        toast.success("Username updated successfully!");
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
+      })
+      .catch((error) => {
+        toast.error("Failed to update username.");
+        handleClientError({
+          error,
+          location: "AccountForm_onUsernameSubmit",
+        });
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
+  };
+
+  const handleVerifyNewEmail = async () => {
+    if (!emailIsValid) return;
+
+    //double check uniqueness in case they submit before debouncing completes
+    const isUnique = await checkEmailUniqueness(email);
+    if (!isUnique) return;
+
+    setVerifyOpen(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4">
+        <StatelessFormItem
+          label="Username"
+          description={`Used for tagging and sharing your profile${
+            usernameIsWallet ? " (defaults to wallet address)" : ""
+          }.`}
+          errorMessage={usernameError}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-x-4 gap-y-2">
+            <Input
+              placeholder="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <Button
+              onClick={onUsernameSubmit}
+              className="w-full"
+              loading={submitting}
+              disabled={!usernameIsValid}
+            >
+              Save Username
+            </Button>
+          </div>
+        </StatelessFormItem>
+      </div>
+
+      <div>
+        <StatelessFormItem
+          label="Verified Email"
+          description="A verified email allows you to log in anywhere using accounts linked to your email. Never shared or used without consent."
+          errorMessage={emailError}
+          ref={setEmailRef}
+        >
+          {verifiedEmail ? (
+            <Button className="w-full justify-start" disabled>
+              <CircleCheckIcon />
+              {verifiedEmail}
+            </Button>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-x-4 gap-y-2">
+              <Input
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button
+                type="button"
+                className={cn("w-full")}
+                onClick={handleVerifyNewEmail}
+                disabled={!emailIsValid || submitting}
+              >
+                Verify your email address
+              </Button>
+            </div>
+          )}
+        </StatelessFormItem>
+      </div>
+
+      <StatelessFormItem
+        ref={setWalletsRef}
+        label="Verified Wallets"
+        description="Verified wallets allow you to sign in and prove ownership of digital assets."
+      >
+        <div className="space-y-3">
+          {/* Display existing verified wallets */}
+          {verifiedSolanaWallets.length ? (
+            <div className="flex flex-wrap gap-2">
+              <P className="text-muted-foreground text-sm font-bold">Solana:</P>
+              {verifiedSolanaWallets.map((address) => (
+                <Badge
+                  key={address}
+                  variant={
+                    verifiedPublicKey === address ? "default" : "secondary"
+                  }
+                  className="font-bold stroke-4"
+                >
+                  <CircleCheckIcon className="stroke-3" />
+
+                  {truncate(address)}
+
+                  {canRemoveWallet && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => removeWallet(address)}
+                      className="rounded-full size-4"
+                      disabled={isVerifying}
+                    >
+                      <XIcon className="size-3 stroke-3" />
+                    </Button>
+                  )}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+
+          {/* Add new wallet button */}
+
+          <Button
+            onClick={verifyWallet}
+            loading={isVerifying}
+            className="w-full"
+            variant={!verifiedSolanaWallets.length ? "default" : "outline"}
+          >
+            <WalletIcon />
+            Add Verified Wallet
+          </Button>
+        </div>
+      </StatelessFormItem>
+
+      <Button
+        onClick={handleOnboardingReset}
+        variant="link"
+        className="mx-auto block"
+      >
+        Reset Onboarding Walkthroughs
+      </Button>
+
+      <AuthLinkingDialog
+        open={verifyOpen}
+        onOpenChange={setVerifyOpen}
+        email={email}
+      />
+    </div>
+  );
+}
+
+export default ProfileAccountForm;

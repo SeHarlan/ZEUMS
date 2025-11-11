@@ -1,21 +1,19 @@
 "use client";
 
-import { FC, useState } from "react";
 import { Button, LinkButton } from "@/components/ui/button";
-import { ExternalLink, Copy, Check } from "lucide-react";
-import { ParsedBlockChainAsset } from "@/types/asset";
-import ScrollableDialog from "../general/ScrollableDialog";
-import { P, H3 } from "../typography/Typography";
 import { Separator } from "@/components/ui/separator";
-import { cn, truncate } from "@/utils/ui-utils";
-import { EntrySource } from "@/types/entry";
-import useSolanaAssets from "@/hooks/useSolanaAssets";
-import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
-import MediaThumbnail from "../media/MediaThumbnail";
 import { BLOCKCHAIN_MEDIA_PATHS } from "@/constants/clientRoutes";
+import { SOLANA_BLOCKCHAIN_EXPLORER } from "@/constants/externalLinks";
+import useSolanaAssets from "@/hooks/useSolanaAssets";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { BlockchainAttribute, EntrySource } from "@/types/entry";
 import { ChainIdsEnum } from "@/types/wallet";
-import { getReturnKey, makeReturnQueryParam } from "@/utils/navigation";
-import { usePathname } from "next/navigation";
+import { cn, truncate } from "@/utils/ui-utils";
+import { Check, Copy, ExternalLink } from "lucide-react";
+import { FC, useState } from "react";
+import ScrollableDialog from "../general/ScrollableDialog";
+import MediaThumbnail from "../media/MediaThumbnail";
+import { H3, P } from "../typography/Typography";
 
 
 interface AssetMetadataDialogProps {
@@ -30,15 +28,15 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
   onOpenChange,
   asset
 }) => {
-  const pathname = usePathname();
+
 
   const { solanaAssets: childrenAssets } = useSolanaAssets({
-    publicKeys: [asset.tokenAddress],
+    publicKey: asset.tokenAddress,
     source: EntrySource.Collector,
+    page: 1,
   });
   
-  const returnKey = getReturnKey(pathname, asset.tokenAddress);
-
+  
   return (
     <ScrollableDialog
       open={open}
@@ -93,7 +91,7 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
               <div className="grid grid-cols-1 gap-2">
                 {asset.attributes.map((attribute, index) => (
                   <AttributeItem
-                    key={`${attribute.type}-${attribute.value}-${index}`}
+                    key={`${attribute.trait_type}-${attribute.value}-${index}`}
                     attribute={attribute}
                   />
                 ))}
@@ -112,7 +110,6 @@ const AssetMetadataDialog: FC<AssetMetadataDialogProps> = ({
                   <ChildrenAsset
                     key={childrenAsset.tokenAddress}
                     childrenAsset={childrenAsset}
-                    returnKey={returnKey}
                   />
                 ))}
               </div>
@@ -197,13 +194,13 @@ const AddressTag: FC<AddressTagProps> = ({
   );
 };
 
-interface AttributeItemProps {
-  attribute: { type: string; value: string };
+interface BlockchainAttributeItemProps {
+  attribute: BlockchainAttribute;
 }
-const AttributeItem: FC<AttributeItemProps> = ({ attribute }) => (
+const AttributeItem: FC<BlockchainAttributeItemProps> = ({ attribute }) => (
   <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
     <span className="text-sm font-medium text-muted-foreground">
-      {attribute.type}
+      {attribute.trait_type}
     </span>
     <span className="text-sm">{attribute.value}</span>
   </div>
@@ -211,13 +208,11 @@ const AttributeItem: FC<AttributeItemProps> = ({ attribute }) => (
 
 interface ChildrenAssetProps {
   childrenAsset: ParsedBlockChainAsset;
-  returnKey?: string;
 }
-const ChildrenAsset: FC<ChildrenAssetProps> = ({ childrenAsset, returnKey = "" }) => {
+const ChildrenAsset: FC<ChildrenAssetProps> = ({ childrenAsset}) => {
   const newPath =
-    BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](childrenAsset.tokenAddress) +
-    makeReturnQueryParam(returnKey);
-  
+    BLOCKCHAIN_MEDIA_PATHS[ChainIdsEnum.SOLANA](childrenAsset.tokenAddress)
+
   return (
     <LinkButton href={newPath} className="gap-4 h-fit p-2 w-full justify-start">
       <div className="flex-shrink-0 w-12 h-12">

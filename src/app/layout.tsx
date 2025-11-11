@@ -1,19 +1,22 @@
-import type { Metadata } from "next";
-import { DM_Serif_Text, DM_Sans, DM_Mono } from "next/font/google";
-import AuthContextProvider from "@/context/AuthProvider";
-import { Toaster } from "@/components/ui/sonner";
-import WalletContextProvider from "@/context/WalletProvider";
-import UserContextProvider from "@/context/UserProvider";
 import NavBar from "@/components/navigation/NavBar";
-import NavBarActionsProvider from "@/context/NavBarActionsProvider";
-import { Analytics } from "@vercel/analytics/next";
-import "@solana/wallet-adapter-react-ui/styles.css";
-import "./globals.css";
-import { cn } from "@/utils/ui-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 import { AspectRatioProvider } from "@/context/AspectRatioProvider";
+import AuthContextProvider from "@/context/AuthProvider";
+import NavBarActionsProvider from "@/context/NavBarActionsProvider";
+import { ResponsiveProvider } from "@/context/ResponsiveProvider";
+import UserContextProvider from "@/context/UserProvider";
+import WalletContextProvider from "@/context/WalletProvider";
 import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { cn } from "@/utils/ui-utils";
+import "@solana/wallet-adapter-react-ui/styles.css";
+import { Analytics } from "@vercel/analytics/next";
+import { Provider as AtomProvider } from "jotai";
+import type { Metadata } from "next";
+import { DM_Mono, DM_Sans, DM_Serif_Text } from "next/font/google";
+import { Suspense } from "react";
+import "./globals.css";
 
 
 const dmSerif = DM_Serif_Text({
@@ -35,6 +38,7 @@ const dmMono = DM_Mono({
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.zeums.art"),
   title: TITLE_COPY,
   description: SUBTITLE_COPY,
   icons: {
@@ -60,7 +64,7 @@ export const metadata: Metadata = {
     title: TITLE_COPY,
     description: SUBTITLE_COPY,
     images: ["/og-image.png"],
-    creator: "@ZEUMS_art",
+    creator: "@Zeums_art",
   },
 };
 
@@ -80,23 +84,31 @@ export default function RootLayout({
         )}
       >
         <Analytics />
+        <AtomProvider>
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
-              <NavBarActionsProvider>
-                <AspectRatioProvider>
-                  <ScrollArea className="h-screen">
+              <ResponsiveProvider>
+                <NavBarActionsProvider>
+                  <AspectRatioProvider>
                     <Suspense fallback={<nav />}>
                       <NavBar />
                     </Suspense>
-                    {children}
-                    <Toaster />
-                  </ScrollArea>
-                </AspectRatioProvider>
-              </NavBarActionsProvider>
+                    <ScrollArea className="h-screen" id={MAIN_SCROLL_AREA_ID}>
+                      {children}
+                    </ScrollArea>
+                  </AspectRatioProvider>
+                </NavBarActionsProvider>
+              </ResponsiveProvider>
             </UserContextProvider>
           </AuthContextProvider>
-        </WalletContextProvider>
+          </WalletContextProvider>
+        </AtomProvider>
+        <Toaster
+          position="bottom-right"
+          richColors={true}
+          closeButton={true}
+        />
       </body>
     </html>
   );

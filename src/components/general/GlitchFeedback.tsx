@@ -2,7 +2,7 @@
 import { H1, P } from "@/components/typography/Typography";
 import { handleClientError } from "@/utils/handleError";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, useState, useEffect, FC } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 interface GlitchTextMeshProps {
@@ -280,18 +280,18 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
           float rgbValue = random(rgbChunk + st + vec2(blockTime, 0.));
 
-          if((rgbValue < mouseDisplacement - 0.5)) {
-            float colRan = random(rgbChunk + 100. + vec2(t, blockTime));
-            vec3 staticCol = color;
-            if(colRan < 0.33) {
-              staticCol = vec3(1.,0.,0.);
-            } else if (colRan < 0.66) {
-              staticCol = vec3(0.,1.,0.);
-             }else if(colRan < 0.99) {
-              staticCol = vec3(0.,0.,1.);
-            }
-            color = mix(color, staticCol, (0.1 + mouseDisplacement) * (glitchSquared + 0.1));//glitchSquared * (mouseDisplacement + 0.1));
-          }
+          // if((rgbValue < mouseDisplacement - 0.5)) {
+          //   float colRan = random(rgbChunk + 100. + vec2(t, blockTime));
+          //   vec3 staticCol = color;
+          //   if(colRan < 0.33) {
+          //     staticCol = vec3(1.,0.,0.);
+          //   } else if (colRan < 0.66) {
+          //     staticCol = vec3(0.,1.,0.);
+          //    }else if(colRan < 0.99) {
+          //     staticCol = vec3(0.,0.,1.);
+          //   }
+          //   color = mix(color, staticCol, (0.1 + mouseDisplacement) * (glitchSquared + 0.1));//glitchSquared * (mouseDisplacement + 0.1));
+          // }
             
           //static outside text
           if(text.a < 0.5) {
@@ -329,13 +329,14 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
         textTexture.image.width,
         textTexture.image.height
       );
-      shaderMaterial.uniforms.dpr.value = window.devicePixelRatio || 1; // Update DPR
     }
   }, [size, shaderMaterial, textTexture]);
 
   // Animation loop
   useFrame((state) => {
     if (meshRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
+      shaderMaterial.uniforms.dpr.value = window.devicePixelRatio || 1; // Update DPR
       shaderMaterial.uniforms.time.value = 100 + (state.clock.elapsedTime % 50);
       shaderMaterial.uniforms.mouse.value.copy(mousePos);
       shaderMaterial.uniforms.glitchIntensity.value = glitchIntensity;
@@ -413,6 +414,8 @@ const GlitchTextMesh: FC<GlitchTextMeshProps> = ({
 
 // WebGL detection function
 const isWebGLSupported = (): boolean => {
+  if (typeof window === 'undefined' || !document) return false;
+
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -433,9 +436,7 @@ const FallbackText: FC<GlitchTextMeshProps> = ({
   return (
     <div className="w-full h-full flex flex-col justify-center items-center space-y-8">
       <H1 className="text-center text-7xl lg:text-9xl">{title}</H1>
-      <P className="text-center text-xl lg:text-2xl pb-12">
-        {subtitle}
-      </P>
+      <P className="text-center text-xl lg:text-2xl pb-12">{subtitle}</P>
     </div>
   );
 }
@@ -445,24 +446,19 @@ const GlitchFeedback: FC<GlitchTextMeshProps> = ({
   title,
   subtitle
 }) => {
-  const [webglSupported, setWebglSupported] = useState(true);
+  const webglSupported = isWebGLSupported();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    // Check WebGL support on mount
-    setWebglSupported(isWebGLSupported());
-  }, []);
 
   if (!webglSupported) {
     return (
-      <div className="absolute inset-0 left-0 top-0 w-full h-full overflow-hidden font">
+      <div className="absolute inset-0 left-0 top-0 w-full h-full overflow-hidden">
         <FallbackText title={title} subtitle={subtitle} />;
       </div>
     )
   }
 
   return (
-    <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10">
+    <div className="absolute inset-0 left-0 top-0 w-full h-full bg-transparent pointer-events-none -z-10 dark:invert">
       <Canvas
         ref={canvasRef}
         orthographic

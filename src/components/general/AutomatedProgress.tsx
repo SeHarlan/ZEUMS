@@ -20,16 +20,11 @@ const AutomatedProgress = ({
   useEffect(() => { 
     let interval: NodeJS.Timeout | null = null;
 
-    if (complete) { 
-      setProgress(100); // Set progress to 100% when user is logged in
-      return; // No need for an interval if user is logged in
-    }
-
     if (loading) {
       interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 99) {
-            return 75; // Repeat at 75% to indicate continuing loading
+            return 50; // Repeat at 50% to indicate continuing loading
           }
           return prev + 1;
         });
@@ -40,7 +35,11 @@ const AutomatedProgress = ({
       if (interval) clearInterval(interval);
     };
   }, [loading, complete]);
-  return <Progress value={progress} className={className} />;
+
+
+  const value = complete ? 100 : progress
+
+  return <Progress value={value} className={className} />;
 }
 
 export default AutomatedProgress;

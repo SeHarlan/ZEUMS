@@ -1,9 +1,10 @@
-import { USER_AUTH_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
-import { TimelineEntry } from "./entry";
-import { WalletType } from "./wallet";
+import { USER_AUTH_VIRTUAL, USER_COLLECTED_GALLERIES_VIRTUAL, USER_COLLECTED_TIMELINE_VIRTUAL, USER_CREATED_GALLERIES_VIRTUAL, USER_CREATED_TIMELINE_VIRTUAL, USER_WALLET_VIRTUAL } from "@/constants/databaseKeys";
 import { Schema } from "mongoose";
-import { AuthUserType } from "./next-auth";
+import { EntrySource, TimelineEntry } from "./entry";
+import { UserVirtualGalleryType } from "./gallery";
 import { ImageType } from "./media";
+import { AuthUserType } from "./next-auth";
+import { WalletType } from "./wallet";
 
 // export type Website = {
 //   url: string;
@@ -21,6 +22,9 @@ export type BaseUserType = {
   bio?: string;
   socialHandles: UserSocialHandles;
   authUserId?: Schema.Types.ObjectId;
+  primaryTimeline?: EntrySource;
+  hideCreatorDates?: boolean;
+  hideCollectorDates?: boolean;
   // websites?: Website[];
 };
 
@@ -30,6 +34,7 @@ export const SOCIAL_HANDLE_KEYS = [
   "tiktok",
   "telegram",
   "discord",
+  "website",
   // "facebook",
 ] as const;
 
@@ -48,9 +53,23 @@ export function isValidSocialHandleKey(
 /** extend UserType with virtuals populated */
 export type UserType = BaseUserType & {
   [USER_WALLET_VIRTUAL]: WalletType[];
+  [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[];
+  [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[];
+  [USER_AUTH_VIRTUAL]: AuthUserType;
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_CREATED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
+  /** Contains only the first gallery item with media, closest to position [0,0]*/
+  [USER_COLLECTED_GALLERIES_VIRTUAL]: UserVirtualGalleryType[];
+};
+
+export type PublicUserType = BaseUserType & {
   [USER_CREATED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
   [USER_COLLECTED_TIMELINE_VIRTUAL]: TimelineEntry[]; 
-  [USER_AUTH_VIRTUAL]: AuthUserType;
+};
+
+export type PublicListUserType = Pick<PublicUserType, '_id' | 'username' | 'displayName'> & {
+  profileImage: ImageType;
+  bannerImage: ImageType;
 };
 
 export type CreateUserData = {

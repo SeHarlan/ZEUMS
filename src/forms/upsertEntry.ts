@@ -1,5 +1,6 @@
 import { EntryTypes } from "@/types/entry";
 import { z } from "zod";
+import { urlSchema } from "./urlSchema";
 
 // Form schema with Zod validation
 export const entryFormSchema = z.object({
@@ -27,14 +28,12 @@ export const entryFormSchema = z.object({
         text: z.string().min(1, {
           message: "Button text is required.",
         }),
-        url: z.string().url({
-          message: "Please enter a valid URL.",
-        }),
+        url: urlSchema,
       })
     )
     .max(3, {
       message: "You can add up to 3 buttons.",
-    })
+    }),
 });
 
 export type EntryFormValues = z.infer<typeof entryFormSchema>;

@@ -1,17 +1,21 @@
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { BlockchainAttribute, EntryTypes } from "@/types/entry";
+import { MallowArtwork } from "@/types/mallow";
 import { BlockchainImage, BlockchainMedia, MediaCategory, MediaOrigin } from "@/types/media";
 import { ChainIdsEnum } from "@/types/wallet";
-import { MallowArtwork } from "@/types/mallow";
 
+interface ParseMallowAssetsResponse {
+  parsedAssets: ParsedBlockChainAsset[];
+  duplicateEditionCount: number;
+}
 export const parseMallowAssets = (
   rawAssets: MallowArtwork[]
-): ParsedBlockChainAsset[] => {
+): ParseMallowAssetsResponse => {
   const parsedAssets: ParsedBlockChainAsset[] = [];
   const editionMap: Record<string, ParsedBlockChainAsset> = {};
+  let editionCount = 0;
 
   for (const asset of rawAssets) {
-
     if (asset.source === "objkt") continue; //exclude objkt (tezos) nfts
      //must have at least image url and name
     if (!asset.imageUrl) continue;
@@ -20,7 +24,7 @@ export const parseMallowAssets = (
     // Parse attributes
     const attributes: BlockchainAttribute[] =
       asset.attributes?.map((attr) => ({
-        type: attr.trait_type,
+        trait_type: attr.trait_type,
         value: String(attr.value),
       })) || [];
 
@@ -35,6 +39,8 @@ export const parseMallowAssets = (
     const onChainOwner = {
       address: asset.owner,
     };
+
+
 
     // Parse media and determine category
     const { videoUrl, htmlUrl, vrUrl } = parseMallowMedia(asset);
@@ -70,6 +76,7 @@ export const parseMallowAssets = (
     const isEdition = asset.maxSupply || asset.editionNumber;
 
     if (isEdition) {
+      editionCount++;
       //replace url characters for a safe string as key
       const editionKey = asset.imageUrl.replaceAll(/[^a-zA-Z0-9]/g, "-");
 
@@ -84,8 +91,8 @@ export const parseMallowAssets = (
   parsedAssets.push(...editions);
 
   //mallow assets come sorted (default is recently listed)
-
-  return parsedAssets;
+  const duplicateEditionCount = editionCount - editions.length;
+  return { parsedAssets, duplicateEditionCount };
 };
 
 

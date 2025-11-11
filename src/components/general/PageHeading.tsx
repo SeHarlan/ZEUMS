@@ -2,18 +2,20 @@ import { cn } from "@/utils/ui-utils";
 import { FC } from "react";
 import { H1, P } from "../typography/Typography";
 
-interface PageTitleProps { 
+interface PageTitleProps {
   text: string;
   className?: string;
 }
 
 export const PageTitle: FC<PageTitleProps> = ({ text, className }) => { 
   return (
-    <H1 className={className}>
+    <H1 className={cn("max-w-7/8 md:max-w-1/3 lg:max-w-5/14", className)}>
       {text}
     </H1>
   );
 }
+
+
 
 export const PageSubtitle: FC<PageTitleProps> = ({ text, className }) => { 
   return (
@@ -33,13 +35,12 @@ const PageHeading: FC<PageHeadingProps> = ({
   title,
   subtitle,
   className
-}) => {
-  
+}) => {  
   return (
     <div className={cn("mb-4 sm:mb-6", className)}>
-      <PageTitle text={title}/>
+      <PageTitle text={title} />
       {subtitle ? (
-        <PageSubtitle text={subtitle}/>
+        <PageSubtitle text={subtitle} className="mt-1" />
       ) : null}
     </div>
   )

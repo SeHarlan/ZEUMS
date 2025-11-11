@@ -3,7 +3,7 @@
 import { useUser } from "@/context/UserProvider";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, } from "react";
-import LoadingPage from "../general/LoadingPage";
+import PageLoading from "../general/PageLoading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export const ProtectedRoute = ({
 
 
   if (userLoading) {
-    return <LoadingPage complete={loggedIn} loading={userLoading} />
+    return <PageLoading complete={loggedIn} loading={userLoading} />
   }
 
   if (!loggedIn) {

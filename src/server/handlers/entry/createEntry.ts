@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
-import Entry from "../../models/Entry/Entry";
-import { TimelineEntryCreation } from "@/types/entry";
+import Entry, { GalleryEntryVirtual } from "../../models/Entry/Entry";
+import { TimelineEntryCreation, EntryTypes } from "@/types/entry";
 
 export async function createEntryHandler(req: NextRequest): Promise<NextResponse> {
   await connectToDatabase();
@@ -20,6 +20,11 @@ export async function createEntryHandler(req: NextRequest): Promise<NextResponse
     // Create the entry directly through the base model
     // Mongoose will use the right discriminator based on entryType
     const createdEntry = await Entry.create(entryCreationData);
+    
+    // Populate the created entry if it's a gallery entry
+    if (createdEntry.entryType === EntryTypes.Gallery) {
+      await createdEntry.populate(GalleryEntryVirtual);
+    }
 
     if (!createdEntry) {
       throw new Error("Failed to create new entry");

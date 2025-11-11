@@ -1,6 +1,6 @@
+import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import Entry from "../../models/Entry/Entry";
 
 export async function deleteEntryHandler(

@@ -1,62 +1,88 @@
-import Image from "next/image";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { FC, SyntheticEvent } from "react";
-import { ImageOffIcon } from "lucide-react";
-import { cn } from "@/utils/ui-utils";
-import { MediaType } from "@/types/media";
+"use client";
+import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
+import { useInView } from "@/hooks/useObserver";
+import { MediaType } from "@/types/media";
+import { cn } from "@/utils/ui-utils";
+import { ImageOffIcon } from "lucide-react";
+import Image from "next/image";
+import { FC, SyntheticEvent } from "react";
+import { AspectRatio } from "../ui/aspect-ratio";
 
 interface MediaThumbnailProps {
   media: MediaType;
   onLoad?: (imageElement: HTMLImageElement) => void;
+  onError?: () => void;
   objectFit?: "object-cover" | "object-contain";
-  rounding?: "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  rounding?:
+    | "rounded-none"
+    | "rounded-sm"
+    | "rounded-md"
+    | "rounded-lg"
+    | "rounded-full"
+    | "rounded-b-md";
   ratio?: number;
   className?: string;
   alt?: string;
+  size?: ImageSizing;
+  priority?: boolean;
+  noPadding?: boolean;
+  quality?: number;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
   media,
   onLoad,
+  onError,
   objectFit = "object-contain",
   rounding = "rounded-md",
   ratio = 1,
   className,
   alt,
+  size = "thumbnail",
+  priority,
+  noPadding,
+  quality = 50,
 }) => {
   const {
     isLoaded,
     isLoading,
     isError,
     imageUrl,
-    onError,
-    onLoad: onImageLoad,
-  } = useImageFallback(media);
+    onError: handleFallbackError,
+    onLoad: handleFallbackLoad,
+  } = useImageFallback({ media, onFinalError: onError });
+
+  const {inView, ref} = useInView();
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
-    onImageLoad();
-    if (onLoad) onLoad(event.currentTarget);
+    handleFallbackLoad();
+    onLoad?.(event.currentTarget);
   };
 
   const renderContent = () => {
+    if (!inView) return null;
     //broken image
     if (isError) return <ImageOffIcon className="size-8" />;
 
+    const width = imageSizing[size];
+    const height = width / ratio;
+
     return (
       <Image
-        fill
-        unoptimized //keep unoptimized, we use this for displaying hundreds of images as they are being selected in the search dialog
-        loading="lazy"
-        onError={onError}
+        height={height}
+        width={width}
+        sizes={`${width}px`}
+        quality={quality}
+        loading={priority ? "eager" : "lazy"}
+        onError={handleFallbackError}
         onLoad={handleLoad}
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
-          "w-full transition-opacity duration-200",
-          isLoaded ? "opacity-100" : "opacity-0",
-          objectFit,
-          objectFit === "object-contain" && "p-3",
+          "w-full h-full transition-opacity duration-200 rounded",
+          isLoaded || priority ? "opacity-100" : "opacity-0",
+          objectFit
         )}
       />
     );
@@ -64,11 +90,14 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
 
   return (
     <AspectRatio
+      ref={ref}
       ratio={ratio}
       className={cn(
-        "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden",
+        "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden transition-opacity duration-500",
+        inView ? "opacity-100" : "opacity-0",
         rounding,
         isLoading && "animate-skeleton-shimmer",
+        objectFit === "object-contain" && !noPadding && "p-2",
         className
       )}
     >

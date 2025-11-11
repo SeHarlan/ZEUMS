@@ -1,9 +1,18 @@
-import { EntrySource, TimelineEntry } from "@/types/entry";
+import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
+import { PublicUserType } from "@/types/user";
 
-export const getTimelineKey = (source: EntrySource) => source === EntrySource.Creator
-      ? "createdTimelineEntries"
-  : "collectedTimelineEntries";
-      
+export const getTimelineKey = (source: EntrySource) => {
+  switch (source) {
+    // case EntrySource.Curator:
+    //   return "curatedTimelineEntries";
+    case EntrySource.Collector:
+      return "collectedTimelineEntries";
+    case EntrySource.Creator:
+      return "createdTimelineEntries";
+  }
+}
+
+
 
 /** expects parsed Entries with date as a Date object */
 export const sortTimeline = (timelineEntries: TimelineEntry[]) => {
@@ -36,3 +45,100 @@ export const addPreciseCurrentTime = (date: Date) => {
   );
   return preciseDate;
 }
+export interface ProcessedEntry {
+  entry: TimelineEntry;
+  isAssetEntry: boolean;
+  entryDate: string;
+  entryYear: number;
+  showYear: boolean;
+  showDate: boolean;
+  flipEntry: boolean;
+  flipDate: boolean;
+  isGalleryEntry: boolean;
+}
+export const processTimelineEntries = (
+  entries: TimelineEntry[],
+  cb: (processedEntry: ProcessedEntry) => React.ReactNode,
+  hideDates = false
+) => {
+  let assetIndex = 0;
+  let dateIndex = 0;
+  let lastDate: string | null = null;
+  let lastYear: number | null = null;
+
+  return entries.map((entry) => {
+    const isAssetEntry =
+      entry.entryType === EntryTypes.BlockchainAsset ||
+      entry.entryType === EntryTypes.UserAsset;
+    
+    const isGalleryEntry = entry.entryType === EntryTypes.Gallery;
+
+    // Format the date
+    const entryDate = entry.date.toLocaleString(undefined, {
+      month: "long",
+      day: "numeric",
+    });
+
+    const entryYear = entry.date.getFullYear();
+    const showYear = hideDates ? false : (entryYear !== lastYear); // Show year only if it's different from the last one and dates are not hidden
+    if (showYear) lastYear = entryYear; // Update the lastYear
+
+    const showDate = hideDates ? false : (showYear || (entryDate !== lastDate)); // Show date only if it's different from the last one and dates are not hidden
+    if (showDate) {
+      lastDate = entryDate; // Update the lastDate
+      dateIndex++;
+    }
+
+    if (isAssetEntry || isGalleryEntry) assetIndex++;
+
+    const flipEntry = assetIndex % 2 === 1; // Only track asset entries
+    const flipDate = dateIndex % 2 === 1; // Flip every other date
+
+    return cb({
+      entry,
+      isAssetEntry,
+      isGalleryEntry,
+      entryDate,
+      entryYear,
+      showYear,
+      showDate,
+      flipEntry,
+      flipDate,
+    });
+  });
+}
+
+export const getTimelineTabContent = (user?: PublicUserType | null, useAllSources = false) => {
+  if (!user) return [];
+
+const useCreated = useAllSources || user?.createdTimelineEntries?.length;
+const useCollected = useAllSources || user?.collectedTimelineEntries?.length;
+
+  const contentMap = [
+    useCreated
+      ? {
+          title: "Created",
+          value: EntrySource.Creator,
+          entries: user.createdTimelineEntries,
+        }
+      : undefined,
+    useCollected
+      ? {
+          title: "Collected",
+          value: EntrySource.Collector,
+          entries: user.collectedTimelineEntries,
+        }
+      : undefined,
+  ];
+
+  const orderedContent =
+    user?.primaryTimeline === EntrySource.Collector
+      ? [contentMap[1], contentMap[0]]
+      : [contentMap[0], contentMap[1]];
+
+  const content = orderedContent.filter(
+    (item): item is NonNullable<typeof item> => Boolean(item)
+  );
+
+  return content;
+};

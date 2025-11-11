@@ -1,76 +1,54 @@
 "use client";
 
-import { EntrySource, EntryTypes, TimelineEntry } from "@/types/entry";
-import { FC, Fragment } from "react";
 import { H2, P } from "@/components/typography/Typography";
-import { cn } from "@/utils/ui-utils";
+import { TimelineEntry } from "@/types/entry";
+import { processTimelineEntries } from "@/utils/timeline";
+import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { FC, Fragment, useMemo } from "react";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 import { EntryBaseProps } from "./EntryBase";
 
 interface TimelineBaseProps {
-  source: EntrySource;
-  createdTimelineEntries?: TimelineEntry[];
-  collectedTimelineEntries?: TimelineEntry[];
+  entries: TimelineEntry[];
   EntryComponent: React.FC<EntryBaseProps>;
+  hideDates?: boolean;
 }
 
-const TimelineBase: FC<TimelineBaseProps> = ({ source, collectedTimelineEntries, createdTimelineEntries, EntryComponent}) => {
+const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false}) => {
 
-  const timelinesMap = {
-    [EntrySource.Creator]: createdTimelineEntries,
-    [EntrySource.Collector]: collectedTimelineEntries,
-  };
+  const renderedEntries = useMemo(() => {
+    return processTimelineEntries(entries, (processedEntry) => {
+      const {
+        entry,
+        entryDate,
+        entryYear,
+        showYear,
+        showDate,
+        flipEntry,
+        flipDate,
+      } = processedEntry;
 
-  const entries = timelinesMap[source] || [];
-
-  const renderEntries = () => {
-    let assetIndex = 0;
-    let dateIndex = 0;
-    let lastDate: string | null = null;
-    let lastYear: number | null = null;
-
-    return entries.map((entry) => {
-      const isAssetEntry =
-        entry.entryType === EntryTypes.BlockchainAsset ||
-        entry.entryType === EntryTypes.UserAsset;
-
-      // Format the date 
-      const entryDate = entry.date.toLocaleString(undefined, {
-        month: "long",
-        day: "numeric",
-      });
-
-      const entryYear = entry.date.getFullYear();
-
-      const showDate = entryDate !== lastDate; // Show date only if it's different from the last one
-      if (showDate) {
-        lastDate = entryDate; // Update the lastDate
-        dateIndex++;
-      }
-      const showYear = entryYear !== lastYear; // Show year only if it's different from the last one
-      if (showYear) lastYear = entryYear; // Update the lastYear
-
-      if (isAssetEntry) assetIndex++;
-
-      const flipEntry = assetIndex % 2 === 1; // Only track asset entries
-      const flipDate = dateIndex % 2 === 1; // Flip every other date
       return (
-        <Fragment key={String(entry._id)}>
+        <Fragment key={entry._id.toString()}>
           {showYear && (
-            <H2 className="w-fit relative left-1/2 -translate-x-1/2 bg-background p-2 text-muted-foreground">
-              {lastYear}
-            </H2>
-          )}
+             <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
+               {entryYear}
+             </H2>
+           )}
           {showDate && (
             <div className="flex justify-center">
               <div
                 className={cn(
                   "flex items-center",
                   flipDate
-                    ? "-translate-x-1/2 flex-row-reverse"
-                    : "translate-x-1/2"
+                  ? "-translate-x-1/2 flex-row-reverse"
+                  : "translate-x-1/2"
                 )}
-              >
-                <div className="z-0 h-px w-4 border-2 border-dashed border-muted" />
+                >
+             
+                <div className="z-0 h-px w-5 border-2 border-dashed border-muted" />
                 <P className={cn("text-lg text-muted-foreground px-2")}>
                   {entryDate}
                 </P>
@@ -81,15 +59,53 @@ const TimelineBase: FC<TimelineBaseProps> = ({ source, collectedTimelineEntries,
           <EntryComponent entry={entry} flip={flipEntry} />
         </Fragment>
       );
-    });
+    }, hideDates);
+  }, [entries, EntryComponent, hideDates]);
+
+  const handleScrollToBottom = () => {
+    const viewport = getMainScrollAreaViewport();
+    if (viewport) {
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: "smooth" });
+    }
+  };
+
+  const handleScrollToTop = () => {
+    const viewport = getMainScrollAreaViewport();
+    if (viewport) {
+      viewport.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
-    <div className="relative pb-8">
-      <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
-      <div className="relative flex flex-col space-y-6">
-        {renderEntries()}
+    <div className="pb-4 space-y-2">
+      <Button
+        className="mx-auto flex font-serif text-muted-foreground"
+        variant="link"
+        onClick={handleScrollToBottom}
+      >
+        Start at the beginning <ArrowDownIcon />
+      </Button>
+      <div className="relative pb-8 mb-0">
+        {!hideDates && (
+          <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
+        )}
+        <div
+          className={cn(
+            "relative flex flex-col pb-10",
+            hideDates ? "space-y-40 pt-20" : "space-y-20 pt-5"
+          )}
+        >
+          {renderedEntries}
+        </div>
       </div>
+      <Separator />
+      <Button
+        className="mx-auto flex font-serif text-muted-foreground"
+        variant="link"
+        onClick={handleScrollToTop}
+      >
+        Back to the top <ArrowUpIcon />
+      </Button>
     </div>
   );
 };

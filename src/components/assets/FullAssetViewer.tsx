@@ -1,21 +1,20 @@
 "use client"
 
-import Image from "next/image";
-import { FC, useState, useEffect } from "react";
+import { useImageFallback } from "@/hooks/useImageFallback";
+import { ParsedBlockChainAsset } from "@/types/asset";
+import { UserAssetEntry } from "@/types/entry";
+import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import { getMediaUrl } from "@/utils/media";
-import { 
-  ImageOffIcon, 
-  MonitorOffIcon 
-} from "lucide-react";
 import { cn } from "@/utils/ui-utils";
-import { MediaCategory } from "@/types/media";
-import VideoViewer from "../media/VideoViewer";
+import {
+  ImageOffIcon,
+  MonitorOffIcon
+} from "lucide-react";
+import Image from "next/image";
+import { FC, useState } from "react";
 import HtmlViewer from "../media/HtmlViewer";
 import ModelViewer from "../media/ModelViewer";
-import { UserAssetEntry } from "@/types/entry";
-import { useImageFallback } from "@/hooks/useImageFallback";
-import { isBlockchainImage, isUserImage } from "@/types/media";
-import { ParsedBlockChainAsset } from "@/types/asset";
+import VideoViewer from "../media/VideoViewer";
 
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
@@ -27,7 +26,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
   className,
 }) => {
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback(asset.media);
+    useImageFallback({media: asset.media});
 
   const [mediaError, setMediaError] = useState(false);
 
@@ -36,21 +35,12 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
 
   const isImage = isBlockchainImage(media) || isUserImage(media);
 
-  // const isGif = isBlockchainImage(media)
-  //   ? media.imageUrl.endsWith("gif")
-  //   : false;
-
   //other media types handle their own loading states
   const isImageLoading = isLoading && isImage;
 
   const handleMediaError = () => {
     setMediaError(true);
   };
-
-  // Reset error state when asset changes
-  useEffect(() => {
-    setMediaError(false);
-  }, [asset.title, media.category]);
 
   const renderContent = () => {
     if (mediaError) {
@@ -86,11 +76,10 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       default:
         return (
           <Image
-            unoptimized={false}
+            quality={100}
             loading="eager"
             priority
             fill
-            sizes="100vw"
             onError={onError}
             onLoad={onLoad}
             src={imageUrl}
@@ -114,18 +103,21 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       )}
     >
       {renderContent()}
-      
+
       {/* Blurred background image */}
-      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-600">
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-neutral-500">
         <Image
-          unoptimized={false}
+          quality={10}
           loading="eager"
           priority
           fill
           src={imageUrl}
           alt="blurred background"
           aria-hidden="true"
-          className={cn("object-cover", !mediaError && "scale-125 blur-3xl opacity-50")}
+          className={cn(
+            "object-cover",
+            !mediaError && "scale-125 blur-3xl opacity-75"
+          )}
         />
       </div>
     </div>

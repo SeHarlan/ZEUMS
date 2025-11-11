@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,20 +8,20 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import Link from 'next/link';
-import { ABOUT, COMING_SOON, EDIT_GALLERIES,  EDIT_PROFILE_ACCOUNT, EDIT_PROFILE_DISPLAY, EDIT_TIMELINE, HOME } from '@/constants/clientRoutes';
-import LoginButton from "../general/LoginButton"
-import { cn, truncate } from "@/utils/ui-utils";
-import { useUser } from "@/context/UserProvider";
 import { Separator } from "@/components/ui/separator";
-import { Button, LinkButton } from "@/components/ui/button";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { ABOUT, EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT, EDIT_TIMELINE, GALLERIES, HOME, NOT_FOUND, TIMELINES, USER_TIMELINE } from '@/constants/clientRoutes';
+import { useUser } from "@/context/UserProvider";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import SearchAssetDialog from "../assets/SearchAssetDialog";
-import { P } from "../typography/Typography";
-import Logo from "../general/Logo";
+import { cn, truncate } from "@/utils/ui-utils";
 import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
-import { InfoIcon } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { EyeIcon, InfoIcon } from "lucide-react";
+import Link from 'next/link';
+import { FC, useState } from "react";
+import SearchAssetDialog from "../assets/SearchAssetDialog";
+import LoginButton from "../general/LoginButton";
+import Logo from "../general/Logo";
+import { P } from "../typography/Typography";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const NavMenu: FC = () => {
@@ -72,27 +72,27 @@ const NavMenu: FC = () => {
             className={cn("w-full")}
             onClick={() => setSearchAssetOpen(true)}
           >
-            Search Assets
+            Search Artworks
           </Button>
-          <NavLink label="Timelines" href={COMING_SOON} />
-          <NavLink label="Galleries" href={COMING_SOON} />
+          <NavLink label="Timelines" href={TIMELINES} />
+          <NavLink label="Galleries" href={GALLERIES} />
         </NavDropDown>
 
-        <NavDropDown trigger={"Profile"}>
+        <NavDropDown trigger={"Manage"}>
           <NavLink
-            label="Profile Settings"
-            href={EDIT_PROFILE_DISPLAY}
+            label="Account Settings"
+            href={EDIT_PROFILE_ACCOUNT}
             disabled={!loggedIn}
             className="order-1"
           />
           <NavLink
-            label="Edit Timeline"
+            label="My Timeline"
             href={EDIT_TIMELINE}
             disabled={!loggedIn}
             className="order-2"
           />
           <NavLink
-            label="Manage Galleries"
+            label="My Galleries"
             href={EDIT_GALLERIES}
             disabled={!loggedIn}
             className="order-3"
@@ -101,43 +101,44 @@ const NavMenu: FC = () => {
           <Separator className="w-full md:col-span-2 order-4" />
 
           <LinkButton
-            href={COMING_SOON}
-            className="md:col-span-2 w-full order-5"
+            href={user?.username ? USER_TIMELINE(user.username) : NOT_FOUND}
+            className="w-full order-5  md:col-span-2 "
             disabled={!loggedIn}
           >
-            Go to my timeline
+            <EyeIcon />
+            Public Timeline
           </LinkButton>
 
-          <LoginButton
-            className="order-6 md:order-7"
-            variant={loggedIn ? "outline" : "default"}
-          />
+            <LoginButton
+              className="order-6 md:order-7"
+              variant={loggedIn ? "outline" : "default"}
+            />
 
-          <LinkButton
-            href={EDIT_PROFILE_ACCOUNT}
-            className={cn(
-              "order-7 md:order-6",
-              !loggedIn && "font-serif" //for default Z when no user
-            )}
-            variant="secondary"
-            disabled={!loggedIn}
-          >
-            {loggedIn ? userDisplayName : noUserDisplayName}
+            {/* <NavigationMenuLink asChild> */}
+            <Button
+              className={cn(
+                "order-7 md:order-6 flex-row cursor-auto",
+                !loggedIn && "font-serif" //for default Z when no user
+              )}
+              variant="secondary"
+            >
+              {loggedIn ? userDisplayName : noUserDisplayName}
 
-            {walletMismatch && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="size-4" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <P>
-                    You are currently connected to a wallet not associated with
-                    your account
-                  </P>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </LinkButton>
+              {walletMismatch && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <P>
+                      You are currently connected to a wallet not associated
+                      with your account
+                    </P>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </Button>
+  
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>
@@ -146,18 +147,20 @@ const NavMenu: FC = () => {
 
 export default NavMenu;
 
-interface NavDropDownProps { 
+interface NavDropDownProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
 }
-const NavDropDown: FC<NavDropDownProps> = ({ children, trigger}) => { 
+const NavDropDown: FC<NavDropDownProps> = ({ children, trigger }) => { 
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className="rounded-sm text-md px-2 md:px-4">
         {trigger}
       </NavigationMenuTrigger>
       <NavigationMenuContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 w-[30rem] max-w-full gap-4 justify-stretch p-2"
+        >
           {children}
         </div>
       </NavigationMenuContent>
@@ -170,8 +173,9 @@ interface NavLinkProps {
   label: string;
   className?: string;
   disabled?: boolean;
+  onClick?: () => void;
 }
-const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
+const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled, onClick }) => {
   return (
     <Link
       href={href}
@@ -179,6 +183,7 @@ const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : undefined}
       className={disabled ? "pointer-events-none" : ""}
+      onClick={onClick}
     >
       <NavigationMenuLink
         // with "asChild" these classNames will be passed down.
@@ -191,7 +196,7 @@ const NavLink: FC<NavLinkProps> = ({ href, label, className, disabled }) => {
         )}
         asChild
       >
-        <p>{label}</p>
+        <P>{label}</P>
       </NavigationMenuLink>
     </Link>
   );

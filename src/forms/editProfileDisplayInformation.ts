@@ -1,4 +1,6 @@
+import { EntrySource } from "@/types/entry";
 import { z } from "zod";
+import { optionalUrlSchema } from "./urlSchema";
 
 // Helper function to validate social media handles (not URLs)
 const validateSocialHandle = (value: string | undefined) => {
@@ -50,8 +52,12 @@ export const profileDisplayFormSchema = z.object({
     tiktok: socialHandleSchema,
     telegram: socialHandleSchema,
     discord: socialHandleSchema,
+    website: optionalUrlSchema,
     // facebook: socialHandleSchema,
   }),
+  primaryTimeline: z.nativeEnum(EntrySource),
+  hideCreatorDates: z.boolean().optional(),
+  hideCollectorDates: z.boolean().optional(),
   // websites: z.array(z.string().url()).optional().transform((val) => (val === "" ? undefined : val)),
 });
 

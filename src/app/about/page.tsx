@@ -1,36 +1,38 @@
 "use client";
 
+import { useShowReturnButton } from "@/atoms/navigation";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
 import GetStartedButton from "@/components/navigation/GetStartedButton";
 import { Blockquote, H3, P } from "@/components/typography/Typography";
-import { SUBTITLE_COPY, TITLE_COPY } from "@/textCopy/mainCopy";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 
 export default function About() {
+  useShowReturnButton();
   return (
     <PageContainer maxWidth="small" className="space-y-8">
-      <section>
-        <PageHeading
-          title={`About ${TITLE_COPY}`}
-          subtitle={`${SUBTITLE_COPY}`}
-        />
-      </section>
+      <PageHeading title={`About us`} />
 
-      <section className="space-y-4">
-        <Blockquote className="font-bold not-italic">
-          {TITLE_COPY} is a living museum for the digital Renaissance, created
-          to preserve your story and celebrate your digital history
-        </Blockquote>
-      </section>
+      <Blockquote>
+        <P className="not-italic font-bold">
+          {TITLE_COPY} is bringing digital art galleries to life.
+        </P>
+        <ul className="pl-0 leading-relaxed">
+          <li>Made for artists to create thoughtful portfolio sites.</li>
+          <li>
+            Made for art admirers to curate and exhibit their collections.
+          </li>
+          <li>Made to celebrate your digital history.</li>
+        </ul>
+      </Blockquote>
 
       <section className="space-y-4">
         <H3>Why {TITLE_COPY}?</H3>
         <P>
           In this digital era, art risks being lost in fragmented feeds and
-          fleeting links. {TITLE_COPY} offers a museum-like experience where
-          your creative journey is curated as a coherent, evolving story. Each
-          timeline entry, whether a project or milestone, is placed in context,
-          transforming scattered digital artifacts into a lasting exhibition.
+          fleeting links. {TITLE_COPY} offers a new way to experience digital
+          art, displaying everything together in a decluttered and customizable
+          space.
         </P>
       </section>
 
@@ -38,18 +40,29 @@ export default function About() {
         <H3>What You Can Do</H3>
         <ul className="list-disc pl-6 space-y-3 text-base leading-relaxed">
           <li>
-            <strong>Curate Timelines:</strong> Craft your personal or collective
-            history as a progressive narrative.
+            <strong>Create Galleries:</strong> curated collections where people
+            can explore your art in depth.
           </li>
           <li>
-            <strong>Integrate Blockchain Assets:</strong> Showcase digital
-            assets you&apos;ve created or collected. Currently supporting
-            Solana, with Tezos and Ethereum on the horizon.
+            <strong>Curate your personal Timeline:</strong> the entryway into
+            your creative world. Introduce yourself, highlight favorite
+            artworks, and connect your galleries.
           </li>
           <li>
-            <strong>Create Galleries:</strong> Design dedicated exhibition pages
-            for collections and related works, while keeping your timeline
-            refined and powerful.
+            <strong>Import blockchain assets:</strong> easily view and share
+            digital art works with on-chain provenance.
+            <span className="text-muted-foreground text-sm">
+              {" "}
+              *Currently supporting Solana, with Tezos and Ethereum coming soon.
+            </span>
+          </li>
+          <li>
+            <strong>Upload your own media:</strong> IRL gallery photos, process
+            videos, and anything else you might want to share.
+            <span className="text-muted-foreground text-sm">
+              {" "}
+              *Coming soon.
+            </span>
           </li>
         </ul>
       </section>
@@ -57,12 +70,11 @@ export default function About() {
       <section className="space-y-4">
         <H3>The Vision</H3>
         <P>
-          What began as a passion project by digital-generative artist EV3 has grown into a
-          mission to help shape and uplift the digital art Renaissance.{" "}
-          {TITLE_COPY} makes digital art feel real—not just for insiders, but
-          for everyone. By giving artists and collectors tools to present their
-          work with clarity and context, we preserve today&apos;s creative moment for
-          the future.
+          What began as a passion project by generative-glitch artist EV3 has
+          grown into a mission to help uplift a burgeoning art movement. {TITLE_COPY} is here to make digital art feel real, not just for
+          insiders, but for everyone. By giving artists and collectors tools to
+          present their artworks with clarity and context, we will help
+          today&apos;s creative movement thrive and preserve it for the future.
         </P>
       </section>
 
@@ -82,9 +94,10 @@ export default function About() {
       <section className="space-y-4">
         <H3>Join the Movement</H3>
         <P>
-          ZEUMS is continuously evolving toward the perfect digital museum
-          platform, one that empowers creators and elevates digital art as a
-          whole. Be part of the journey.
+          Easily gather scattered images, posts, and links into one curated
+          space. Create galleries to exhibit collections. Showcase your favorite
+          pieces and craft your story in a timeline that brings it all together.
+          Join {TITLE_COPY} to start celebrating your digital history today!
         </P>
       </section>
 

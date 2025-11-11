@@ -11,20 +11,22 @@ import {
 } from "@/types/media";
 
 export const getImageUrlSources = (media: MediaType): string[] => {
-  const cdn = media.imageCdn;
+  // const cdn = media.imageCdn;
 
   const sources = [];
 
+  //TODO depricate all mutlitple source logic
   //try CDNs first
-  if (cdn) {
-    const { type, cdnId } = cdn;
-    if (type === CdnIdType.HELIUS_URL) {
-      sources.push(cdnId);
-    } else if (type === CdnIdType.CLOUDINARY_ID) {
-      // TODO: Cloudinary, will need to construct this URL
-      sources.push(cdnId);
-    }
-  }
+  // if (cdn) {
+  //   const { type, cdnId } = cdn;
+  //   if (type === CdnIdType.HELIUS_URL) {
+  //     //only use this when quality doesnt matter cause we
+
+  //   } else if (type === CdnIdType.CLOUDINARY_ID) {
+  //     // TODO: Cloudinary, will need to construct this URL
+  //     sources.push(cdnId);
+  //   }
+  // }
 
   if (isBlockchainMedia(media) || isBlockchainImage(media)) {
     // For blockchain media, include the original url
@@ -91,3 +93,12 @@ export const convertMediaToImage = (media: MediaType): ImageType => {
     return imageMedia;
   }
 }
+
+export const isGif = (media: MediaType) => {
+  const isGif = isBlockchainImage(media)
+    ? media.imageUrl.endsWith("gif")
+    : false;
+
+  return isGif;
+}
+

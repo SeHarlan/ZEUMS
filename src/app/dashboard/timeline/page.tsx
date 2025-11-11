@@ -1,67 +1,45 @@
+"use client";
+import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
+import EditTimeline from "@/components/dashboard/editTimeline/EditTimeline";
+import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
 import { PageContainer } from "@/components/general/PageContainer";
 import PageHeading from "@/components/general/PageHeading";
-import EditTimeline from "@/components/page-specific/dashboard/editTimeline/EditTimeline";
-import { PageTurnLeft, PageTurnRight } from "@/components/page-specific/dashboard/PageTurnButtons";
-import GlitchFeedback from "@/components/general/GlitchFeedback";
+import { TimelineOnboardingPopover } from "@/components/onboarding/TimelineOnboarding";
+import ProfileHero from "@/components/timeline/ProfileHero";
 import { P } from "@/components/typography/Typography";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EDIT_GALLERIES, EDIT_PROFILE } from "@/constants/clientRoutes";
-import { EntrySource } from "@/types/entry";
-import { EditTimelineTab } from "@/types/ui/dashboard";
+import { LinkButton } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT, USER_TIMELINE } from "@/constants/clientRoutes";
+import { NavBarActions } from "@/context/NavBarActionsProvider";
+import { useUser } from "@/context/UserProvider";
+import { EyeIcon } from "lucide-react";
 
 export default function EditTimelinePage() { 
+  const { user } = useUser();
+  const {setStepComplete, setStepRef} = useTimelineSetter(TimelineOnboardingKeys.goToGalleries);
   return (
     <PageContainer maxWidth="large">
+      <NavBarActions>
+        <LinkButton
+          href={USER_TIMELINE(user?.username ?? "")}
+          variant="outline"
+          className="size-10 md:w-fit"
+        >
+          <EyeIcon className="size-5 md:size-4" />
+          <P className="hidden md:block">View Timeline</P>
+        </LinkButton>
+      </NavBarActions>
       <PageHeading
-        title="Timeline"
-        subtitle="Create and edit timeline entries"
+        title="Manage Timeline"
+        subtitle="Highlighted artworks, galleries, and words that create a cohesive entry point into your creative world"
       />
-      <PageTurnLeft path={EDIT_PROFILE} />
-      <PageTurnRight path={EDIT_GALLERIES} />
-      <GlitchFeedback title={"Timeline"} subtitle={"Coming very soon..."} />
-    </PageContainer>
-  )
-  return (
-    <PageContainer maxWidth="large">
-      <PageHeading
-        title="Timeline"
-        subtitle="Create and edit timeline entries"
-      />
-      <PageTurnLeft path={EDIT_PROFILE} />
-      <PageTurnRight path={EDIT_GALLERIES} />
-      <Card>
-        <CardContent>
-          <Tabs defaultValue={EditTimelineTab.ARTIST}>
-            <TabsList className="w-full justify-stretch">
-              <TabsTrigger value={EditTimelineTab.ARTIST}>Artist</TabsTrigger>
-              <TabsTrigger value={EditTimelineTab.COLLECTOR}>
-                Collector
-              </TabsTrigger>
-              <TabsTrigger value={EditTimelineTab.CURATOR}>Curator</TabsTrigger>
-            </TabsList>
-
-            <TabsContent
-              value={EditTimelineTab.ARTIST}
-              className="flex flex-col space-y-8 mt-8"
-            >
-              <EditTimeline source={EntrySource.Creator} />
-            </TabsContent>
-            <TabsContent
-              value={EditTimelineTab.COLLECTOR}
-              className="flex flex-col space-y-8 mt-8"
-            >
-              <EditTimeline source={EntrySource.Collector} />
-            </TabsContent>
-            <TabsContent
-              value={EditTimelineTab.CURATOR}
-              className="flex flex-col space-y-8 mt-8"
-            >
-              <P className="italic text-center">Coming Soon...</P>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
+      <PageTurnLeft path={EDIT_PROFILE_ACCOUNT} />
+      <PageTurnRight path={EDIT_GALLERIES} ref={setStepRef} onClick={setStepComplete} />
+      <Card className="pt-0 overflow-hidden">
+        <ProfileHero publicUser={user} editMode />
+        <EditTimeline />
       </Card>
+      <TimelineOnboardingPopover />
     </PageContainer>
   );
 }

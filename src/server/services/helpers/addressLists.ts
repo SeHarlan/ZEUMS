@@ -56,8 +56,11 @@ export const solanaSpamCreatorAddresses = new Set([
   "2iJJNyPvCXsQZaYkxU6gWKF7umhg6BSogkRntJN9xRYQ",
   "GVqRozv4yxQLaYgxMVESXg143V6zqNuH4xnz5yt4hkm",
   "GS6sZRtL8c6SKr9rjyFWP1G5qkaou3kXBMuYVfKUSWYH",
+  "4MHyUGG7ZGu3f3ye45buSc2NMWrjXj5PYdGt85hc4hgi",
+  "DhfsDSwYNdrWqoWW3U4ujTKqerzgjEPtZ9tnAwetBYw1",
 ]);
 
 export const solanaWhiteListedCollectionAddresses = new Set([
   "4G3eWCkFoDdVBhr2EEAys87yp7TmCmezCT6gMCZXnCqy",
+  "2fBY6UqfcC9ohYtVAEAuzgDv7FBjj4fgjhfEjg7qk9JK",
 ]);

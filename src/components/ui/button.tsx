@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
-import { cn } from "@/utils/ui-utils"
+import { cn } from "@/utils/ui-utils";
 import { Loader2Icon } from "lucide-react";
 import Link from "next/link";
 
@@ -16,11 +16,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input ",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-input/80",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -42,7 +42,6 @@ function Button({
   variant,
   size,
   children,
-  disabled,
   asChild = false,
   loading = false,
   ...props
@@ -52,21 +51,45 @@ function Button({
     loading?: boolean;
   }) {
   const Comp = asChild ? Slot : "button"
+  const hasPositionClass =
+    className?.includes("absolute") ||
+    className?.includes("fixed") ||
+    className?.includes("sticky") ||
+    className?.includes("static");
+    const hasPositionStyle = !!props.style?.position && props.style.position !== "static";
+    
+    
+    const noPositioning = !hasPositionClass && !hasPositionStyle;
+    
+    if (loading) {
+    return (
+      <button
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          noPositioning && "relative" //set position if it isn't so the loader can be centered
+        )}
+        disabled
+        {...props}
+      >
+        {children}
+        <div className="bg-inherit w-full h-full absolute inset-0 rounded-full flex items-center justify-center">
+          <Loader2Icon className="size-2/3 animate-spin" />
+        </div>
+      </button>
+    );
+  }
+
 
   return (
     <Comp
       data-slot="button"
       className={cn(
+        "cursor-pointer",
         buttonVariants({ variant, size, className }),
-        "cursor-pointer"
       )}
-      disabled={disabled || loading} // Disable button when loading
       {...props}
     >
-      {loading
-        ? <Loader2Icon className="size-4 animate-spin" />
-        : children
-      }
+      {children}
     </Comp>
   );
 }
@@ -109,5 +132,5 @@ function LinkButton({
   );
 }
 
-export { Button, LinkButton, buttonVariants }
+export { Button, buttonVariants, LinkButton };
 

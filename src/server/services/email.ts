@@ -204,15 +204,6 @@ export function createMagicLinkEmailTemplate({
           <p class="text-center italic">
             This link will expire in 24 hours.
           </p>
-          
-          <!-- Fallback Link -->
-          <div class="fallback">
-            <strong>Button not working?</strong>
-            <p>
-              Copy and paste this link into your browser:<br>
-              <a href="${magicLink}">${magicLink}</a>
-            </p>
-          </div>
         </div>
         
         <!-- Footer -->
@@ -240,20 +231,16 @@ export async function sendMagicLinkEmail({
   appName: string;
   }) {
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: from,
-      to: [to],
-      subject: `Sign in to ${appName}`,
-      html: createMagicLinkEmailTemplate({ magicLink, appName }),
-    });
+  const { data, error } = await resend.emails.send({
+    from: from,
+    to: [to],
+    subject: `Sign in to ${appName}`,
+    html: createMagicLinkEmailTemplate({ magicLink, appName }),
+  });
 
-    if (error) {
-      throw error
-    }
-
-    return { success: true, messageId: data?.id };
-  } catch (error) {
-    throw error;
+  if (error) {
+    throw error
   }
+
+  return { success: true, messageId: data?.id };
 }

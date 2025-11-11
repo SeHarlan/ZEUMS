@@ -1,30 +1,31 @@
 "use client";
 
-import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
+import { authLoadingAtom } from "@/atoms/auth";
+import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
+import { USER_ROUTE } from "@/constants/serverRoutes";
+import { TITLE_COPY } from "@/textCopy/mainCopy";
 import { UserType } from "@/types/user";
+import { SignInMessage } from "@/utils/auth";
+import { handleClientError } from "@/utils/handleError";
+import { truncate } from "@/utils/ui-utils";
+import { activeSolanaWalletIsInUserWallets, parseUserDates } from "@/utils/user";
+import { useWallet } from "@solana/wallet-adapter-react";
+import axios from "axios";
+import base58 from "bs58";
+import { useSetAtom } from "jotai";
+import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import {
-  useContext,
-  useState,
   createContext,
   Dispatch,
   SetStateAction,
-  useEffect,
   useCallback,
-  useRef,
+  useContext,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { SignInMessage } from "@/utils/auth";
-import axios from "axios";
-import base58 from "bs58";
 import { toast } from "sonner";
-import { truncate } from "@/utils/ui-utils";
-import { handleClientError } from "@/utils/handleError";
-import { USER_ROUTE } from "@/constants/serverRoutes";
-import { parseEntryDates } from "@/utils/timeline";
-import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { AuthOptionsDialog } from "@/components/auth/AuthOptionsDialog";
-import { activeSolanaWalletIsInUserWallets } from "@/utils/user";
 
 type UserContextType = {
   user: UserType | null;
@@ -33,6 +34,8 @@ type UserContextType = {
   logOutUser: () => Promise<void>;
   userLoading: boolean;
   loggedIn: boolean;
+  revalidateUser: () => void;
+  loggingOut: boolean;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -42,6 +45,8 @@ const UserContext = createContext<UserContextType>({
   logOutUser: async () => {},
   userLoading: false,
   loggedIn: false,
+  revalidateUser: () => {},
+  loggingOut: false,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -56,6 +61,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserType | null>(null);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [authOptionsOpen, setAuthOptionsOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const setAuthLoading = useSetAtom(authLoadingAtom);
 
   const signingInRef = useRef(false);
   
@@ -75,6 +82,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logOutUser = useCallback(async () => {
+    setLoggingOut(true);
     signingInRef.current = false;
     if (disconnect) {
       await disconnect();
@@ -83,6 +91,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setUser(null);
     setHasLoggedIn(false);
+    setLoggingOut(false);
   }, [disconnect]);
 
   const handleWalletAuthSignIn = useCallback(async () => {
@@ -115,7 +124,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error(res.error);
       }
     } catch (error) {
-      
+      setAuthLoading(false);
+
       handleClientError({
         error,
         location: "useAuth_handleWalletAuthSignIn",
@@ -125,7 +135,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       signingInRef.current = false;
     }
-  }, [signMessage, publicKey, logOutUser]);
+  }, [signMessage, publicKey, logOutUser, setAuthLoading]);
 
   useEffect(() => {
     // wallet is connected but user is not logged in
@@ -162,45 +172,37 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [publicKey, userExists, hasLoggedIn, logOutUser, validOAuthEmail, walletIsVerified]);
 
+  const fetchUser = useCallback((controller?: AbortController) => {
+    axios
+      .get<{ user: UserType }>(USER_ROUTE, { signal: controller?.signal })
+      .then((response) => {
+        const userData = parseUserDates(response.data.user);
+        setUser(userData);
+      })
+      .catch((error) => {
+        //if no controller, don't log out user on error (will be the case for revalidating user)
+        if (!controller) return;
+        
+        if (controller?.signal.aborted) return;
+        logOutUser();
+        handleClientError({
+          error,
+          location: "useAuth_fetchUser",
+        });
+      });
+
+  }, [logOutUser]);
+
   useEffect(() => {
     if (userExists) return;
 
     if (status === "authenticated" && sessionIdExists) {
       const controller = new AbortController();
-
-      axios
-        .get<{ user: UserType }>(USER_ROUTE, { signal: controller.signal })
-        .then((response) => {
-          const userData = response.data.user;
-
-          // Convert date strings back to Date objects
-          if (userData.createdTimelineEntries) {
-            userData.createdTimelineEntries = parseEntryDates(
-              userData.createdTimelineEntries
-            );
-          }
-
-          if (userData.collectedTimelineEntries) {
-            userData.collectedTimelineEntries = parseEntryDates(
-              userData.collectedTimelineEntries
-            );
-          }
-
-          setUser(userData);
-        })
-        .catch((error) => {
-          if (controller.signal.aborted) return;
-
-          logOutUser();
-          handleClientError({
-            error,
-            location: "useAuth_get(USER_ROUTE)",
-          });
-        });
+      fetchUser(controller);
 
       return () => controller.abort();
     }
-  }, [logOutUser, sessionIdExists, status, userExists]);
+  }, [fetchUser, userExists, sessionIdExists, status]);
 
   const contextValue = useMemo(
     () => ({
@@ -210,8 +212,10 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({
       logInUser,
       userLoading,
       loggedIn: userExists,
+      revalidateUser: fetchUser,
+      loggingOut,
     }),
-    [user, userLoading, userExists, logOutUser, logInUser]
+    [user, userLoading, userExists, logOutUser, logInUser, fetchUser, loggingOut]
   );
 
   return (

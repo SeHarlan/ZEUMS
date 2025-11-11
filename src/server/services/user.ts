@@ -1,5 +1,5 @@
 import { CreateUserData } from "@/types/user";
-import User from "../models/User";
+import User, { UsernameCollation } from "../models/User";
 import { handleServerError } from "@/utils/handleError";
 import { CreateWalletData } from "@/types/wallet";
 import Wallet from "../models/Wallet";
@@ -212,7 +212,7 @@ const handleWithWallet = async ({
  * @returns A unique, non-banned username with z_ prefix if needed
  */
 async function ensureUniqueUsername(username: string): Promise<string> {
-  let finalUsername = username.toLowerCase().trim();
+  let finalUsername = username.trim();
   
   
   // Check if username is banned - if so, generate fallback with z_ prefix
@@ -225,8 +225,9 @@ async function ensureUniqueUsername(username: string): Promise<string> {
   const maxAttempts = MAX_USERNAME_FALLBACK_ATTEMPTS;
   
   while (attempts < maxAttempts) {
-    // Use exact match with lowercase - much more efficient with unique index
+    // Use case-insensitive username uniqueness check
     const existingUser = await User.findOne({ username: finalUsername })
+      .collation(UsernameCollation)
       .select("_id")
       .lean();
     

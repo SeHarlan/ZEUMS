@@ -2,6 +2,7 @@ import { DisplayNameFields, UserType } from "@/types/user";
 import { ChainIdsEnum } from "@/types/wallet";
 import { truncate } from "./ui-utils";
 import { PublicKey } from "@solana/web3.js";
+import { parseEntryDates } from "./timeline";
 
 // Group users wallet addresses by blockchain 
 export const getWalletsByChain = (
@@ -35,11 +36,11 @@ export const activeSolanaWalletIsInUserWallets = (user: UserType | null, publicK
   return solanaAddresses.includes(publicKey.toString());
 }
 
-export const getDisplayName = (user: DisplayNameFields | null, useTruncation?: boolean): string => { 
+export const getDisplayName = (user: DisplayNameFields | null, noTruncation = false): string => { 
   if (!user) return "";
   if (user.displayName) return user.displayName;
   if (user.username) {
-    if (useTruncation) return truncate(user.username);
+    if (!noTruncation) return truncate(user.username);
     return user.username;
   }
   return "";
@@ -57,4 +58,15 @@ export const getPrimaryWallet = (user: UserType | null) => {
   };
 }
 
+export const parseUserDates = (user: UserType): UserType => {
+  return {
+    ...user,
+    ...(user.createdTimelineEntries && {
+      createdTimelineEntries: parseEntryDates(user.createdTimelineEntries),
+    }),
+    ...(user.collectedTimelineEntries && {
+      collectedTimelineEntries: parseEntryDates(user.collectedTimelineEntries),
+    }),
+  };
+};
 

@@ -56,7 +56,7 @@ export const useUsernameValidation = (initUsername?: string) => {
   const checkUsernameUniqueness = useCallback(async (value: string) => {
     try {
       const response = await axios.post<{ isUnique: boolean; error?: string }>(USER_USERNAME_ROUTE, {
-        username: value.toLowerCase(), // Normalize to lowercase for consistency
+        username: value, // Send username as-is for case-insensitive check
       });
       
       if (!response.data.isUnique) {

@@ -1,34 +1,52 @@
-interface ServerErrorArgs {
-  error: Error | unknown
-  report?: boolean;
+interface ErrorArgs {
+  error: Error | unknown;
   location: string;
+  report?: boolean;
 }
 
-
-const isErrorWithMessage = (error: unknown): error is { message: unknown } => {
-  return typeof error === "object" && error !== null && "message" in error;
-}
-
-export const handleServerError = ({ error, report, location } : ServerErrorArgs) => { 
-  let errorMessage = isErrorWithMessage(error) ? error.message : error;
-  if (typeof errorMessage !== "string") {
-    errorMessage = JSON.stringify(errorMessage);
-  } 
-  console.warn(`🚨💾 ${location} -- ${errorMessage}`);
+export const handleServerError = ({ error, location, report }: ErrorArgs) => { 
+  const message = getErrorMessage(error);
+  console.error(`🚨💾 ${location} -- ${message}`);
 
   if (report) {
-    //TODO report error
+    // TODO: Report to monitoring service (e.g., Sentry, DataDog)
   }
 }
 
-export const handleClientError = ({ error, report, location } : ServerErrorArgs) => { 
-  let errorMessage = isErrorWithMessage(error) ? error.message : error;
-  if (typeof errorMessage !== "string") {
-    errorMessage = JSON.stringify(errorMessage);
-  } 
-  console.warn(`🚨💻 ${location} -- ${errorMessage}`);
+export const handleClientError = ({ error, location, report }: ErrorArgs) => { 
+  const message = getErrorMessage(error);
+  console.warn(`🚨💻 ${location} -- ${message}`);
 
   if (report) {
-    //TODO report error
+    // TODO: Report to client-side monitoring (e.g., Sentry, LogRocket)
   }
+}
+
+export const getErrorMessage = (error: Error | unknown): string => {
+  // Handle Error objects
+  if (error instanceof Error) {
+    return error.message || error.toString();
+  }
+  
+  // Handle string errors
+  if (typeof error === "string") {
+    return error;
+  }
+  
+  // Handle null/undefined
+  if (error == null || error === undefined) {
+    return "Unknown error";
+  }
+  
+  // Handle objects - try JSON stringify, fallback to string
+  if (typeof error === "object") {
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return `[Object: ${error.constructor?.name || "Unknown"}]`;
+    }
+  }
+  
+  // Fallback for primitives
+  return String(error);
 }
