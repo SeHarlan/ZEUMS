@@ -93,7 +93,7 @@ export const getSolanaAssetsPage = async ({
       page: page + 1, // Helius API pages starts at 1
       limit: limit || MAX_BATCH,
       displayOptions: {
-        showUnverifiedCollections: true,
+        // showUnverifiedCollections: true,
         // showCollectionMetadata: true,
         showGrandTotal: page === 0,
       },

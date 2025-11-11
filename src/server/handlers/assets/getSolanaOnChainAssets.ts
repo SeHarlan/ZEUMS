@@ -46,6 +46,7 @@ export async function getSolanaOnChainAssetsHandler(req: NextRequest): Promise<N
 
     const {parsedAssets, skippedAssets, duplicateEditionCount} = parseHeliusAssets(items);
     
+  
     const assetPageResponse: GetSolanaAssetsPageResponse = {
       parsedAssets,
       skippedAssets,
