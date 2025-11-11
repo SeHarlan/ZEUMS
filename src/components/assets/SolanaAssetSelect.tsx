@@ -32,7 +32,10 @@ interface SolanaAssetSelectProps {
   setSelectAssets: Dispatch<SetStateAction<ParsedBlockChainAsset[]>>;
   optimisticallySelectedAssets: Set<string>;
   setOptimisticallySelectedAssets: Dispatch<SetStateAction<Set<string>>>;
-  /** @defaults 20 */
+  /** 
+   * 100 - 1000 
+   * @defaults 100 
+   * */
   perPage?: number;
   /** @defaults 1 */
   maxSelected?: number;
@@ -45,8 +48,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   source,
   selectedAssets,
   setSelectAssets,
-  perPage = 20,
-  /** Default to 1 if not provided */
+  perPage = 100,
   maxSelected = 1,
   withSearch, // Default to true to show search input
   maxSelectWarningBody,
@@ -86,7 +88,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
     searchTerm: debouncedSearch,
   });
 
-  //mallow search api is set at 30 per page
+  //mallow search api is hard set at 30 per page
   const actualPerPage = !!search ? 30 : perPage;
 
   
