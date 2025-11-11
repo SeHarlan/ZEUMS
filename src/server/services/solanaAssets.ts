@@ -82,14 +82,10 @@ export const getSolanaAssetsPage = async ({
 }: GetSolanaAssetsPageProps) => {
   const method = getMethod(source);
   const sourceParamKey = getSourceParamKey(source);
-  console.log(
-    "🚀 ~ getSolanaAssetsPage ~ params.params.limit:",
-    limit
-  );
 
   const params = {
     jsonrpc: "2.0",
-    id: `z-${publicKey}-${limit}-${page}`,
+    id: `z-${publicKey}-${page}-${limit ?? MAX_BATCH}`,
     method,
     params: {
       [sourceParamKey]: publicKey,
@@ -111,7 +107,6 @@ export const getSolanaAssetsPage = async ({
   return axios
     .post<GetAssetResponse>(heliusUrl, params)
     .then((res) => {
-      console.log("🚀 ~ getSolanaAssetsPage ~ res:", res)
       return res.data.result;
     });
 };
