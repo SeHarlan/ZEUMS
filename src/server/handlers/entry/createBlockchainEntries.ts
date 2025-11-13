@@ -1,9 +1,9 @@
+import { getMintDates } from "@/server/services/estimateMintDates";
+import { TimelineBlockchainEntryCreation } from "@/types/entry";
+import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import Entry from "../../models/Entry/Entry";
-import { TimelineBlockchainEntryCreation } from "@/types/entry";
-import { getMintDates } from "@/server/services/estimateMintDates";
 
 export async function createBlockchainEntriesHandler(
   req: NextRequest
@@ -29,12 +29,12 @@ export async function createBlockchainEntriesHandler(
       owner: authSessionUser.dbUserId,
       date: datesMap[entry.tokenAddress],
     }));
-  
+ 
     // Create multiple entries at once
     const createdEntries = await Entry.insertMany(entriesWithUser, {
       ordered: false, // Continue inserting even if some fail
       // rawResult: true, // Get the raw result to check insertedCount
-    });
+    })
 
     if (!createdEntries || createdEntries.length === 0) {
       throw new Error("Failed to create entries");
