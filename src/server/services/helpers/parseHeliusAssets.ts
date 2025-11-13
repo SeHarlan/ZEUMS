@@ -44,8 +44,8 @@ export const parseHeliusAssets = (
 
     const attributes: BlockchainAttribute[] = content.metadata.attributes
       ?.length
-      ? content.metadata.attributes?.map((a) => ({
-          trait_type: a.trait_type,
+      ? content.metadata.attributes?.filter((a) => !!a.trait_type || !!a.traitType).map((a) => ({
+          trait_type: a.trait_type || a.traitType || "unknown",
           value: a.value,
         }))
       : [];

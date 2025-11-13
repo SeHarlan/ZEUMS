@@ -322,7 +322,8 @@ export interface Metadata {
 // Attributes
 export interface Attribute {
   value: string;
-  trait_type: string;
+  trait_type?: string;
+  traitType?: string;
 }
 // Compression
 export interface Compression {
