@@ -1,19 +1,19 @@
 "use client";
 
-import { 
-  FC,
-  useCallback, 
-  useEffect, 
-  useMemo, 
-  useRef, 
-  useState 
-} from "react";
-import { Maximize2, Minimize2, PlayIcon, PauseIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/ui-utils";
 import { P } from "@/components/typography/Typography";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useInView } from "@/hooks/useObserver";
+import { cn } from "@/utils/ui-utils";
+import { Maximize2, Minimize2, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 
 // Type definitions for fullscreen methods
 interface FullscreenVideoElement extends HTMLVideoElement {
@@ -71,7 +71,6 @@ const VideoViewer: FC<VideoViewerProps> = ({containerClassName, ...props}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
-
   const showLoadingState = isLoading || isBuffering;
 
   const setIsLoadingCallback = useCallback((isLoading: boolean) => {

@@ -12,7 +12,7 @@ export const useImageFallback = ({ media, onFinalError}: UseImageFallbackProps) 
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
   const [hasErrored, setHasErrored] = useHasErroredImage(media);
-  
+
   const onLoad = () => setLoaded(true);
   const sources = getImageUrlSources(media);
 
