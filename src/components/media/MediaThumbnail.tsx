@@ -1,7 +1,6 @@
 "use client";
 import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
-import { useInView } from "@/hooks/useObserver";
 import { MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { ImageOffIcon } from "lucide-react";
@@ -53,15 +52,12 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     onLoad: handleFallbackLoad,
   } = useImageFallback({ media, onFinalError: onError });
 
-  const {inView, ref} = useInView();
-
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();
     onLoad?.(event.currentTarget);
   };
 
   const renderContent = () => {
-    if (!inView) return null;
     //broken image
     if (isError) return <ImageOffIcon className="size-8" />;
 
@@ -80,7 +76,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
-          "w-full h-full transition-opacity duration-200 rounded",
+          "w-full h-full transition-opacity duration-400 rounded",
           isLoaded || priority ? "opacity-100" : "opacity-0",
           objectFit
         )}
@@ -90,11 +86,9 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
 
   return (
     <AspectRatio
-      ref={ref}
       ratio={ratio}
       className={cn(
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden transition-opacity duration-500",
-        inView ? "opacity-100" : "opacity-0",
         rounding,
         isLoading && "animate-skeleton-shimmer",
         objectFit === "object-contain" && !noPadding && "p-2",
