@@ -105,10 +105,11 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
   const renderContent = () => {
     if (media.category === MediaCategory.Video) {
-      if (videoError) return <VideoOffIcon className="size-14" />;
+      if (videoError) return <VideoOffIcon className="size-14 text-border" />;
 
       return (
         <VideoViewer
+          media={media}
           src={getMediaUrl(media)}
           onError={() => setVideoError(true)}
           minimalControls
@@ -119,7 +120,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     }
 
     //broken image
-    if (isError) return <ImageOffIcon className="size-14" />;
+    if (isError) return <ImageOffIcon className="size-14 text-muted-border" />;
 
     return (
       <Image
@@ -157,7 +158,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
     <AspectRatio
       ratio={aspectRatioValue}
       className={cn(
-        "relative w-full flex justify-center items-center bg-muted text-muted-foreground rounded-md overflow-hidden group/media",
+        "relative w-full flex justify-center items-center bg-muted rounded-md overflow-hidden group/media",
         isImageLoading && "animate-skeleton-shimmer",
         "shadow-lg",
         className

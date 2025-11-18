@@ -24,6 +24,7 @@ interface SideDrawerProps {
   onOpenChange?: (open: boolean) => void;
   contentClassName?: string;
   disableInteractOutside?: boolean;
+  scrollAreaId?: string;
 }
 
 const SideDrawer: FC<SideDrawerProps> = ({
@@ -36,6 +37,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
   onOpenChange, 
   contentClassName,
   disableInteractOutside = false,
+  scrollAreaId,
 }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -51,7 +53,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
 
         <div className="row-start-2 min-h-0 px-4">
           <Separator />
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full" id={scrollAreaId}>
             <div className="p-2">{children}</div>
           </ScrollArea>
           <Separator />

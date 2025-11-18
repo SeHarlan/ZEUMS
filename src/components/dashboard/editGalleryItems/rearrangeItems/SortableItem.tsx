@@ -43,11 +43,11 @@ const SortableItem: FC<SortableItemProps> = ({ processedItem, hoverSide }) => {
       <GripVerticalIcon className="shadow border absolute z-20 -left-2 top-1/2 -translate-y-1/2 bg-muted rounded w-4 h-8 shrink-0" />
       <div
         className={cn(
-          "flex-shrink-0 rounded-md",
+          "shrink-0 rounded-md",
           isOver ? "shadow-lg" : "shadow"
         )}
       >
-        <MiniGalleryItemBase item={item} />
+        <MiniGalleryItemBase item={item} priority />
       </div>
 
       {hoverSide && (
