@@ -88,6 +88,26 @@ const RearrangeEntries = forwardRef<HTMLButtonElement, RearrangeEntriesProps>(({
     // debug: process.env.NODE_ENV === "development",
   });
 
+  // Reset virtualizer when drawer opens
+  useEffect(() => {
+    if (!drawerOpen) return;
+    
+    // Wait for the scroll element to be available
+    const checkScrollElement = () => {
+      const scrollElement = getScrollAreaViewport(REARRANGE_ENTRIES_SCROLL_AREA_ID);
+      if (scrollElement) {
+        // Scroll to top and trigger remeasure
+        scrollElement.scrollTop = 0;
+        entryVirtualizer.measure();
+      } else {
+        // Retry after a short delay if scroll element isn't ready
+        requestAnimationFrame(checkScrollElement);
+      }
+    };
+    
+    requestAnimationFrame(checkScrollElement);
+  }, [drawerOpen, entryVirtualizer]);
+
 
   const saveRearrangement = async () => {
     // filter to just entries with changed dates
