@@ -11,9 +11,10 @@ import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy"
 import { GalleryItemPositionUpdate } from "@/types/galleryItem"
 import { cleanGalleryRows, initializeGalleryRows, insertIntoNewRowAtIndex, processGalleryRows, swapToExistingRow, swapToNewRowAfter, swapToNewRowBefore } from "@/utils/gallery"
 import { handleClientError } from "@/utils/handleError"
-import { cn } from "@/utils/ui-utils"
+import { cn, getScrollAreaViewport } from "@/utils/ui-utils"
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent, DragOverlay, DragStartEvent, useDroppable } from "@dnd-kit/core"
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable"
+import { useVirtualizer } from "@tanstack/react-virtual"
 import axios from "axios"
 import { useAtom } from "jotai"
 import { LayoutTemplateIcon, PlusIcon, PlusSquareIcon } from "lucide-react"
@@ -29,6 +30,8 @@ const DROP_AREA_ID_AFTER = "droppable-area-after";
 const DROP_AREA_ID_BEFORE = "droppable-area-before";
 const INSERT_ROW_ID_PREFIX = "insert-row-";
 const MAX_HEIGHT_RATIO = 0.33;
+
+const REARRANGE_ITEMS_SCROLL_AREA_ID = "rearrange-items-scroll-area";
 
 interface RearrangeItemsProps {
   galleryId: string;
@@ -64,7 +67,6 @@ const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ gal
   
   useEffect(() => {
     if (!formOpen) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRearrangedRows(initRearrangedRows);
   }, [formOpen, initRearrangedRows])
 
@@ -87,6 +89,49 @@ const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ gal
       maxHeight,
     });
   }, [rearrangedRows, containerWidth, maxHeight]);
+
+  // Calculate row heights for virtualization
+  // DroppableInsertRow has my-2 (8px top + 8px bottom = 16px) + icon height (~16px) ≈ 32px
+  const DROPPABLE_INSERT_ROW_HEIGHT = 32;
+  const getRowHeight = useMemo(() => {
+    return (index: number): number => {
+      if (!galleryRows[index]?.length) return 0;
+      const row = galleryRows[index];
+      const rowHeight = row[0]?.height || 0;
+      // Row height + spacing for droppable insert row (appears before each row except the first)
+      return rowHeight + (index > 0 ? DROPPABLE_INSERT_ROW_HEIGHT : 0);
+    };
+  }, [galleryRows]);
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: galleryRows.length,
+    getScrollElement: () => getScrollAreaViewport(REARRANGE_ITEMS_SCROLL_AREA_ID),
+    estimateSize: getRowHeight,
+    overscan: 2,
+    useAnimationFrameWithResizeObserver: true,
+    // debug: process.env.NODE_ENV === "development",
+  });
+
+  // Reset virtualizer when drawer opens
+  useEffect(() => {
+    if (!formOpen) return;
+    
+    // Wait for the scroll element to be available
+    const checkScrollElement = () => {
+      const scrollElement = getScrollAreaViewport(REARRANGE_ITEMS_SCROLL_AREA_ID);
+      if (scrollElement) {
+        // Scroll to top and trigger remeasure
+        scrollElement.scrollTop = 0;
+        rowVirtualizer.measure();
+      } else {
+        // Retry after a short delay if scroll element isn't ready
+        requestAnimationFrame(checkScrollElement);
+      }
+    };
+    
+    requestAnimationFrame(checkScrollElement);
+  }, [formOpen, rowVirtualizer]);
 
   const onDragStart = (event: DragStartEvent) => { 
     const { active } = event;
@@ -261,6 +306,7 @@ const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ gal
           <P>Save</P>
         </Button>
       }
+      scrollAreaId={REARRANGE_ITEMS_SCROLL_AREA_ID}
     >
       <div ref={containerRef} className="w-full h-full flex flex-col">
         {isReady ? (
@@ -275,42 +321,64 @@ const RearrangeItems = forwardRef<HTMLButtonElement, RearrangeItemsProps>(({ gal
               // modifiers={[restrictToFirstScrollableAncestor]}
             >
               <Droppable id={DROP_AREA_ID_BEFORE} />
-              {galleryRows.map((row, rowIndex) => {
-                const insertRowId = INSERT_ROW_ID_PREFIX + rowIndex;
-                return (
-                  <div key={rowIndex}>
-                    {rowIndex !== 0 && (
-                      <DroppableInsertRow key={insertRowId} id={insertRowId} />
-                    )}
-                    <div
-                      className={cn(
-                        "flex justify-center flex-row items-center"
-                      )}
-                      style={{ gap: GAP }}
-                    >
-                      <SortableContext
-                        items={row.map((item) => item.item._id.toString())}
-                        strategy={rectSortingStrategy}
-                      >
-                        {row.map((cell) => {
-                          const hoverSide =
-                            hoverData?.id === cell.item._id.toString()
-                              ? hoverData.side
-                              : null;
-                          return (
-                            <SortableItem
-                              key={cell.item._id.toString()}
-                              processedItem={cell}
-                              hoverSide={hoverSide}
-                            />
-                          );
-                        })}
-                      </SortableContext>
-                    </div>
-                  </div>
-                );
-              })}
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const rowIndex = virtualRow.index;
+                  const row = galleryRows[rowIndex];
+                  if (!row) return null;
 
+                  const insertRowId = INSERT_ROW_ID_PREFIX + rowIndex;
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      data-index={rowIndex}
+                      ref={rowVirtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                    >
+                      {rowIndex !== 0 && (
+                        <DroppableInsertRow key={insertRowId} id={insertRowId} />
+                      )}
+                      <div
+                        className={cn(
+                          "flex justify-center flex-row items-center"
+                        )}
+                        style={{ gap: GAP }}
+                      >
+                        <SortableContext
+                          items={row.map((item) => item.item._id.toString())}
+                          strategy={rectSortingStrategy}
+                        >
+                          {row.map((cell) => {
+                            const hoverSide =
+                              hoverData?.id === cell.item._id.toString()
+                                ? hoverData.side
+                                : null;
+                            return (
+                              <SortableItem
+                                key={cell.item._id.toString()}
+                                processedItem={cell}
+                                hoverSide={hoverSide}
+                              />
+                            );
+                          })}
+                        </SortableContext>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
               <Droppable id={DROP_AREA_ID_AFTER} />
 
               <DragOverlay>

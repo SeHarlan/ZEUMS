@@ -2,8 +2,9 @@ import { useUser } from "@/context/UserProvider";
 import { useDebouncedState } from "@/hooks/useDebounce";
 import useSolanaAssets from "@/hooks/useSolanaAssets";
 import { EntrySource, isEntrySource } from "@/types/entry";
-import { cn, truncate } from "@/utils/ui-utils";
+import { cn, getScrollAreaViewport, truncate } from "@/utils/ui-utils";
 import { getWalletsByChain } from "@/utils/user";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { SearchIcon, WalletIcon } from "lucide-react";
 import { Dispatch, FC, ReactNode, SetStateAction, useEffect, useMemo, useState } from "react";
 import Pagination from "../general/Pagination";
@@ -25,6 +26,8 @@ import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import AssetThumbnailCard from "./AssetThumbnailCard";
 
+
+const SOLANA_ASSET_SELECT_SCROLL_AREA_ID = "solana-asset-select-scroll-area";
 interface SolanaAssetSelectProps {
   usedAssetAddresses?: Set<string>; //prevent already saved tokens from being selected again
   source: EntrySource | "choose";
@@ -50,7 +53,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   setSelectAssets,
   perPage = 100,
   maxSelected = 1,
-  withSearch, // Default to true to show search input
+  withSearch,
   maxSelectWarningBody,
   imageVariant = "default",
   usedAssetAddresses,
@@ -93,8 +96,47 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
   const changedPageKey = solanaAssetsPage?.[0]?.tokenAddress;
 
+  // Grid-based virtualization - calculate items per row based on screen size
+  // For grid-cols-2 lg:grid-cols-4: 2 items/row on mobile, 4 on desktop
+  // For grid-cols-1 lg:grid-cols-2 (banner): 1 item/row on mobile, 2 on desktop
+  const [itemsPerRow, setItemsPerRow] = useState(() => {
+    if (typeof window === 'undefined') return imageVariant === "banner" ? 2 : 4;
+    const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+    if (imageVariant === "banner") {
+      return isDesktop ? 2 : 1;
+    }
+    return isDesktop ? 4 : 2;
+  });
 
+  useEffect(() => {
+    const updateItemsPerRow = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      if (imageVariant === "banner") {
+        setItemsPerRow(isDesktop ? 2 : 1);
+      } else {
+        setItemsPerRow(isDesktop ? 4 : 2);
+      }
+    };
+
+    updateItemsPerRow();
+    window.addEventListener('resize', updateItemsPerRow);
+    return () => window.removeEventListener('resize', updateItemsPerRow);
+  }, [imageVariant]);
+
+  // Estimate row height (grid items are typically square-ish)
+  const estimatedRowHeight = imageVariant === "banner" ? 150 : 200;
+  const totalRows = Math.ceil((solanaAssetsPage?.length || 0) / itemsPerRow);
   
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: totalRows,
+    getScrollElement: () => getScrollAreaViewport(SOLANA_ASSET_SELECT_SCROLL_AREA_ID),
+    estimateSize: () => estimatedRowHeight + 16, // row height + gap
+    overscan: 2,
+    useAnimationFrameWithResizeObserver: true,
+  });
+
+
   // Calculate spam count by subtraction
   const parseSkipped = () => {
     const collectionNfts = [];
@@ -264,7 +306,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         </Tabs>
       ) : null}
       
-      <ScrollArea className="flex-1 min-h-0" key={changedPageKey}>
+      <ScrollArea className="flex-1 min-h-0" key={changedPageKey} id={SOLANA_ASSET_SELECT_SCROLL_AREA_ID}>
         {showMaxSelectWarning ? (
           <div className="absolute top-1/2 left-1/2 -translate-1/2 bg-popover-blur z-10 rounded-md p-6 shadow-md">
             <P className="text-lg font-bold">
@@ -275,14 +317,37 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
         ) : null}
 
         <div
-          className={cn(
-            "grid gap-4 h-full p-2",
-            imageVariant === "banner"
-              ? "grid-cols-1 lg:grid-cols-2"
-              : "grid-cols-2 lg:grid-cols-4"
-          )}
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
         >
-          {solanaAssetsPage?.map((asset) => {
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const rowStart = virtualRow.index * itemsPerRow;
+            const rowEnd = Math.min(rowStart + itemsPerRow, solanaAssetsPage?.length || 0);
+            const rowItems = solanaAssetsPage?.slice(rowStart, rowEnd) || [];
+
+            return (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                className={cn(
+                  "grid gap-4 p-2",
+                  imageVariant === "banner"
+                    ? "grid-cols-1 lg:grid-cols-2"
+                    : "grid-cols-2 lg:grid-cols-4"
+                )}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                {rowItems.map((asset) => {
             const isSelected = !!selectedAddresses?.includes(
               asset.tokenAddress
             );
@@ -294,49 +359,52 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
 
             const isDisabled = (showMaxSelectWarning && !isSelected) || isUsed;
 
-            if (isUsed) {
-              return (
-                <Tooltip key={asset.tokenAddress}>
-                  <TooltipTrigger disabled={!isUsed}>
+                  if (isUsed) {
+                    return (
+                      <Tooltip key={asset.tokenAddress}>
+                        <TooltipTrigger disabled={!isUsed}>
+                          <AssetThumbnailCard
+                            asset={asset}
+                            imageVariant={imageVariant}
+                            className={cn("border-3 opacity-50")}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <P>This asset is already being used</P>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  }
+
+                  return (
                     <AssetThumbnailCard
+                      key={asset.tokenAddress}
                       asset={asset}
                       imageVariant={imageVariant}
-                      className={cn("border-3 opacity-50")}
+                      onClick={(aspectRatio) => {
+                        if (isDisabled) return;
+                        handleAssetClick({ asset, isSelected, aspectRatio });
+                      }}
+                      optimisticClick={isOptimisticallySelected}
+                      setOptimisticClick={(click) => {
+                        if (isDisabled) return;
+                        handleOptimisticClick(asset.tokenAddress, click);
+                      }}
+                      className={cn(
+                        "cursor-pointer border-3 hover:shadow-md transition-shadow duration-200",
+                        isSelected
+                          ? "border-primary"
+                          : isOptimisticallySelected
+                          ? "border-primary/90"
+                          : "border-transparent",
+                        isDisabled
+                          ? "opacity-50 cursor-default pointer-events-none"
+                          : ""
+                      )}
                     />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <P>This asset is already being used</P>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
-
-            return (
-              <AssetThumbnailCard
-                key={asset.tokenAddress}
-                asset={asset}
-                imageVariant={imageVariant}
-                onClick={(aspectRatio) => {
-                  if (isDisabled) return;
-                  handleAssetClick({ asset, isSelected, aspectRatio });
-                }}
-                optimisticClick={isOptimisticallySelected}
-                setOptimisticClick={(click) => {
-                  if (isDisabled) return;
-                  handleOptimisticClick(asset.tokenAddress, click);
-                }}
-                className={cn(
-                  "cursor-pointer border-3 hover:shadow-md transition-shadow duration-200",
-                  isSelected
-                    ? "border-primary"
-                    : isOptimisticallySelected
-                    ? "border-primary/90"
-                    : "border-transparent",
-                  isDisabled
-                    ? "opacity-50 cursor-default pointer-events-none"
-                    : ""
-                )}
-              />
+                  );
+                })}
+              </div>
             );
           })}
         </div>

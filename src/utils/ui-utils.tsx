@@ -1,5 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
 import {
   DiscordIcon,
   InstagramIcon,
@@ -8,10 +6,12 @@ import {
   TwitterIcon,
   WebsiteIcon,
 } from "@/components/icons/Social";
-import { UserSocialHandles } from "@/types/user";
-import { ReactNode } from "react";
-import { SocialIconProps } from "@/types/generic";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
+import { SocialIconProps } from "@/types/generic";
+import { UserSocialHandles } from "@/types/user";
+import { clsx, type ClassValue } from "clsx";
+import { ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(...inputs))
@@ -35,9 +35,13 @@ export function truncate(
 }
 
 export const getMainScrollAreaViewport = () => {
-  const mainScrollArea = document.getElementById(MAIN_SCROLL_AREA_ID);
-  if (mainScrollArea) {
-    return mainScrollArea.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+  return getScrollAreaViewport(MAIN_SCROLL_AREA_ID);
+}
+
+export const getScrollAreaViewport = (id: string) => {
+  const scrollArea = document.getElementById(id);
+  if (scrollArea) {
+    return scrollArea.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
   }
   return null;
 }
