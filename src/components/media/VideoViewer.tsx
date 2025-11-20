@@ -569,7 +569,7 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
         preload={autoPlay ? "auto" : "metadata"}
         className={cn(
           "w-full object-contain transition-opacity duration-500",
-          isLoading ? "opacity-0" : isBuffering ? "opacity-66" : "opacity-100",
+          isLoading ? "opacity-0" : isBuffering ? "opacity-60" : "opacity-100",
           className
         )}
       >

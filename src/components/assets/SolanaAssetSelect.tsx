@@ -53,7 +53,7 @@ const SolanaAssetSelect: FC<SolanaAssetSelectProps> = ({
   setSelectAssets,
   perPage = 100,
   maxSelected = 1,
-  withSearch, // Default to true to show search input
+  withSearch,
   maxSelectWarningBody,
   imageVariant = "default",
   usedAssetAddresses,
