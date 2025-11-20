@@ -12,7 +12,7 @@ import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntry
 import { isMediaGalleryItem } from "@/types/galleryItem";
 import { handleClientError } from "@/utils/handleError";
 import { getTimelineKey, sortTimeline } from "@/utils/timeline";
-import { cn } from "@/utils/ui-utils";
+import { cn, getScrollAreaViewport } from "@/utils/ui-utils";
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
 import {
   restrictToVerticalAxis,
@@ -24,6 +24,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import axios from "axios";
 import { useAtom } from "jotai";
 import { ArrowDownUpIcon, GripVerticalIcon } from "lucide-react";
@@ -37,6 +38,9 @@ interface HoverData {
   id: string;
   side: "above" | "down";
 }
+
+const REARRANGE_ENTRIES_SCROLL_AREA_ID = "rearrange-entries-scroll-area";
+
 interface RearrangeEntriesProps {
   source: EntrySource;
   buttonClassName?: string;
@@ -67,9 +71,22 @@ const RearrangeEntries = forwardRef<HTMLButtonElement, RearrangeEntriesProps>(({
     //when open, sync state to current userEntries
     if (!drawerOpen) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRearrangedEntries(originalEntries);
   }, [originalEntries, drawerOpen])
+
+  // Entry height: h-14 (56px) + gap-4 (16px) = 72px per entry
+  const ENTRY_HEIGHT = 56; // h-14
+  const GAP = 16; // gap-4
+  
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const entryVirtualizer = useVirtualizer({
+    count: rearrangedEntries.length,
+    getScrollElement: () => getScrollAreaViewport(REARRANGE_ENTRIES_SCROLL_AREA_ID),
+    estimateSize: () => ENTRY_HEIGHT + GAP,
+    overscan: 2,
+    useAnimationFrameWithResizeObserver: true,
+    // debug: process.env.NODE_ENV === "development",
+  });
 
 
   const saveRearrangement = async () => {
@@ -212,6 +229,7 @@ const RearrangeEntries = forwardRef<HTMLButtonElement, RearrangeEntriesProps>(({
 
   return (
     <SideDrawer
+      scrollAreaId={REARRANGE_ENTRIES_SCROLL_AREA_ID}
       triggerButton={
         <Button
           className={cn("w-full", buttonClassName)}
@@ -249,22 +267,46 @@ const RearrangeEntries = forwardRef<HTMLButtonElement, RearrangeEntriesProps>(({
           items={rearrangedEntries.map((entry) => entry._id.toString())}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex flex-col gap-4 mt-2">
-            {rearrangedEntries.length ? (
-              rearrangedEntries.map((entry) => {
+          {rearrangedEntries.length ? (
+            <div
+              style={{
+                height: `${entryVirtualizer.getTotalSize()}px`,
+                width: "100%",
+                position: "relative",
+              }}
+              className="mt-2"
+            >
+              {entryVirtualizer.getVirtualItems().map((virtualItem) => {
+                const entry = rearrangedEntries[virtualItem.index];
+                if (!entry) return null;
+
                 return (
-                  <SortableEntry key={entry._id.toString()} entry={entry} />
+                  <div
+                    key={virtualItem.key}
+                    data-index={virtualItem.index}
+                    ref={entryVirtualizer.measureElement}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${virtualItem.start}px)`,
+                      paddingBottom: `${GAP}px`, // gap-4 equivalent
+                    }}
+                  >
+                    <SortableEntry entry={entry} />
+                  </div>
                 );
-              })
-            ) : (
-              <div className="p-4 space-y-4">
-                <P className="text-center ">
-                  Add some {TIMELINE_ENTRY_LABEL.fullPlural} to get started!
-                </P>
-                <NewEntryFormButton source={source} buttonVariant="default" />
-              </div>
-            )}
-          </div>
+              })}
+            </div>
+          ) : (
+            <div className="p-4 space-y-4 mt-2">
+              <P className="text-center ">
+                Add some {TIMELINE_ENTRY_LABEL.fullPlural} to get started!
+              </P>
+              <NewEntryFormButton source={source} buttonVariant="default" />
+            </div>
+          )}
         </SortableContext>
       </DndContext>
     </SideDrawer>
@@ -301,12 +343,13 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
     || isGalleryEntry(entry) && isMediaGalleryItem(entry.gallery.items?.[0]) && entry.gallery.items?.[0]?.media;
     
   const thumbnail = media ? (
-    <div className="flex-shrink-0 w-10 h-10">
+    <div className="shrink-0 w-10 h-10">
       <MediaThumbnail
         objectFit="object-cover"
         media={media}
         alt={entry.title}
         rounding="rounded-sm"
+        priority
       />
     </div>
   ) : null;
@@ -322,7 +365,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
       {...listeners}
       {...attributes}
     >
-      <GripVerticalIcon className="flex-shrink-0" />
+      <GripVerticalIcon className="shrink-0" />
       {thumbnail}
       <P
         className={cn(
@@ -332,7 +375,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
       >
         {text}
       </P>
-      <P className="flex-shrink-0 text-sm text-muted-foreground">
+      <P className="shrink-0 text-sm text-muted-foreground">
         {entry.date.toLocaleDateString()}
       </P>
     </div>

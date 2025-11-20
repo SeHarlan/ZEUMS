@@ -4,7 +4,7 @@ import { GalleryItemTypes } from "@/types/galleryItem";
 import { cleanGalleryRows, initializeGalleryRows, processGalleryRows } from "@/utils/gallery";
 import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { GalleryItemBaseProps } from "./GalleryItemBase";
 
 interface GalleryBaseProps {
@@ -50,15 +50,13 @@ const GalleryBase: FC<GalleryBaseProps> = ({
   }, [galleryItems, PADDING, isDesktop, containerWidth, maxHeight]);
 
   // Calculate row heights: row height + padding + gap between rows
-  const getRowHeight = useMemo(() => {
-    return (index: number): number => {
-      if (!galleryRows[index]?.length) return 0;
-      const row = galleryRows[index];
-      const rowHeight = row[0]?.height || 0;
+  const getRowHeight = useCallback((index: number): number => {
+    if (!galleryRows[index]?.length) return 0;
+    const row = galleryRows[index];
+    const rowHeight = row[0]?.height || 0;
 
-      const spacing = isDesktop ? PADDING_DESKTOP * 2 : GAP;
-      return rowHeight + spacing * 2 ;
-    };
+    const spacing = isDesktop ? PADDING_DESKTOP * 2 : GAP;
+    return rowHeight + spacing * 2;
   }, [galleryRows, isDesktop]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
