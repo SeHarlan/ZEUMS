@@ -44,25 +44,26 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
 
   const renderContent = () => {
     if (mediaError) {
-      return  <MonitorOffIcon className="size-14" />;
+      return  <MonitorOffIcon className="size-14 text-muted-border" />;
     }
 
     if (isError && isImage) {
-      return <ImageOffIcon className="size-14" />;
+      return <ImageOffIcon className="size-14 text-muted-border" />;
     }
 
     switch (media.category) {
       case MediaCategory.Video:
         return (
           <VideoViewer
+            media={media}
             src={getMediaUrl(media)}
-            poster={imageUrl}
             autoPlay
             loop
             controls
             onError={handleMediaError}
             className="max-h-screen w-fit"
             containerClassName="h-fit w-fit"
+            noLoadingAnimation={true}
           />
         );
       case MediaCategory.Html:

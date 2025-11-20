@@ -1,19 +1,20 @@
 "use client";
 
-import { 
-  FC,
-  useCallback, 
-  useEffect, 
-  useMemo, 
-  useRef, 
-  useState 
-} from "react";
-import { Maximize2, Minimize2, PlayIcon, PauseIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/ui-utils";
 import { P } from "@/components/typography/Typography";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useInView } from "@/hooks/useObserver";
+import { MediaType } from "@/types/media";
+import { cn } from "@/utils/ui-utils";
+import { Maximize2, Minimize2, PauseIcon, PlayIcon, VideoIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
+import MediaThumbnail from "./MediaThumbnail";
 
 // Type definitions for fullscreen methods
 interface FullscreenVideoElement extends HTMLVideoElement {
@@ -29,14 +30,6 @@ interface FullscreenDocument extends Document {
   msFullscreenElement?: Element;
 }
 
-const VIDEO_STATE = {
-  HAVE_NOTHING: 0,
-  HAVE_METADATA: 1,
-  HAVE_CURRENT_DATA: 2,
-  HAVE_FUTURE_DATA: 3,
-  HAVE_ENOUGH_DATA: 4,
-} as const;
-
 const mimeTypes: Record<string, string> = {
   mp4: "video/mp4",
   webm: "video/webm",
@@ -49,9 +42,8 @@ const mimeTypes: Record<string, string> = {
 
 const BUFFERING_DELAY = 1_000; //time before buffering message shows
 const LOADING_TIMEOUT = 30_000; //30 seconds - before before showing long load time message
-const REMOVE_RENDER_DELAY = 5_000//5 seconds - remove from dom after delay
-const RENDER_DEBOUNCE_DELAY = 300; //300ms - debounce render state update to prevent mounting and unmounting too quickly
 interface VideoViewerProps {
+  media?: MediaType;
   src: string;
   poster?: string;
   containerClassName?: string;
@@ -64,62 +56,59 @@ interface VideoViewerProps {
   loop?: boolean;
   onLoadedMetadata?: (video: HTMLVideoElement) => void;
   onError?: ((e: unknown) => void);
+  noLoadingAnimation?: boolean;
 }
 
-const VideoViewer: FC<VideoViewerProps> = ({containerClassName, ...props}) => {
-  const { inView, ref: containerRef } = useInView({rootMargin: "200px", mobileRootMargin: "0px"});
+const VideoViewer: FC<VideoViewerProps> = ({containerClassName, noLoadingAnimation = false, ...props}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
-
   const showLoadingState = isLoading || isBuffering;
+
+  const media = props.media;
 
   const setIsLoadingCallback = useCallback((isLoading: boolean) => {
     setIsLoading(isLoading);
   }, []);
+
   const setIsBufferingCallback = useCallback((isBuffering: boolean) => {
     setIsBuffering(isBuffering);
   }, []);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (inView) {
-      timeout = setTimeout(() => {
-        setShouldRender(true);
-      }, RENDER_DEBOUNCE_DELAY);
-
-    } else {
-      timeout = setTimeout(() => {
-        setShouldRender(false);
-
-        //also reset parent state
-        setIsLoading(true);
-        setIsBuffering(false);
-      }, REMOVE_RENDER_DELAY);
-    }
-    return () => clearTimeout(timeout);
-  }, [inView])
 
   return (
     <div
       ref={containerRef}
       className={cn(
         "relative group/video w-full h-full flex justify-center items-center",
-        showLoadingState && "animate-skeleton-shimmer",
+        showLoadingState  && !noLoadingAnimation && "animate-skeleton-shimmer",
         containerClassName
       )}
     >
-      {shouldRender && (
-        <VideoViewerCore
-          {...props}
-          containerRef={containerRef}
-          isLoading={isLoading}
-          isBuffering={isBuffering}
-          setIsLoading={setIsLoadingCallback}
-          setIsBuffering={setIsBufferingCallback}
-          inView={inView}
-        />
+      {isLoading  && (
+        <div className="absolute inset-0 ">
+          <div className="absolute-center bg-muted-blur rounded-sm p-2 z-20 relative animate-pulse">
+            <VideoIcon className="size-6 text-muted-foreground" />
+          </div>
+
+          {media?.aspectRatio && (
+            <MediaThumbnail
+              media={media}
+              alt={"video thumbnail"}
+              className="opacity-75 bg-transparent"
+              ratio={media.aspectRatio}
+              noPadding
+            />
+          )}
+        </div>
       )}
+      <VideoViewerCore
+        {...props}
+        containerRef={containerRef}
+        isLoading={isLoading}
+        isBuffering={isBuffering}
+        setIsLoading={setIsLoadingCallback}
+        setIsBuffering={setIsBufferingCallback}
+      />
     </div>
   );
 };
@@ -130,7 +119,6 @@ interface VideoViewerCoreProps extends Omit<VideoViewerProps, "containerClassNam
   setIsLoading: (isLoading: boolean) => void;
   setIsBuffering: (isBuffering: boolean) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  inView: boolean;
 }
 
 const VideoViewerCore: FC<VideoViewerCoreProps> = ({
@@ -149,7 +137,6 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
   setIsLoading,
   setIsBuffering,
   containerRef,
-  inView
 }) => {
   const defaultMuted = autoPlay ? true : muted;
 
@@ -164,7 +151,6 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
   const [showControls, setShowControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failedToPlayMessage, setFailedToPlayMessage] = useState<null | "autoplay" | "loading-timeout" | "error">(null);
-  const [userPaused, setUserPaused] = useState(false);
 
   //these prevent unneeded event listeners and other checks
   const useCurrentTime = controls && !minimalControls;
@@ -224,11 +210,6 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
     setFailedToPlayMessage("loading-timeout");
   }, [setIsLoading, setIsBuffering]);
 
-
-  const videoIsStopped = (video: HTMLVideoElement) => {
-    return video.readyState <= VIDEO_STATE.HAVE_CURRENT_DATA || video.paused || video.ended
-  };
-
   const togglePlay = async () => {
     const video = videoRef.current;
     if (!video) return;
@@ -237,10 +218,8 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
 
     if (isPlaying) {
       video.pause();
-      setUserPaused(true);
     } else {
       await video.play().catch(handleVideoPlayError);
-      setUserPaused(false);
     }
   };
 
@@ -429,23 +408,8 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
     setIsLoading,
   ]);
 
-  // //pause when not in view and play when in view and not paused
-  // //only autoplay again if autoPlay is true and the user hasnt manually paused
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Early return if the video cannot play through all the way
-    if (video.readyState < VIDEO_STATE.HAVE_ENOUGH_DATA) {
-      return;
-    }
-
-    if (!inView) {
-      video?.pause();
-    } else if (autoPlay && !userPaused && videoIsStopped(video)) {
-      video?.play().catch(handleVideoPlayError);
-    }
-  }, [inView, autoPlay, handleVideoPlayError, userPaused]);
+  // Note: Play/pause based on viewport visibility removed since virtualizer handles mounting/unmounting
+  // Videos will auto-play when mounted (if autoPlay is true) and pause when unmounted by the virtualizer
   
 
   // Listen for fullscreen changes
@@ -602,9 +566,10 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
         playsInline
         webkit-playsinline="true"
         controls={false}
+        preload={autoPlay ? "auto" : "metadata"}
         className={cn(
           "w-full object-contain transition-opacity duration-500",
-          isLoading ? "opacity-0" : isBuffering ? "opacity-50" : "opacity-100",
+          isLoading ? "opacity-0" : isBuffering ? "opacity-60" : "opacity-100",
           className
         )}
       >
@@ -615,7 +580,7 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
         <div
           ref={controlsRef}
           className={cn(
-            "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-200",
+            "absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4 transition-opacity duration-200",
             showControls
               ? "opacity-100"
               : "opacity-0 group-hover/video:opacity-100"
