@@ -27,10 +27,6 @@ const PROFILE_QUALITY = 85;
 /** Banner image quality (90) */
 const BANNER_QUALITY = 90;
 
-/** Timeout for async worker processing (60 seconds) */
-const ASYNC_TIMEOUT_MS = 60000;
-
-
 // Lazy-load Sharp with module-level caching
 let sharpPromise: Promise<typeof import("sharp")> | null = null;
 let sharpModule: typeof import("sharp") | null = null;
@@ -159,6 +155,29 @@ function shouldCache(q: number | undefined): boolean {
   return q > HIGH_QUALITY_THRESHOLD || q === PROFILE_QUALITY || q === BANNER_QUALITY;
 }
 
+/**
+ * Validates and normalizes a format parameter from query string
+ * @param fParam - Raw format parameter from query string
+ * @returns Valid ImageFormat or undefined if invalid/missing
+ */
+function validateFormat(fParam: string | null): ImageFormat | undefined {
+  if (!fParam) return undefined;
+  
+  // Normalize: trim whitespace and convert to lowercase
+  const normalized = fParam.trim().toLowerCase();
+  
+  // Validate against allowed formats
+  const allowedFormats: readonly ImageFormat[] = ["avif", "webp", "jpeg", "gif"] as const;
+  
+  if (allowedFormats.includes(normalized as ImageFormat)) {
+    return normalized as ImageFormat;
+  }
+  
+  // Log invalid format for debugging
+  console.debug(`Invalid image format parameter: "${fParam}" (normalized: "${normalized}"). Allowed formats: ${allowedFormats.join(", ")}`);
+  return undefined;
+}
+
 export async function resizeImageHandler(
   req: NextRequest
 ): Promise<NextResponse> {
@@ -192,7 +211,8 @@ export async function resizeImageHandler(
 
   // Determine output format
   const accept = req.headers.get("accept") || "";
-  const format: ImageFormat = (fParam as ImageFormat) || getFormatFromAccept(accept);
+  const validatedFormat = validateFormat(fParam);
+  const format: ImageFormat = validatedFormat || getFormatFromAccept(accept);
 
   // Check blob cache for public-facing images
   if (serverCache) {
