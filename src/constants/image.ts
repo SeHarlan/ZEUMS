@@ -1,0 +1,1 @@
+export const HIGH_QUALITY_THRESHOLD = 70;
