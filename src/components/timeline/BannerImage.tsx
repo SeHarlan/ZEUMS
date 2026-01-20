@@ -46,6 +46,7 @@ export const BannerImage: FC<BannerImageProps> = ({
   
   return (
     <MediaThumbnail
+      useCustomLoader={false}
       quality={90}
       size={width}
       media={media}

@@ -51,6 +51,7 @@ const UserCard: FC<{ user: PublicListUserType }> = ({ user }) => {
     >
       <CardContent className="p-0 relative">
         <MediaThumbnail
+          useCustomLoader={false}
           media={user.bannerImage}
           alt={user.displayName}
           quality={80}
