@@ -53,6 +53,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "p1v6uvkvzbjkuo1l.public.blob.vercel-storage.com",
       },
+      {
+        protocol: "https",
+        hostname: "**.mypinata.cloud"
+      }
     ],
   },
   //allow ngrok-free.app domains for development
