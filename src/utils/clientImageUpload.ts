@@ -1,4 +1,5 @@
 import { API_ROUTE } from "@/constants/serverRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { upload } from "@vercel/blob/client";
 
 export interface UploadImageResult {
@@ -111,7 +112,7 @@ export const constructVercelBlobUrl = (
  */
 export const makeUserImageBlobKey = (
   userId: string,
-  category: string,
+  category: UploadCategory,
   filename: string
 ): string => {
   // Sanitize filename to prevent path traversal (userId and category are controlled)
@@ -127,14 +128,14 @@ export const makeUserImageBlobKey = (
  * 
  * @param cdnId - Either the full blob key OR just the filename
  * @param userId - User ID (required if cdnId is just a filename)
- * @param category - Image category: "profile", "banner", "assets", etc. (required if cdnId is just a filename)
+ * @param category - enum UploadCategory (required if cdnId is just a filename)
  * @param baseUrl - Optional base URL
  * @returns The full URL to the blob
  */
 export const constructVercelBlobUserImageUrl = (
   cdnId: string,
   userId?: string,
-  category?: string,
+  category?: UploadCategory,
   baseUrl?: string
 ): string => {
   // If cdnId already contains slashes, assume it's the full key

@@ -1,3 +1,4 @@
+import { UploadCategory } from "@/constants/uploadCategories";
 import {
   BlockchainMedia,
   CdnIdType,
@@ -9,8 +10,11 @@ import {
   MediaType,
   UserMedia
 } from "@/types/media";
+import { constructVercelBlobUserImageUrl } from "./clientImageUpload";
 
-export const getImageUrlSources = (media: MediaType): string[] => {
+
+//TODO: multiple sources is depricated, will need to clean this up at some point
+export const getImageUrlSources = (media: MediaType, userId?: string, category?: UploadCategory): string[] => {
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -22,20 +26,19 @@ export const getImageUrlSources = (media: MediaType): string[] => {
 
     // } else 
     if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
-      // TODO Important: will need to construct this URL
-      const cdnUrl = constructVercelBlobUserImageUrl(cdnId);
+      if(!userId || !category) {
+        throw new Error("userId and category are required when cdnId is vercel_blob_user_image");
+      }
+      const cdnUrl = constructVercelBlobUserImageUrl(cdnId, userId, category);
       sources.push(cdnUrl);
     }
   }
 
-  if (isBlockchainMedia(media) || isBlockchainImage(media)) {
-    // For blockchain media, include the original url
+  if (isBlockchainImage(media) || isBlockchainMedia(media)) {
     sources.push(media.imageUrl);
   }
 
-  return sources.length > 0
-    ? sources
-    : [""]; // Return an empty string if no valid image URL is found
+  return sources;
 };
 
 export const getMediaUrl = (media: BlockchainMedia | UserMedia) => {
