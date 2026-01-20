@@ -13,6 +13,7 @@ import { USER_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { EntrySource } from "@/types/entry";
+import { MediaOrigin } from "@/types/media";
 import { UserType } from "@/types/user";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
@@ -104,6 +105,10 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
 
       if (socialHandles.website) {
         socialHandles.website = addHttpsPrefix(socialHandles.website);
+      }
+
+      if (profileImage && profileImage.origin === MediaOrigin.User) {
+      
       }
 
       const userData: Partial<UserType> = {
