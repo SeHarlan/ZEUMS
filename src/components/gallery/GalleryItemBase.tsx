@@ -52,6 +52,7 @@ export const MiniGalleryItemBase: FC<MiniGalleryItemBaseProps> = ({ item, priori
   if (item.itemType === GalleryItemTypes.BlockchainAsset || item.itemType === GalleryItemTypes.UserAsset) {
     return (
       <MediaThumbnail
+        useCustomLoader={false}
         quality={80}
         noPadding
         priority={priority}

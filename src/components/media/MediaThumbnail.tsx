@@ -1,8 +1,8 @@
 "use client";
 import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
-import { useInView } from "@/hooks/useObserver";
 import { MediaType } from "@/types/media";
+import resizeLoader from "@/utils/imageLoader";
 import { cn } from "@/utils/ui-utils";
 import { ImageOffIcon } from "lucide-react";
 import Image from "next/image";
@@ -11,6 +11,15 @@ import { AspectRatio } from "../ui/aspect-ratio";
 
 interface MediaThumbnailProps {
   media: MediaType;
+  /** 
+   * Set to false for public images.
+   * Keep true for user specific images. 
+   * 
+   * Custom loader skips the public Next.js cache but still caches them for an individual browser.
+   * Add "unoptimized" to skip optimization altogether
+   * */
+  useCustomLoader?: boolean;
+  unoptimized?: boolean;
   onLoad?: (imageElement: HTMLImageElement) => void;
   onError?: () => void;
   objectFit?: "object-cover" | "object-contain";
@@ -31,7 +40,9 @@ interface MediaThumbnailProps {
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
+  useCustomLoader = true,
   media,
+  unoptimized,
   onLoad,
   onError,
   objectFit = "object-contain",
@@ -53,15 +64,12 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     onLoad: handleFallbackLoad,
   } = useImageFallback({ media, onFinalError: onError });
 
-  const {inView, ref} = useInView();
-
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();
     onLoad?.(event.currentTarget);
   };
 
   const renderContent = () => {
-    if (!inView) return null;
     //broken image
     if (isError) return <ImageOffIcon className="size-8" />;
 
@@ -70,6 +78,8 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
 
     return (
       <Image
+        loader={useCustomLoader ? resizeLoader : undefined}
+        unoptimized={unoptimized}
         height={height}
         width={width}
         sizes={`${width}px`}
@@ -80,7 +90,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
         src={imageUrl}
         alt={alt || "Media Thumbnail"}
         className={cn(
-          "w-full h-full transition-opacity duration-200 rounded",
+          "w-full h-full transition-opacity duration-400 rounded",
           isLoaded || priority ? "opacity-100" : "opacity-0",
           objectFit
         )}
@@ -90,11 +100,9 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
 
   return (
     <AspectRatio
-      ref={ref}
       ratio={ratio}
       className={cn(
         "flex justify-center items-center bg-muted text-muted-foreground overflow-hidden transition-opacity duration-500",
-        inView ? "opacity-100" : "opacity-0",
         rounding,
         isLoading && "animate-skeleton-shimmer",
         objectFit === "object-contain" && !noPadding && "p-2",

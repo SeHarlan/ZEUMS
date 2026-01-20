@@ -1,3 +1,4 @@
+import { UploadCategory } from "@/constants/uploadCategories";
 import {
   BlockchainMedia,
   CdnIdType,
@@ -7,48 +8,50 @@ import {
   isImageType,
   MediaCategory,
   MediaType,
-  UserMedia,
+  UserMedia
 } from "@/types/media";
+import { constructVercelBlobUserImageUrl } from "./clientImageUpload";
 
-export const getImageUrlSources = (media: MediaType): string[] => {
-  // const cdn = media.imageCdn;
+
+//TODO: multiple sources is depricated, will need to clean this up at some point
+export const getImageUrlSources = (media: MediaType, userId?: string, category?: UploadCategory): string[] => {
+  const cdn = media.imageCdn;
 
   const sources = [];
 
-  //TODO depricate all mutlitple source logic
-  //try CDNs first
-  // if (cdn) {
-  //   const { type, cdnId } = cdn;
-  //   if (type === CdnIdType.HELIUS_URL) {
-  //     //only use this when quality doesnt matter cause we
+  if (cdn) {
+    const { type, cdnId } = cdn;
+    // if (type === CdnIdType.HELIUS_URL) {
+    //   //only use this when quality doesnt matter cause we
 
-  //   } else if (type === CdnIdType.CLOUDINARY_ID) {
-  //     // TODO: Cloudinary, will need to construct this URL
-  //     sources.push(cdnId);
-  //   }
-  // }
+    // } else 
+    if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
+      if(!userId || !category) {
+        throw new Error("userId and category are required when cdnId is vercel_blob_user_image");
+      }
+      const cdnUrl = constructVercelBlobUserImageUrl(cdnId, userId, category);
+      sources.push(cdnUrl);
+    }
+  }
 
-  if (isBlockchainMedia(media) || isBlockchainImage(media)) {
-    // For blockchain media, include the original url
+  if (isBlockchainImage(media) || isBlockchainMedia(media)) {
     sources.push(media.imageUrl);
   }
 
-  return sources.length > 0
-    ? sources
-    : [""]; // Return an empty string if no valid image URL is found
+  return sources;
 };
 
 export const getMediaUrl = (media: BlockchainMedia | UserMedia) => {
   const cdn = media.mediaCdn;
 
   if (cdn) {
-    const { type, cdnId } = cdn;
-    if (type === CdnIdType.CLOUDINARY_ID) {
-      // TODO: Cloudinary, will need to construct this URL
-      return cdnId;
-    }
+    // const { type, cdnId } = cdn;
+    // if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
+    //   // TODO important: will need to construct this URL here
+    //   return cdnId;
+    // }
 
-    return ""; // For now, we don't handle other CDN types
+    // For now, we don't handle media CDNs 
   }
 
   // Fallback to the media URL if no CDN is available

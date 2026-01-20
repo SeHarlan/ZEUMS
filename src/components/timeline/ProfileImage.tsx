@@ -31,6 +31,7 @@ export const ProfileImage = ({
 
   return (
     <MediaThumbnail
+      useCustomLoader={false}
       quality={85}
       media={media}
       alt={"Profile Image"}

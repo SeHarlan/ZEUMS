@@ -54,7 +54,7 @@ const GalleryCard: FC<{ gallery: PublicGalleryType }> = ({ gallery }) => {
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
-        <MediaThumbnail media={thumbnailMedia} alt={gallery.title} quality={80}/>
+        <MediaThumbnail useCustomLoader={false} media={thumbnailMedia} alt={gallery.title} quality={80}/>
       </CardContent>
 
       <CardFooter className="pb-1 px-3">

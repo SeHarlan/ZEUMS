@@ -7,7 +7,6 @@ const Logo = ({ className = "size-24" }: { className?: string }) => {
   return (
     <Image
       priority
-      unoptimized
       src="https://p1v6uvkvzbjkuo1l.public.blob.vercel-storage.com/glitchz-no-static.gif"
       alt={TITLE_COPY + " Logo"}
       width={256}

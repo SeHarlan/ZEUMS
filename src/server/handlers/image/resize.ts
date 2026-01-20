@@ -8,7 +8,7 @@ const SHORT_CACHE_CONTROL = "public, max-age=86400, s-maxage=604800";
 const ZEUM_DOMAIN = process.env.NEXTAUTH_URL || "https://www.zeums.art";
 
 /** default loader quality is 70 */
-const HIGH_QUALITY_THRESHOLD = 70;
+// const HIGH_QUALITY_THRESHOLD = 70;
 const TIMEOUT_MS = 10000;
 
 
@@ -142,8 +142,8 @@ export async function resizeImageHandler(
 
   //high quality assets will generally be public facing so we should present the best/optimized version
   //default in loader is 70 so these will be false by default
-  const serverCache = q && q > HIGH_QUALITY_THRESHOLD;
-  const animateGif = q && q > HIGH_QUALITY_THRESHOLD;
+  const serverCache = false //q && q > HIGH_QUALITY_THRESHOLD; //On Hold for now
+  const animateGif = false //q && q > HIGH_QUALITY_THRESHOLD; //On Hold for now
 
   if (!src) return NextResponse.json({ error: "Missing src" }, { status: 400 });
 
