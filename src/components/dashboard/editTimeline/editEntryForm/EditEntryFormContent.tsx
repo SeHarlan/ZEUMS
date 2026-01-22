@@ -75,7 +75,7 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
           <Icon className="size-12 text-muted-foreground" />
           <div className="text-left min-w-0">
             <P className="font-bold text-lg ">{title}</P>
-            <P className="text-sm break-words text-muted-foreground">
+            <P className="text-sm wrap-break-word text-muted-foreground">
               {description}
             </P>
           </div>

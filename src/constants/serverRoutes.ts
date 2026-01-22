@@ -25,6 +25,8 @@ export const PUBLIC_ROUTE = `${API_ROUTE}/public`;
 export const PUBLIC_USER_ROUTE = `${PUBLIC_ROUTE}/user`;
 export const PUBLIC_USER_BY_USERNAME_ROUTE = (username: string) =>
   `${PUBLIC_USER_ROUTE}/${username}`;
+export const PUBLIC_MEDIA_ROUTE = (assetId: string) =>
+  `${PUBLIC_ROUTE}/media/${assetId}`;
 export const PUBLIC_GALLERY_ROUTE = `${PUBLIC_ROUTE}/gallery`;
 
 export const GALLERY_BY_USERNAME_AND_NAME_ROUTE = (

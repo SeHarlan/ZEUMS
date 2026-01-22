@@ -1,4 +1,5 @@
 import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import ImageUploadDialog from "@/components/media/ImageUploadDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
 import { ProfileImage } from "@/components/timeline/ProfileImage";
@@ -18,7 +19,6 @@ import { UserType } from "@/types/user";
 import { getFileAspectRatio } from "@/utils/media";
 import { socialHandlesList } from "@/utils/ui-utils";
 import { getDisplayName } from "@/utils/user";
-import { ImagePlusIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -225,7 +225,7 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
             size="icon"
             onClick={() => setBannerImageOpen(true)}
           >
-            <ImagePlusIcon />
+            <BlockchainAssetEntryIcon />
           </Button>
         </div>
         <BannerImage
@@ -252,7 +252,7 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
               size="icon"
               onClick={() => setProfileImageOpen(true)}
             >
-              <ImagePlusIcon />
+              <BlockchainAssetEntryIcon />
             </Button>
           </div>
           <ProfileImage

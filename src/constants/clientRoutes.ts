@@ -16,8 +16,9 @@ export const EDIT_PROFILE_DISPLAY = EDIT_TIMELINE; //currently display info is e
 export const EDIT_GALLERIES = `${DASHBOARD}/galleries`;
 export const EDIT_GALLERY = (galleryId: string) => `${EDIT_GALLERIES}/${galleryId}`;
 
+export const USER_MEDIA = (username: string, id: string) => `/${username}/media/${id}`;
+
 export const MEDIA = '/artworks';
-export const USER_MEDIA = (id: string) => `${MEDIA}/user/${id}`;
 export const SOLANA_MEDIA = (mintAddress: string) => `${MEDIA}/solana/${mintAddress}`;
 export const TEZOS_MEDIA = (mintAddress: string) => `${MEDIA}/tezos/${mintAddress}`;
 
