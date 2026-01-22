@@ -1,7 +1,7 @@
 "use client";
 import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
 import resizeLoader from "@/utils/imageLoader";
 import { cn } from "@/utils/ui-utils";
 import { ImageOffIcon } from "lucide-react";
@@ -37,6 +37,7 @@ interface MediaThumbnailProps {
   priority?: boolean;
   noPadding?: boolean;
   quality?: number;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
@@ -54,6 +55,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   priority,
   noPadding,
   quality = 50,
+  blobUrlBuilderProps,
 }) => {
   const {
     isLoaded,
@@ -62,7 +64,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError: handleFallbackError,
     onLoad: handleFallbackLoad,
-  } = useImageFallback({ media, onFinalError: onError });
+  } = useImageFallback({ media, onFinalError: onError, blobUrlBuilderProps });
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();

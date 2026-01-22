@@ -1,5 +1,5 @@
-import { UploadCategory } from "@/constants/uploadCategories";
 import {
+  BlobUrlBuilderProps,
   BlockchainMedia,
   CdnIdType,
   ImageType,
@@ -14,7 +14,8 @@ import { constructVercelBlobUserImageUrl } from "./clientImageUpload";
 
 
 //TODO: multiple sources is depricated, will need to clean this up at some point
-export const getImageUrlSources = (media: MediaType, userId?: string, category?: UploadCategory): string[] => {
+export const getImageUrlSources = (media: MediaType, blobUrlBuilderProps?: BlobUrlBuilderProps): string[] => {
+  
   const cdn = media.imageCdn;
 
   const sources = [];
@@ -26,11 +27,10 @@ export const getImageUrlSources = (media: MediaType, userId?: string, category?:
 
     // } else 
     if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
-      if(!userId || !category) {
-        throw new Error("userId and category are required when cdnId is vercel_blob_user_image");
-      }
-      const cdnUrl = constructVercelBlobUserImageUrl(cdnId, userId, category);
-      sources.push(cdnUrl);
+      if (blobUrlBuilderProps) {
+        const cdnUrl = constructVercelBlobUserImageUrl(cdnId, blobUrlBuilderProps.userId, blobUrlBuilderProps.category);
+        sources.push(cdnUrl);
+      } 
     }
   }
 
@@ -69,6 +69,31 @@ export const getImageAspectRatio = (imageElement: HTMLImageElement) => {
 
 export const getVideoAspectRatio = (videoElement: HTMLVideoElement) => {
   return videoElement.videoWidth / videoElement.videoHeight;
+}
+
+/**
+ * Calculates the aspect ratio of an image file by loading it into an Image element.
+ * @param file - The image File object
+ * @returns Promise resolving to the aspect ratio (width / height)
+ */
+export const getFileAspectRatio = (file: File): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      resolve(aspectRatio);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image file"));
+    };
+
+    img.src = url;
+  });
 }
 
 export const convertMediaToImage = (media: MediaType): ImageType => { 

@@ -1,3 +1,5 @@
+
+/** which blob bin/folder the image is stored in {userId/category/imageKey} */
 export enum UploadCategory {
   PROFILE_PICTURE = "profile-picture",
   PROFILE_BANNER = "profile-banner",

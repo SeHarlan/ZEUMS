@@ -3,7 +3,7 @@
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { UserAssetEntry } from "@/types/entry";
-import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
+import { BlobUrlBuilderProps, isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import { getMediaUrl } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import {
@@ -19,14 +19,16 @@ import VideoViewer from "../media/VideoViewer";
 interface FullAssetViewerProps {
   asset: ParsedBlockChainAsset | UserAssetEntry;
   className?: string;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
 const FullAssetViewer: FC<FullAssetViewerProps> = ({
   asset,
   className,
+  blobUrlBuilderProps,
 }) => {
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback({media: asset.media});
+    useImageFallback({media: asset.media, blobUrlBuilderProps});
 
   const [mediaError, setMediaError] = useState(false);
 

@@ -32,6 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             "image/webp",
             "image/svg+xml",
           ],
+          allowOverwrite: true,
         };
       },
       onUploadCompleted: async ({ blob }) => {
