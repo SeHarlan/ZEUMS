@@ -21,6 +21,7 @@ import { getDisplayName } from "@/utils/user";
 import { ImagePlusIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
 
 interface EditProfileFormContentProps {
@@ -91,15 +92,18 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
         category: MediaCategory.Image,
         imageCdn: {
           type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
-          cdnId: objectUrl, // Use object URL directly - constructor will detect it's a full URL
+          cdnId: objectUrl, // Use object URL directly - constructor will detect it's a full blob URL
         },
         aspectRatio,
       };
       
       setProfileImage(tempImage);
     } catch (error) {
-      console.error("Failed to calculate aspect ratio:", error);
-      setUploadedProfileFile(file);
+      console.error("Failed to calculate profile image aspect ratio:", error);
+      
+      toast.error("Something's gone wrong", {
+        description: "Try again or choose a different image",
+      });
     }
   };
 
@@ -131,8 +135,11 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
       
       setBannerImage(tempImage);
     } catch (error) {
-      console.error("Failed to calculate aspect ratio:", error);
-      setUploadedBannerFile(file);
+      console.error("Failed to calculate banner image aspect ratio:", error);
+      
+      toast.error("Something's gone wrong", {
+        description: "Try again or choose a different image",
+      });
     }
   };
 

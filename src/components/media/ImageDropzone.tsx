@@ -53,8 +53,6 @@ const DEFAULT_ACCEPTED_TYPES = [
   "image/svg+xml",
 ] as const;
 
-export const BASE_ACCEPTED_TYPES = DEFAULT_ACCEPTED_TYPES.filter((type) => type !== "image/gif");
-
 export function ImageDropzone({
   onFileSelect,
   maxFileSize = DEFAULT_MAX_FILE_SIZE,

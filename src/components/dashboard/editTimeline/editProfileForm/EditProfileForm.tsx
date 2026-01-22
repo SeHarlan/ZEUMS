@@ -211,7 +211,7 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
         
         toast.success("Profile updated successfully!");
         const updatedUserData = parseUserDates(response.data.user);
-        console.log("🚀 ~ updatedUserData:", updatedUserData)
+
         setUser(updatedUserData);
         setFormOpen(false);
         setSaveProfileComplete();
@@ -242,14 +242,6 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
         originalBannerImageRef.current = user?.bannerImage;
         setProfileImage(user?.profileImage);
         setBannerImage(user?.bannerImage);
-      } else {
-        // Clean up any blob: URLs before closing
-        if (profileImage?.imageCdn?.cdnId?.startsWith("blob:")) {
-          URL.revokeObjectURL(profileImage.imageCdn.cdnId);
-        }
-        if (bannerImage?.imageCdn?.cdnId?.startsWith("blob:")) {
-          URL.revokeObjectURL(bannerImage.imageCdn.cdnId);
-        }
       }
 
       //we only wanna run this effect when the formOpen state changes
