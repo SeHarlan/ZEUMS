@@ -1,9 +1,9 @@
-import useSWRImmutable from "swr/immutable";
-import { handleClientError } from "@/utils/handleError";
-import axios from "axios";
 import { PUBLIC_MEDIA_ROUTE } from "@/constants/serverRoutes";
 import { UserAssetEntry } from "@/types/entry";
+import { handleClientError } from "@/utils/handleError";
 import { parseEntryDate } from "@/utils/timeline";
+import axios from "axios";
+import useSWRImmutable from "swr/immutable";
 
 const userAssetFetcher = async (assetId: string) => {
   if (!assetId) return null;

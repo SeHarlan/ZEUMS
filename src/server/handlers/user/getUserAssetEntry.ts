@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { EntryTypes, UserAssetEntry } from "@/types/entry";
+import { standardErrorResponses } from "@/utils/server";
+import { NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
 import Entry from "../../models/Entry/Entry";
-import { UserAssetEntry, EntryTypes } from "@/types/entry";
-import { standardErrorResponses } from "@/utils/server";
-import { parseEntryDate } from "@/utils/timeline";
 
 export async function getUserAssetEntryHandler(
   assetId: string
@@ -25,10 +24,7 @@ export async function getUserAssetEntryHandler(
       return NextResponse.json({ error: "Asset not found" }, { status: 404 });
     }
 
-    // Parse the date
-    const parsedEntry = parseEntryDate(entry);
-
-    return NextResponse.json({ entry: parsedEntry }, { status: 200 });
+    return NextResponse.json({ entry }, { status: 200 });
   } catch (error) {
     return standardErrorResponses({
       error,

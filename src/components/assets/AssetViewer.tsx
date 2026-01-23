@@ -99,7 +99,7 @@ const AssetViewer: FC<AssetViewerProps> = ({
 
   const newPagePath = isBlockchainAsset
     ? BLOCKCHAIN_MEDIA_PATHS[asset.blockchain](asset.tokenAddress)
-    : USER_MEDIA(asset.owner.toString(), asset._id.toString());
+    : USER_MEDIA(asset._id.toString());
 
   const goToMediaPage = () => {
     router.push(newPagePath);

@@ -14,8 +14,8 @@ import { useMemo } from 'react';
 
 
 export default function UserAssetPage() {
-  const { assetId } = useParams<{ assetId: string }>();
-  const { userAsset, isLoading, isError } = useUserAsset(assetId);
+  const { id } = useParams<{ id: string }>();
+  const { userAsset, isLoading, isError } = useUserAsset(id);
 
   // Create blobUrlBuilderProps for UserAssetEntry
   const blobUrlBuilderProps = useMemo(() => {
