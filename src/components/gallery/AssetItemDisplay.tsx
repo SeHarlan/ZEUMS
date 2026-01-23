@@ -1,4 +1,5 @@
 import { GalleryMediaItem } from "@/types/galleryItem";
+import { BlobUrlBuilderProps } from "@/types/media";
 import { FC } from "react";
 import AssetViewer from "../assets/AssetViewer";
 import ExpandableText from "../general/ExpandableText";
@@ -11,12 +12,13 @@ interface AssetItemDisplayProps {
   hideDescription?: boolean;
   hideButtons?: boolean;
   sizeDivisor?: number;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
-const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons, sizeDivisor}) => {
+const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons, sizeDivisor, blobUrlBuilderProps}) => {
   return (
     <div>
-      <AssetViewer asset={item} sizeDivisor={sizeDivisor} />
+      <AssetViewer asset={item} sizeDivisor={sizeDivisor} blobUrlBuilderProps={blobUrlBuilderProps} />
 
       {(!hideTitle || !hideDescription) && (
         <div className="relative h-fit mt-3">
