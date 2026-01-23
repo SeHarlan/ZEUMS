@@ -11,8 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FolderPlusIcon } from "lucide-react";
 import { FC, useEffect, useMemo, useState } from "react";
+import { UserAssetEntryIcon } from "../icons/EntryTypes";
 
 interface ImageUploadDialogProps {
   title: string;
@@ -83,7 +83,7 @@ const ImageUploadDialog: FC<ImageUploadDialogProps> = ({
           variant="outline"
           className="rounded-full"
         >
-          <FolderPlusIcon className="size-4" />
+          <UserAssetEntryIcon className="size-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
