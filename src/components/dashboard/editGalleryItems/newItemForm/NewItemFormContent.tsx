@@ -1,3 +1,4 @@
+import { ImageDropzone } from "@/components/media/ImageDropzone";
 import ButtonEditor from "@/components/timeline/ButtonEditor";
 import {
   FormControl,
@@ -13,6 +14,7 @@ import useGalleryById from "@/hooks/useGalleryById";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
 import { GalleryItemTypes } from "@/types/galleryItem";
+import { getFileAspectRatio } from "@/utils/media";
 import { FC, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
@@ -24,6 +26,10 @@ interface NewItemFormContentProps {
   setBlockchainAsset: (asset: ParsedBlockChainAsset | null) => void;
   setAspectRatio: (aspectRatio: number | null) => void; 
   galleryId: string;
+  uploadedImageFile?: File;
+  setUploadedImageFile: (file: File | undefined) => void;
+  previewImage: { url: string; aspectRatio: number } | null;
+  setPreviewImage: (image: { url: string; aspectRatio: number } | null) => void;
 }
 
 const NewItemFormContent: FC<NewItemFormContentProps> = ({
@@ -33,6 +39,10 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
   setBlockchainAsset,
   setAspectRatio,
   galleryId,
+  uploadedImageFile,
+  setUploadedImageFile,
+  previewImage,
+  setPreviewImage,
 }) => {
   const { gallery } = useGalleryById(galleryId);
   const source = gallery?.source || EntrySource.Creator;
@@ -46,6 +56,39 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
   }, [gallery?.items]);
   
   const isBlockchainEntry = selectedItemType === GalleryItemTypes.BlockchainAsset;
+  const isUserAssetEntry = selectedItemType === GalleryItemTypes.UserAsset;
+
+  const handleImageFileSelect = async (file: File) => {
+    // Clean up previous object URL if it exists
+    if (previewImage?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewImage.url);
+    }
+    
+    setUploadedImageFile(file);
+    
+    // Create object URL for preview
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Calculate aspect ratio
+    try {
+      const aspectRatio = await getFileAspectRatio(file);
+      setPreviewImage({ url: objectUrl, aspectRatio });
+    } catch (error) {
+      console.error("Failed to calculate image aspect ratio:", error);
+      setUploadedImageFile(undefined);
+      URL.revokeObjectURL(objectUrl);
+    }
+  };
+
+  const handleClearPreview = () => {
+    if (previewImage?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewImage.url);
+    }
+    setUploadedImageFile(undefined);
+    setPreviewImage(null);
+  };
+
+  const hideDetailInputs = (isBlockchainEntry && !blockchainAsset) || (isUserAssetEntry && !uploadedImageFile);
 
   return (
     <div className="flex flex-col gap-y-6">
@@ -59,50 +102,58 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
         />
       ) : null}
 
-      {isBlockchainEntry && !blockchainAsset
-        ? null
-        : (
-          <>
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {selectedItemType === GalleryItemTypes.Text ? "Content" : "Description"}
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={
-                        selectedItemType === GalleryItemTypes.Text
-                          ? "Enter text content"
-                          : "Enter description"
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <ButtonEditor form={form} />
-          </>
+      {isUserAssetEntry ? (
+        <div className="space-y-2">
+          <FormLabel>Image</FormLabel>
+          <ImageDropzone
+            onFileSelect={handleImageFileSelect}
+            previewUrl={previewImage?.url || null}
+            onClearPreview={handleClearPreview}
+            className="min-h-[200px]"
+          />
+        </div>
+      ) : null}
+
+      {hideDetailInputs ? null : (
+        <>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {selectedItemType === GalleryItemTypes.Text ? "Content" : "Description"}
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={
+                      selectedItemType === GalleryItemTypes.Text
+                        ? "Enter text content"
+                        : "Enter description"
+                    }
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <ButtonEditor form={form} />
+        </>
       )}
-
-
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { ImageSizing } from "@/constants/ui";
-import { GalleryItem, GalleryItemTypes } from "@/types/galleryItem";
-import { FC } from "react";
+import { UploadCategory } from "@/constants/uploadCategories";
+import { GalleryItem, GalleryItemTypes, isUserAssetGalleryItem } from "@/types/galleryItem";
+import { FC, useMemo } from "react";
 import MediaThumbnail from "../media/MediaThumbnail";
 import { P } from "../typography/Typography";
 import AssetItemDisplay from "./AssetItemDisplay";
@@ -16,6 +17,18 @@ export interface GalleryItemBaseProps {
 }
 
 const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription, sizeDivisor}) => {
+  // Create blobUrlBuilderProps for UserAssetGalleryItem
+  const blobUrlBuilderProps = useMemo(() => {
+    if (isUserAssetGalleryItem(item)) {
+      const userId = item.owner.toString();
+      return {
+        userId,
+        category: UploadCategory.UPLOADED_IMAGE,
+      };
+    }
+    return undefined;
+  }, [item]);
+
   if (item.itemType === GalleryItemTypes.Text) {
     return <TextItemDisplay item={item} />;
   }
@@ -24,7 +37,7 @@ const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescri
     item.itemType === GalleryItemTypes.BlockchainAsset ||
     item.itemType === GalleryItemTypes.UserAsset
   ) {
-    return <AssetItemDisplay item={item} hideTitle={hideTitle} hideDescription={hideDescription} sizeDivisor={sizeDivisor} />;
+    return <AssetItemDisplay item={item} hideTitle={hideTitle} hideDescription={hideDescription} sizeDivisor={sizeDivisor} blobUrlBuilderProps={blobUrlBuilderProps} />;
   }
 
   //TODO create and handle other item types
@@ -38,6 +51,18 @@ interface MiniGalleryItemBaseProps {
   imageSize?: ImageSizing;
 }
 export const MiniGalleryItemBase: FC<MiniGalleryItemBaseProps> = ({ item, priority, imageSize }) => {
+  // Create blobUrlBuilderProps for UserAssetGalleryItem
+  const blobUrlBuilderProps = useMemo(() => {
+    if (isUserAssetGalleryItem(item)) {
+      const userId = item.owner.toString();
+      return {
+        userId,
+        category: UploadCategory.UPLOADED_IMAGE,
+      };
+    }
+    return undefined;
+  }, [item]);
+
   if (item.itemType === GalleryItemTypes.Text) {
     return (
       <div className="text-center w-full p-2">
@@ -62,6 +87,7 @@ export const MiniGalleryItemBase: FC<MiniGalleryItemBaseProps> = ({ item, priori
         alt={item.title}
         rounding="rounded-sm"
         size={imageSize}
+        blobUrlBuilderProps={blobUrlBuilderProps}
       />
     );
   }
