@@ -1,5 +1,6 @@
 import { UploadCategory } from "@/constants/uploadCategories";
 import { isUserAssetEntry, TimelineEntry } from "@/types/entry";
+import { CdnIdType } from "@/types/media";
 import { makeUserImageBlobKey } from "@/utils/clientImageUpload";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { del } from "@vercel/blob";
@@ -32,9 +33,14 @@ export async function deleteEntryHandler(
     if (!entryToDelete) {
       throw new Error("Entry not found or you don't have permission to delete it");
     }
-
+    
     // If it's a UserAssetEntry, delete the blob first
     if (isUserAssetEntry(entryToDelete)) {
+      
+      if (entryToDelete.media.imageCdn.type !== CdnIdType.VERCEL_BLOB_USER_IMAGE) {
+        throw new Error("Only VERCEL_BLOB_USER_IMAGE entries can be deleted");
+      }
+
       const media = entryToDelete.media;
       if (media?.imageCdn?.cdnId) {
         const cdnId = media.imageCdn.cdnId;
