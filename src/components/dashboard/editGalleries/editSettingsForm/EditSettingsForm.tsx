@@ -173,7 +173,11 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
-          <EditSettingsContent form={form} bannerImage={bannerImage} setBannerImage={setBannerImage} />
+          <EditSettingsContent 
+            form={form} 
+            bannerImage={bannerImage} 
+            setBannerImage={setBannerImage}
+          />
         </form>
       </Form>
     </SideDrawer>

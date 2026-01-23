@@ -1,7 +1,8 @@
 "use client";
 import { ImageSizing, imageSizing } from "@/constants/ui";
 import { useImageFallback } from "@/hooks/useImageFallback";
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
+import resizeLoader from "@/utils/imageLoader";
 import { cn } from "@/utils/ui-utils";
 import { ImageOffIcon } from "lucide-react";
 import Image from "next/image";
@@ -10,6 +11,15 @@ import { AspectRatio } from "../ui/aspect-ratio";
 
 interface MediaThumbnailProps {
   media: MediaType;
+  /** 
+   * Set to false for public images.
+   * Keep true for user specific images. 
+   * 
+   * Custom loader skips the public Next.js cache but still caches them for an individual browser.
+   * Add "unoptimized" to skip optimization altogether
+   * */
+  useCustomLoader?: boolean;
+  unoptimized?: boolean;
   onLoad?: (imageElement: HTMLImageElement) => void;
   onError?: () => void;
   objectFit?: "object-cover" | "object-contain";
@@ -27,10 +37,13 @@ interface MediaThumbnailProps {
   priority?: boolean;
   noPadding?: boolean;
   quality?: number;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
 const MediaThumbnail: FC<MediaThumbnailProps> = ({
+  useCustomLoader = true,
   media,
+  unoptimized,
   onLoad,
   onError,
   objectFit = "object-contain",
@@ -42,6 +55,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
   priority,
   noPadding,
   quality = 50,
+  blobUrlBuilderProps,
 }) => {
   const {
     isLoaded,
@@ -50,7 +64,7 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
     imageUrl,
     onError: handleFallbackError,
     onLoad: handleFallbackLoad,
-  } = useImageFallback({ media, onFinalError: onError });
+  } = useImageFallback({ media, onFinalError: onError, blobUrlBuilderProps });
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     handleFallbackLoad();
@@ -66,6 +80,8 @@ const MediaThumbnail: FC<MediaThumbnailProps> = ({
 
     return (
       <Image
+        loader={useCustomLoader ? resizeLoader : undefined}
+        unoptimized={unoptimized}
         height={height}
         width={width}
         sizes={`${width}px`}

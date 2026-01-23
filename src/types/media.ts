@@ -1,3 +1,5 @@
+import { UploadCategory } from "@/constants/uploadCategories";
+
 export type ImageVariant = "default" | "profile" | "banner";
 
 export enum MediaOrigin {
@@ -19,7 +21,12 @@ export enum MediaCategory {
 
 export enum CdnIdType {
   HELIUS_URL = "helius_image_url",
-  CLOUDINARY_ID = "cloudinary_id",
+  VERCEL_BLOB_USER_IMAGE = "vercel_blob_user_image",
+}
+
+export interface BlobUrlBuilderProps {
+  userId: string;
+  category: UploadCategory;
 }
 
 export type Cdn = {
@@ -33,6 +40,7 @@ export type UserImage = BaseMedia & {
   category: MediaCategory.Image;
   imageCdn: Cdn;
 };
+
 export type UserMedia = BaseMedia & {
   origin: MediaOrigin.User;
   category: Omit<MediaCategory, MediaCategory.Image>;

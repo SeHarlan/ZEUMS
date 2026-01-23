@@ -215,8 +215,9 @@ const ChildrenAsset: FC<ChildrenAssetProps> = ({ childrenAsset}) => {
 
   return (
     <LinkButton href={newPath} className="gap-4 h-fit p-2 w-full justify-start">
-      <div className="flex-shrink-0 w-12 h-12">
+      <div className="shrink-0 w-12 h-12">
         <MediaThumbnail
+          unoptimized
           media={childrenAsset.media}
           rounding="rounded-sm"
           alt={childrenAsset.title}

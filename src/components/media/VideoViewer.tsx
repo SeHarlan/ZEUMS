@@ -92,6 +92,7 @@ const VideoViewer: FC<VideoViewerProps> = ({containerClassName, noLoadingAnimati
 
           {media?.aspectRatio && (
             <MediaThumbnail
+              useCustomLoader={false}
               media={media}
               alt={"video thumbnail"}
               className="opacity-75 bg-transparent"

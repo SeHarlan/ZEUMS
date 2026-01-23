@@ -1,4 +1,6 @@
 import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
+import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
+import ImageUploadDialog from "@/components/media/ImageUploadDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
 import { ProfileImage } from "@/components/timeline/ProfileImage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -9,17 +11,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { EntrySource } from "@/types/entry";
-import { ImageType } from "@/types/media";
+import { CdnIdType, ImageType, MediaCategory, MediaOrigin } from "@/types/media";
 import { UserType } from "@/types/user";
+import { getFileAspectRatio } from "@/utils/media";
 import { socialHandlesList } from "@/utils/ui-utils";
 import { getDisplayName } from "@/utils/user";
-import { ImagePlusIcon } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
-;
 
 interface EditProfileFormContentProps {
   user: UserType | null;
@@ -28,6 +31,8 @@ interface EditProfileFormContentProps {
   profileImage?: ImageType;
   setProfileImage: (image?: ImageType) => void;
   setBannerImage: (image?: ImageType) => void;
+  setUploadedProfileFile: (file: File | undefined) => void;
+  setUploadedBannerFile: (file: File | undefined) => void;
 }
 const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
   user,
@@ -36,13 +41,107 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
   profileImage,
   setProfileImage,
   setBannerImage,
+  setUploadedProfileFile,
+  setUploadedBannerFile,
 }) => {
   const [profileImageOpen, setProfileImageOpen] = useState(false);
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
+  const [uploadProfileDialogOpen, setUploadProfileDialogOpen] = useState(false);
+  const [uploadBannerDialogOpen, setUploadBannerDialogOpen] = useState(false);
 
   const {setStepRef: setPrimaryTimelineRef} = useTimelineSetter(
     TimelineOnboardingKeys.ChoosePrimaryTimeline
   );
+
+  const userId = user?._id?.toString();
+  // Create blobUrlBuilderProps for user-uploaded images
+  const profileBlobUrlBuilderProps = useMemo(() => {
+    if (!userId) return undefined;
+    return {
+      userId,
+      category: UploadCategory.PROFILE_PICTURE,
+    };
+  }, [userId]);
+
+  const bannerBlobUrlBuilderProps = useMemo(() => {
+    if (!userId) return undefined;
+    return {
+      userId,
+      category: UploadCategory.PROFILE_BANNER,
+    };
+  }, [userId]);
+
+  const handleProfileFileSelect = async (file: File) => {
+    // Clean up previous object URL if it exists
+    if (profileImage?.imageCdn?.cdnId?.startsWith("blob:")) {
+      URL.revokeObjectURL(profileImage.imageCdn.cdnId);
+    }
+    
+    setUploadedProfileFile(file);
+    
+    // Create object URL for preview and use it as cdnId
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Calculate aspect ratio
+    try {
+      const aspectRatio = await getFileAspectRatio(file);
+      
+      // Create temporary UserImage with object URL as cdnId for preview
+      const tempImage: ImageType = {
+        origin: MediaOrigin.User,
+        category: MediaCategory.Image,
+        imageCdn: {
+          type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+          cdnId: objectUrl, // Use object URL directly - constructor will detect it's a full blob URL
+        },
+        aspectRatio,
+      };
+      
+      setProfileImage(tempImage);
+    } catch (error) {
+      console.error("Failed to calculate profile image aspect ratio:", error);
+      
+      toast.error("Something's gone wrong", {
+        description: "Try again or choose a different image",
+      });
+    }
+  };
+
+  const handleBannerFileSelect = async (file: File) => {
+    // Clean up previous object URL if it exists
+    if (bannerImage?.imageCdn?.cdnId?.startsWith("blob:")) {
+      URL.revokeObjectURL(bannerImage.imageCdn.cdnId);
+    }
+    
+    setUploadedBannerFile(file);
+    
+    // Create object URL for preview and use it as cdnId
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Calculate aspect ratio
+    try {
+      const aspectRatio = await getFileAspectRatio(file);
+      
+      // Create temporary UserImage with object URL as cdnId for preview
+      const tempImage: ImageType = {
+        origin: MediaOrigin.User,
+        category: MediaCategory.Image,
+        imageCdn: {
+          type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+          cdnId: objectUrl, // Use object URL directly - constructor will detect it's a full URL
+        },
+        aspectRatio,
+      };
+      
+      setBannerImage(tempImage);
+    } catch (error) {
+      console.error("Failed to calculate banner image aspect ratio:", error);
+      
+      toast.error("Something's gone wrong", {
+        description: "Try again or choose a different image",
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col space-y-6 py-4">
@@ -112,36 +211,55 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
       <Separator />
       
       <div className="relative w-full h-fit">
-        <Button
-          type="button"
-          variant={user?.bannerImage ? "outline" : "default"}
-          size="icon"
-          className="absolute -top-2 -right-2 z-10 "
-          onClick={() => setBannerImageOpen(true)}
-        >
-          <ImagePlusIcon />
-        </Button>
+        <div className="absolute -top-2 -right-2 z-10 flex gap-2">
+          <ImageUploadDialog
+            title="Upload Banner Image"
+            description="Upload an image from your device to use as your banner"
+            onSelect={handleBannerFileSelect}
+            open={uploadBannerDialogOpen}
+            onOpenChange={setUploadBannerDialogOpen}
+          />
+          <Button
+            type="button"
+            variant={user?.bannerImage ? "outline" : "default"}
+            size="icon"
+            onClick={() => setBannerImageOpen(true)}
+          >
+            <BlockchainAssetEntryIcon />
+          </Button>
+        </div>
         <BannerImage
           media={bannerImage}
           className="text-5xl"
           fallbackText={getDisplayName(user) || "Z"}
+          blobUrlBuilderProps={bannerBlobUrlBuilderProps}
         />
       </div>
       <div className="w-full flex gap-3 sm:gap-6 flex-row items-center">
-        <div className="relative size-20 sm:size-26 flex-shrink-0">
-          <Button
-            type="button"
-            variant={user?.profileImage ? "outline" : "default"}
-            size="icon"
-            className="absolute top-0 right-0 z-10 "
-            onClick={() => setProfileImageOpen(true)}
-          >
-            <ImagePlusIcon />
-          </Button>
+        <div className="relative size-20 sm:size-26 shrink-0">
+          <div className="absolute top-0 right-0 z-10 flex gap-2">
+            <ImageUploadDialog
+              title="Upload Profile Image"
+              description="Upload an image from your device to use as your profile picture"
+              onSelect={handleProfileFileSelect}
+              open={uploadProfileDialogOpen}
+              onOpenChange={setUploadProfileDialogOpen}
+              maxFileSize={15 * 1024 * 1024} //15MB
+            />
+            <Button
+              type="button"
+              variant={user?.profileImage ? "outline" : "default"}
+              size="icon"
+              onClick={() => setProfileImageOpen(true)}
+            >
+              <BlockchainAssetEntryIcon />
+            </Button>
+          </div>
           <ProfileImage
             media={profileImage}
             fallbackText={getDisplayName(user).charAt(0).toUpperCase() || "Z"}
             className="text-4xl sm:text-6xl border-3"
+            blobUrlBuilderProps={profileBlobUrlBuilderProps}
           />
         </div>
 

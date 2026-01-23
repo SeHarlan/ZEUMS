@@ -1,7 +1,7 @@
 import { BANNER_RATIO, BANNER_RATIO_MOBILE } from "@/constants/ui";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { TITLE_COPY } from "@/textCopy/mainCopy";
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { FC } from "react";
 import MediaThumbnail from "../media/MediaThumbnail";
@@ -11,11 +11,13 @@ interface BannerImageProps {
   media?: MediaType;
   className?: string;
   fallbackText?: string;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 export const BannerImage: FC<BannerImageProps> = ({
   media,
   className,
   fallbackText = TITLE_COPY,
+  blobUrlBuilderProps,
 }) => {
   const { isMd, isLg, isXl, is2Xl} = useBreakpoints();
   
@@ -46,6 +48,7 @@ export const BannerImage: FC<BannerImageProps> = ({
   
   return (
     <MediaThumbnail
+      useCustomLoader={false}
       quality={90}
       size={width}
       media={media}
@@ -54,6 +57,7 @@ export const BannerImage: FC<BannerImageProps> = ({
       rounding="rounded-b-md"
       ratio={ratio}
       className={className}
+      blobUrlBuilderProps={blobUrlBuilderProps}
     />
   );
 };

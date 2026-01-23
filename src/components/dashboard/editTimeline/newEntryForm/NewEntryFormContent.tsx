@@ -1,3 +1,4 @@
+import { ImageDropzone } from "@/components/media/ImageDropzone";
 import ButtonEditor from "@/components/timeline/ButtonEditor";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource, EntryTypes } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
 import { getFirstBlockchainItem } from "@/utils/gallery";
+import { getFileAspectRatio } from "@/utils/media";
 import { getTimelineKey } from "@/utils/timeline";
 import { cn } from "@/utils/ui-utils";
 import { format } from "date-fns";
@@ -39,6 +41,10 @@ interface NewEntryFormContentProps {
   setGallery: (gallery: UserVirtualGalleryType | null) => void;
   handleGetMintDates: (tokenAddress?: string) => void;
   fetchingMintDate: boolean;
+  uploadedImageFile?: File;
+  setUploadedImageFile: (file: File | undefined) => void;
+  previewImage: { url: string; aspectRatio: number } | null;
+  setPreviewImage: (image: { url: string; aspectRatio: number } | null) => void;
 }
 
 const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
@@ -51,15 +57,50 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
   gallery,
   setGallery,
   fetchingMintDate,
-  source
+  source,
+  uploadedImageFile,
+  setUploadedImageFile,
+  previewImage,
+  setPreviewImage,
 }) => {
   const {user} = useUser();
   const isBlockchainEntry = selectedEntryType === EntryTypes.BlockchainAsset;
   const isGalleryEntry = selectedEntryType === EntryTypes.Gallery;
+  const isUserAssetEntry = selectedEntryType === EntryTypes.UserAsset;
 
   const hasFetchableDate = isBlockchainEntry || isGalleryEntry 
 
-  const hideDetailInputs = (isBlockchainEntry && !blockchainAsset) || isGalleryEntry && !gallery;
+  const hideDetailInputs = (isBlockchainEntry && !blockchainAsset) || (isGalleryEntry && !gallery) || (isUserAssetEntry && !uploadedImageFile);
+
+  const handleImageFileSelect = async (file: File) => {
+    // Clean up previous object URL if it exists
+    if (previewImage?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewImage.url);
+    }
+    
+    setUploadedImageFile(file);
+    
+    // Create object URL for preview
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Calculate aspect ratio
+    try {
+      const aspectRatio = await getFileAspectRatio(file);
+      setPreviewImage({ url: objectUrl, aspectRatio });
+    } catch (error) {
+      console.error("Failed to calculate image aspect ratio:", error);
+      setUploadedImageFile(undefined);
+      URL.revokeObjectURL(objectUrl);
+    }
+  };
+
+  const handleClearPreview = () => {
+    if (previewImage?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewImage.url);
+    }
+    setUploadedImageFile(undefined);
+    setPreviewImage(null);
+  };
   
   const timelineKey = getTimelineKey(source);
 
@@ -184,6 +225,18 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
           setEntryGallery={setGallery}
           source={source}
         />
+      ) : null}
+
+      {isUserAssetEntry ? (
+        <div className="space-y-2">
+          <FormLabel>Image</FormLabel>
+          <ImageDropzone
+            onFileSelect={handleImageFileSelect}
+            previewUrl={previewImage?.url || null}
+            onClearPreview={handleClearPreview}
+            className="min-h-[200px]"
+          />
+        </div>
       ) : null}
 
       {hideDetailInputs ? null : (

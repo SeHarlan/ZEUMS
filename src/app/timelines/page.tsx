@@ -7,12 +7,13 @@ import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { USER_TIMELINE } from "@/constants/clientRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import useUsersByPage from "@/hooks/useUsersByPage";
 import { PublicListUserType } from "@/types/user";
 import { cn } from "@/utils/ui-utils";
 import { getDisplayName } from "@/utils/user";
 import { useRouter } from "next/navigation";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
 export default function TimelinesPage() { 
   const { users, isLoading, isError } = useUsersByPage({ page: 1, limit: 16 });
@@ -42,6 +43,13 @@ const UserCard: FC<{ user: PublicListUserType }> = ({ user }) => {
   const handleClick = () => {
     router.push(USER_TIMELINE(user.username));
   }
+  const bannerBlobUrlBuilderProps = useMemo(() => {
+    return {
+      userId: user._id.toString(),
+      category: UploadCategory.PROFILE_BANNER,
+    };
+  }, [user]);
+  
   return (
      <Card
       className={cn(
@@ -51,9 +59,11 @@ const UserCard: FC<{ user: PublicListUserType }> = ({ user }) => {
     >
       <CardContent className="p-0 relative">
         <MediaThumbnail
+          useCustomLoader={false}
           media={user.bannerImage}
           alt={user.displayName}
           quality={80}
+          blobUrlBuilderProps={bannerBlobUrlBuilderProps}
         />
       </CardContent>
 

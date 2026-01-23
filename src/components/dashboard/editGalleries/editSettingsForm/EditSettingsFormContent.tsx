@@ -4,10 +4,12 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadCategory } from "@/constants/uploadCategories";
+import { useUser } from "@/context/UserProvider";
 import { UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { ImageType } from "@/types/media";
 import { ImagePlusIcon, Trash2Icon } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
 
@@ -19,6 +21,16 @@ interface EditSettingsContentProps {
 
 const EditSettingsContent: FC<EditSettingsContentProps> = ({ form, bannerImage, setBannerImage }) => { 
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
+  const {user} = useUser();
+  // Create blobUrlBuilderProps using the gallery owner's ID
+  const galleryOwnerId = user?._id?.toString();
+  const bannerBlobUrlBuilderProps = useMemo(() => {
+    if (!galleryOwnerId) return undefined;
+    return {
+      userId: galleryOwnerId,
+      category: UploadCategory.GALLERY_BANNER,
+    };
+  }, [galleryOwnerId]);
 
   return (
     <div className="h-fit space-y-6">
@@ -47,6 +59,7 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({ form, bannerImage, 
           media={bannerImage || undefined}
           className="text-5xl"
           fallbackText={"Banner Image"}
+          blobUrlBuilderProps={bannerBlobUrlBuilderProps}
         />
       </div>
 

@@ -5,12 +5,14 @@ import {
   BlockchainAssetEntryIcon,
   GalleryEntryIcon,
   TextEntryIcon,
+  UserAssetEntryIcon,
 } from "@/components/icons/EntryTypes";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { ENTRY_DATES_ROUTE, ENTRY_ROUTE } from "@/constants/serverRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { useUser } from "@/context/UserProvider";
 import { entryFormSchema, EntryFormValues } from "@/forms/upsertEntry";
 import {
@@ -18,6 +20,7 @@ import {
   ENTRY_TYPE_COPY,
   GALLERY_ENTRY_COPY,
   TEXT_ENTRY_COPY,
+  USER_ASSET_ENTRY_COPY,
 } from "@/textCopy/entryTypes";
 import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { DateMap, ParsedBlockChainAsset } from "@/types/asset";
@@ -26,11 +29,15 @@ import {
   EntryTypes,
   TimelineEntry,
   TimelineEntryCreation,
+  UserAssetEntry,
 } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
+import { CdnIdType, MediaCategory, MediaOrigin, UserImage } from "@/types/media";
+import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
 import { getFirstBlockchainItem } from "@/utils/gallery";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
+import { getFileAspectRatio } from "@/utils/media";
 import {
   addPreciseCurrentTime,
   getTimelineKey,
@@ -79,7 +86,7 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
     },
     ref
   ) => {
-    const { setUser } = useUser();
+    const { user, setUser } = useUser();
     const [formOpen, setFormOpen] = useAtom(addTimelineEntriesFormOpenAtom);
     const [submitting, setSubmitting] = useState(false);
     const [fetchingMintDate, setFetchingMintDate] = useState(false);
@@ -87,7 +94,9 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
       useState<ParsedBlockChainAsset | null>(null);
     const [gallery, setGallery] = useState<UserVirtualGalleryType | null>(null);
     const [aspectRatio, setAspectRatio] = useState<number | null>(null);
-    const [contentChosen, setContentChosen] = useState(false)
+    const [contentChosen, setContentChosen] = useState(false);
+    const [uploadedImageFile, setUploadedImageFile] = useState<File | undefined>();
+    const [previewImage, setPreviewImage] = useState<{ url: string; aspectRatio: number } | null>(null);
 
     const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
 
@@ -115,7 +124,8 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
  
     const disableSubmit =
       (selectedEntryType === EntryTypes.BlockchainAsset && !blockchainAsset) ||
-      (selectedEntryType === EntryTypes.Gallery && !gallery);
+      (selectedEntryType === EntryTypes.Gallery && !gallery) ||
+      (selectedEntryType === EntryTypes.UserAsset && !uploadedImageFile);
 
     const timelineKey = getTimelineKey(source);
 
@@ -221,6 +231,12 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
         setBlockchainAsset(null);
         setGallery(null);
         setAspectRatio(null);
+        setUploadedImageFile(undefined);
+        // Clean up blob URL if it exists
+        if (previewImage?.url.startsWith("blob:")) {
+          URL.revokeObjectURL(previewImage.url);
+        }
+        setPreviewImage(null);
         reset();
         prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
         setContentChosen(false);
@@ -236,7 +252,7 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
       }
     };
 
-    const onSubmit = (data: EntryFormValues) => {
+    const onSubmit = async (data: EntryFormValues) => {
       setSubmitting(true);
 
       data.date = addPreciseCurrentTime(data.date);
@@ -281,6 +297,78 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
           ...entryCreationData,
           galleryId: gallery._id.toString(),
         };
+      }
+
+      if (data.entryType === EntryTypes.UserAsset) {
+        if (!uploadedImageFile) {
+          toast.error("Please select an image to upload.");
+          setSubmitting(false);
+          return;
+        }
+
+        if (!user?._id) {
+          toast.error("User must be logged in.");
+          setSubmitting(false);
+          return;
+        }
+
+        const userId = user._id.toString();
+
+        try {
+          // Generate image ID: use filename or UUID with extension
+          const fileExtension = getFileExtension(uploadedImageFile);
+          const filename = uploadedImageFile.name.trim();
+          const imageId = filename && filename.length > 0
+            ? filename
+            : `${crypto.randomUUID()}${fileExtension}`;
+
+          const blobKey = makeUserImageBlobKey(
+            userId,
+            UploadCategory.UPLOADED_IMAGE,
+            imageId
+          );
+
+          toast.info("Uploading image...");
+
+          // Upload to Vercel Blob
+          await clientImageUpload(uploadedImageFile, blobKey);
+
+          // Calculate aspect ratio
+          const aspectRatio = previewImage?.aspectRatio || await getFileAspectRatio(uploadedImageFile);
+
+          // Create UserImage object
+          const userImage: UserImage = {
+            origin: MediaOrigin.User,
+            category: MediaCategory.Image,
+            imageCdn: {
+              type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+              cdnId: imageId,
+            },
+            aspectRatio,
+          };
+
+          // Create UserAssetEntry creation data (similar to BlockchainAsset pattern)
+          const userAssetEntry: Omit<UserAssetEntry, "owner" | "_id"> = {
+            ...entryCreationData,
+            entryType: EntryTypes.UserAsset,
+            media: userImage,
+          };
+
+          entryCreationData = userAssetEntry;
+        } catch (error) {
+          handleClientError({
+            error,
+            location: "NewEntryForm_onSubmit_UserAsset",
+          });
+          
+          if (error instanceof Error) {
+            toast.error(error.message || "Failed to upload image. Please try again.");
+          } else {
+            toast.error("Failed to upload image. Please try again.");
+          }
+          setSubmitting(false);
+          return;
+        }
       }
 
       axios
@@ -385,6 +473,10 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
                   setGallery={setGallery}
                   setAspectRatio={setAspectRatio}
                   source={source}
+                  uploadedImageFile={uploadedImageFile}
+                  setUploadedImageFile={setUploadedImageFile}
+                  previewImage={previewImage}
+                  setPreviewImage={setPreviewImage}
                 />
               </form>
             </Form>
@@ -412,8 +504,24 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
             </AddBlockchainEntriesButton>
 
             <Button
+              onClick={() => handleChooseContent(EntryTypes.UserAsset)}
+              variant="default"
+              className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+            >
+              <UserAssetEntryIcon className="size-12 text-neutral-400" />
+              <div className="text-left min-w-0">
+                <P className="font-bold text-lg ">
+                  {USER_ASSET_ENTRY_COPY.title}
+                </P>
+                <P className="text-sm text-neutral-400">
+                  {USER_ASSET_ENTRY_COPY.description}
+                </P>
+              </div>
+            </Button>
+
+            <Button
               onClick={() => handleChooseContent(EntryTypes.Text)}
-              variant="outline"
+              variant="secondary"
               className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
             >
               <TextEntryIcon className="size-12 text-muted-foreground" />
@@ -426,7 +534,7 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
               </div>
             </Button>
             <Button
-              variant="default"
+              variant="secondary"
               className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
               onClick={() => handleChooseContent(EntryTypes.Gallery)}
             >

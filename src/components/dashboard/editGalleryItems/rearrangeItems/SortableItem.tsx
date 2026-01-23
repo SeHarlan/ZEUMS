@@ -51,7 +51,7 @@ const SortableItem: FC<SortableItemProps> = ({ processedItem, hoverSide }) => {
       </div>
 
       {hoverSide && (
-        <div
+        <div  
           className={cn(
             "h-full absolute z-30 w-1 bg-muted-foreground rounded-md top-1/2 -translate-y-1/2",
             hoverSide === "left" && "-left-1",

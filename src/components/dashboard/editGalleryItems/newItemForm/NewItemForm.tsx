@@ -1,24 +1,28 @@
 "use client";
 import SideDrawer from "@/components/general/SideDrawer";
-import { BlockchainAssetEntryIcon, TextEntryIcon } from "@/components/icons/EntryTypes";
+import { BlockchainAssetEntryIcon, TextEntryIcon, UserAssetEntryIcon } from "@/components/icons/EntryTypes";
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { useUser } from "@/context/UserProvider";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
 
 import { newGalleryItemFormOpenAtom } from "@/atoms/dashboard";
-import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
+import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY, USER_ASSET_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
 import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
-import { GalleryItem, GalleryItemCreation, GalleryItemTypes } from "@/types/galleryItem";
+import { GalleryItem, GalleryItemCreation, GalleryItemTypes, UserAssetGalleryItem } from "@/types/galleryItem";
+import { CdnIdType, MediaCategory, MediaOrigin, UserImage } from "@/types/media";
+import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
 import { getLastGalleryRowIndex } from "@/utils/gallery";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
+import { getFileAspectRatio } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -55,6 +59,8 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
   const [blockchainAsset, setBlockchainAsset] = useState<ParsedBlockChainAsset | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const [contentChosen, setContentChosen] = useState<boolean>(false);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | undefined>();
+  const [previewImage, setPreviewImage] = useState<{ url: string; aspectRatio: number } | null>(null);
 
   const prevBlockchainAssetRef = useRef<ParsedBlockChainAsset | null>(null);
   const prevGalleryItemTypeRef = useRef<GalleryItemTypes>(
@@ -81,6 +87,7 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
   const disableSubmit =
     (selectedGalleryItemType === GalleryItemTypes.BlockchainAsset &&
       !blockchainAsset) ||
+    (selectedGalleryItemType === GalleryItemTypes.UserAsset && !uploadedImageFile) ||
     !user;
   
   const blockchainAddText = source === EntrySource.Creator ? "created" : "collected";
@@ -133,19 +140,31 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
     // Only reset if selectedGalleryItemType changed
     if (selectedGalleryItemType !== prevGalleryItemTypeRef.current) {
       setBlockchainAsset(null);
+      // Clean up preview image if switching away from UserAsset
+      if (prevGalleryItemTypeRef.current === GalleryItemTypes.UserAsset && previewImage?.url.startsWith("blob:")) {
+        URL.revokeObjectURL(previewImage.url);
+      }
+      setUploadedImageFile(undefined);
+      setPreviewImage(null);
       reset({
         ...defaultValues,
         itemType: selectedGalleryItemType,
       });
       prevGalleryItemTypeRef.current = selectedGalleryItemType;
     }
-  }, [selectedGalleryItemType, reset, defaultValues]);
+  }, [selectedGalleryItemType, reset, defaultValues, previewImage]);
 
   const fullFormReset = () => {
     //don't rest state till drawer has fully closed
     setTimeout(() => {
       setBlockchainAsset(null);
       setAspectRatio(null);
+      // Clean up preview image
+      if (previewImage?.url.startsWith("blob:")) {
+        URL.revokeObjectURL(previewImage.url);
+      }
+      setUploadedImageFile(undefined);
+      setPreviewImage(null);
       reset(defaultValues);
       prevBlockchainAssetRef.current = null;
       prevGalleryItemTypeRef.current = GalleryItemTypes.BlockchainAsset;
@@ -160,7 +179,7 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
       }
     }
   };
-  const onSubmit = (data: GalleryItemFormValues) => {
+  const onSubmit = async (data: GalleryItemFormValues) => {
     if (!user || !gallery) return;
 
     setSubmitting(true);
@@ -202,6 +221,80 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
         ...assetWithAspectRatio,
         ...itemCreationData,
       };
+    }
+
+    if (data.itemType === GalleryItemTypes.UserAsset) {
+      if (!uploadedImageFile) {
+        toast.error("Please select an image to upload.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!user?._id) {
+        toast.error("User must be logged in.");
+        setSubmitting(false);
+        return;
+      }
+
+      const userId = user._id.toString();
+
+      try {
+        // Generate image ID: use filename or UUID with extension
+        const fileExtension = getFileExtension(uploadedImageFile);
+        const filename = uploadedImageFile.name.trim();
+        const imageId = filename && filename.length > 0
+          ? filename
+          : `${crypto.randomUUID()}${fileExtension}`;
+
+        const blobKey = makeUserImageBlobKey(
+          userId,
+          UploadCategory.UPLOADED_IMAGE,
+          imageId
+        );
+
+        toast.info("Uploading image...");
+
+        // Upload to Vercel Blob
+        await clientImageUpload(uploadedImageFile, blobKey);
+
+        // Calculate aspect ratio
+        const aspectRatio = previewImage?.aspectRatio || await getFileAspectRatio(uploadedImageFile);
+
+        // Create UserImage object
+        const userImage: UserImage = {
+          origin: MediaOrigin.User,
+          category: MediaCategory.Image,
+          imageCdn: {
+            type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+            cdnId: imageId,
+          },
+          aspectRatio,
+        };
+
+        // Create UserAssetGalleryItem creation data (similar to BlockchainAsset pattern)
+        const userAssetItem:
+          Omit<UserAssetGalleryItem, "owner" | "_id" | "parentGalleryId">
+          & { parentGalleryId: string } = {
+            ...itemCreationData,
+            itemType: GalleryItemTypes.UserAsset,
+            media: userImage,
+          };
+
+        itemCreationData = userAssetItem;
+      } catch (error) {
+        handleClientError({
+          error,
+          location: "NewItemForm_onSubmit_UserAsset",
+        });
+        
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to upload image. Please try again.");
+        } else {
+          toast.error("Failed to upload image. Please try again.");
+        }
+        setSubmitting(false);
+        return;
+      }
     }
 
     axios
@@ -297,6 +390,10 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
                 setBlockchainAsset={setBlockchainAsset}
                 setAspectRatio={setAspectRatio}
                 galleryId={galleryId}
+                uploadedImageFile={uploadedImageFile}
+                setUploadedImageFile={setUploadedImageFile}
+                previewImage={previewImage}
+                setPreviewImage={setPreviewImage}
               />
             </form>
           </Form>
@@ -325,8 +422,24 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
           </AddBlockchainGalleryItems>
 
           <Button
+            onClick={() => handleChooseContent(GalleryItemTypes.UserAsset)}
+            variant="default"
+            className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
+          >
+            <UserAssetEntryIcon className="size-12 text-neutral-400" />
+            <div className="text-left min-w-0">
+              <P className="font-bold text-lg ">
+                {USER_ASSET_GALLERY_ITEM_COPY.title}
+              </P>
+              <P className="text-sm text-neutral-400">
+                {USER_ASSET_GALLERY_ITEM_COPY.description}
+              </P>
+            </div>
+          </Button>
+
+          <Button
             onClick={() => handleChooseContent(GalleryItemTypes.Text)}
-            variant="outline"
+            variant="secondary"
             className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
           >
             <TextEntryIcon className="size-12 text-muted-foreground" />

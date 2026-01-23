@@ -1,4 +1,4 @@
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import MediaThumbnail from "../media/MediaThumbnail";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -7,12 +7,14 @@ interface ProfileImageProps {
   media?: MediaType;
   className?: string;
   fallbackText?: string;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
 export const ProfileImage = ({
   media,
   className = "size-6",
   fallbackText = "Z",
+  blobUrlBuilderProps,
 }: ProfileImageProps) => {
 
   if (!media)
@@ -31,6 +33,7 @@ export const ProfileImage = ({
 
   return (
     <MediaThumbnail
+      useCustomLoader={false}
       quality={85}
       media={media}
       alt={"Profile Image"}
@@ -38,6 +41,7 @@ export const ProfileImage = ({
       rounding="rounded-full"
       ratio={1}
       className={className}
+      blobUrlBuilderProps={blobUrlBuilderProps}
     />
   );
 };
