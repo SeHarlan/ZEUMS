@@ -90,6 +90,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
     } catch (error) {
       console.error("Failed to calculate image aspect ratio:", error);
       setUploadedImageFile(undefined);
+      URL.revokeObjectURL(objectUrl);
     }
   };
 
