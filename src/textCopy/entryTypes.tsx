@@ -10,7 +10,7 @@ export const TEXT_ENTRY_COPY = {
   description: "Add extra context to your timeline with text.",
 };
 export const USER_ASSET_ENTRY_COPY = {
-  title: "Uploaded",
+  title: "Uploaded Media",
   description: "Upload and display your own media",
 };
 export const GALLERY_ENTRY_COPY = {

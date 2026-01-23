@@ -521,7 +521,7 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
 
             <Button
               onClick={() => handleChooseContent(EntryTypes.Text)}
-              variant="outline"
+              variant="secondary"
               className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
             >
               <TextEntryIcon className="size-12 text-muted-foreground" />
@@ -534,7 +534,7 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
               </div>
             </Button>
             <Button
-              variant="default"
+              variant="secondary"
               className="rounded-lg w-full h-26 has-[>svg]:px-6 text-md flex justify-start items-center gap-6 whitespace-normal"
               onClick={() => handleChooseContent(EntryTypes.Gallery)}
             >
