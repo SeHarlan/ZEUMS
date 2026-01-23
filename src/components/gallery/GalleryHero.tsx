@@ -2,12 +2,13 @@ import { ProfileImage } from "@/components/timeline/ProfileImage";
 import { H1, P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
 import { USER_TIMELINE } from "@/constants/clientRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { EntrySource } from "@/types/entry";
 import { getDisplayName } from "@/utils/user";
 
 import { GalleryType } from "@/types/gallery";
 import { cn } from "@/utils/ui-utils";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { EditGallerySettingsButton } from "../dashboard/editGalleryItems/EditGallerySettingsButton";
 import { PAGE_PADDING_X } from "../general/PageContainer";
 import { BannerImage } from "../timeline/BannerImage";
@@ -24,7 +25,24 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
   const attributionLink = username ? USER_TIMELINE(username) : "";
   const profileImage = gallery?.ownerData?.profileImage;
 
-  const bannerMedia = gallery?.bannerImage
+  const bannerMedia = gallery?.bannerImage;
+
+  // Create blobUrlBuilderProps using the gallery owner's ID
+  const galleryBannerBlobUrlBuilderProps = useMemo(() => {
+    if (!gallery?.owner) return undefined;
+    return {
+      userId: gallery.owner.toString(),
+      category: UploadCategory.GALLERY_BANNER,
+    };
+  }, [gallery]);
+
+  const profileBlobUrlBuilderProps = useMemo(() => {
+    if (!gallery?.owner) return undefined;
+    return {
+      userId: gallery.owner.toString(),
+      category: UploadCategory.PROFILE_PICTURE,
+    };
+  }, [gallery]);
 
   return (
     <div>
@@ -33,6 +51,7 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
           media={bannerMedia}
           className="text-5xl mb-6 md:mb-12 md:shadow-lg rounded-none xl:rounded-b-md"
           fallbackText={gallery?.title}
+          blobUrlBuilderProps={galleryBannerBlobUrlBuilderProps}
         />
       )}
 
@@ -61,7 +80,8 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
           <div className="size-10">
             <ProfileImage
               media={profileImage}
-              className="flex-shrink-0 border"
+              className="shrink-0 border"
+              blobUrlBuilderProps={profileBlobUrlBuilderProps}
             />
           </div>
           <P>

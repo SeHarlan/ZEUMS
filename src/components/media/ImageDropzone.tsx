@@ -41,12 +41,15 @@ export interface ImageDropzoneProps {
 }
 
 const DEFAULT_MAX_FILE_SIZE = 33 * 1024 * 1024; // 33MB
+
+
+
 const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
-  "image/gif",
   "image/webp",
+  "image/gif",
   "image/svg+xml",
 ] as const;
 

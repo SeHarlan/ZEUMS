@@ -6,7 +6,7 @@ import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
 import { BlockchainAssetGalleryItem, isBlockchainAssetGalleryItem, isGalleryItem, UserAssetGalleryItem } from "@/types/galleryItem";
-import { isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
+import { BlobUrlBuilderProps, isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import { getMediaUrl } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import { BoxIcon, Code2Icon, FullscreenIcon, ImageOffIcon, VideoOffIcon } from "lucide-react";
@@ -30,6 +30,7 @@ interface AssetViewerProps {
   aspectRatio?: "square" | "media-defined";
   className?: string;
   sizeDivisor?: number;
+  blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
 const AssetViewer: FC<AssetViewerProps> = ({
@@ -39,12 +40,13 @@ const AssetViewer: FC<AssetViewerProps> = ({
   /** caps at MAX_SIZE_DIVISOR to align with next config device sizes */
   sizeDivisor = 1,
   className,
+  blobUrlBuilderProps,
 }) => {
   const router = useRouter();
   const { isMd, isLg, isXl, is2Xl } = useBreakpoints();
 
   const { isLoaded, isLoading, isError, imageUrl, onError, onLoad } =
-    useImageFallback({ media: asset.media });
+    useImageFallback({ media: asset.media, blobUrlBuilderProps });
 
   const [videoError, setVideoError] = useState(false);
 

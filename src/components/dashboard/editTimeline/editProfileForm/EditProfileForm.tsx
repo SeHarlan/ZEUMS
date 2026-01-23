@@ -10,20 +10,23 @@ import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { USER_ROUTE } from "@/constants/serverRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { useUser } from "@/context/UserProvider";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
 import { EntrySource } from "@/types/entry";
-import { MediaOrigin } from "@/types/media";
+import { CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { UserType } from "@/types/user";
+import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
+import { getFileAspectRatio } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import { parseUserDates } from "@/utils/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useAtom } from "jotai";
 import { SettingsIcon } from "lucide-react";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import EditProfileFormContent from "./EditProfileFormConent";
@@ -55,6 +58,12 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
 
     const [profileImage, setProfileImage] = useState(user?.profileImage);
     const [bannerImage, setBannerImage] = useState(user?.bannerImage);
+    const [uploadedProfileFile, setUploadedProfileFile] = useState<File | undefined>();
+    const [uploadedBannerFile, setUploadedBannerFile] = useState<File | undefined>();
+    
+    // Track original images to detect new uploads (using ref to avoid unnecessary re-renders)
+    const originalProfileImageRef = useRef(user?.profileImage);
+    const originalBannerImageRef = useRef(user?.bannerImage);
 
     const {
       setStepRef: setSaveProfileRef,
@@ -98,7 +107,7 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
       }
     };
 
-    const onSubmit = formHook.handleSubmit((data) => {
+    const onSubmit = formHook.handleSubmit(async (data) => {
       setSubmitting(true);
 
       const socialHandles = data.socialHandles;
@@ -107,52 +116,137 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
         socialHandles.website = addHttpsPrefix(socialHandles.website);
       }
 
-      if (profileImage && profileImage.origin === MediaOrigin.User) {
-      
+      if (!user?._id) {
+        toast.error("User must be logged in.");
+        setSubmitting(false);
+        return;
       }
 
-      const userData: Partial<UserType> = {
-        ...data,
-        socialHandles,
-        profileImage,
-        bannerImage,
-      };
+      const userId = user._id.toString();
 
-      axios
-        .patch<{ user: UserType }>(USER_ROUTE, userData)
-        .then((response) => {
-          toast.success("Profile updated successfully!");
-          const userData = parseUserDates(response.data.user);
+      let finalProfileImage = profileImage;
+      let finalBannerImage = bannerImage;
 
-          setUser(userData);
-          setFormOpen(false);
-          setSaveProfileComplete();
-        })
-        .catch((error) => {
-          handleClientError({
-            error,
-            location: "EditProfileForm_onSubmit",
-          });
-          toast.error("Failed to update profile.");
-        })
-        .finally(() => {
-          setSubmitting(false);
+      try {
+        // Check if profile image is a new User upload
+        const isNewProfileUpload = 
+          profileImage?.origin === MediaOrigin.User &&
+          uploadedProfileFile &&
+          profileImage !== originalProfileImageRef.current;
+
+        if (isNewProfileUpload) {
+          // Get file extension and create blob key
+          const fileExtension = getFileExtension(uploadedProfileFile);
+          const imageId = `image${fileExtension}`
+          const blobKey = makeUserImageBlobKey(
+            userId,
+            UploadCategory.PROFILE_PICTURE,
+            imageId
+          );
+
+          toast.info(`Uploading new profile image...`);
+
+          // Upload to Vercel Blob
+          await clientImageUpload(uploadedProfileFile, blobKey);
+          
+          // Calculate aspect ratio if not already set
+          const aspectRatio = profileImage.aspectRatio || await getFileAspectRatio(uploadedProfileFile);
+
+          // Create final UserImage object
+          finalProfileImage = {
+            origin: MediaOrigin.User,
+            category: MediaCategory.Image,
+            imageCdn: {
+              type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+              cdnId: imageId, // Just the id
+            },
+            aspectRatio,
+          };
+        }
+
+        // Check if banner image is a new User upload
+        const isNewBannerUpload = 
+          bannerImage?.origin === MediaOrigin.User &&
+          uploadedBannerFile &&
+          bannerImage !== originalBannerImageRef.current;
+
+        if (isNewBannerUpload) {
+          // Get file extension and create blob key
+          const fileExtension = getFileExtension(uploadedBannerFile);
+          const imageId = `image${fileExtension}`
+          const blobKey = makeUserImageBlobKey(
+            userId,
+            UploadCategory.PROFILE_BANNER,
+            imageId
+          );
+
+          toast.info(`Uploading new banner image...`);
+
+          // Upload to Vercel Blob
+          await clientImageUpload(uploadedBannerFile, blobKey);
+          
+          // Calculate aspect ratio if not already set
+          const aspectRatio = bannerImage.aspectRatio || await getFileAspectRatio(uploadedBannerFile);
+
+          // Create final UserImage object
+          finalBannerImage = {
+            origin: MediaOrigin.User,
+            category: MediaCategory.Image,
+            imageCdn: {
+              type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+              cdnId: imageId, // Just the image id
+            },
+            aspectRatio,
+          };
+        }
+
+        const userData: Partial<UserType> = {
+          ...data,
+          socialHandles,
+          profileImage: finalProfileImage,
+          bannerImage: finalBannerImage,
+        };
+
+        const response = await axios.patch<{ user: UserType }>(USER_ROUTE, userData);
+        
+        toast.success("Profile updated successfully!");
+        const updatedUserData = parseUserDates(response.data.user);
+
+        setUser(updatedUserData);
+        setFormOpen(false);
+        setSaveProfileComplete();
+      } catch (error) {
+        handleClientError({
+          error,
+          location: "EditProfileForm_onSubmit",
         });
+        
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to update profile.");
+        } else {
+          toast.error("Failed to update profile.");
+        }
+      } finally {
+        setSubmitting(false);
+      }
     });
 
+    // Reset uploaded files and clean up blob URLs when dialog closes
     useEffect(() => {
-      if (user?.profileImage && !profileImage) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setProfileImage(user.profileImage);
+      setUploadedProfileFile(undefined);
+      setUploadedBannerFile(undefined);
+      
+      if (formOpen) {
+        // Reset to user's actual images (not blob: URLs)
+        originalProfileImageRef.current = user?.profileImage;
+        originalBannerImageRef.current = user?.bannerImage;
+        setProfileImage(user?.profileImage);
+        setBannerImage(user?.bannerImage);
       }
-    }, [user?.profileImage, profileImage]);
 
-    useEffect(() => {
-      if (user?.bannerImage && !bannerImage) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setBannerImage(user.bannerImage);
-      }
-    }, [user?.bannerImage, bannerImage]);
+      //we only wanna run this effect when the formOpen state changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formOpen]);
 
     return (
       <SideDrawer
@@ -195,6 +289,8 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
               setBannerImage={setBannerImage}
               bannerImage={bannerImage}
               profileImage={profileImage}
+              setUploadedProfileFile={setUploadedProfileFile}
+              setUploadedBannerFile={setUploadedBannerFile}
             />
           </form>
         </Form>

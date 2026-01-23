@@ -74,6 +74,31 @@ export async function clientImageUpload(
 const DEFAULT_BLOB_BASE_URL = "https://p1v6uvkvzbjkuo1l.public.blob.vercel-storage.com";
 
 /**
+ * Gets the file extension from a File object, falling back to MIME type if filename doesn't have an extension.
+ * 
+ * @param file - The File object
+ * @returns The file extension including the dot (e.g., ".jpg", ".png")
+ */
+export const getFileExtension = (file: File): string => {
+  const fileName = file.name;
+  const lastDotIndex = fileName.lastIndexOf(".");
+  
+  if (lastDotIndex > 0) {
+    return fileName.substring(lastDotIndex);
+  }
+  
+  // Fallback to MIME type
+  if (file.type === "image/png") return ".png";
+  if (file.type === "image/gif") return ".gif";
+  if (file.type === "image/webp") return ".webp";
+  if (file.type === "image/svg+xml") return ".svg";
+  if (file.type === "image/jpeg" || file.type === "image/jpg") return ".jpg";
+  
+  // Default to .jpg
+  return ".jpg";
+};
+
+/**
  * Sanitizes a filename to prevent path traversal and other security issues.
  * Only sanitizes the filename part, not full paths.
  * 
@@ -123,10 +148,11 @@ export const makeUserImageBlobKey = (
 /**
  * Constructs a Vercel Blob URL for user images.
  * 
- * Option 1: If cdnId contains the full blob key (userId/category/filename), use it directly.
- * Option 2: If cdnId is just the filename, provide userId and category.
+ * Option 1: If cdnId is a full URL (http://, https://, or blob:), return it as-is.
+ * Option 2: If cdnId contains the full blob key (userId/category/filename), use it directly.
+ * Option 3: If cdnId is just the filename, provide userId and category.
  * 
- * @param cdnId - Either the full blob key OR just the filename
+ * @param cdnId - Either a full URL, full blob key, OR just the filename
  * @param userId - User ID (required if cdnId is just a filename)
  * @param category - enum UploadCategory (required if cdnId is just a filename)
  * @param baseUrl - Optional base URL
@@ -138,6 +164,11 @@ export const constructVercelBlobUserImageUrl = (
   category?: UploadCategory,
   baseUrl?: string
 ): string => {
+  // If cdnId is already a full URL (http://, https://, or blob:), return it as-is
+  if (cdnId.startsWith("http://") || cdnId.startsWith("https://") || cdnId.startsWith("blob:")) {
+    return cdnId;
+  }
+  
   // If cdnId already contains slashes, assume it's the full key
   const isFullKey = cdnId.includes("/");
   

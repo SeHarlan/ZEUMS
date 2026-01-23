@@ -125,6 +125,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
       _id: editingEntry._id,
       ...data,
     };
+
     axios
       .patch<{ updatedEntry: TimelineEntry }>(ENTRY_ROUTE, updatedEntryData)
       .then((response) => {

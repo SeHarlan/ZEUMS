@@ -1,20 +1,21 @@
 import { useHasErroredImage } from "@/atoms/media";
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
 import { getImageUrlSources } from "@/utils/media";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseImageFallbackProps {
   media: MediaType;
   onFinalError?: () => void;
+   blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
 
-export const useImageFallback = ({ media, onFinalError}: UseImageFallbackProps) => {
+export const useImageFallback = ({ media, onFinalError, blobUrlBuilderProps}: UseImageFallbackProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isLoaded, setLoaded] = useState(false);
   const [hasErrored, setHasErrored] = useHasErroredImage(media);
 
   const onLoad = () => setLoaded(true);
-  const sources = getImageUrlSources(media);
+  const sources = getImageUrlSources(media, blobUrlBuilderProps);
 
   const errorCount = imageIndex;
   const isError = hasErrored || errorCount >= sources.length;
