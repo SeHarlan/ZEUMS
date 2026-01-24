@@ -18,7 +18,7 @@ import { ParsedBlockChainAsset } from "@/types/asset";
 import { EntrySource } from "@/types/entry";
 import { GalleryItem, GalleryItemCreation, GalleryItemTypes, UserAssetGalleryItem } from "@/types/galleryItem";
 import { CdnIdType, MediaCategory, MediaOrigin, UserImage } from "@/types/media";
-import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
+import { clientImageUpload, getFileExtension, makeUserImageBlobKey, sanitizeFilename } from "@/utils/clientImageUpload";
 import { getLastGalleryRowIndex } from "@/utils/gallery";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
@@ -241,9 +241,16 @@ const NewItemForm = forwardRef<HTMLButtonElement, NewItemFormProps>(({
       try {
         // Generate image ID: use filename or UUID with extension
         const fileExtension = getFileExtension(uploadedImageFile);
-        const filename = uploadedImageFile.name.trim();
-        const imageId = filename && filename.length > 0
-          ? filename
+        const originalFilename = uploadedImageFile.name.trim();
+        
+        // Sanitize the filename before using it
+        const sanitizedFilename = originalFilename && originalFilename.length > 0
+          ? sanitizeFilename(originalFilename)
+          : `${crypto.randomUUID()}${fileExtension}`;
+        
+        // Ensure we have a valid filename (fallback to UUID if sanitization resulted in empty)
+        const imageId = sanitizedFilename && sanitizedFilename.length > 0
+          ? sanitizedFilename
           : `${crypto.randomUUID()}${fileExtension}`;
 
         const blobKey = makeUserImageBlobKey(
