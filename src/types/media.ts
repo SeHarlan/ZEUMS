@@ -21,6 +21,7 @@ export enum MediaCategory {
 
 export enum CdnIdType {
   HELIUS_URL = "helius_image_url",
+  VERCEL_BLOB_USER_VIDEO = "vercel_blob_user_video",
   VERCEL_BLOB_USER_IMAGE = "vercel_blob_user_image",
 }
 

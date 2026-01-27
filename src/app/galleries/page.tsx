@@ -7,12 +7,15 @@ import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { USER_GALLERY } from "@/constants/clientRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
 import useGalleriesByPage from "@/hooks/useGalleriesByPage";
 import { PublicGalleryType } from "@/types/gallery";
+import { isUserAssetGalleryItem } from "@/types/galleryItem";
+import { MediaCategory } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { getDisplayName } from "@/utils/user";
 import { useRouter } from "next/navigation";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
 export default function GalleriesPage() { 
   const { galleries, isLoading, isError } = useGalleriesByPage({ page: 1, limit: 16 });
@@ -39,22 +42,45 @@ export default function GalleriesPage() {
 
 const GalleryCard: FC<{ gallery: PublicGalleryType }> = ({ gallery }) => {
   const router = useRouter();
+
+  // Get the first item's media for the thumbnail
+  const itemOne = gallery.items[0];
+  const thumbnailMedia = itemOne.media;
+
+  const blobUrlBuilderProps = useMemo(() => {
+    if(!isUserAssetGalleryItem(itemOne)) {
+      return undefined;
+    }
+
+    const category = itemOne.media.category === MediaCategory.Image
+      ? UploadCategory.UPLOADED_IMAGE
+      : UploadCategory.UPLOADED_THUMBNAIL;
+    
+    return {
+      userId: itemOne.owner.toString(),
+      category,
+    };
+  }, [itemOne]);
+
   const handleClick = () => {
     router.push(USER_GALLERY(gallery.ownerData?.username, gallery.title));
   };
 
-  // Get the first item's media for the thumbnail
-  const thumbnailMedia = gallery.items[0].media;
-
   return (
     <Card
       className={cn(
-        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg hover:shadow-lg transition-shadow duration-300"
+        "p-0 overflow-hidden cursor-pointer gap-1 rounded-lg hover:shadow-lg transition-shadow duration-300",
       )}
       onClick={handleClick}
     >
       <CardContent className="p-0 relative">
-        <MediaThumbnail useCustomLoader={false} media={thumbnailMedia} alt={gallery.title} quality={80}/>
+        <MediaThumbnail
+          useCustomLoader={false}
+          media={thumbnailMedia}
+          alt={gallery.title}
+          quality={80}
+          blobUrlBuilderProps={blobUrlBuilderProps}
+        />
       </CardContent>
 
       <CardFooter className="pb-1 px-3">
@@ -69,4 +95,4 @@ const GalleryCard: FC<{ gallery: PublicGalleryType }> = ({ gallery }) => {
       </CardFooter>
     </Card>
   );
-};
+};;

@@ -2,6 +2,7 @@
 
 import { BLOCKCHAIN_MEDIA_PATHS, USER_MEDIA } from "@/constants/clientRoutes";
 import { imageSizing, MAX_SIZE_DIVISOR, MD_BREAKPOINT } from "@/constants/ui";
+import { UploadCategory } from "@/constants/uploadCategories";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { BlockchainAssetEntry, isBlockchainAssetEntry, isEntry, UserAssetEntry } from "@/types/entry";
@@ -110,14 +111,29 @@ const AssetViewer: FC<AssetViewerProps> = ({
     if (media.category === MediaCategory.Video) {
       if (videoError) return <VideoOffIcon className="size-14 text-border" />;
 
+      let videoBlobUrlBuilderProps: BlobUrlBuilderProps | undefined;
+      let thumbnailBlobUrlBuilderProps: BlobUrlBuilderProps | undefined;
+
+      if (blobUrlBuilderProps) {
+        videoBlobUrlBuilderProps = {
+          userId: blobUrlBuilderProps.userId,
+          category: UploadCategory.UPLOADED_VIDEO,
+        };
+        thumbnailBlobUrlBuilderProps = {
+          userId: blobUrlBuilderProps.userId,
+          category: UploadCategory.UPLOADED_THUMBNAIL,
+        };
+      }
+
       return (
         <VideoViewer
           media={media}
-          src={getMediaUrl(media)}
+          src={getMediaUrl(media, videoBlobUrlBuilderProps)}
           onError={() => setVideoError(true)}
           minimalControls
           autoPlay
           loop
+          thumbnailBlobUrlBuilderProps={thumbnailBlobUrlBuilderProps}
         />
       );
     }

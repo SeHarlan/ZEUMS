@@ -1,23 +1,26 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import MediaThumbnail from "@/components/media/MediaThumbnail";
-import { Trash2Icon } from "lucide-react";
-import { EditIcon } from "lucide-react";
-import { UserVirtualGalleryType } from "@/types/gallery";
-import { FC } from "react";
-import { useEditGallerySettings } from "@/context/EditGallerySettingsProvider";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { EDIT_GALLERY } from "@/constants/clientRoutes";
+import { UploadCategory } from "@/constants/uploadCategories";
+import { useEditGallerySettings } from "@/context/EditGallerySettingsProvider";
+import { UserVirtualGalleryType } from "@/types/gallery";
+import { isUserAssetGalleryItem } from "@/types/galleryItem";
+import { MediaCategory } from "@/types/media";
+import { EditIcon, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FC, useMemo } from "react";
 
 interface EditableGalleryCardProps { 
   gallery: UserVirtualGalleryType;
 }
-const EditableGalleryCard: FC<EditableGalleryCardProps> = ({ gallery }) => { 
+const EditableGalleryCard: FC<EditableGalleryCardProps> = ({ gallery }) => {
   const router = useRouter();
-  const { openDeleteDrawer, openEditDrawer, galleryToDelete } = useEditGallerySettings();
-  
+  const { openDeleteDrawer, openEditDrawer, galleryToDelete } =
+    useEditGallerySettings();
+
   const handleClick = (galleryId: string) => {
     router.push(EDIT_GALLERY(galleryId));
   };
@@ -31,6 +34,25 @@ const EditableGalleryCard: FC<EditableGalleryCardProps> = ({ gallery }) => {
     e.stopPropagation();
     openEditDrawer(gallery);
   };
+
+  // Get the first item's media for the thumbnail
+  const itemOne = gallery.items?.[0];
+
+  const blobUrlBuilderProps = useMemo(() => {
+    if (!itemOne || !isUserAssetGalleryItem(itemOne)) {
+      return undefined;
+    }
+
+    const category =
+      itemOne.media.category === MediaCategory.Image
+        ? UploadCategory.UPLOADED_IMAGE
+        : UploadCategory.UPLOADED_THUMBNAIL;
+
+    return {
+      userId: itemOne.owner.toString(),
+      category,
+    };
+  }, [itemOne]);
 
   return (
     <Card
@@ -57,8 +79,8 @@ const EditableGalleryCard: FC<EditableGalleryCardProps> = ({ gallery }) => {
             <EditIcon />
           </Button>
         </div>
-        {gallery.items?.[0] ? (
-          <MediaThumbnail media={gallery.items[0].media} />
+        {itemOne ? (
+          <MediaThumbnail media={itemOne.media} blobUrlBuilderProps={blobUrlBuilderProps} />
         ) : (
           <AspectRatio
             ratio={1}
@@ -75,6 +97,6 @@ const EditableGalleryCard: FC<EditableGalleryCardProps> = ({ gallery }) => {
       </CardFooter>
     </Card>
   );
-}
+};
 
 export default EditableGalleryCard;

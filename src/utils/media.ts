@@ -10,7 +10,7 @@ import {
   MediaType,
   UserMedia
 } from "@/types/media";
-import { constructVercelBlobUserImageUrl } from "./clientImageUpload";
+import { constructVercelBlobUserMediaUrl } from "./clientImageUpload";
 
 
 //TODO: multiple sources is depricated, will need to clean this up at some point
@@ -28,7 +28,7 @@ export const getImageUrlSources = (media: MediaType, blobUrlBuilderProps?: BlobU
     // } else 
     if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
       if (blobUrlBuilderProps) {
-        const cdnUrl = constructVercelBlobUserImageUrl(cdnId, blobUrlBuilderProps.userId, blobUrlBuilderProps.category);
+        const cdnUrl = constructVercelBlobUserMediaUrl(cdnId, blobUrlBuilderProps.userId, blobUrlBuilderProps.category);
         sources.push(cdnUrl);
       } 
     }
@@ -41,17 +41,21 @@ export const getImageUrlSources = (media: MediaType, blobUrlBuilderProps?: BlobU
   return sources;
 };
 
-export const getMediaUrl = (media: BlockchainMedia | UserMedia) => {
+export const getMediaUrl = (media: BlockchainMedia | UserMedia, blobUrlBuilderProps?: BlobUrlBuilderProps) => {
   const cdn = media.mediaCdn;
 
   if (cdn) {
-    // const { type, cdnId } = cdn;
-    // if (type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
-    //   // TODO important: will need to construct this URL here
-    //   return cdnId;
-    // }
-
-    // For now, we don't handle media CDNs 
+    const { type, cdnId } = cdn;
+    if (type === CdnIdType.VERCEL_BLOB_USER_VIDEO) {
+      if (blobUrlBuilderProps) {
+        const cdnUrl = constructVercelBlobUserMediaUrl(
+          cdnId,
+          blobUrlBuilderProps.userId,
+          blobUrlBuilderProps.category,
+        );
+        return cdnUrl;
+      }
+    }
   }
 
   // Fallback to the media URL if no CDN is available

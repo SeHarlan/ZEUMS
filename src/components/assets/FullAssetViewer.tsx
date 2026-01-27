@@ -1,8 +1,10 @@
 "use client"
 
+import { UploadCategory } from "@/constants/uploadCategories";
 import { useImageFallback } from "@/hooks/useImageFallback";
 import { ParsedBlockChainAsset } from "@/types/asset";
 import { UserAssetEntry } from "@/types/entry";
+import { GalleryMediaItem } from "@/types/galleryItem";
 import { BlobUrlBuilderProps, isBlockchainImage, isUserImage, MediaCategory } from "@/types/media";
 import { getMediaUrl } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
@@ -17,7 +19,7 @@ import ModelViewer from "../media/ModelViewer";
 import VideoViewer from "../media/VideoViewer";
 
 interface FullAssetViewerProps {
-  asset: ParsedBlockChainAsset | UserAssetEntry;
+  asset: ParsedBlockChainAsset | UserAssetEntry | GalleryMediaItem;
   className?: string;
   blobUrlBuilderProps?: BlobUrlBuilderProps;
 }
@@ -53,12 +55,26 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
       return <ImageOffIcon className="size-14 text-muted-border" />;
     }
 
+      let videoBlobUrlBuilderProps: BlobUrlBuilderProps | undefined;
+      let thumbnailBlobUrlBuilderProps: BlobUrlBuilderProps | undefined;
+
+      if (blobUrlBuilderProps) {
+        videoBlobUrlBuilderProps = {
+          userId: blobUrlBuilderProps.userId,
+          category: UploadCategory.UPLOADED_VIDEO,
+        };
+        thumbnailBlobUrlBuilderProps = {
+          userId: blobUrlBuilderProps.userId,
+          category: UploadCategory.UPLOADED_THUMBNAIL,
+        };
+      }
+
     switch (media.category) {
       case MediaCategory.Video:
         return (
           <VideoViewer
             media={media}
-            src={getMediaUrl(media)}
+            src={getMediaUrl(media, videoBlobUrlBuilderProps)}
             autoPlay
             loop
             controls
@@ -66,6 +82,7 @@ const FullAssetViewer: FC<FullAssetViewerProps> = ({
             className="max-h-screen w-fit"
             containerClassName="h-fit w-fit"
             noLoadingAnimation={true}
+            thumbnailBlobUrlBuilderProps={thumbnailBlobUrlBuilderProps}
           />
         );
       case MediaCategory.Html:
