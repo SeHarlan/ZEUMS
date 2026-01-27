@@ -1,4 +1,5 @@
 "use client";
+import { newGalleryItemFormOpenAtom } from "@/atoms/dashboard";
 import SideDrawer from "@/components/general/SideDrawer";
 import { BlockchainAssetEntryIcon, TextEntryIcon, UserAssetEntryIcon } from "@/components/icons/EntryTypes";
 import { P } from "@/components/typography/Typography";
@@ -10,8 +11,6 @@ import { UploadCategory } from "@/constants/uploadCategories";
 import { useUser } from "@/context/UserProvider";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
-
-import { newGalleryItemFormOpenAtom } from "@/atoms/dashboard";
 import { BLOCKCHAIN_GALLERY_ITEM_COPY, GALLERY_ITEM_TYPE_COPY, TEXT_GALLERY_ITEM_COPY, USER_ASSET_GALLERY_ITEM_COPY } from "@/textCopy/entryTypes";
 import { GALLERY_ITEM_LABEL } from "@/textCopy/mainCopy";
 import { ParsedBlockChainAsset } from "@/types/asset";

@@ -1,5 +1,4 @@
 import { API_ROUTE } from "@/constants/serverRoutes";
-import { UploadCategory } from "@/constants/uploadCategories";
 import { upload } from "@vercel/blob/client";
 
 export interface UploadVideoResult {

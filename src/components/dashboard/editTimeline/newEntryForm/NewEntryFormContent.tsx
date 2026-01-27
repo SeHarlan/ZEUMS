@@ -24,13 +24,12 @@ import { UserVirtualGalleryType } from "@/types/gallery";
 import { getFirstBlockchainItem } from "@/utils/gallery";
 import { getFileAspectRatio } from "@/utils/media";
 import { getTimelineKey } from "@/utils/timeline";
-import { extractVideoThumbnail } from "@/utils/videoThumbnail";
 import { cn } from "@/utils/ui-utils";
+import { extractVideoThumbnail } from "@/utils/videoThumbnail";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 import SelectGalleryEntry from "../../SelectGalleryEntry";
 

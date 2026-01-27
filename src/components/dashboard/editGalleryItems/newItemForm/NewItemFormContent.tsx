@@ -20,7 +20,6 @@ import { getFileAspectRatio } from "@/utils/media";
 import { extractVideoThumbnail } from "@/utils/videoThumbnail";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
 import SelectBlockchainAsset from "../../SelectBlockchainAsset";
 
 interface NewItemFormContentProps { 
