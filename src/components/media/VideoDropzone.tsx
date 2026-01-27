@@ -39,7 +39,7 @@ export interface VideoDropzoneProps {
   onError?: (error: string) => void;
 }
 
-const DEFAULT_MAX_FILE_SIZE = 333 * 1024 * 1024; // 333MB
+const DEFAULT_MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 
 const DEFAULT_ACCEPTED_TYPES = [
   "video/mp4",

@@ -40,7 +40,7 @@ export interface ImageDropzoneProps {
   onError?: (error: string) => void;
 }
 
-const DEFAULT_MAX_FILE_SIZE = 33 * 1024 * 1024; // 33MB
+const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 
 

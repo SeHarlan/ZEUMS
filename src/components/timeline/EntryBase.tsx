@@ -1,5 +1,5 @@
-import { UploadCategory } from "@/constants/uploadCategories";
-import { EntryTypes, TimelineEntry, isUserAssetEntry } from "@/types/entry";
+import { EntryTypes, TimelineEntry } from "@/types/entry";
+import { getBlobUrlBuilderPropsFromItemOrEntry } from "@/utils/media";
 import { FC, useMemo } from "react";
 import AssetEntryDisplay from "./AssetEntryDisplay";
 import GalleryEntryDisplay from "./GalleryEntryDisplay";
@@ -13,14 +13,7 @@ export interface EntryBaseProps {
 const EntryBase: FC<EntryBaseProps> = ({ entry, flip }) => {
   // Create blobUrlBuilderProps for UserAssetEntry
   const blobUrlBuilderProps = useMemo(() => {
-    if (isUserAssetEntry(entry)) {
-      const userId = entry.owner.toString();
-      return {
-        userId,
-        category: UploadCategory.UPLOADED_IMAGE,
-      };
-    }
-    return undefined;
+    return getBlobUrlBuilderPropsFromItemOrEntry(entry);
   }, [entry]);
 
   if(entry.entryType === EntryTypes.Text) {

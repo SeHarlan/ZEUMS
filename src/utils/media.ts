@@ -1,3 +1,6 @@
+import { UploadCategory } from "@/constants/uploadCategories";
+import { isUserAssetEntry, type TimelineEntry } from "@/types/entry";
+import { isGalleryItem, isUserAssetGalleryItem, type GalleryItem } from "@/types/galleryItem";
 import {
   BlobUrlBuilderProps,
   BlockchainMedia,
@@ -11,6 +14,29 @@ import {
   UserMedia
 } from "@/types/media";
 import { constructVercelBlobUserMediaUrl } from "./clientImageUpload";
+
+export const getBlobUrlBuilderPropsFromItemOrEntry = (
+  asset?: GalleryItem | TimelineEntry | null
+): BlobUrlBuilderProps | undefined => {
+  if (!asset) return undefined;
+  if (!("media" in asset) || !asset.media) return undefined;
+
+  if (isGalleryItem(asset)) { 
+    if (!isUserAssetGalleryItem(asset)) return undefined;
+  } else {
+    if (!isUserAssetEntry(asset)) return undefined;
+  }
+  
+  const category =
+    asset.media.category === MediaCategory.Image
+      ? UploadCategory.UPLOADED_IMAGE
+      : UploadCategory.UPLOADED_THUMBNAIL;
+
+  return {
+    userId: asset.owner.toString(),
+    category,
+  };
+};
 
 
 //TODO: multiple sources is depricated, will need to clean this up at some point

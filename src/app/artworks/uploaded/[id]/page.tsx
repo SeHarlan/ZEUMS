@@ -5,9 +5,9 @@ import FullAssetViewer from '@/components/assets/FullAssetViewer';
 import FeedbackWrapper from '@/components/general/FeedbackWrapper';
 import { PageContainer } from '@/components/general/PageContainer';
 import { ShareButton } from '@/components/navigation/ShareButton';
-import { UploadCategory } from '@/constants/uploadCategories';
 import { NavBarActions } from '@/context/NavBarActionsProvider';
 import useUserAsset from '@/hooks/useUserAsset';
+import { getBlobUrlBuilderPropsFromItemOrEntry } from '@/utils/media';
 import { useParams } from 'next/navigation';
 import { useMemo } from 'react';
 
@@ -18,14 +18,7 @@ export default function UserAssetPage() {
 
   // Create blobUrlBuilderProps for UserAssetEntry
   const blobUrlBuilderProps = useMemo(() => {
-    if (userAsset) {
-      const userId = userAsset.owner.toString();
-      return {
-        userId,
-        category: UploadCategory.UPLOADED_IMAGE,
-      };
-    }
-    return undefined;
+    return getBlobUrlBuilderPropsFromItemOrEntry(userAsset);
   }, [userAsset]);
 
   useShowReturnButton();

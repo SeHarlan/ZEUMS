@@ -11,6 +11,7 @@ import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
 import { EntrySource, isGalleryEntry, isMediaEntry, TimelineEntry, TimelineEntryDateUpdate } from "@/types/entry";
 import { isMediaGalleryItem } from "@/types/galleryItem";
 import { handleClientError } from "@/utils/handleError";
+import { getBlobUrlBuilderPropsFromItemOrEntry } from "@/utils/media";
 import { getTimelineKey, sortTimeline } from "@/utils/timeline";
 import { cn, getScrollAreaViewport } from "@/utils/ui-utils";
 import { closestCenter, DndContext, DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
@@ -358,10 +359,19 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  const item = isMediaEntry(entry)
+    ? entry
+    : isGalleryEntry(entry) && isMediaGalleryItem(entry.gallery.items?.[0])
+      ? entry.gallery.items?.[0]
+      : undefined;
   
-  const media = isMediaEntry(entry) && entry.media
-    || isGalleryEntry(entry) && isMediaGalleryItem(entry.gallery.items?.[0]) && entry.gallery.items?.[0]?.media;
+  const media = item && item.media;
     
+  const blobUrlBuilderProps = useMemo(() => {
+    return getBlobUrlBuilderPropsFromItemOrEntry(item);
+  }, [item]);
+
   const thumbnail = media ? (
     <div className="shrink-0 w-10 h-10">
       <MediaThumbnail
@@ -370,6 +380,7 @@ const SortableEntry: FC<SortableEntryProps> = ({entry}) => {
         alt={entry.title}
         rounding="rounded-sm"
         priority
+        blobUrlBuilderProps={blobUrlBuilderProps}
       />
     </div>
   ) : null;

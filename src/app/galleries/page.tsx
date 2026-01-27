@@ -7,11 +7,9 @@ import MediaThumbnail from "@/components/media/MediaThumbnail";
 import { P } from "@/components/typography/Typography";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { USER_GALLERY } from "@/constants/clientRoutes";
-import { UploadCategory } from "@/constants/uploadCategories";
 import useGalleriesByPage from "@/hooks/useGalleriesByPage";
 import { PublicGalleryType } from "@/types/gallery";
-import { isUserAssetGalleryItem } from "@/types/galleryItem";
-import { MediaCategory } from "@/types/media";
+import { getBlobUrlBuilderPropsFromItemOrEntry } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import { getDisplayName } from "@/utils/user";
 import { useRouter } from "next/navigation";
@@ -48,18 +46,7 @@ const GalleryCard: FC<{ gallery: PublicGalleryType }> = ({ gallery }) => {
   const thumbnailMedia = itemOne.media;
 
   const blobUrlBuilderProps = useMemo(() => {
-    if(!isUserAssetGalleryItem(itemOne)) {
-      return undefined;
-    }
-
-    const category = itemOne.media.category === MediaCategory.Image
-      ? UploadCategory.UPLOADED_IMAGE
-      : UploadCategory.UPLOADED_THUMBNAIL;
-    
-    return {
-      userId: itemOne.owner.toString(),
-      category,
-    };
+    return getBlobUrlBuilderPropsFromItemOrEntry(itemOne);
   }, [itemOne]);
 
   const handleClick = () => {
