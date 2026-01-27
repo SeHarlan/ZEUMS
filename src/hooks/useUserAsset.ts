@@ -1,7 +1,7 @@
 import { PUBLIC_MEDIA_ROUTE } from "@/constants/serverRoutes";
 import { UserAssetEntry } from "@/types/entry";
+import { GalleryMediaItem } from "@/types/galleryItem";
 import { handleClientError } from "@/utils/handleError";
-import { parseEntryDate } from "@/utils/timeline";
 import axios from "axios";
 import useSWRImmutable from "swr/immutable";
 
@@ -9,10 +9,9 @@ const userAssetFetcher = async (assetId: string) => {
   if (!assetId) return null;
 
   return axios
-    .get<{ entry: UserAssetEntry }>(PUBLIC_MEDIA_ROUTE(assetId))
+    .get<{ asset: UserAssetEntry | GalleryMediaItem }>(PUBLIC_MEDIA_ROUTE(assetId))
     .then((res) => {
-      // Parse the date in case it comes as a string
-      return parseEntryDate(res.data.entry);
+      return res.data.asset;
     })
 };
 

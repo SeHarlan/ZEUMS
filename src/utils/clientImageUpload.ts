@@ -205,7 +205,7 @@ export const makeUserImageBlobKey = (
  * @param baseUrl - Optional base URL
  * @returns The full URL to the blob
  */
-export const constructVercelBlobUserImageUrl = (
+export const constructVercelBlobUserMediaUrl = (
   cdnId: string,
   userId?: string,
   category?: UploadCategory,
@@ -233,4 +233,43 @@ export const constructVercelBlobUserImageUrl = (
   
   const key = makeUserImageBlobKey(userId, category, cdnId);
   return constructVercelBlobUrl(key, baseUrl);
+};
+
+/**
+ * Gets the file extension from a video File object, falling back to MIME type if filename doesn't have an extension.
+ * 
+ * @param file - The File object
+ * @returns The file extension including the dot (e.g., ".mp4", ".webm")
+ */
+export const getVideoFileExtension = (file: File): string => {
+  const fileName = file.name;
+  const lastDotIndex = fileName.lastIndexOf(".");
+  
+  if (lastDotIndex > 0) {
+    return fileName.substring(lastDotIndex);
+  }
+  
+  // Fallback to MIME type
+  if (file.type === "video/mp4") return ".mp4";
+  if (file.type === "video/webm") return ".webm";
+  
+  // Default to .mp4
+  return ".mp4";
+};
+
+/**
+ * Constructs a blob key for user videos.
+ * Format: {userId}/{category}/{filename}
+ * 
+ * @param userId - User ID
+ * @param category - Video category: "uploaded-video", etc.
+ * @param filename - The filename (cdnId) - assumed to be already sanitized and with extension
+ * @returns The blob key
+ */
+export const makeUserVideoBlobKey = (
+  userId: string,
+  category: UploadCategory,
+  filename: string
+): string => {
+  return `${userId}/${category}/${filename}`;
 };

@@ -5,5 +5,7 @@ export enum UploadCategory {
   PROFILE_BANNER = "profile-banner",
   GALLERY_BANNER = "gallery-banner",
   UPLOADED_IMAGE = "uploaded-image",
+  UPLOADED_VIDEO = "uploaded-video",
+  UPLOADED_THUMBNAIL = "uploaded-thumbnail",
 }
 

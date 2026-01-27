@@ -104,6 +104,9 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
   const entryVirtualizer = useVirtualizer({
     count: processedEntries.length,
     getScrollElement: getMainScrollAreaViewport,
+    // Important: use a stable key per entry so React doesn't reuse
+    // video components after insert/delete operations.
+    getItemKey: (index) => String(processedEntries[index]?.entry?._id ?? index),
     estimateSize: estimateSize,
     overscan: 2,
     useAnimationFrameWithResizeObserver: true,
@@ -315,7 +318,8 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
           </div>
         )}
 
-        <EntryComponent entry={entry} flip={flipEntry} />
+        {/* Force stable identity per entry to avoid DOM reuse issues (e.g. <video>) */}
+        <EntryComponent key={entry._id.toString()} entry={entry} flip={flipEntry} />
       </div>
     );
   };

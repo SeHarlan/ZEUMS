@@ -1,23 +1,22 @@
 "use client";
 
 import { cn } from "@/utils/ui-utils";
-import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
-import Image from "next/image";
+import { UploadIcon, VideoIcon, XIcon } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 
-export interface ImageDropzoneProps {
+export interface VideoDropzoneProps {
   /**
-   * Callback fired when a valid image file is selected
+   * Callback fired when a valid video file is selected
    */
   onFileSelect: (file: File) => void;
   /**
-   * Maximum file size in bytes (default: 10MB)
+   * Maximum file size in bytes (default: 100MB)
    */
   maxFileSize?: number;
   /**
-   * Accepted image MIME types (default: common image types)
+   * Accepted video MIME types (default: MP4 and WebM)
    */
-  acceptedImageTypes?: readonly string[];
+  acceptedVideoTypes?: readonly string[];
   /**
    * Additional CSS classes
    */
@@ -27,7 +26,7 @@ export interface ImageDropzoneProps {
    */
   disabled?: boolean;
   /**
-   * Optional preview image URL to display
+   * Optional preview video URL to display
    */
   previewUrl?: string | null;
   /**
@@ -40,38 +39,33 @@ export interface ImageDropzoneProps {
   onError?: (error: string) => void;
 }
 
-const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-
-
+const DEFAULT_MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 
 const DEFAULT_ACCEPTED_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/svg+xml",
+  "video/mp4",
+  "video/webm",
 ] as const;
 
-export function ImageDropzone({
+export function VideoDropzone({
   onFileSelect,
   maxFileSize = DEFAULT_MAX_FILE_SIZE,
-  acceptedImageTypes = DEFAULT_ACCEPTED_TYPES,
+  acceptedVideoTypes = DEFAULT_ACCEPTED_TYPES,
   className,
   disabled = false,
   previewUrl,
   onClearPreview,
   onError,
-}: ImageDropzoneProps) {
+}: VideoDropzoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const validateFile = useCallback(
     (file: File): boolean => {
       // Check file type
-      if (!acceptedImageTypes.includes(file.type as typeof acceptedImageTypes[number])) {
-        const errorMsg = `Invalid file type. Accepted types: ${acceptedImageTypes.join(", ")}`;
+      if (!acceptedVideoTypes.includes(file.type as typeof acceptedVideoTypes[number])) {
+        const errorMsg = `Invalid file type. Only MP4 and WebM formats are supported.`;
         setError(errorMsg);
         onError?.(errorMsg);
         return false;
@@ -79,7 +73,7 @@ export function ImageDropzone({
 
       // Check file size
       if (file.size > maxFileSize) {
-        const maxSizeMB = (maxFileSize / (1024 * 1024)).toFixed(2);
+        const maxSizeMB = (maxFileSize / (1024 * 1024)).toFixed(0);
         const errorMsg = `File size exceeds maximum of ${maxSizeMB}MB`;
         setError(errorMsg);
         onError?.(errorMsg);
@@ -89,7 +83,7 @@ export function ImageDropzone({
       setError(null);
       return true;
     },
-    [acceptedImageTypes, maxFileSize, onError]
+    [acceptedVideoTypes, maxFileSize, onError]
   );
 
   const handleFile = useCallback(
@@ -165,14 +159,14 @@ export function ImageDropzone({
     [onClearPreview]
   );
 
-  const acceptString = acceptedImageTypes.join(",");
+  const acceptString = acceptedVideoTypes.join(",");
 
   return (
     <div className={cn("relative w-full", className)}>
       <div
         role="button"
         tabIndex={disabled ? -1 : 0}
-        aria-label="Upload image"
+        aria-label="Upload video"
         aria-disabled={disabled}
         onClick={handleClick}
         onDragOver={handleDragOver}
@@ -209,12 +203,13 @@ export function ImageDropzone({
         {previewUrl ? (
           <>
             <div className="relative w-full h-full min-h-[200px] rounded-sm overflow-hidden">
-              <Image
+              <video
+                ref={videoRef}
                 src={previewUrl}
-                alt="Preview"
-                fill
-                unoptimized
-                className="object-contain"
+                className="w-full h-full object-contain"
+                controls={false}
+                muted
+                playsInline
               />
               {onClearPreview && (
                 <button
@@ -239,16 +234,15 @@ export function ImageDropzone({
               {isDragging ? (
                 <UploadIcon className="size-6 text-primary" />
               ) : (
-                <ImageIcon className="size-6 text-muted-foreground" />
+                <VideoIcon className="size-6 text-muted-foreground" />
               )}
             </div>
             <div className="text-center px-4">
               <p className="text-sm font-medium text-foreground">
-                {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
+                {isDragging ? "Drop video here" : "Click to upload or drag and drop"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {acceptedImageTypes.map((type) => type.split("/")[1]).join(", ").toUpperCase()}{" "}
-                (max {(maxFileSize / (1024 * 1024)).toFixed(0)}MB)
+                MP4, WebM (max {(maxFileSize / (1024 * 1024)).toFixed(0)}MB)
               </p>
             </div>
           </>
