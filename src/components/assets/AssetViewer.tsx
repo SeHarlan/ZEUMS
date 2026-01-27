@@ -43,7 +43,6 @@ const AssetViewer: FC<AssetViewerProps> = ({
   className,
   blobUrlBuilderProps,
 }) => {
-  console.log("🚀 ~ AssetViewer ~ asset:", asset)
   const router = useRouter();
   const { isMd, isLg, isXl, is2Xl } = useBreakpoints();
 
