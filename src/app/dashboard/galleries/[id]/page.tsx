@@ -5,11 +5,9 @@ import { PageTurnLeft } from "@/components/dashboard/PageTurnButtons";
 import { GalleryHero } from "@/components/gallery/GalleryHero";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
-import PageHeading from "@/components/general/PageHeading";
 import { GalleryOnboardingPopover } from "@/components/onboarding/GalleryOnboarding";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { EDIT_GALLERIES, USER_GALLERY } from "@/constants/clientRoutes";
 import { NavBarActions } from "@/context/NavBarActionsProvider";
 import { useUser } from "@/context/UserProvider";
@@ -26,10 +24,6 @@ const EditGalleryPage = () => {
 
   return (
     <PageContainer maxWidth="large">
-      <PageHeading
-        title="Manage Gallery"
-        subtitle="A focused collection of related artworks"
-      />
       <PageTurnLeft path={EDIT_GALLERIES} />
       <NavBarActions>
         <LinkButton
@@ -48,11 +42,11 @@ const EditGalleryPage = () => {
         noDataSubtitle="Gallery not found"
         useSpinner
       >
-        <Card className="pt-0 overflow-hidden">
+     
           <GalleryHero gallery={gallery} editMode />
 
           <EditGalleryItems galleryId={id} />
-        </Card>
+   
       </FeedbackWrapper>
       <GalleryOnboardingPopover />
     </PageContainer>

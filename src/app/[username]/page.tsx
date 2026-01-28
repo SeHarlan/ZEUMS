@@ -6,6 +6,7 @@ import { PageContainer } from "@/components/general/PageContainer";
 import { ShareButton } from "@/components/navigation/ShareButton";
 import EntryBase from "@/components/timeline/EntryBase";
 import ProfileHero from "@/components/timeline/ProfileHero";
+import { TimelineBackground } from "@/components/timeline/TimelineBackground";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export default function UserTimelinePage() {
             variant="outline"
             className="size-10 md:w-fit"
           >
-            <EditIcon  className="size-5 md:size-4"/>
+            <EditIcon className="size-5 md:size-4" />
             <P className="hidden md:block">Edit</P>
           </LinkButton>
         )}
@@ -46,6 +47,7 @@ export default function UserTimelinePage() {
         hasData={!!timelineUser}
         noDataSubtitle="User not found"
       >
+        <TimelineBackground user={timelineUser} />
         <ProfileHero publicUser={timelineUser} />
         <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
       </FeedbackWrapper>

@@ -13,7 +13,7 @@ export default function ProtectedLayout({
     <ProtectedRoute>
       <EditEntryContextProvider>
         <EditGallerySettingsContextProvider>
-          <div className="bg-muted w-screen h-full min-h-screen">
+          <div className="w-screen h-full min-h-screen">
             {children}
           </div>
           <EditGalleryItemForm />

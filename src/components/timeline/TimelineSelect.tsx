@@ -14,8 +14,16 @@ interface TimelineSelectProps {
   EntryComponent: React.FC<EntryBaseProps>;
   tabValue?: EntrySource;
   setTabValue?: (value: EntrySource) => void;
+  topCenterOverlay?: React.ReactNode;
 }
-export const TimelineSelect: FC<TimelineSelectProps> = ({ user, EntryComponent, tabValue, setTabValue }) => { 
+
+export const TimelineSelect: FC<TimelineSelectProps> = ({
+  user,
+  EntryComponent,
+  tabValue,
+  setTabValue,
+  topCenterOverlay,
+}) => {
   const content = getTimelineTabContent(user);
   
   const handleValueChange = setTabValue ?(value: string) => {
@@ -34,7 +42,12 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({ user, EntryComponent, 
   };
 
   return (
-    <div className={cn(PAGE_PADDING_X, "py-4")}>
+    <div className={cn(PAGE_PADDING_X, "py-4 relative")}>
+      {topCenterOverlay && (
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6">
+          {topCenterOverlay}
+        </div>
+      )}
       {content.length <= 1 ? (
         <TimelineBase
           entries={content[0]?.entries || []}

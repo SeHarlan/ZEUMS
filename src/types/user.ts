@@ -18,6 +18,10 @@ export type BaseUserType = {
   displayName?: string;
   profileImage?: ImageType; 
   bannerImage?: ImageType;
+  backgroundImage?: ImageType | null;
+  backgroundTintHex?: string;
+  backgroundTintOpacity?: number;
+  backgroundBlur?: number;
   email?: string;
   bio?: string;
   socialHandles: UserSocialHandles;

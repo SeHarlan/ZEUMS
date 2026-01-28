@@ -1,0 +1,20 @@
+import { EntrySource } from "@/types/entry";
+import { z } from "zod";
+
+const backgroundTintHexSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color like #112233");
+
+export const timelineSettingsFormSchema = z.object({
+  primaryTimeline: z.nativeEnum(EntrySource),
+  hideCreatorDates: z.boolean().optional(),
+  hideCollectorDates: z.boolean().optional(),
+  backgroundTintHex: backgroundTintHexSchema,
+  backgroundTintOpacity: z.number().min(0).max(1),
+  backgroundBlur: z.number().min(0).max(40),
+}).strict();
+
+export type TimelineSettingsFormValues = z.infer<
+  typeof timelineSettingsFormSchema
+>;
+

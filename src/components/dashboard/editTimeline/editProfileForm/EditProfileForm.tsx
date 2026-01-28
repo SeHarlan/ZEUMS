@@ -13,7 +13,6 @@ import { USER_ROUTE } from "@/constants/serverRoutes";
 import { UploadCategory } from "@/constants/uploadCategories";
 import { useUser } from "@/context/UserProvider";
 import { profileDisplayFormSchema, ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
-import { EntrySource } from "@/types/entry";
 import { CdnIdType, MediaCategory, MediaOrigin } from "@/types/media";
 import { UserType } from "@/types/user";
 import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
@@ -83,9 +82,6 @@ const EditProfileForm = forwardRef<HTMLButtonElement, EditDisplayPanelProps>(
           website: user?.socialHandles?.website || "",
           // facebook: user?.socialHandles?.facebook || "",
         },
-        primaryTimeline: user?.primaryTimeline || EntrySource.Collector,
-        hideCreatorDates: user?.hideCreatorDates ?? false,
-        hideCollectorDates: user?.hideCollectorDates ?? true,
         // websites: user?.websites || [],
       }),
       [user]
