@@ -19,6 +19,8 @@ export type BaseUserType = {
   profileImage?: ImageType; 
   bannerImage?: ImageType;
   backgroundImage?: ImageType | null;
+  /** Number of rows for background tiling (0 = off) */
+  backgroundTileCount?: number;
   backgroundTintHex?: string;
   backgroundTintOpacity?: number;
   backgroundBlur?: number;

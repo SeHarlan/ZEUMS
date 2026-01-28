@@ -160,7 +160,7 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
         </FormDescription>
 
         <ChooseProfileImageDialog
-          imageVariant={"banner"}
+          imageVariant={"default"}
           setSelectedMedia={(media) => setBackgroundImage(media ?? null)}
           open={backgroundImageOpen}
           setOpen={setBackgroundImageOpen}
@@ -238,27 +238,64 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
         />
 
         {showBlurControl && (
-          <FormField
-            control={form.control}
-            name="backgroundBlur"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Image Blur{" "}
-                  <span className="text-muted-foreground">{field.value}px</span>
-                </FormLabel>
-                <FormControl>
-                  <Slider
-                    min={0}
-                    max={40}
-                    value={[field.value]}
-                    onValueChange={(value) => field.onChange(value[0])}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <>
+            <FormField
+              control={form.control}
+              name="backgroundBlur"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Image Blur{" "}
+                    <span className="text-muted-foreground">{field.value}px</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Slider
+                      min={0}
+                      max={40}
+                      value={[field.value]}
+                      onValueChange={(value) => field.onChange(value[0])}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="backgroundTileCount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tile Count</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      placeholder="0"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        field.onChange(e.target.value);
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          field.onChange("0");
+                        } else {
+                          field.onChange(value);
+                        }
+                        field.onBlur();
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Number of rows to tile the background image (0 = no tiling)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
       </div>
 

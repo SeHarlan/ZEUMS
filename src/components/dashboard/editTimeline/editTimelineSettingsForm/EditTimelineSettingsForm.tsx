@@ -89,6 +89,7 @@ const EditTimelineSettingsForm = forwardRef<
         backgroundTintHex: user?.backgroundTintHex ?? "#000000",
         backgroundTintOpacity: user?.backgroundTintOpacity ?? 0.35,
         backgroundBlur: user?.backgroundBlur ?? 0,
+        backgroundTileCount: user?.backgroundTileCount?.toString() ?? "0",
       }),
       [user]
     );
@@ -204,6 +205,14 @@ const EditTimelineSettingsForm = forwardRef<
           normalizeImage(backgroundImage) !==
             normalizeImage(originalBackgroundImageRef.current);
 
+        const tileCount =
+          !data.backgroundTileCount
+            ? 0
+            : (() => {
+                const parsed = parseInt(data.backgroundTileCount, 10);
+                return isNaN(parsed) ? 0 : parsed;
+              })();
+
         const userData: Partial<UserType> = {
           primaryTimeline: data.primaryTimeline,
           hideCreatorDates: data.hideCreatorDates,
@@ -214,6 +223,7 @@ const EditTimelineSettingsForm = forwardRef<
           backgroundTintHex: data.backgroundTintHex,
           backgroundTintOpacity: data.backgroundTintOpacity,
           backgroundBlur: data.backgroundBlur,
+          backgroundTileCount: tileCount,
         };
 
         const response = await axios.patch<{ user: UserType }>(

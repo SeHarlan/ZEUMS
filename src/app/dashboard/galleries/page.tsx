@@ -16,7 +16,7 @@ export default function EditGalleriesPage() {
       />
       <PageTurnLeft path={EDIT_TIMELINE} />
      
-          <EditGalleries />
+      <EditGalleries />
        
       <GalleriesOnboardingPopover />
     </PageContainer>

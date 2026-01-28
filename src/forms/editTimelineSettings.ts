@@ -12,9 +12,8 @@ export const timelineSettingsFormSchema = z.object({
   backgroundTintHex: backgroundTintHexSchema,
   backgroundTintOpacity: z.number().min(0).max(1),
   backgroundBlur: z.number().min(0).max(40),
+  backgroundTileCount: z.string(),
 }).strict();
 
-export type TimelineSettingsFormValues = z.infer<
-  typeof timelineSettingsFormSchema
->;
+export type TimelineSettingsFormValues = z.infer<typeof timelineSettingsFormSchema>;
 
