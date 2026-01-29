@@ -6,7 +6,7 @@ import {
   TwitterIcon,
   WebsiteIcon,
 } from "@/components/icons/Social";
-import { TimelineBackgroundUser } from "@/components/timeline/TimelineBackground";
+import { TimelineBackgroundUser } from "@/components/media/BackgroundImage";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 import { SocialIconProps } from "@/types/generic";
 import { UserSocialHandles } from "@/types/user";

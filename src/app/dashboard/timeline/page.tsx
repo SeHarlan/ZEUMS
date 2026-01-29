@@ -3,9 +3,9 @@ import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/ed
 import EditTimeline from "@/components/dashboard/editTimeline/EditTimeline";
 import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
 import { PageContainer } from "@/components/general/PageContainer";
+import { BackgroundImage } from "@/components/media/BackgroundImage";
 import { TimelineOnboardingPopover } from "@/components/onboarding/TimelineOnboarding";
 import ProfileHero from "@/components/timeline/ProfileHero";
-import { TimelineBackground } from "@/components/timeline/TimelineBackground";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
 import { EDIT_GALLERIES, EDIT_PROFILE_ACCOUNT, USER_TIMELINE } from "@/constants/clientRoutes";
@@ -36,7 +36,7 @@ export default function EditTimelinePage() {
         ref={setStepRef}
         onClick={setStepComplete}
       />
-      <TimelineBackground user={user} />
+      <BackgroundImage user={user} />
       <div className="relative z-1">
         <ProfileHero publicUser={user} editMode />
         <EditTimeline />

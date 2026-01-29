@@ -3,10 +3,10 @@
 import { useShowReturnButton } from "@/atoms/navigation";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
+import { BackgroundImage } from "@/components/media/BackgroundImage";
 import { ShareButton } from "@/components/navigation/ShareButton";
 import EntryBase from "@/components/timeline/EntryBase";
 import ProfileHero from "@/components/timeline/ProfileHero";
-import { TimelineBackground } from "@/components/timeline/TimelineBackground";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export default function UserTimelinePage() {
         hasData={!!timelineUser}
         noDataSubtitle="User not found"
       >
-        <TimelineBackground user={timelineUser} />
+        <BackgroundImage user={timelineUser} />
         <div className="relative z-1">
           <ProfileHero publicUser={timelineUser} />
           <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />

@@ -8,7 +8,7 @@ import { cn, getRgbaBackgroundFromUser } from "@/utils/ui-utils";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
 
-export type TimelineBackgroundUser = Pick<
+export type BackgroundImageUser = Pick<
   PublicUserType | UserType,
   | "_id"
   | "backgroundImage"
@@ -20,19 +20,19 @@ export type TimelineBackgroundUser = Pick<
 
 
 
-export interface TimelineBackgroundProps {
-  user: TimelineBackgroundUser | null | undefined;
+export interface BackgroundImageProps {
+  user: BackgroundImageUser | null | undefined;
   className?: string;
 }
 
-interface TimelineBackgroundInnerProps {
-  backgroundImage: TimelineBackgroundUser["backgroundImage"];
+interface BackgroundImageInnerProps {
+  backgroundImage: BackgroundImageUser["backgroundImage"];
   userId: string;
   blurPx: number;
   tileCount: number;
 }
 
-const TimelineBackgroundInner: FC<TimelineBackgroundInnerProps> = ({
+const BackgroundImageInner: FC<BackgroundImageInnerProps> = ({
   backgroundImage,
   userId,
   blurPx,
@@ -145,7 +145,7 @@ const TimelineBackgroundInner: FC<TimelineBackgroundInnerProps> = ({
   );
 };
 
-export const TimelineBackground: FC<TimelineBackgroundProps> = ({
+export const BackgroundImage: FC<BackgroundImageProps> = ({
   user,
   className,
 }) => {
@@ -172,7 +172,7 @@ export const TimelineBackground: FC<TimelineBackgroundProps> = ({
         <div className="absolute z-2 inset-0" style={{ backgroundColor: tintColor }} />
       )}
       {backgroundImage && (
-        <TimelineBackgroundInner
+        <BackgroundImageInner
           backgroundImage={backgroundImage}
           userId={userId}
           blurPx={blurPx}
