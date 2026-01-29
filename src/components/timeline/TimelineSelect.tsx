@@ -53,6 +53,7 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({
           entries={content[0]?.entries || []}
           EntryComponent={EntryComponent}
           hideDates={getHideDates(content[0]?.value || EntrySource.Creator)}
+          timelineTheme={user?.timelineTheme}
         />
       ) : (
         <Tabs
@@ -81,6 +82,7 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({
                 entries={item.entries}
                 EntryComponent={EntryComponent}
                 hideDates={getHideDates(item.value)}
+                timelineTheme={user?.timelineTheme}
               />
             </TabsContent>
           ))}

@@ -1,3 +1,4 @@
+import { TimelineBodyTheme } from "@/components/general/TimelineBodyTheme";
 import NavBar from "@/components/navigation/NavBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
@@ -88,6 +89,7 @@ export default function RootLayout({
         <WalletContextProvider>
           <AuthContextProvider>
             <UserContextProvider>
+              <TimelineBodyTheme />
               <ResponsiveProvider>
                 <NavBarActionsProvider>
                   <AspectRatioProvider>

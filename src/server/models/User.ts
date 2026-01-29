@@ -64,6 +64,7 @@ const UserSchema: Schema = new Schema<UserDocument>(
     primaryTimeline: { type: String, enum: Object.values(EntrySource)},
     hideCreatorDates: { type: Boolean, default: false },
     hideCollectorDates: { type: Boolean, default: true },
+    timelineTheme: { type: String, enum: ["light", "dark"] },
   },
   {
     timestamps: true,

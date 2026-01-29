@@ -48,8 +48,10 @@ export default function UserTimelinePage() {
         noDataSubtitle="User not found"
       >
         <TimelineBackground user={timelineUser} />
-        <ProfileHero publicUser={timelineUser} />
-        <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
+        <div className="relative z-1">
+          <ProfileHero publicUser={timelineUser} />
+          <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
+        </div>
       </FeedbackWrapper>
     </PageContainer>
   );

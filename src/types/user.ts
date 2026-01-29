@@ -31,6 +31,8 @@ export type BaseUserType = {
   primaryTimeline?: EntrySource;
   hideCreatorDates?: boolean;
   hideCollectorDates?: boolean;
+  /** Theme for timeline pages only (public timeline + dashboard timeline). Default: light. */
+  timelineTheme?: "light" | "dark";
   // websites?: Website[];
 };
 

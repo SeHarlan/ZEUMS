@@ -8,6 +8,7 @@ import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { TimelineBodyTheme } from "../general/TimelineBodyTheme";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { EntryBaseProps } from "./EntryBase";
@@ -16,9 +17,10 @@ interface TimelineBaseProps {
   entries: TimelineEntry[];
   EntryComponent: React.FC<EntryBaseProps>;
   hideDates?: boolean;
+  timelineTheme?: "light" | "dark";
 }
 
-const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false}) => {
+const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false, timelineTheme}) => {
   const { isMd } = useBreakpoints()
   
   const layoutKey = useMemo(() => isMd ? "md-timeline" : "sm-timeline", [isMd]);
@@ -311,7 +313,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
                   : "md:translate-x-1/2",
               )}
             >
-              <div className="hidden md:block z-0 h-px w-5 border-2 border-dashed border-muted" />
+              <div className="hidden md:block z-0 h-px w-5 border-2 border-dashed border-foreground/10" />
               <P className={cn("text-lg text-muted-foreground px-2 underline underline-offset-4 md:no-underline")}>
                 {entryDate}
               </P>
@@ -331,6 +333,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
 
   return (
     <div className="pb-4 space-y-2">
+      <TimelineBodyTheme theme={timelineTheme} />
       <Button
         className="mx-auto flex font-serif text-muted-foreground"
         variant="link"
@@ -340,7 +343,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
       </Button>
       <div className="relative pb-8 mb-0" key={layoutKey}>
         {!hideDates && (
-          <div className="hidden md:block z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
+          <div className="hidden md:block z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-foreground/10 border-2 border-dashed" />
         )}
         <div
           className={cn(

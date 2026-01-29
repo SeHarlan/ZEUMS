@@ -9,6 +9,7 @@ export const timelineSettingsFormSchema = z.object({
   primaryTimeline: z.nativeEnum(EntrySource),
   hideCreatorDates: z.boolean().optional(),
   hideCollectorDates: z.boolean().optional(),
+  timelineTheme: z.enum(["light", "dark"]).optional(),
   backgroundTintHex: backgroundTintHexSchema,
   backgroundTintOpacity: z.number().min(0).max(1),
   backgroundBlur: z.number().min(0).max(40),

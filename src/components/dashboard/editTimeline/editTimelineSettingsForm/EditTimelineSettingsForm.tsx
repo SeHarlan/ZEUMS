@@ -86,6 +86,7 @@ const EditTimelineSettingsForm = forwardRef<
         primaryTimeline: user?.primaryTimeline || EntrySource.Collector,
         hideCreatorDates: user?.hideCreatorDates ?? false,
         hideCollectorDates: user?.hideCollectorDates ?? true,
+        timelineTheme: user?.timelineTheme ?? "light",
         backgroundTintHex: user?.backgroundTintHex ?? "#000000",
         backgroundTintOpacity: user?.backgroundTintOpacity ?? 0.35,
         backgroundBlur: user?.backgroundBlur ?? 0,
@@ -217,6 +218,7 @@ const EditTimelineSettingsForm = forwardRef<
           primaryTimeline: data.primaryTimeline,
           hideCreatorDates: data.hideCreatorDates,
           hideCollectorDates: data.hideCollectorDates,
+          timelineTheme: data.timelineTheme ?? "light",
           ...(shouldPatchBackgroundImage
             ? { backgroundImage: finalBackgroundImage }
             : {}),

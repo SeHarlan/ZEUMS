@@ -36,10 +36,12 @@ export default function EditTimelinePage() {
         ref={setStepRef}
         onClick={setStepComplete}
       />
-        <TimelineBackground user={user} />
+      <TimelineBackground user={user} />
+      <div className="relative z-1">
         <ProfileHero publicUser={user} editMode />
         <EditTimeline />
-      <TimelineOnboardingPopover />
+        <TimelineOnboardingPopover />
+      </div>
     </PageContainer>
   );
 }
