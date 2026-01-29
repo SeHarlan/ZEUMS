@@ -4,6 +4,7 @@ import { cn } from "@/utils/ui-utils";
 import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export interface ImageDropzoneProps {
   /**
@@ -95,6 +96,11 @@ export function ImageDropzone({
   const handleFile = useCallback(
     (file: File) => {
       if (validateFile(file)) {
+        if (file.type === "image/gif") {
+          toast.warning(
+            "GIF files can't be optimized and may take longer to load.",
+          );
+        }
         onFileSelect(file);
       }
     },

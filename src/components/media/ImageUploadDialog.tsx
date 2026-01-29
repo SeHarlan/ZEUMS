@@ -52,6 +52,7 @@ const ImageUploadDialog: FC<ImageUploadDialogProps> = ({
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
+
   };
 
   const handleClearPreview = () => {
