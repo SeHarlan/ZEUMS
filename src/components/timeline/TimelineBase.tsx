@@ -8,6 +8,7 @@ import { cn, getMainScrollAreaViewport } from "@/utils/ui-utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { TimelineBodyTheme } from "../general/TimelineBodyTheme";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { EntryBaseProps } from "./EntryBase";
@@ -16,10 +17,13 @@ interface TimelineBaseProps {
   entries: TimelineEntry[];
   EntryComponent: React.FC<EntryBaseProps>;
   hideDates?: boolean;
+  timelineTheme?: "light" | "dark";
 }
 
-const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false}) => {
-  const {isMd} = useBreakpoints()
+const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDates = false, timelineTheme}) => {
+  const { isMd } = useBreakpoints()
+  
+  const layoutKey = useMemo(() => isMd ? "md-timeline" : "sm-timeline", [isMd]);
   // Process entries to get metadata for virtualization
   const processedEntries = useMemo(() => {
     let assetIndex = 0;
@@ -295,23 +299,22 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
     return (
       <div className="space-y-4" id={id}>
         {showYear && (
-           <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
-             {entryYear}
-           </H2>
-         )}
+          <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground">
+            {entryYear}
+          </H2>
+        )}
         {showDate && (
           <div className="flex justify-center">
             <div
               className={cn(
                 "flex items-center",
                 flipDate
-                ? "-translate-x-1/2 flex-row-reverse"
-                : "translate-x-1/2"
+                  ? "md:-translate-x-1/2 flex-row-reverse"
+                  : "md:translate-x-1/2",
               )}
-              >
-           
-              <div className="z-0 h-px w-5 border-2 border-dashed border-muted" />
-              <P className={cn("text-lg text-muted-foreground px-2")}>
+            >
+              <div className="hidden md:block z-0 h-px w-5 border-2 border-dashed border-foreground/10" />
+              <P className={cn("text-lg text-muted-foreground px-2 underline underline-offset-4 md:no-underline")}>
                 {entryDate}
               </P>
             </div>
@@ -319,13 +322,18 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
         )}
 
         {/* Force stable identity per entry to avoid DOM reuse issues (e.g. <video>) */}
-        <EntryComponent key={entry._id.toString()} entry={entry} flip={flipEntry} />
+        <EntryComponent
+          key={entry._id.toString()}
+          entry={entry}
+          flip={flipEntry}
+        />
       </div>
     );
   };
 
   return (
     <div className="pb-4 space-y-2">
+      <TimelineBodyTheme theme={timelineTheme} />
       <Button
         className="mx-auto flex font-serif text-muted-foreground"
         variant="link"
@@ -333,14 +341,14 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
       >
         Start at the beginning <ArrowDownIcon />
       </Button>
-      <div className="relative pb-8 mb-0">
+      <div className="relative pb-8 mb-0" key={layoutKey}>
         {!hideDates && (
-          <div className="z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-muted border-2 border-dashed" />
+          <div className="hidden md:block z-0 h-full w-px absolute top-0 left-1/2 -translate-x-1/2 border-foreground/10 border-2 border-dashed" />
         )}
         <div
           className={cn(
             "relative flex flex-col pb-10",
-            hideDates ? "pt-20" : "pt-10"
+            hideDates ? "pt-20" : "pt-10",
           )}
           style={{
             height: `${entryVirtualizer.getTotalSize()}px`,
@@ -353,7 +361,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
 
             return (
               <div
-                key={virtualItem.key}
+                key={virtualItem.key + "_" + layoutKey}
                 data-index={virtualItem.index}
                 ref={entryVirtualizer.measureElement}
                 style={{

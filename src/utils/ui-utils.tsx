@@ -6,6 +6,7 @@ import {
   TwitterIcon,
   WebsiteIcon,
 } from "@/components/icons/Social";
+import { BackgroundImageUser } from "@/components/media/BackgroundImage";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 import { SocialIconProps } from "@/types/generic";
 import { UserSocialHandles } from "@/types/user";
@@ -94,3 +95,26 @@ export const socialHandlesList: {
   
 ];
 
+function hexToRgb(hex?: string): { r: number; g: number; b: number } | null {
+  if (!hex) return null;
+  const match = /^#([0-9A-Fa-f]{6})$/.exec(hex);
+  if (!match) return null;
+  const value = match[1];
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  return { r, g, b };
+}
+
+export const getRgbaBackgroundFromUser = (user: BackgroundImageUser | null | undefined) => { 
+  if (!user) return null;
+  const rgb = hexToRgb(user?.backgroundTintHex);
+  if (!rgb) return null;
+
+  const tintOpacity = user.backgroundTintOpacity;
+  
+  if (!tintOpacity) return null;
+
+  const opacity = Math.min(1, Math.max(0, tintOpacity));
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+}

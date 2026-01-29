@@ -141,7 +141,7 @@ const EditGalleryItemForm: FC = () => {
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+        <form id={formId}>
           <EditGalleryItemFormContent
             form={form}
             selectedItemType={selectedItemType}

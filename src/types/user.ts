@@ -18,6 +18,12 @@ export type BaseUserType = {
   displayName?: string;
   profileImage?: ImageType; 
   bannerImage?: ImageType;
+  backgroundImage?: ImageType | null;
+  /** Number of rows for background tiling (0 = off) */
+  backgroundTileCount?: number;
+  backgroundTintHex?: string;
+  backgroundTintOpacity?: number;
+  backgroundBlur?: number;
   email?: string;
   bio?: string;
   socialHandles: UserSocialHandles;
@@ -25,6 +31,8 @@ export type BaseUserType = {
   primaryTimeline?: EntrySource;
   hideCreatorDates?: boolean;
   hideCollectorDates?: boolean;
+  /** Theme for timeline pages only (public timeline + dashboard timeline). Default: light. */
+  timelineTheme?: "light" | "dark";
   // websites?: Website[];
 };
 

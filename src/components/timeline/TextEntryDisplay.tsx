@@ -9,7 +9,7 @@ interface TextEntryDisplayProps {
 
 const TextEntryDisplay: FC<TextEntryDisplayProps> = ({ entry }) => {
   return (
-    <div className="text-center bg-background p-2">
+    <div className="text-center p-2">
       <H3 className="mb-2">{entry.title}</H3>
       <P className="text-muted-foreground mb-4">{entry.description}</P>
       <EntryButtons buttons={entry.buttons} />

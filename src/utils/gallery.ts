@@ -1,8 +1,84 @@
+import type { BackgroundImageUser } from "@/components/media/BackgroundImage";
 import { NON_MEDIA_ASPECT_RATIO } from "@/constants/ui";
+import type { OwnerTimelineSettingsType } from "@/hooks/useGalleryByUsernameAndName";
 import { EntrySource } from "@/types/entry";
-import { GalleryType, UserVirtualGalleryType } from "@/types/gallery";
+import {
+  BaseGalleryType,
+  GalleryType,
+  UserVirtualGalleryType,
+} from "@/types/gallery";
 import { GalleryItem, GalleryItemTypes, isMediaGalleryItem } from "@/types/galleryItem";
 import { GalleryRowItem } from "@/types/ui/dashboard";
+
+/** Minimal gallery shape needed to resolve background/theme (owner + useCustomBackgroundSettings + optional overrides). */
+export type GalleryBackgroundInput = Pick<
+  BaseGalleryType,
+  | "owner"
+  | "useCustomBackgroundSettings"
+  | "galleryTheme"
+  | "backgroundImage"
+  | "backgroundTintHex"
+  | "backgroundTintOpacity"
+  | "backgroundBlur"
+  | "backgroundTileCount"
+>;
+
+export interface ResolvedGalleryBackground {
+  effectiveTheme: "light" | "dark";
+  resolvedBackgroundUser: BackgroundImageUser | null;
+}
+
+/**
+ * Resolves effective theme, background user object, and upload category for a gallery page.
+ * When useCustomBackgroundSettings is false, uses owner timeline settings; when true, uses gallery fields with owner fallback.
+ */
+export function resolveGalleryBackgroundAndTheme(
+  gallery: GalleryBackgroundInput | null | undefined,
+  ownerTimelineSettings: OwnerTimelineSettingsType | null | undefined
+): ResolvedGalleryBackground {
+  const useCustom = gallery?.useCustomBackgroundSettings ?? false;
+  
+  const effectiveTheme = useCustom
+    ? (gallery?.galleryTheme ?? "light")
+    : (ownerTimelineSettings?.timelineTheme ?? "light");
+
+  const ownerId = gallery?.owner ?? ownerTimelineSettings?._id;
+  if (!ownerId) {
+    return {
+      effectiveTheme,
+      resolvedBackgroundUser: null,
+    };
+  }
+
+  if (useCustom) {
+    const resolvedBackgroundUser: BackgroundImageUser = {
+      _id: ownerId,
+      backgroundImage: gallery?.backgroundImage,
+      backgroundTileCount: gallery?.backgroundTileCount ?? 0,
+      backgroundTintHex: gallery?.backgroundTintHex ?? "#000000",
+      backgroundTintOpacity: gallery?.backgroundTintOpacity ?? 0,
+      backgroundBlur: gallery?.backgroundBlur ?? 0,
+    };
+
+    return {
+      effectiveTheme,
+      resolvedBackgroundUser
+    };
+  }
+
+  const resolvedBackgroundUser: BackgroundImageUser = {
+    _id: ownerId,
+    backgroundImage: ownerTimelineSettings?.backgroundImage,
+    backgroundTileCount: ownerTimelineSettings?.backgroundTileCount ?? 0,
+    backgroundTintHex: ownerTimelineSettings?.backgroundTintHex ?? "#000000",
+    backgroundTintOpacity: ownerTimelineSettings?.backgroundTintOpacity ?? 0,
+    backgroundBlur: ownerTimelineSettings?.backgroundBlur ?? 0,
+  };
+  return {
+    effectiveTheme,
+    resolvedBackgroundUser
+  };
+}
 
 export const getGalleryKey = (source: EntrySource) => {
   switch (source) {

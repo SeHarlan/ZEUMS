@@ -5,17 +5,19 @@ import { PageTurnLeft } from "@/components/dashboard/PageTurnButtons";
 import { GalleryHero } from "@/components/gallery/GalleryHero";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
-import PageHeading from "@/components/general/PageHeading";
+import { TimelineBodyTheme } from "@/components/general/TimelineBodyTheme";
+import { BackgroundImage } from "@/components/media/BackgroundImage";
 import { GalleryOnboardingPopover } from "@/components/onboarding/GalleryOnboarding";
 import { P } from "@/components/typography/Typography";
 import { LinkButton } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { EDIT_GALLERIES, USER_GALLERY } from "@/constants/clientRoutes";
 import { NavBarActions } from "@/context/NavBarActionsProvider";
 import { useUser } from "@/context/UserProvider";
 import useGalleryById from "@/hooks/useGalleryById";
+import { resolveGalleryBackgroundAndTheme } from "@/utils/gallery";
 import { EyeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 
 const EditGalleryPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,12 +26,13 @@ const EditGalleryPage = () => {
 
   const viewGalleryHref = USER_GALLERY(user?.username, gallery?.title);
 
+  const { effectiveTheme, resolvedBackgroundUser } = useMemo(
+    () => resolveGalleryBackgroundAndTheme(gallery, user ?? undefined),
+    [gallery, user]
+  );
+
   return (
-    <PageContainer maxWidth="large">
-      <PageHeading
-        title="Manage Gallery"
-        subtitle="A focused collection of related artworks"
-      />
+    <PageContainer maxWidth="large" noPadding>
       <PageTurnLeft path={EDIT_GALLERIES} />
       <NavBarActions>
         <LinkButton
@@ -48,11 +51,12 @@ const EditGalleryPage = () => {
         noDataSubtitle="Gallery not found"
         useSpinner
       >
-        <Card className="pt-0 overflow-hidden">
+        <BackgroundImage user={resolvedBackgroundUser} />
+        <TimelineBodyTheme theme={effectiveTheme} />
+        <div className="relative z-1">
           <GalleryHero gallery={gallery} editMode />
-
           <EditGalleryItems galleryId={id} />
-        </Card>
+        </div>
       </FeedbackWrapper>
       <GalleryOnboardingPopover />
     </PageContainer>
