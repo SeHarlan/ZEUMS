@@ -6,7 +6,7 @@ import {
   TwitterIcon,
   WebsiteIcon,
 } from "@/components/icons/Social";
-import { TimelineBackgroundUser } from "@/components/media/BackgroundImage";
+import { BackgroundImageUser } from "@/components/media/BackgroundImage";
 import { MAIN_SCROLL_AREA_ID } from "@/constants/ui";
 import { SocialIconProps } from "@/types/generic";
 import { UserSocialHandles } from "@/types/user";
@@ -105,7 +105,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   return { r, g, b };
 }
 
-export const getRgbaBackgroundFromUser = (user: TimelineBackgroundUser | null | undefined) => { 
+export const getRgbaBackgroundFromUser = (user: BackgroundImageUser | null | undefined) => { 
   if (!user) return null;
   const rgb = hexToRgb(user?.backgroundTintHex ?? "#000000");
   if (!rgb) return null;
