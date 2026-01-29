@@ -299,7 +299,7 @@ const TimelineBase: FC<TimelineBaseProps> = ({ entries, EntryComponent, hideDate
     return (
       <div className="space-y-4" id={id}>
         {showYear && (
-          <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground shadow">
+          <H2 className="w-fit mx-auto bg-muted px-6 py-2 rounded-md text-muted-foreground">
             {entryYear}
           </H2>
         )}

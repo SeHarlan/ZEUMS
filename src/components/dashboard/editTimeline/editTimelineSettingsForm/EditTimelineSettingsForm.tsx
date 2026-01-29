@@ -88,7 +88,7 @@ const EditTimelineSettingsForm = forwardRef<
         hideCollectorDates: user?.hideCollectorDates ?? true,
         timelineTheme: user?.timelineTheme ?? "light",
         backgroundTintHex: user?.backgroundTintHex ?? "#000000",
-        backgroundTintOpacity: user?.backgroundTintOpacity ?? 0.35,
+        backgroundTintOpacity: user?.backgroundTintOpacity ?? 0,
         backgroundBlur: user?.backgroundBlur ?? 0,
         backgroundTileCount: user?.backgroundTileCount?.toString() ?? "0",
       }),

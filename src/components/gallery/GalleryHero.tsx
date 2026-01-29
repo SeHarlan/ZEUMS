@@ -49,7 +49,7 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
       {bannerMedia && (
         <BannerImage
           media={bannerMedia}
-          className="text-5xl mb-6 md:mb-12 md:shadow-lg rounded-none xl:rounded-b-md"
+          className="text-5xl mb-6 md:mb-12  rounded-none xl:rounded-b-md"
           fallbackText={gallery?.title}
           blobUrlBuilderProps={galleryBannerBlobUrlBuilderProps}
         />

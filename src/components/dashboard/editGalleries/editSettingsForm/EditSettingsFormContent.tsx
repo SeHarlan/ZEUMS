@@ -25,7 +25,7 @@ import { UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { ImageType } from "@/types/media";
 import { UserType } from "@/types/user";
 import { useSetAtom } from "jotai";
-import { ImagePlusIcon, Trash2Icon } from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
@@ -35,6 +35,7 @@ interface EditSettingsContentProps {
   bannerImage?: ImageType | null;
   setBannerImage: (image?: ImageType | null) => void;
   user: UserType | null;
+  onBannerFileSelect: (file: File) => void;
   backgroundImage: ImageType | null;
   setBackgroundImage: (image: ImageType | null) => void;
   onBackgroundFileSelect: (file: File) => void;
@@ -45,11 +46,13 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
   bannerImage,
   setBannerImage,
   user,
+  onBannerFileSelect,
   backgroundImage,
   setBackgroundImage,
   onBackgroundFileSelect,
 }) => {
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
+  const [uploadBannerDialogOpen, setUploadBannerDialogOpen] = useState(false);
   const [backgroundImageOpen, setBackgroundImageOpen] = useState(false);
   const [uploadBackgroundDialogOpen, setUploadBackgroundDialogOpen] = useState(false);
   const { user: contextUser } = useUser();
@@ -103,13 +106,20 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
               <Trash2Icon />
             </Button>
           )}
+          <ImageUploadDialog
+            title="Upload Banner Image"
+            description="Upload an image from your device to use as this gallery's banner"
+            onSelect={onBannerFileSelect}
+            open={uploadBannerDialogOpen}
+            onOpenChange={setUploadBannerDialogOpen}
+          />
           <Button
             type="button"
             variant={bannerImage ? "outline" : "default"}
             size="icon"
             onClick={() => setBannerImageOpen(true)}
           >
-            <ImagePlusIcon />
+            <BlockchainAssetEntryIcon />
           </Button>
         </div>
         <BannerImage
@@ -275,7 +285,7 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
                 <FormLabel>
                   Tint Opacity{" "}
                   <span className="text-muted-foreground">
-                    {Math.round((field.value ?? 0.35) * 100)}%
+                    {Math.round((field.value ?? 0) * 100)}%
                   </span>
                 </FormLabel>
                 <FormControl>

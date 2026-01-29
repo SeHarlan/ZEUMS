@@ -162,6 +162,10 @@ export const BackgroundImage: FC<BackgroundImageProps> = ({
     return null;
   }
 
+  if(!backgroundImage && !tintColor) { 
+    return null;
+  }
+
   return (
     <div
       className={cn("fixed inset-0 z-0 pointer-events-none", className)}

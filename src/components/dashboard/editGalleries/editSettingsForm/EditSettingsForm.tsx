@@ -30,6 +30,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import EditSettingsContent from "./EditSettingsFormContent";
 
+const EDIT_GALLERY_KEY_CLOSED = "closed";
+
 const formId = "edit-gallery-form";
 
 interface EditGallerySettingsProps { 
@@ -37,13 +39,20 @@ interface EditGallerySettingsProps {
   onClose: () => void;
 }
 
-const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onClose }) => {
+const EditGallerySettings: FC<EditGallerySettingsProps> = (props) => {
+  const galleryKey = props.editingGallery?._id?.toString() ?? EDIT_GALLERY_KEY_CLOSED;
+  return <EditGallerySettingsInner key={galleryKey} {...props} />;
+};
+
+const EditGallerySettingsInner: FC<EditGallerySettingsProps> = ({ editingGallery, onClose }) => {
   const [submitting, setSubmitting] = useState(false);
   const [bannerImage, setBannerImage] = useState<ImageType | null | undefined>(editingGallery?.bannerImage);
   const [backgroundImage, setBackgroundImage] = useState<ImageType | null | undefined>(
     editingGallery?.backgroundImage ?? null
   );
+  const [uploadedBannerFile, setUploadedBannerFile] = useState<File | undefined>();
   const [uploadedBackgroundFile, setUploadedBackgroundFile] = useState<File | undefined>();
+  const originalBannerImageRef = useRef<ImageType | null | undefined>(editingGallery?.bannerImage);
   const originalBackgroundImageRef = useRef<ImageType | null | undefined>(editingGallery?.backgroundImage);
 
   const galleryId = editingGallery?._id?.toString() || "";
@@ -64,7 +73,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       useCustomBackgroundSettings: editingGallery?.useCustomBackgroundSettings ?? false,
       galleryTheme: editingGallery?.galleryTheme ?? user?.timelineTheme ?? "light",
       backgroundTintHex: editingGallery?.backgroundTintHex ?? user?.backgroundTintHex ?? "#000000",
-      backgroundTintOpacity: editingGallery?.backgroundTintOpacity ?? user?.backgroundTintOpacity ?? 0.35,
+      backgroundTintOpacity: editingGallery?.backgroundTintOpacity ?? user?.backgroundTintOpacity ?? 0,
       backgroundBlur: editingGallery?.backgroundBlur ?? user?.backgroundBlur ?? 0,
       backgroundTileCount: editingGallery?.backgroundTileCount?.toString() ?? user?.backgroundTileCount?.toString() ?? "0",
     }),
@@ -88,19 +97,13 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
     }
   }, [reset, defaultValues, isOpen]);
 
-  useEffect(() => {
-    if (editingGallery?.bannerImage && bannerImage === undefined) {
-      setBannerImage(editingGallery.bannerImage);
+  const setBannerImageAndClearUpload = (image: ImageType | null | undefined) => {
+    if (bannerImage?.imageCdn?.cdnId?.startsWith("blob:")) {
+      URL.revokeObjectURL(bannerImage.imageCdn.cdnId);
     }
-  }, [editingGallery?.bannerImage, bannerImage]);
-
-  useEffect(() => {
-    if (isOpen && editingGallery) {
-      originalBackgroundImageRef.current = editingGallery.backgroundImage;
-      setBackgroundImage(editingGallery.backgroundImage ?? null);
-      setUploadedBackgroundFile(undefined);
-    }
-  }, [isOpen, editingGallery?.backgroundImage]);
+    setUploadedBannerFile(undefined);
+    setBannerImage(image);
+  };
 
   const setBackgroundImageAndClearUpload = (image: ImageType | null) => {
     if (backgroundImage?.imageCdn?.cdnId?.startsWith("blob:")) {
@@ -108,6 +111,26 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
     }
     setUploadedBackgroundFile(undefined);
     setBackgroundImage(image);
+  };
+
+  const handleBannerFileSelect = async (file: File) => {
+    if (bannerImage?.imageCdn?.cdnId?.startsWith("blob:")) {
+      URL.revokeObjectURL(bannerImage.imageCdn.cdnId);
+    }
+    setUploadedBannerFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const aspectRatio = await getFileAspectRatio(file);
+      setBannerImage({
+        origin: MediaOrigin.User,
+        category: MediaCategory.Image,
+        imageCdn: { type: CdnIdType.VERCEL_BLOB_USER_IMAGE, cdnId: objectUrl },
+        aspectRatio,
+      });
+    } catch (error) {
+      console.error("Failed to calculate banner image aspect ratio:", error);
+      toast.error("Something went wrong", { description: "Try again or choose a different image" });
+    }
   };
 
   const handleBackgroundFileSelect = async (file: File) => {
@@ -135,15 +158,51 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
 
     setSubmitting(true);
 
+    const userId = user._id.toString();
     const normalizeImage = (image: ImageType | null | undefined): ImageType | null => image ?? null;
     let finalBackgroundImage: ImageType | null = normalizeImage(backgroundImage);
+    let finalBannerImage: ImageType | null = normalizeImage(bannerImage);
     const isNewBackgroundUpload =
       backgroundImage?.origin === MediaOrigin.User &&
       uploadedBackgroundFile &&
       backgroundImage !== originalBackgroundImageRef.current;
+    const isNewBannerUpload =
+      bannerImage?.origin === MediaOrigin.User &&
+      uploadedBannerFile &&
+      bannerImage !== originalBannerImageRef.current;
+
+    const doSubmit = (bg: ImageType | null, banner: ImageType | null) => {
+      submitGallery(data, bg, banner);
+    };
+
+    const uploadBannerThenSubmit = async (bg: ImageType | null) => {
+      if (!isNewBannerUpload || !uploadedBannerFile) {
+        doSubmit(bg, finalBannerImage);
+        return;
+      }
+      const fileExtension = getFileExtension(uploadedBannerFile);
+      const imageId = `banner-${galleryId}${fileExtension}`;
+      const blobKey = makeUserImageBlobKey(userId, UploadCategory.GALLERY_BANNER, imageId);
+      toast.info("Uploading new banner image...");
+      try {
+        await clientImageUpload(uploadedBannerFile, blobKey);
+        const aspectRatio =
+          bannerImage?.aspectRatio ?? (await getFileAspectRatio(uploadedBannerFile));
+        finalBannerImage = {
+          origin: MediaOrigin.User,
+          category: MediaCategory.Image,
+          imageCdn: { type: CdnIdType.VERCEL_BLOB_USER_IMAGE, cdnId: imageId },
+          aspectRatio,
+        };
+        doSubmit(bg, finalBannerImage);
+      } catch (err) {
+        handleClientError({ error: err, location: "EditGallerySettings_bannerUpload" });
+        toast.error("Failed to upload banner image.");
+        setSubmitting(false);
+      }
+    };
 
     if (isNewBackgroundUpload && uploadedBackgroundFile) {
-      const userId = user._id.toString();
       const fileExtension = getFileExtension(uploadedBackgroundFile);
       const imageId = `${galleryId}${fileExtension}`;
       const blobKey = makeUserImageBlobKey(userId, UploadCategory.GALLERY_BACKGROUND, imageId);
@@ -158,7 +217,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
             imageCdn: { type: CdnIdType.VERCEL_BLOB_USER_IMAGE, cdnId: imageId },
             aspectRatio,
           };
-          submitGallery(data, finalBackgroundImage);
+          await uploadBannerThenSubmit(finalBackgroundImage);
         })
         .catch((err) => {
           handleClientError({ error: err, location: "EditGallerySettings_backgroundUpload" });
@@ -168,10 +227,14 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       return;
     }
 
-    submitGallery(data, finalBackgroundImage);
+    uploadBannerThenSubmit(finalBackgroundImage);
   };
 
-  const submitGallery = (data: UpsertGalleryFormValues, finalBackgroundImage: ImageType | null) => {
+  const submitGallery = (
+    data: UpsertGalleryFormValues,
+    finalBackgroundImage: ImageType | null,
+    finalBannerImage: ImageType | null
+  ) => {
     if (!editingGallery) return;
 
     const tileCount = !data.backgroundTileCount
@@ -187,7 +250,7 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
       description: data.description,
       hideItemTitles: data.hideItemTitles,
       hideItemDescriptions: data.hideItemDescriptions,
-      bannerImage,
+      bannerImage: finalBannerImage,
       useCustomBackgroundSettings: data.useCustomBackgroundSettings,
       galleryTheme: data.galleryTheme,
       backgroundImage: finalBackgroundImage,
@@ -279,12 +342,13 @@ const EditGallerySettings: FC<EditGallerySettingsProps> = ({ editingGallery, onC
         )}
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+        <form id={formId}>
           <EditSettingsContent
             form={form}
             bannerImage={bannerImage}
-            setBannerImage={setBannerImage}
+            setBannerImage={setBannerImageAndClearUpload}
             user={user}
+            onBannerFileSelect={handleBannerFileSelect}
             backgroundImage={backgroundImage ?? null}
             setBackgroundImage={setBackgroundImageAndClearUpload}
             onBackgroundFileSelect={handleBackgroundFileSelect}

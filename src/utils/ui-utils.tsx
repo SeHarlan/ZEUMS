@@ -95,7 +95,8 @@ export const socialHandlesList: {
   
 ];
 
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+function hexToRgb(hex?: string): { r: number; g: number; b: number } | null {
+  if (!hex) return null;
   const match = /^#([0-9A-Fa-f]{6})$/.exec(hex);
   if (!match) return null;
   const value = match[1];
@@ -107,7 +108,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 
 export const getRgbaBackgroundFromUser = (user: BackgroundImageUser | null | undefined) => { 
   if (!user) return null;
-  const rgb = hexToRgb(user?.backgroundTintHex ?? "#000000");
+  const rgb = hexToRgb(user?.backgroundTintHex);
   if (!rgb) return null;
 
   const tintOpacity = user.backgroundTintOpacity;

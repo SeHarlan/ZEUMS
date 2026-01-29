@@ -37,6 +37,7 @@ export function resolveGalleryBackgroundAndTheme(
   ownerTimelineSettings: OwnerTimelineSettingsType | null | undefined
 ): ResolvedGalleryBackground {
   const useCustom = gallery?.useCustomBackgroundSettings ?? false;
+  
   const effectiveTheme = useCustom
     ? (gallery?.galleryTheme ?? "light")
     : (ownerTimelineSettings?.timelineTheme ?? "light");

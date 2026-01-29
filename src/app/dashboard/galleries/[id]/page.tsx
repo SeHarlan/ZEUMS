@@ -32,7 +32,7 @@ const EditGalleryPage = () => {
   );
 
   return (
-    <PageContainer maxWidth="large">
+    <PageContainer maxWidth="large" noPadding>
       <PageTurnLeft path={EDIT_GALLERIES} />
       <NavBarActions>
         <LinkButton

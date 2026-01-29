@@ -48,7 +48,7 @@ const ProfileHero: FC<ProfileHeroProps> = ({ publicUser, editMode = false }) => 
     <div>
       <BannerImage
         media={publicUser?.bannerImage}
-        className="text-5xl mb-4 md:mb-8 md:shadow-lg rounded-none xl:rounded-b-md"
+        className="text-5xl mb-4 md:mb-8 rounded-none xl:rounded-b-md"
         fallbackText={displayName}
         blobUrlBuilderProps={bannerBlobUrlBuilderProps}
       />
