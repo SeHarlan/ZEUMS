@@ -67,7 +67,7 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
     if (!userId) return undefined;
     return {
       userId,
-      category: UploadCategory.PROFILE_BACKGROUND,
+      category: UploadCategory.GALLERY_BACKGROUND,
     };
   }, [userId]);
 

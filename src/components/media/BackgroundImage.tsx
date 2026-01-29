@@ -41,7 +41,7 @@ const BackgroundImageInner: FC<BackgroundImageInnerProps> = ({
   const blobUrlBuilderProps = useMemo(() => {
     return {
       userId,
-      category: UploadCategory.PROFILE_BACKGROUND,
+      category: UploadCategory.GALLERY_BACKGROUND,
     };
   }, [userId]);
 
@@ -157,7 +157,6 @@ export const BackgroundImage: FC<BackgroundImageProps> = ({
   const tintColor = useMemo(() => {
     return getRgbaBackgroundFromUser(user);
   }, [user]);
-
 
   if (!userId) {
     return null;

@@ -40,7 +40,12 @@ export async function getGalleryByUsernameAndNameHandler(
       throw new Error("Gallery not found");
     }
 
-    return NextResponse.json({ gallery });
+    const ownerTimelineSettings = gallery.useCustomBackgroundSettings ? null : await User.findById(gallery.owner)
+      .select("_id backgroundImage backgroundTileCount backgroundTintHex backgroundTintOpacity backgroundBlur timelineTheme")
+      .lean()
+      .exec();
+
+    return NextResponse.json({ gallery, ownerTimelineSettings });
   } catch (error) {
     return standardErrorResponses({
       error,

@@ -178,7 +178,7 @@ const EditTimelineSettingsForm = forwardRef<
           const imageId = `image${fileExtension}`;
           const blobKey = makeUserImageBlobKey(
             userId,
-            UploadCategory.PROFILE_BACKGROUND,
+            UploadCategory.GALLERY_BACKGROUND,
             imageId
           );
 
