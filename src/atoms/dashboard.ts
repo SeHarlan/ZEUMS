@@ -11,6 +11,7 @@ export const editTimelineSourceAtom = atomWithStorage<EntrySource>(
 
 export const addTimelineEntriesFormOpenAtom = atom<boolean>(false);
 export const editProfileFormOpenAtom = atom<boolean>(false);
+export const editTimelineSettingsFormOpenAtom = atom<boolean>(false);
 export const rearrangeEntriesDrawerOpenAtom = atom<boolean>(false);
 
 export const newGalleryItemFormOpenAtom = atom<boolean>(false);

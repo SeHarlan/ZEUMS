@@ -2,6 +2,7 @@
 
 import { editTimelineSourceAtom } from "@/atoms/dashboard";
 import { PAGE_PADDING_X } from "@/components/general/PageContainer";
+import EditTimelineSettingsForm from "@/components/dashboard/editTimeline/editTimelineSettingsForm/EditTimelineSettingsForm";
 import { TimelineSelect } from "@/components/timeline/TimelineSelect";
 import { useUser } from "@/context/UserProvider";
 import { TIMELINE_ENTRY_LABEL } from "@/textCopy/mainCopy";
@@ -30,19 +31,25 @@ const EditTimeline: FC = () => {
       <EditTimelineBar />
       {entries.length === 0 ? (
         <div className={PAGE_PADDING_X}>
-          <NewEntryFormButton
-            source={source}
-            buttonVariant="outline"
-            buttonClassName="h-40 rounded-lg mb-10"
-            buttonText={`Add your first ${TIMELINE_ENTRY_LABEL.fullPlural}!`}
-          />
+          <div className="relative">
+            <div className="absolute left-1/2 -translate-x-1/2 top-4 z-20">
+              <EditTimelineSettingsForm buttonClassName="shadow-md" />
+            </div>
+            <NewEntryFormButton
+              source={source}
+              buttonVariant="outline"
+              buttonClassName="h-40 rounded-lg mb-10"
+              buttonText={`Add your first ${TIMELINE_ENTRY_LABEL.fullPlural}!`}
+            />
           </div>
+        </div>
       ) : (
         <TimelineSelect
           user={user}
           EntryComponent={EditableEntry}
           tabValue={tabValue}
           setTabValue={setTabValue}
+          topCenterOverlay={<EditTimelineSettingsForm buttonClassName="shadow-md" />}
         />
       )}
     </div>

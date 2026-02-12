@@ -105,7 +105,7 @@ export default function RootLayout({
           </WalletContextProvider>
         </AtomProvider>
         <Toaster
-          position="bottom-right"
+          position="bottom-center"
           richColors={true}
           closeButton={true}
         />

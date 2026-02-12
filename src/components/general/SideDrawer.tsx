@@ -1,5 +1,9 @@
+"use client";
+
+import { isEyeDropperActiveAtom } from "@/atoms/eyeDropper";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/ui-utils";
+import { useAtomValue } from "jotai";
 import { FC, ReactNode } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
@@ -39,10 +43,13 @@ const SideDrawer: FC<SideDrawerProps> = ({
   disableInteractOutside = false,
   scrollAreaId,
 }) => {
+  const isEyeDropperActive = useAtomValue(isEyeDropperActiveAtom);
+  
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} >
       <SheetTrigger asChild>{triggerButton}</SheetTrigger>
       <SheetContent
+        showOverlay={!isEyeDropperActive}
         onInteractOutside={disableInteractOutside ? (e) => e.preventDefault() : undefined}
         className={cn("grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-y-hidden h-full gap-0", contentClassName)}
       >

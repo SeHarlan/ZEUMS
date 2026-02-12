@@ -1,10 +1,11 @@
 import { createOnboardingAtoms } from "./factory";
 
 export const TimelineOnboardingKeys = {
-  ChooseActiveSource: "chooseActiveSource",
   EditProfile: "editProfile",
-  ChoosePrimaryTimeline: "choosePrimaryTimeline",
   SaveProfile: "saveProfile",
+  ChooseActiveSource: "chooseActiveSource",
+  EditSettings: "editSettings",
+  ChoosePrimaryTimeline: "choosePrimaryTimeline",
   AddItems: "addItems",
   RearrangeItems: "rearrangeItems",
   goToGalleries: "goToGalleries",

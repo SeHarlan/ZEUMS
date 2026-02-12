@@ -37,7 +37,7 @@ const GalleryEntryDisplay: FC<GalleryEntryDisplayProps> = ({ entry, flip }) => {
       </div>
 
       <div
-        className={cn("order-2 bg-background py-4 px-2", flip && "md:order-1")}
+        className={cn("order-2 py-4 px-2", flip && "md:order-1")}
       >
         <div className="relative mb-2 text-center">
           <H3 className="">{entry.title}</H3>

@@ -11,7 +11,7 @@ import { useAtom, useAtomValue } from "jotai/react";
 import { Minimize2Icon } from "lucide-react";
 import { FC, useState } from "react";
 import { EditBar } from "../EditBar";
-import EditProfileForm from "./editProfileForm/EditProfileForm";
+import EditTimelineSettingsForm from "./editTimelineSettingsForm/EditTimelineSettingsForm";
 import NewEntryFormButton from "./newEntryForm/NewEntryForm";
 import RearrangeEntriesButton from "./RearrangeEntries";
 
@@ -27,9 +27,9 @@ export const EditTimelineBar:FC = () => {
   );
 
   const {
-    setStepRef: setEditProfileRef,
-    setStepComplete: setEditProfileComplete,
-  } = useTimelineSetter(TimelineOnboardingKeys.EditProfile);
+    setStepRef: setEditSettingsRef,
+    setStepComplete: setEditSettingsComplete,
+  } = useTimelineSetter(TimelineOnboardingKeys.EditSettings);
 
   const { setStepRef: setAddItemsRef, setStepComplete: setAddItemsComplete } =
     useTimelineSetter(TimelineOnboardingKeys.AddItems);
@@ -78,10 +78,10 @@ export const EditTimelineBar:FC = () => {
         </Button>
       </div>
       <div className={cn("grid gap-2 w-full", "grid-cols-3")}>
-        <EditProfileForm
+        <EditTimelineSettingsForm
           buttonVariant="outline"
-          ref={setEditProfileRef}
-          onClick={setEditProfileComplete}
+          ref={setEditSettingsRef}
+          onClick={setEditSettingsComplete}
           disableInteractOutside={onboardingActive}
         />
         <NewEntryFormButton

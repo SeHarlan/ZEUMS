@@ -69,7 +69,7 @@ const NavMenu: FC = () => {
           <NavLink label={`About ${TITLE_COPY}`} href={ABOUT} />
           <Button
             variant="ghost"
-            className={cn("w-full")}
+            className={cn(navigationMenuTriggerStyle(), "w-full")}
             onClick={() => setSearchAssetOpen(true)}
           >
             Search Artworks
@@ -109,36 +109,35 @@ const NavMenu: FC = () => {
             Public Timeline
           </LinkButton>
 
-            <LoginButton
-              className="order-6 md:order-7"
-              variant={loggedIn ? "outline" : "default"}
-            />
+          <LoginButton
+            className="order-6 md:order-7"
+            variant={loggedIn ? "outline" : "default"}
+          />
 
-            {/* <NavigationMenuLink asChild> */}
-            <Button
-              className={cn(
-                "order-7 md:order-6 flex-row cursor-auto",
-                !loggedIn && "font-serif" //for default Z when no user
-              )}
-              variant="secondary"
-            >
-              {loggedIn ? userDisplayName : noUserDisplayName}
+          {/* <NavigationMenuLink asChild> */}
+          <Button
+            className={cn(
+              "order-7 md:order-6 flex-row cursor-auto",
+              !loggedIn && "font-serif", //for default Z when no user
+            )}
+            variant="secondary"
+          >
+            {loggedIn ? userDisplayName : noUserDisplayName}
 
-              {walletMismatch && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <InfoIcon className="size-4" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <P>
-                      You are currently connected to a wallet not associated
-                      with your account
-                    </P>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </Button>
-  
+            {walletMismatch && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <InfoIcon className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <P>
+                    You are currently connected to a wallet not associated with
+                    your account
+                  </P>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </Button>
         </NavDropDown>
       </NavigationMenuList>
     </NavigationMenu>
