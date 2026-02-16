@@ -28,6 +28,7 @@ import { usePathname } from "next/navigation";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { mutate } from "swr";
 import EditSettingsContent from "./EditSettingsFormContent";
 
 const EDIT_GALLERY_KEY_CLOSED = "closed";
@@ -76,6 +77,8 @@ const EditGallerySettingsInner: FC<EditGallerySettingsProps> = ({ editingGallery
       backgroundTintOpacity: editingGallery?.backgroundTintOpacity ?? user?.backgroundTintOpacity ?? 0,
       backgroundBlur: editingGallery?.backgroundBlur ?? user?.backgroundBlur ?? 0,
       backgroundTileCount: editingGallery?.backgroundTileCount?.toString() ?? user?.backgroundTileCount?.toString() ?? "0",
+      galleryHeadingFont: editingGallery?.galleryHeadingFont ?? "",
+      galleryBodyFont: editingGallery?.galleryBodyFont ?? "",
     }),
     [editingGallery, user]
   );
@@ -258,6 +261,8 @@ const EditGallerySettingsInner: FC<EditGallerySettingsProps> = ({ editingGallery
       backgroundTintOpacity: data.backgroundTintOpacity,
       backgroundBlur: data.backgroundBlur,
       backgroundTileCount: tileCount,
+      galleryHeadingFont: data.galleryHeadingFont || undefined,
+      galleryBodyFont: data.galleryBodyFont || undefined,
     };
 
     axios
@@ -269,6 +274,11 @@ const EditGallerySettingsInner: FC<EditGallerySettingsProps> = ({ editingGallery
 
         // Update the main gallery data using SWR mutation
         mutateGallery(updatedGallery, false)
+
+        // Revalidate the public gallery page cache
+        if (user?.username && updatedGallery.title) {
+          mutate(`gallery-${user.username}-${updatedGallery.title}`);
+        }
 
         //update user if the gallery title or description changed for gallery Cards
         if (updatedGallery.title !== editingGallery.title || updatedGallery.description !== editingGallery.description) {

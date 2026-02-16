@@ -33,6 +33,8 @@ export type BaseUserType = {
   hideCollectorDates?: boolean;
   /** Theme for timeline pages only (public timeline + dashboard timeline). Default: light. */
   timelineTheme?: "light" | "dark";
+  timelineHeadingFont?: string;
+  timelineBodyFont?: string;
   // websites?: Website[];
 };
 

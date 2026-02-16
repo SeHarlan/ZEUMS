@@ -21,6 +21,8 @@ const ALLOWED_UPDATE_KEYS: ReadonlyArray<keyof UserType> = [
   "hideCreatorDates",
   "hideCollectorDates",
   "timelineTheme",
+  "timelineHeadingFont",
+  "timelineBodyFont",
 ] as const;
 
 function buildUpdateSet(body: Record<string, unknown>): Partial<UserType> {

@@ -16,6 +16,8 @@ export type GalleryBackgroundInput = Pick<
   | "owner"
   | "useCustomBackgroundSettings"
   | "galleryTheme"
+  | "galleryHeadingFont"
+  | "galleryBodyFont"
   | "backgroundImage"
   | "backgroundTintHex"
   | "backgroundTintOpacity"
@@ -25,11 +27,13 @@ export type GalleryBackgroundInput = Pick<
 
 export interface ResolvedGalleryBackground {
   effectiveTheme: "light" | "dark";
+  effectiveHeadingFont: string | null;
+  effectiveBodyFont: string | null;
   resolvedBackgroundUser: BackgroundImageUser | null;
 }
 
 /**
- * Resolves effective theme, background user object, and upload category for a gallery page.
+ * Resolves effective theme, fonts, background user object, and upload category for a gallery page.
  * When useCustomBackgroundSettings is false, uses owner timeline settings; when true, uses gallery fields with owner fallback.
  */
 export function resolveGalleryBackgroundAndTheme(
@@ -37,15 +41,25 @@ export function resolveGalleryBackgroundAndTheme(
   ownerTimelineSettings: OwnerTimelineSettingsType | null | undefined
 ): ResolvedGalleryBackground {
   const useCustom = gallery?.useCustomBackgroundSettings ?? false;
-  
+
   const effectiveTheme = useCustom
     ? (gallery?.galleryTheme ?? "light")
     : (ownerTimelineSettings?.timelineTheme ?? "light");
+
+  const effectiveHeadingFont = useCustom
+    ? (gallery?.galleryHeadingFont ?? null)
+    : (ownerTimelineSettings?.timelineHeadingFont ?? null);
+
+  const effectiveBodyFont = useCustom
+    ? (gallery?.galleryBodyFont ?? null)
+    : (ownerTimelineSettings?.timelineBodyFont ?? null);
 
   const ownerId = gallery?.owner ?? ownerTimelineSettings?._id;
   if (!ownerId) {
     return {
       effectiveTheme,
+      effectiveHeadingFont,
+      effectiveBodyFont,
       resolvedBackgroundUser: null,
     };
   }
@@ -62,6 +76,8 @@ export function resolveGalleryBackgroundAndTheme(
 
     return {
       effectiveTheme,
+      effectiveHeadingFont,
+      effectiveBodyFont,
       resolvedBackgroundUser
     };
   }
@@ -76,6 +92,8 @@ export function resolveGalleryBackgroundAndTheme(
   };
   return {
     effectiveTheme,
+    effectiveHeadingFont,
+    effectiveBodyFont,
     resolvedBackgroundUser
   };
 }

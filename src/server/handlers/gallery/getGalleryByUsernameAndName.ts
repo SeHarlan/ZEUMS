@@ -41,7 +41,7 @@ export async function getGalleryByUsernameAndNameHandler(
     }
 
     const ownerTimelineSettings = gallery.useCustomBackgroundSettings ? null : await User.findById(gallery.owner)
-      .select("_id backgroundImage backgroundTileCount backgroundTintHex backgroundTintOpacity backgroundBlur timelineTheme")
+      .select("_id backgroundImage backgroundTileCount backgroundTintHex backgroundTintOpacity backgroundBlur timelineTheme timelineHeadingFont timelineBodyFont")
       .lean()
       .exec();
 

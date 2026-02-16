@@ -4,6 +4,12 @@ const backgroundTintHexSchema = z
   .string()
   .regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color like #112233");
 
+const googleFontNameSchema = z
+  .string()
+  .max(100, "Font name must be 100 characters or less")
+  .optional()
+  .or(z.literal(""));
+
 // Form schema with Zod validation for gallery creation and settings
 export const upsertGalleryFormSchema = z.object({
   title: z
@@ -29,6 +35,8 @@ export const upsertGalleryFormSchema = z.object({
   backgroundTintOpacity: z.number().min(0).max(1).optional(),
   backgroundBlur: z.number().min(0).max(40).optional(),
   backgroundTileCount: z.string().optional(),
+  galleryHeadingFont: googleFontNameSchema,
+  galleryBodyFont: googleFontNameSchema,
 });
 
 export type UpsertGalleryFormValues = z.infer<typeof upsertGalleryFormSchema>;

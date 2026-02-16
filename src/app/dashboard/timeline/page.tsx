@@ -2,6 +2,7 @@
 import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
 import EditTimeline from "@/components/dashboard/editTimeline/EditTimeline";
 import { PageTurnLeft, PageTurnRight } from "@/components/dashboard/PageTurnButtons";
+import { DynamicFontLoader } from "@/components/general/DynamicFontLoader";
 import { PageContainer } from "@/components/general/PageContainer";
 import { BackgroundImage } from "@/components/media/BackgroundImage";
 import { TimelineOnboardingPopover } from "@/components/onboarding/TimelineOnboarding";
@@ -37,7 +38,11 @@ export default function EditTimelinePage() {
         onClick={setStepComplete}
       />
       <BackgroundImage user={user} />
-      <div className="relative z-1">
+      <DynamicFontLoader
+        headingFont={user?.timelineHeadingFont}
+        bodyFont={user?.timelineBodyFont}
+      />
+      <div className="relative z-1 timeline-content">
         <ProfileHero publicUser={user} editMode />
         <EditTimeline />
         <TimelineOnboardingPopover />

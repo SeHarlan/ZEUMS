@@ -17,7 +17,10 @@ export const EditBar: FC<EditBarProps> = ({ children, isOpen, setIsOpen }) => {
           "fixed left-1/2 -translate-x-1/2 z-30 ",
           "transition-all duration-400 ease-in-out",
           "fill-mode-forwards zoom-in-80 fade-in-0 zoom-out-80 fade-out-0",
-          !isOpen ? "animate-in bottom-4 lg:bottom-8" : "animate-out -bottom-30"
+          !isOpen
+            ? "animate-in bottom-4 lg:bottom-8"
+            : "animate-out -bottom-30",
+          "no-custom-font",
         )}
       >
         <Button
@@ -34,14 +37,16 @@ export const EditBar: FC<EditBarProps> = ({ children, isOpen, setIsOpen }) => {
           "w-full max-w-2xl fixed bottom-0 left-1/2 -translate-x-1/2 z-20 pb-4",
           PAGE_PADDING_X,
           "transition-all duration-400 ease-in-out",
-          isOpen ? "opacity-100 bottom-0 scale-100" : "opacity-0 -bottom-30 scale-90"
-            
+          isOpen
+            ? "opacity-100 bottom-0 scale-100"
+            : "opacity-0 -bottom-30 scale-90",
+          "no-custom-font",
         )}
       >
         <div
           className={cn(
             "shadow-md border p-3 rounded-md",
-            "space-y-3 bg-muted-blur"
+            "space-y-3 bg-muted-blur",
           )}
         >
           {children}

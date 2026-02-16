@@ -29,6 +29,8 @@ export type BaseGalleryType = {
   backgroundTintOpacity?: number;
   backgroundBlur?: number;
   backgroundTileCount?: number;
+  galleryHeadingFont?: string;
+  galleryBodyFont?: string;
 };
 
 type GalleryOwnerData = Pick<BaseUserType, "username" | "displayName" | "profileImage">;

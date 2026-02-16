@@ -71,6 +71,8 @@ const GallerySchema = new Schema<GalleryDocument>(
     backgroundTintOpacity: { type: Number },
     backgroundBlur: { type: Number },
     backgroundTileCount: { type: Number },
+    galleryHeadingFont: { type: String },
+    galleryBodyFont: { type: String },
   },
   {
     timestamps: true,

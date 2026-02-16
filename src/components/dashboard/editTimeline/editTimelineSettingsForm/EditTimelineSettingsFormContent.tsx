@@ -1,5 +1,6 @@
 import { isEyeDropperActiveAtom } from "@/atoms/eyeDropper";
 import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
+import GoogleFontPicker from "@/components/fonts/GoogleFontPicker";
 import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import ImageUploadDialog from "@/components/media/ImageUploadDialog";
 import MediaThumbnail from "@/components/media/MediaThumbnail";
@@ -166,6 +167,20 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
 
       <Separator className="mb-6" />
 
+      <GoogleFontPicker
+        form={form}
+        name="timelineHeadingFont"
+        label="Heading Font"
+        description="Font for titles and headings on your timeline."
+      />
+
+      <GoogleFontPicker
+        form={form}
+        name="timelineBodyFont"
+        label="Body Font"
+        description="Font for body text on your timeline."
+      />
+
       <FormField
         control={form.control}
         name="timelineTheme"
@@ -189,6 +204,7 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
           </FormItem>
         )}
       />
+
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <FormLabel>Background Tint</FormLabel>

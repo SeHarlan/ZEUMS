@@ -25,6 +25,8 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
       | "backgroundTintOpacity"
       | "backgroundBlur"
       | "backgroundTileCount"
+      | "galleryHeadingFont"
+      | "galleryBodyFont"
     >;
     const {
       _id,
@@ -40,6 +42,8 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
       backgroundTintOpacity,
       backgroundBlur,
       backgroundTileCount,
+      galleryHeadingFont,
+      galleryBodyFont,
     } = body;
 
     // Validate required fields
@@ -64,6 +68,8 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
       backgroundTintOpacity,
       backgroundBlur,
       backgroundTileCount,
+      galleryHeadingFont,
+      galleryBodyFont,
     });
 
     // Update gallery data
