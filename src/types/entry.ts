@@ -26,6 +26,11 @@ export type EntryButton = {
   url: string;
 };
 
+export type Integration = {
+  type: "exchange" | "mallow";
+  action: "link"
+}
+
 // Base properties shared by all entry types
 export type BaseEntry = {
   _id: Schema.Types.ObjectId;
@@ -36,6 +41,7 @@ export type BaseEntry = {
   title?: string;
   description?: string;
   buttons?: EntryButton[];
+  integrations?: Integration[];
   date: Date;
 };
 
