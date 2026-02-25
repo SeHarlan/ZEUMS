@@ -290,7 +290,7 @@ const NewItemFormContent: FC<NewItemFormContentProps> = ({
               </FormItem>
             )}
           />
-          <ButtonEditor form={form} />
+          <ButtonEditor form={form} tokenAddress={blockchainAsset?.tokenAddress} />
         </>
       )}
     </div>

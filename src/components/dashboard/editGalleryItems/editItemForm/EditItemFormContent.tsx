@@ -23,6 +23,7 @@ interface EditGalleryItemFormContentProps {
   form: UseFormReturn<GalleryItemFormValues>;
   selectedItemType: GalleryItemTypes;
   galleryId?: string;
+  tokenAddress?: string;
   handleOpenChange: (open: boolean) => void;
 }
 
@@ -30,6 +31,7 @@ const EditGalleryItemFormContent: FC<EditGalleryItemFormContentProps> = ({
   form,
   selectedItemType,
   galleryId,
+  tokenAddress,
   handleOpenChange,
 }) => {
   const { title, description } = GALLERY_ITEM_TYPE_COPY[selectedItemType];
@@ -102,7 +104,7 @@ const EditGalleryItemFormContent: FC<EditGalleryItemFormContentProps> = ({
         )}
       />
 
-      <ButtonEditor form={form} />
+      <ButtonEditor form={form} tokenAddress={tokenAddress} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { GalleryMediaItem } from "@/types/galleryItem";
+import { GalleryMediaItem, isBlockchainAssetGalleryItem } from "@/types/galleryItem";
 import { BlobUrlBuilderProps } from "@/types/media";
 import { FC } from "react";
 import AssetViewer from "../assets/AssetViewer";
@@ -16,6 +16,8 @@ interface AssetItemDisplayProps {
 }
 
 const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDescription, hideButtons, sizeDivisor, blobUrlBuilderProps}) => {
+  const isBlockchain = isBlockchainAssetGalleryItem(item);
+
   return (
     <div>
       <AssetViewer asset={item} sizeDivisor={sizeDivisor} blobUrlBuilderProps={blobUrlBuilderProps} />
@@ -33,7 +35,14 @@ const AssetItemDisplay: FC<AssetItemDisplayProps> = ({ item, hideTitle, hideDesc
           )}
         </div>
       )}
-      {!hideButtons && <EntryButtons buttons={item.buttons} className="mt-2 justify-start" />}
+      {!hideButtons && (
+        <EntryButtons
+          buttons={item.buttons}
+          integrations={isBlockchain ? item.integrations : undefined}
+          tokenAddress={isBlockchain ? item.tokenAddress : undefined}
+          className="mt-2 justify-start"
+        />
+      )}
     </div>
   );
 };

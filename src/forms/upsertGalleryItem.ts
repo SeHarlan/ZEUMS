@@ -2,6 +2,11 @@ import { GalleryItemTypes } from "@/types/galleryItem";
 import { z } from "zod";
 import { urlSchema } from "./urlSchema";
 
+const integrationSchema = z.object({
+  type: z.enum(["exchange", "mallow"]),
+  action: z.literal("link"),
+});
+
 // Form schema with Zod validation
 export const galleryItemFormSchema = z.object({
   itemType: z.nativeEnum(GalleryItemTypes),
@@ -31,6 +36,7 @@ export const galleryItemFormSchema = z.object({
     .max(3, {
       message: "You can add up to 3 buttons.",
     }),
+  integrations: z.array(integrationSchema).optional(),
 });
 
 export type GalleryItemFormValues = z.infer<typeof galleryItemFormSchema>;

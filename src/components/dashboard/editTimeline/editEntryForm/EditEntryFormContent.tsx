@@ -24,10 +24,11 @@ import { CalendarIcon, EditIcon } from "lucide-react";
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-interface EditEntryFormContentProps { 
+interface EditEntryFormContentProps {
   form: UseFormReturn<EntryFormValues>;
   selectedEntryType: EntryTypes;
   galleryId?: string;
+  tokenAddress?: string;
   handleOpenChange: (open: boolean) => void;
   handleGetMintDates: () => void;
   fetchingMintDate: boolean;
@@ -37,10 +38,11 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
   form,
   selectedEntryType,
   galleryId,
+  tokenAddress,
   handleOpenChange,
   handleGetMintDates,
   fetchingMintDate,
-}) => { 
+}) => {
   const { title, description } = ENTRY_TYPE_COPY[selectedEntryType]
   const Icon = EntryTypeIcons[selectedEntryType];
 
@@ -195,7 +197,7 @@ const EditEntryFormContent: FC<EditEntryFormContentProps> = ({
         )}
       />
 
-      <ButtonEditor form={form} />
+      <ButtonEditor form={form} tokenAddress={tokenAddress} />
     </div>
   );
 }

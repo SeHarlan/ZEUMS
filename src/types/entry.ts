@@ -41,7 +41,6 @@ export type BaseEntry = {
   title?: string;
   description?: string;
   buttons?: EntryButton[];
-  integrations?: Integration[];
   date: Date;
 };
 
@@ -86,8 +85,9 @@ export type BlockchainAssetEntry = BaseEntry & {
   tokenAddress: string;
   onChainCreators: BlockchainCreator[];
   onChainOwner: BlockchainOwner;
-  blockchain: ChainIdsEnum
+  blockchain: ChainIdsEnum;
   attributes: BlockchainAttribute[];
+  integrations?: Integration[];
 };
 
 // Gallery Entry types
