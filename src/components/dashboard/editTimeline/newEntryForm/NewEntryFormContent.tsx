@@ -419,7 +419,7 @@ const NewEntryFormContent: FC<NewEntryFormContentProps> = ({
             )}
           />
 
-          <ButtonEditor form={form} />
+          <ButtonEditor form={form} tokenAddress={blockchainAsset?.tokenAddress} />
         </>
       )}
     </div>

@@ -38,14 +38,17 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
   const timelineKey = getTimelineKey(source);
 
   const galleryId = isGalleryEntry(editingEntry) ? editingEntry.galleryId.toString() : undefined;
-  
+  const isBlockchain = editingEntry && isBlockchainAssetEntry(editingEntry);
+  const tokenAddress = isBlockchain ? editingEntry.tokenAddress : undefined;
+
   const defaultValues: EntryFormValues = useMemo(() => ({
     entryType: selectedEntryType,
     title: editingEntry?.title || "",
     description: editingEntry?.description || "",
     buttons: editingEntry?.buttons || [],
     date: editingEntry?.date || new Date(),
-  }), [editingEntry, selectedEntryType])
+    integrations: isBlockchain ? editingEntry.integrations || [] : undefined,
+  }), [editingEntry, selectedEntryType, isBlockchain])
 
   const form = useForm<EntryFormValues>({
     resolver: zodResolver(entryFormSchema),
@@ -191,6 +194,7 @@ const EditEntryForm: FC<EditEntryFormProps> = ({ isOpen, editingEntry, onClose }
         <form onSubmit={form.handleSubmit(onSubmit)} id={formId} >
           <EditEntryFormContent
             galleryId={galleryId}
+            tokenAddress={tokenAddress}
             form={form}
             selectedEntryType={selectedEntryType}
             handleOpenChange={handleOpenChange}

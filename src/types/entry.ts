@@ -26,6 +26,11 @@ export type EntryButton = {
   url: string;
 };
 
+export type Integration = {
+  type: "exchange" | "mallow";
+  action: "link"
+}
+
 // Base properties shared by all entry types
 export type BaseEntry = {
   _id: Schema.Types.ObjectId;
@@ -80,8 +85,9 @@ export type BlockchainAssetEntry = BaseEntry & {
   tokenAddress: string;
   onChainCreators: BlockchainCreator[];
   onChainOwner: BlockchainOwner;
-  blockchain: ChainIdsEnum
+  blockchain: ChainIdsEnum;
   attributes: BlockchainAttribute[];
+  integrations?: Integration[];
 };
 
 // Gallery Entry types

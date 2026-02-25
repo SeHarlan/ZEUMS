@@ -1,4 +1,5 @@
 import { Schema } from "mongoose";
+import { BaseEntry, BlockchainAttribute, BlockchainCreator, BlockchainOwner, Integration, TimelineEntry } from "./entry";
 import { GalleryType } from "./gallery";
 import {
   BlockchainImage,
@@ -7,7 +8,6 @@ import {
   UserMedia,
 } from "./media";
 import { ChainIdsEnum } from "./wallet";
-import { BaseEntry, BlockchainAttribute, BlockchainCreator, BlockchainOwner, TimelineEntry } from "./entry";
 
 export enum GalleryItemTypes {
   BlockchainAsset = "gallery_blockchain_asset",
@@ -41,6 +41,7 @@ export type BlockchainAssetGalleryItem = BaseGalleryItem & {
   onChainOwner: BlockchainOwner;
   blockchain: ChainIdsEnum;
   attributes: BlockchainAttribute[];
+  integrations?: Integration[];
 };
 
 // Gallery Item reference types
