@@ -225,7 +225,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
           </div>
         ) : (
           <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
-            <Command className="border rounded-md">
+            <Command shouldFilter={false} className="border rounded-md">
               <CommandInput
                 placeholder="Search fonts..."
                 value={search}
