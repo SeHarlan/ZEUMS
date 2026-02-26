@@ -25,7 +25,7 @@ import { UpsertGalleryFormValues } from "@/forms/upsertGallery";
 import { ImageType } from "@/types/media";
 import { UserType } from "@/types/user";
 import { useSetAtom } from "jotai";
-import { Trash2Icon } from "lucide-react";
+import { PipetteIcon, Trash2Icon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
@@ -66,9 +66,11 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
     return { userId: galleryOwnerId, category: UploadCategory.GALLERY_BACKGROUND };
   }, [galleryOwnerId]);
   const setIsEyeDropperActive = useSetAtom(isEyeDropperActiveAtom);
+  
   const canUseEyeDropper =
     typeof window !== "undefined" &&
     typeof (window as unknown as { EyeDropper?: unknown }).EyeDropper !== "undefined";
+  
   const handlePickTintFromScreen = async () => {
     if (!canUseEyeDropper) return;
     type EyeDropperResult = { sRGBHex: string };
@@ -239,20 +241,13 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
             )}
           />
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <FormLabel>Background Tint</FormLabel>
-              {canUseEyeDropper && (
-                <Button type="button" variant="outline" size="sm" onClick={handlePickTintFromScreen}>
-                  <P>Pick from screen</P>
-                </Button>
-              )}
-            </div>
+            <FormLabel>Background Tint</FormLabel>
             <FormField
               control={form.control}
               name="backgroundTintHex"
               render={({ field }) => (
                 <FormItem>
-                  <div className="grid grid-cols-[1fr_auto] gap-3 items-center">
+                  <div className="flex gap-3 items-center">
                     <FormControl>
                       <Input
                         type="text"
@@ -260,14 +255,27 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
                         autoComplete="off"
                         {...field}
                         value={field.value ?? "#000000"}
+                        className="flex-1"
                       />
                     </FormControl>
+                    {canUseEyeDropper && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={handlePickTintFromScreen}
+                        aria-label="Pick color from screen"
+                      >
+                        <PipetteIcon className="size-4" />
+                      </Button>
+                    )}
                     <FormControl>
                       <Input
                         type="color"
                         value={field.value ?? "#000000"}
                         onChange={(e) => field.onChange(e.target.value)}
-                        className="h-9 w-12 p-1"
+                        className="h-9 w-12 p-1 shrink-0"
                         aria-label="Background tint color"
                       />
                     </FormControl>
