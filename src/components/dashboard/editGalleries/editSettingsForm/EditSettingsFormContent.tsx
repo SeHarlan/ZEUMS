@@ -29,6 +29,7 @@ import { PipetteIcon, Trash2Icon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
+import GoogleFontPicker from "@/components/fonts/GoogleFontPicker";
 
 interface EditSettingsContentProps {
   form: UseFormReturn<UpsertGalleryFormValues>;
@@ -240,6 +241,21 @@ const EditSettingsContent: FC<EditSettingsContentProps> = ({
               </FormItem>
             )}
           />
+
+          <GoogleFontPicker
+            form={form}
+            name="galleryHeadingFont"
+            label="Heading Font"
+            description="Leave empty to inherit from timeline settings."
+          />
+
+          <GoogleFontPicker
+            form={form}
+            name="galleryBodyFont"
+            label="Body Font"
+            description="Leave empty to inherit from timeline settings."
+          />
+
           <div className="space-y-2">
             <FormLabel>Background Tint</FormLabel>
             <FormField

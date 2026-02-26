@@ -67,7 +67,7 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
             <EditGallerySettingsButton
               gallery={gallery}
               buttonVariant="default"
-              buttonClassName="z-20 shadow-md absolute right-0 top-0 -translate-y-full md:translate-x-1/3"
+              buttonClassName="z-20 shadow-md absolute right-0 top-0 -translate-y-full md:translate-x-1/3 no-custom-font"
             />
           )}
           <H1 className="">{gallery?.title}</H1>

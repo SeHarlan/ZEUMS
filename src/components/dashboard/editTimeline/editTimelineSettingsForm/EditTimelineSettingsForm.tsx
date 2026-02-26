@@ -31,6 +31,7 @@ import { SettingsIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { mutate } from "swr";
 import EditTimelineSettingsFormContent from "./EditTimelineSettingsFormContent";
 
 const formId = "edit-timeline-settings-form";
@@ -91,6 +92,8 @@ const EditTimelineSettingsForm = forwardRef<
         backgroundTintOpacity: user?.backgroundTintOpacity ?? 0,
         backgroundBlur: user?.backgroundBlur ?? 0,
         backgroundTileCount: user?.backgroundTileCount?.toString() ?? "0",
+        timelineHeadingFont: user?.timelineHeadingFont ?? "",
+        timelineBodyFont: user?.timelineBodyFont ?? "",
       }),
       [user]
     );
@@ -226,6 +229,8 @@ const EditTimelineSettingsForm = forwardRef<
           backgroundTintOpacity: data.backgroundTintOpacity,
           backgroundBlur: data.backgroundBlur,
           backgroundTileCount: tileCount,
+          timelineHeadingFont: data.timelineHeadingFont || undefined,
+          timelineBodyFont: data.timelineBodyFont || undefined,
         };
 
         const response = await axios.patch<{ user: UserType }>(
@@ -235,6 +240,12 @@ const EditTimelineSettingsForm = forwardRef<
 
         toast.success("Timeline settings updated!");
         setUser(parseUserDates(response.data.user));
+
+        // Revalidate the SWR cache for the timeline page
+        if (user?.username) {
+          mutate(`user-${user.username}`);
+        }
+
         setFormOpen(false);
       } catch (error) {
         handleClientError({

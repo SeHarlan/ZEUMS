@@ -66,7 +66,7 @@ const ProfileHero: FC<ProfileHeroProps> = ({ publicUser, editMode = false }) => 
             <H1>{displayName}</H1>
             {editMode && (
               <EditProfileFormButton
-                buttonClassName="shadow-md w-fit absolute -top-2 left-0 lg:left-auto lg:right-0 lg:translate-x-3/4 -translate-y-3/4 lg:translate-y-0"
+                buttonClassName="shadow-md w-fit absolute -top-2 left-0 lg:left-auto lg:right-0 lg:translate-x-3/4 -translate-y-3/4 lg:translate-y-0 no-custom-font"
                 ref={setEditProfileRef}
                 onClick={setEditProfileComplete}
                 disableInteractOutside={onboardingActive}
