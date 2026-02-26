@@ -261,8 +261,8 @@ const EditGallerySettingsInner: FC<EditGallerySettingsProps> = ({ editingGallery
       backgroundTintOpacity: data.backgroundTintOpacity,
       backgroundBlur: data.backgroundBlur,
       backgroundTileCount: tileCount,
-      galleryHeadingFont: data.galleryHeadingFont || undefined,
-      galleryBodyFont: data.galleryBodyFont || undefined,
+      galleryHeadingFont: data.galleryHeadingFont || "",
+      galleryBodyFont: data.galleryBodyFont || "",
     };
 
     axios
