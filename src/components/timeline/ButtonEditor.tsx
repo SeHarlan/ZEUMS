@@ -7,7 +7,10 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PlusIcon, Trash2 } from "lucide-react";
+import { INTEGRATION_CONFIG } from "@/constants/integrationUrls";
+import { Integration } from "@/types/entry";
+import { cn } from "@/utils/ui-utils";
+import { CheckIcon, PlusIcon, Trash2 } from "lucide-react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { P } from "../typography/Typography";
 import { Badge } from "../ui/badge";
@@ -18,20 +21,46 @@ type FormWithButtons = {
     text: string;
     url: string;
   }[];
+  integrations?: Integration[];
 };
 interface ButtonEditorProps<T extends FormWithButtons> {
   form: UseFormReturn<T>;
+  tokenAddress?: string;
 }
+
+const IntegrationToggleButton = ({
+  label,
+  isActive,
+  onClick,
+  icon,
+  }: {
+  label: string;
+  icon: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+}) => (
+  <Button
+    type="button"
+    variant="secondary"
+    size="sm"
+    onClick={onClick}
+    className="flex-1 hover:opacity-80"
+  >
+    {label} {icon}
+    <CheckIcon className={cn("size-4", isActive ? "opacity-100" : "opacity-10")} /> 
+  </Button>
+);
 
 const ButtonEditor = <T extends FormWithButtons>({
   form,
+  tokenAddress,
 }: ButtonEditorProps<T>) => {
-  //Needs type coercion for TS to get the correct ArrayPath type as "buttons"
-  //We can be certain the form thats passed has at least the correct buttons field because T extends FormWithButtons
-  const { control } = form as unknown as UseFormReturn<FormWithButtons>;
+  //Needs type coercion for TS to get the correct ArrayPath type as "buttons" and "integrations"
+  //We can be certain the form thats passed has at least the correct fields because T extends FormWithButtons
+  const { control, watch, setValue } = form as unknown as UseFormReturn<FormWithButtons>;
 
   const { fields, append, remove } = useFieldArray({
-    control: control,
+    control,
     name: "buttons",
   });
 
@@ -45,8 +74,48 @@ const ButtonEditor = <T extends FormWithButtons>({
     remove(index);
   };
 
+  const integrations = watch("integrations") || [];
+
+  const toggleIntegration = (type: Integration["type"]) => {
+    const existing = integrations.find((i) => i.type === type);
+    if (existing) {
+      setValue(
+        "integrations",
+        integrations.filter((i) => i.type !== type)
+      );
+    } else {
+      setValue("integrations", [
+        ...integrations,
+        { type, action: "link" },
+      ]);
+    }
+  };
+
+  const hasMallow = integrations.some((i) => i.type === "mallow");
+  const hasExchange = integrations.some((i) => i.type === "exchange");
+
   return (
     <div>
+      {tokenAddress && (
+        <div className="mb-4">
+          <P className="text-sm font-medium mb-2">Integrations</P>
+          <div className="flex gap-2">
+            <IntegrationToggleButton
+              label="Link to Mallow"
+              isActive={hasMallow}
+              onClick={() => toggleIntegration("mallow")}
+              icon={INTEGRATION_CONFIG.mallow.icon}
+            />
+            <IntegrationToggleButton
+              label="Link to Exchange"
+              isActive={hasExchange}
+              onClick={() => toggleIntegration("exchange")}
+              icon={INTEGRATION_CONFIG.exchange.icon}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <P className="text-sm font-medium">Buttons</P>
         <Button

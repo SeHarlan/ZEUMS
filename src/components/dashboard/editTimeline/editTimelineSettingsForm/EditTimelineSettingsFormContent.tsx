@@ -32,7 +32,7 @@ import { EntrySource } from "@/types/entry";
 import { ImageType } from "@/types/media";
 import { UserType } from "@/types/user";
 import { useSetAtom } from "jotai";
-import { Trash2Icon } from "lucide-react";
+import { PipetteIcon, Trash2Icon } from "lucide-react";
 import { FC, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import ChooseProfileImageDialog from "../../editProfile/ChooseImageDialog";
@@ -206,40 +206,40 @@ const EditTimelineSettingsFormContent: FC<EditTimelineSettingsFormContentProps> 
       />
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <FormLabel>Background Tint</FormLabel>
-          {canUseEyeDropper && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handlePickTintFromScreen}
-            >
-              <P>Pick from screen</P>
-            </Button>
-          )}
-        </div>
+        <FormLabel>Background Tint</FormLabel>
         <FormField
           control={form.control}
           name="backgroundTintHex"
           render={({ field }) => (
             <FormItem>
-              <div className="grid grid-cols-[1fr_auto] gap-3 items-center">
+              <div className="flex gap-3 items-center">
                 <FormControl>
                   <Input
                     type="text"
                     placeholder="#000000"
                     autoComplete="off"
                     {...field}
+                    className="flex-1"
                   />
                 </FormControl>
-
+                {canUseEyeDropper && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={handlePickTintFromScreen}
+                    aria-label="Pick color from screen"
+                  >
+                    <PipetteIcon className="size-4" />
+                  </Button>
+                )}
                 <FormControl>
                   <Input
                     type="color"
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
-                    className="h-9 w-12 p-1"
+                    className="h-9 w-12 p-1 shrink-0"
                     aria-label="Background tint color"
                   />
                 </FormControl>

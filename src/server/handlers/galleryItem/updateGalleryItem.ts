@@ -23,6 +23,7 @@ export async function updateGalleryItemHandler(
       title: body.title,
       description: body.description,
       buttons: body.buttons,
+      integrations: (body as Record<string, unknown>).integrations,
     };
 
     const updateData = removeUndefined(allowedUpdates)
@@ -38,6 +39,7 @@ export async function updateGalleryItemHandler(
       {
         new: true, // Return the updated document
         runValidators: true, // Validate the update against the schema
+        strict: false, // Allow discriminator-specific fields (e.g. integrations on BlockchainAssetGalleryItem)
       }
     );
 
