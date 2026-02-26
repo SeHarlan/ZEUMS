@@ -44,7 +44,7 @@ export const TimelineSelect: FC<TimelineSelectProps> = ({
   return (
     <div className={cn(PAGE_PADDING_X, "py-4 relative")}>
       {topCenterOverlay && (
-        <div className="absolute left-1/2 -translate-x-1/2 -top-6">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6 no-custom-font">
           {topCenterOverlay}
         </div>
       )}
