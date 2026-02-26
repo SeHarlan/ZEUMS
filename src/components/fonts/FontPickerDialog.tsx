@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useMemo, useEffect } from "react";
+import { FC, useState, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -131,6 +131,32 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
       )
       .slice(0, 50); // Limit search results to 50
   }, [fonts, search]);
+
+  // Batch-load font CSS for list preview (each font name shown in its typeface)
+  const loadedFontsRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!open || loading || filteredFonts.length === 0) return;
+
+    const fontsToLoad = filteredFonts.filter(
+      (f) => !loadedFontsRef.current.has(f.family)
+    );
+    if (fontsToLoad.length === 0) return;
+
+    const batchSize = 20;
+    for (let i = 0; i < fontsToLoad.length; i += batchSize) {
+      const batch = fontsToLoad.slice(i, i + batchSize);
+      const families = batch
+        .map((f) => `family=${encodeURIComponent(f.family)}:wght@400`)
+        .join("&");
+
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
+      document.head.appendChild(link);
+
+      batch.forEach((f) => loadedFontsRef.current.add(f.family));
+    }
+  }, [open, loading, filteredFonts]);
 
   const handleSelect = () => {
     onChange(previewFont);
