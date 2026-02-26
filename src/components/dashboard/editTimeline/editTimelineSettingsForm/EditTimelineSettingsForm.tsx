@@ -229,8 +229,8 @@ const EditTimelineSettingsForm = forwardRef<
           backgroundTintOpacity: data.backgroundTintOpacity,
           backgroundBlur: data.backgroundBlur,
           backgroundTileCount: tileCount,
-          timelineHeadingFont: data.timelineHeadingFont || undefined,
-          timelineBodyFont: data.timelineBodyFont || undefined,
+          timelineHeadingFont: data.timelineHeadingFont || "",
+          timelineBodyFont: data.timelineBodyFont || "",
         };
 
         const response = await axios.patch<{ user: UserType }>(

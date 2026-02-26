@@ -1,7 +1,15 @@
 "use client";
 
-import { FC, useState, useMemo, useEffect, useRef } from "react";
+import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -11,17 +19,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { P } from "@/components/typography/Typography";
-import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
+import { Check, Loader2, X } from "lucide-react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 
 interface GoogleFont {
   family: string;
@@ -38,6 +38,7 @@ interface FontPickerDialogProps {
   onChange: (font: string) => void;
   label: string;
   description?: string;
+  defaultFont?: string;
 }
 
 const GOOGLE_FONTS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY || "";
@@ -65,6 +66,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
   onChange,
   label,
   description,
+  defaultFont = "Default",
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -73,9 +75,9 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Local preview state - only updates form on Select
-  const [previewFont, setPreviewFont] = useState(value || "Open Sans");
+  const [previewFont, setPreviewFont] = useState(value || defaultFont);
 
-  const displayValue = value || "Open Sans";
+  const displayValue = value || defaultFont;
 
   // Reset preview font when dialog opens
   useEffect(() => {
@@ -174,22 +176,34 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           {label}
         </label>
-        <DialogTrigger asChild>
+        <div className="flex gap-2 w-full">
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="flex-1 min-w-0 justify-between font-normal"
+            >
+              <span style={{ fontFamily: displayValue }}>{displayValue}</span>
+            </Button>
+          </DialogTrigger>
           <Button
             variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between font-normal"
+            size="icon"
+            className="shrink-0"
+            onClick={() => onChange("")}
+            disabled={!value}
+            aria-label="Clear font selection"
           >
-            <span style={{ fontFamily: displayValue }}>{displayValue}</span>
+            <X className="h-4 w-4" />
           </Button>
-        </DialogTrigger>
+        </div>
         {description && (
           <P className="text-sm text-muted-foreground">{description}</P>
         )}
       </div>
 
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Select {label}</DialogTitle>
           <DialogDescription>
@@ -210,14 +224,14 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
             <P className="ml-2 text-muted-foreground">Loading fonts...</P>
           </div>
         ) : (
-          <>
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
             <Command className="border rounded-md">
               <CommandInput
                 placeholder="Search fonts..."
                 value={search}
                 onValueChange={setSearch}
               />
-              <CommandList className="max-h-[40vh] sm:max-h-[300px]">
+              <CommandList className="max-h-[200px] sm:max-h-[300px]">
                 <CommandEmpty>No fonts found.</CommandEmpty>
                 <CommandGroup>
                   {filteredFonts.map((font) => (
@@ -267,7 +281,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
                 </P>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         <DialogFooter>
