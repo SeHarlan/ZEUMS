@@ -20,7 +20,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { P } from "@/components/typography/Typography";
-import { Check, Loader2, XIcon } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/utils/ui-utils";
 
 interface GoogleFont {
@@ -174,29 +174,16 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           {label}
         </label>
-        <div className="flex gap-2">
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between font-normal"
-            >
-              <span style={{ fontFamily: displayValue }}>{displayValue}</span>
-            </Button>
-          </DialogTrigger>
-          {value && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0"
-              onClick={() => onChange("")}
-              aria-label={`Clear ${label}`}
-            >
-              <XIcon className="size-4" />
-            </Button>
-          )}
-        </div>
+        <DialogTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between font-normal"
+          >
+            <span style={{ fontFamily: displayValue }}>{displayValue}</span>
+          </Button>
+        </DialogTrigger>
         {description && (
           <P className="text-sm text-muted-foreground">{description}</P>
         )}
