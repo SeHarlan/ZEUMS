@@ -189,7 +189,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
         )}
       </div>
 
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Select {label}</DialogTitle>
           <DialogDescription>
@@ -217,7 +217,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
                 value={search}
                 onValueChange={setSearch}
               />
-              <CommandList className="max-h-[300px]">
+              <CommandList className="max-h-[40vh] sm:max-h-[300px]">
                 <CommandEmpty>No fonts found.</CommandEmpty>
                 <CommandGroup>
                   {filteredFonts.map((font) => (
