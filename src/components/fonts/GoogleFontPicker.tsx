@@ -2,7 +2,6 @@
 
 import FontPickerDialog from "@/components/fonts/FontPickerDialog";
 import { FormControl, FormDescription, FormField, FormItem } from "@/components/ui/form";
-import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 export const DEFAULT_HEADING_FONT = "DM Serif Text";
@@ -23,7 +22,6 @@ function GoogleFontPicker<TFieldValues extends FieldValues>({
   description,
   defaultFont,
 }: GoogleFontPickerProps<TFieldValues>) {
-  const { isSm } = useBreakpoints();
   const resolvedDefault = defaultFont ?? (
     /heading/i.test(label) ? DEFAULT_HEADING_FONT : DEFAULT_BODY_FONT
   );
@@ -39,9 +37,8 @@ function GoogleFontPicker<TFieldValues extends FieldValues>({
               value={field.value || ""}
               onChange={field.onChange}
               label={label}
-              description={!isSm ? "Use desktop to change fonts." : description}
+              description={description}
               defaultFont={resolvedDefault}
-              disabled={!isSm}
             />
           </FormControl>
           {!description && <FormDescription className="sr-only">{label}</FormDescription>}
