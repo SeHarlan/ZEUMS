@@ -1,7 +1,6 @@
 "use client";
 
 import FontPickerDialog from "@/components/fonts/FontPickerDialog";
-import FontPickerInline from "@/components/fonts/FontPickerInline";
 import { FormControl, FormDescription, FormField, FormItem } from "@/components/ui/form";
 import { useBreakpoints } from "@/context/ResponsiveProvider";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
@@ -36,23 +35,14 @@ function GoogleFontPicker<TFieldValues extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           <FormControl>
-            {isSm ? (
-              <FontPickerDialog
-                value={field.value || ""}
-                onChange={field.onChange}
-                label={label}
-                description={description}
-                defaultFont={resolvedDefault}
-              />
-            ) : (
-              <FontPickerInline
-                value={field.value || ""}
-                onChange={field.onChange}
-                label={label}
-                description={description}
-                defaultFont={resolvedDefault}
-              />
-            )}
+            <FontPickerDialog
+              value={field.value || ""}
+              onChange={field.onChange}
+              label={label}
+              description={!isSm ? "Use desktop to change fonts." : description}
+              defaultFont={resolvedDefault}
+              disabled={!isSm}
+            />
           </FormControl>
           {!description && <FormDescription className="sr-only">{label}</FormDescription>}
         </FormItem>
