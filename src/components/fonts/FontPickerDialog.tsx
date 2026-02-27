@@ -38,6 +38,7 @@ interface FontPickerDialogProps {
   label: string;
   description?: string;
   defaultFont?: string;
+  disabled?: boolean;
 }
 
 const GOOGLE_FONTS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY || "";
@@ -66,6 +67,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
   label,
   description,
   defaultFont = "Default",
+  disabled = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -176,11 +178,12 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
           {label}
         </label>
         <div className="flex gap-2 w-full">
-          <DialogTrigger asChild>
+          <DialogTrigger asChild disabled={disabled}>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
+              disabled={disabled}
               className="flex-1 min-w-0 justify-between font-normal"
             >
               <span style={{ fontFamily: displayValue }}>{displayValue}</span>
