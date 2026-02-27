@@ -4,7 +4,6 @@ import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -203,7 +202,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
         )}
       </div>
 
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[80dvh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Select {label}</DialogTitle>
           <DialogDescription>
@@ -225,41 +224,44 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
           </div>
         ) : (
           <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
-            <Command shouldFilter={false} className="border rounded-md">
+            <Command shouldFilter={false} className="border rounded-md overflow-visible" key={fonts.length > 0 ? "loaded" : "empty"}>
               <CommandInput
                 placeholder="Search fonts..."
                 value={search}
                 onValueChange={setSearch}
               />
-              <CommandList className="max-h-[200px] sm:max-h-[300px]">
-                <CommandEmpty>No fonts found.</CommandEmpty>
-                <CommandGroup>
-                  {filteredFonts.map((font) => (
-                    <CommandItem
-                      key={font.family}
-                      value={font.family}
-                      onSelect={() => {
-                        setPreviewFont(font.family);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4 shrink-0",
-                          previewFont === font.family ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      <div className="flex-1 flex items-baseline gap-2">
-                        <span style={{ fontFamily: font.family }}>
-                          {font.family}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {font.category}
-                        </span>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+              <CommandList className="max-h-[40dvh] sm:max-h-[300px]">
+                {filteredFonts.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">No fonts found.</div>
+                ) : (
+                  <CommandGroup className="overflow-visible">
+                    {filteredFonts.map((font) => (
+                      <CommandItem
+                        key={font.family}
+                        value={font.family}
+                        onSelect={() => {
+                          setPreviewFont(font.family);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4 shrink-0",
+                            previewFont === font.family ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <div className="flex-1 flex items-baseline gap-2">
+                          <span style={{ fontFamily: font.family }}>
+                            {font.family}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {font.category}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
               </CommandList>
             </Command>
 
