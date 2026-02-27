@@ -153,6 +153,12 @@ const BlockchainAssetEntrySchema = new Schema<BlockchainAssetEntryDocument>({
       display_type: String,
     },
   ],
+  integrations: [
+    {
+      type: { type: String, enum: ["exchange", "mallow"], required: true },
+      action: { type: String, enum: ["link"], required: true },
+    },
+  ],
 });
 
 const BlockchainAssetEntry = Entry.discriminators?.[EntryTypes.BlockchainAsset] ||

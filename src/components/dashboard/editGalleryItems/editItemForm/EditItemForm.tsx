@@ -9,7 +9,7 @@ import { GALLERY_ITEM_ROUTE } from "@/constants/serverRoutes";
 import { useUser } from "@/context/UserProvider";
 import { galleryItemFormSchema, GalleryItemFormValues } from "@/forms/upsertGalleryItem";
 import useGalleryById from "@/hooks/useGalleryById";
-import { GalleryItem, GalleryItemTypes } from "@/types/galleryItem";
+import { GalleryItem, GalleryItemTypes, isBlockchainAssetGalleryItem } from "@/types/galleryItem";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ const EditGalleryItemForm: FC = () => {
 
   const selectedItemType = editingItem?.itemType || GalleryItemTypes.BlockchainAsset;
   const galleryId = editingItem?.parentGalleryId?.toString() || "";
+  const tokenAddress = editingItem && isBlockchainAssetGalleryItem(editingItem) ? editingItem.tokenAddress : undefined;
   const { mutateGallery } = useGalleryById(galleryId);
   const { revalidateUser } = useUser();
 
@@ -40,6 +41,7 @@ const EditGalleryItemForm: FC = () => {
     title: editingItem?.title || "",
     description: editingItem?.description || "",
     buttons: editingItem?.buttons || [],
+    integrations: editingItem && isBlockchainAssetGalleryItem(editingItem) ? editingItem.integrations || [] : undefined,
   }), [editingItem, selectedItemType])
 
   const form = useForm<GalleryItemFormValues>({
@@ -141,10 +143,11 @@ const EditGalleryItemForm: FC = () => {
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} id={formId}>
+        <form id={formId}>
           <EditGalleryItemFormContent
             form={form}
             selectedItemType={selectedItemType}
+            tokenAddress={tokenAddress}
             handleOpenChange={handleOpenChange}
           />
         </form>

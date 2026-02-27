@@ -49,7 +49,7 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
       {bannerMedia && (
         <BannerImage
           media={bannerMedia}
-          className="text-5xl mb-6 md:mb-12 md:shadow-lg rounded-none xl:rounded-b-md"
+          className="text-5xl mb-6 md:mb-12  rounded-none xl:rounded-b-md"
           fallbackText={gallery?.title}
           blobUrlBuilderProps={galleryBannerBlobUrlBuilderProps}
         />
@@ -67,7 +67,7 @@ export const GalleryHero: FC<GalleryHeroProps> = ({ gallery, editMode = false })
             <EditGallerySettingsButton
               gallery={gallery}
               buttonVariant="default"
-              buttonClassName="z-20 shadow-md absolute right-0 top-0 -translate-y-full md:translate-x-1/3"
+              buttonClassName="z-20 shadow-md absolute right-0 top-0 -translate-y-full md:translate-x-1/3 no-custom-font"
             />
           )}
           <H1 className="">{gallery?.title}</H1>

@@ -99,17 +99,57 @@ export const getFileExtension = (file: File): string => {
 };
 
 /**
- * Sanitizes a filename to prevent path traversal and other security issues.
- * Only sanitizes the filename part, not full paths.
+ * Sanitizes a filename to prevent security issues while preserving the original filename as much as possible.
+ * 
+ * This function performs minimal sanitization - only what's necessary for security:
+ * - Prevents path traversal attacks (../, ..\, etc.)
+ * - Removes control characters (security risk)
+ * - Removes directory separators (security risk)
+ * 
+ * Everything else (spaces, special chars, unicode, numbers) is preserved and will be
+ * handled by URL encoding when constructing the blob URL.
  * 
  * @param filename - The filename to sanitize
- * @returns Sanitized filename
+ * @returns Sanitized filename safe for use in blob storage (will be URL-encoded when used in URLs)
  */
-const sanitizeFilename = (filename: string): string => {
-  return filename
-    .replace(/^\//, "") // Remove leading slash
-    .replace(/\.\./g, "") // Remove path traversal attempts (../)
-    .replace(/[\/\\]/g, "-"); // Replace slashes with hyphens (prevents directory traversal)
+export const sanitizeFilename = (filename: string): string => {
+  if (!filename || filename.trim().length === 0) {
+    return "file";
+  }
+
+  // Remove leading/trailing whitespace
+  let sanitized = filename.trim();
+
+  // Security: Remove path traversal attempts (../, ..\, etc.)
+  sanitized = sanitized.replace(/\.\./g, "");
+
+  // Security: Remove directory separators (prevents path manipulation)
+  sanitized = sanitized.replace(/[\/\\]/g, "");
+
+  // Security: Remove control characters (can cause issues and are security risks)
+  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "");
+
+  // Ensure we still have a valid filename after security sanitization
+  if (!sanitized || sanitized.length === 0) {
+    return "file";
+  }
+
+  // Limit length to prevent abuse (Vercel Blob has limits, and very long names are impractical)
+  const maxLength = 255; // Common filesystem limit
+  if (sanitized.length > maxLength) {
+    // Try to preserve extension if possible
+    const lastDotIndex = sanitized.lastIndexOf(".");
+    if (lastDotIndex > 0 && lastDotIndex < sanitized.length - 1) {
+      const extension = sanitized.substring(lastDotIndex);
+      const nameWithoutExt = sanitized.substring(0, lastDotIndex);
+      const maxNameLength = maxLength - extension.length;
+      sanitized = nameWithoutExt.substring(0, maxNameLength) + extension;
+    } else {
+      sanitized = sanitized.substring(0, maxLength);
+    }
+  }
+
+  return sanitized;
 };
 
 /**
@@ -123,7 +163,16 @@ export const constructVercelBlobUrl = (
   blobKey: string,
   baseUrl = DEFAULT_BLOB_BASE_URL
 ): string => {
-  return `${baseUrl}/${blobKey}`;
+  // URL-encode each path segment to ensure proper handling of special characters,
+  // numeric prefixes, and spaces. This is necessary because Vercel Blob URLs
+  // require properly encoded path segments, especially for filenames starting with numbers.
+  // We encode each segment individually to preserve the '/' separators.
+  const encodedKey = blobKey
+    .split("/")
+    .map(segment => encodeURIComponent(segment))
+    .join("/");
+  
+  return `${baseUrl}/${encodedKey}`;
 };
 
 /**
@@ -132,7 +181,7 @@ export const constructVercelBlobUrl = (
  * 
  * @param userId - User ID
  * @param category - Image category: "profile", "banner", "assets", etc.
- * @param filename - The filename (cdnId) - will be sanitized
+ * @param filename - The filename (cdnId) - assumed to be already sanitized and with extension
  * @returns The blob key
  */
 export const makeUserImageBlobKey = (
@@ -140,9 +189,7 @@ export const makeUserImageBlobKey = (
   category: UploadCategory,
   filename: string
 ): string => {
-  // Sanitize filename to prevent path traversal (userId and category are controlled)
-  const sanitized = sanitizeFilename(filename);
-  return `${userId}/${category}/${sanitized}`;
+  return `${userId}/${category}/${filename}`;
 };
 
 /**
@@ -158,7 +205,7 @@ export const makeUserImageBlobKey = (
  * @param baseUrl - Optional base URL
  * @returns The full URL to the blob
  */
-export const constructVercelBlobUserImageUrl = (
+export const constructVercelBlobUserMediaUrl = (
   cdnId: string,
   userId?: string,
   category?: UploadCategory,
@@ -186,4 +233,43 @@ export const constructVercelBlobUserImageUrl = (
   
   const key = makeUserImageBlobKey(userId, category, cdnId);
   return constructVercelBlobUrl(key, baseUrl);
+};
+
+/**
+ * Gets the file extension from a video File object, falling back to MIME type if filename doesn't have an extension.
+ * 
+ * @param file - The File object
+ * @returns The file extension including the dot (e.g., ".mp4", ".webm")
+ */
+export const getVideoFileExtension = (file: File): string => {
+  const fileName = file.name;
+  const lastDotIndex = fileName.lastIndexOf(".");
+  
+  if (lastDotIndex > 0) {
+    return fileName.substring(lastDotIndex);
+  }
+  
+  // Fallback to MIME type
+  if (file.type === "video/mp4") return ".mp4";
+  if (file.type === "video/webm") return ".webm";
+  
+  // Default to .mp4
+  return ".mp4";
+};
+
+/**
+ * Constructs a blob key for user videos.
+ * Format: {userId}/{category}/{filename}
+ * 
+ * @param userId - User ID
+ * @param category - Video category: "uploaded-video", etc.
+ * @param filename - The filename (cdnId) - assumed to be already sanitized and with extension
+ * @returns The blob key
+ */
+export const makeUserVideoBlobKey = (
+  userId: string,
+  category: UploadCategory,
+  filename: string
+): string => {
+  return `${userId}/${category}/${filename}`;
 };

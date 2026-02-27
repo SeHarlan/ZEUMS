@@ -3,7 +3,7 @@
 import { P } from "@/components/typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { MediaType } from "@/types/media";
+import { BlobUrlBuilderProps, MediaType } from "@/types/media";
 import { cn } from "@/utils/ui-utils";
 import { Maximize2, Minimize2, PauseIcon, PlayIcon, VideoIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
 import {
@@ -55,11 +55,12 @@ interface VideoViewerProps {
   muted?: boolean;
   loop?: boolean;
   onLoadedMetadata?: (video: HTMLVideoElement) => void;
-  onError?: ((e: unknown) => void);
+  onError?: (e: unknown) => void;
   noLoadingAnimation?: boolean;
+  thumbnailBlobUrlBuilderProps?: BlobUrlBuilderProps | undefined;
 }
 
-const VideoViewer: FC<VideoViewerProps> = ({containerClassName, noLoadingAnimation = false, ...props}) => {
+const VideoViewer: FC<VideoViewerProps> = ({containerClassName, noLoadingAnimation = false, thumbnailBlobUrlBuilderProps, ...props}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -98,6 +99,7 @@ const VideoViewer: FC<VideoViewerProps> = ({containerClassName, noLoadingAnimati
               className="opacity-75 bg-transparent"
               ratio={media.aspectRatio}
               noPadding
+              blobUrlBuilderProps={thumbnailBlobUrlBuilderProps}
             />
           )}
         </div>
@@ -559,6 +561,9 @@ const VideoViewerCore: FC<VideoViewerCoreProps> = ({
         </div>
       )}
       <video
+        // Force remount when src changes to avoid stale video element reuse
+        // in lists/virtualizers during add/delete operations.
+        key={src}
         ref={videoRef}
         poster={poster}
         loop={loop}

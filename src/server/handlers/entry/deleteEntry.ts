@@ -1,7 +1,7 @@
 import { UploadCategory } from "@/constants/uploadCategories";
 import { isUserAssetEntry, TimelineEntry } from "@/types/entry";
-import { CdnIdType } from "@/types/media";
-import { makeUserImageBlobKey } from "@/utils/clientImageUpload";
+import { CdnIdType, isUserImage, isUserMedia } from "@/types/media";
+import { makeUserImageBlobKey, makeUserVideoBlobKey } from "@/utils/clientImageUpload";
 import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import { del } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
@@ -36,26 +36,50 @@ export async function deleteEntryHandler(
     
     // If it's a UserAssetEntry, delete the blob first
     if (isUserAssetEntry(entryToDelete)) {
-      
-      if (entryToDelete.media.imageCdn.type !== CdnIdType.VERCEL_BLOB_USER_IMAGE) {
-        throw new Error("Only VERCEL_BLOB_USER_IMAGE entries can be deleted");
-      }
-
       const media = entryToDelete.media;
-      if (media?.imageCdn?.cdnId) {
-        const cdnId = media.imageCdn.cdnId;
-        const userId = entryToDelete.owner.toString();
-        
-        // Reconstruct blob key using makeUserImageBlobKey
-        const blobKey = makeUserImageBlobKey(
-          userId,
-          UploadCategory.UPLOADED_IMAGE,
-          cdnId
-        );
+      const userId = entryToDelete.owner.toString();
+      
+      try {
+        // If video media, delete video and thumbnail blobs
+        if (isUserMedia(media)) {
+          if (media.mediaCdn.type === CdnIdType.VERCEL_BLOB_USER_VIDEO) {
+            const mediaCdnId = media.mediaCdn.cdnId;
+            const blobKey = makeUserVideoBlobKey(
+              userId,
+              UploadCategory.UPLOADED_VIDEO,
+              mediaCdnId
+            );
 
-        await del(blobKey);
-        //let error be thrown if it fails
+            await del(blobKey);
+
+            const thumbnailCdnId = media.imageCdn.cdnId;
+            const thumbnailBlobKey = makeUserImageBlobKey(
+              userId,
+              UploadCategory.UPLOADED_THUMBNAIL,
+              thumbnailCdnId
+            );
+
+            await del(thumbnailBlobKey);
+          }
+        } else if (isUserImage(media)) {
+          if (media.imageCdn.type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
+            const cdnId = media.imageCdn.cdnId;
+
+            // Reconstruct blob key using makeUserImageBlobKey
+            const blobKey = makeUserImageBlobKey(
+              userId,
+              UploadCategory.UPLOADED_IMAGE,
+              cdnId
+            );
+
+            await del(blobKey);
+          }
+        }
+      } catch (blobError) {
+        // Log error but continue with database deletion
+        console.error(`Failed to delete blob for entry ${entryToDelete._id}:`, blobError);
       }
+
     }
 
     // Now delete the entry

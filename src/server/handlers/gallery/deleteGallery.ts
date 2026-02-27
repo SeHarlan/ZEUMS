@@ -1,9 +1,17 @@
+import { UploadCategory } from "@/constants/uploadCategories";
+import {
+  GalleryItem as GalleryItemType,
+  isUserAssetGalleryItem,
+} from "@/types/galleryItem";
+import { CdnIdType, isUserImage, isUserMedia, } from "@/types/media";
+import { makeUserImageBlobKey, makeUserVideoBlobKey } from "@/utils/clientImageUpload";
+import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
+import { del } from "@vercel/blob";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "../../db/mongodb";
-import { getAuthSessionUser, standardErrorResponses } from "@/utils/server";
 import Gallery from "../../models/Gallery/Gallery";
 import GalleryItem from "../../models/Gallery/GalleryItem";
-import mongoose from "mongoose";
 
 export async function deleteGalleryHandler(
   req: NextRequest
@@ -28,7 +36,61 @@ export async function deleteGalleryHandler(
         throw new Error("Safety fallback: main User Id is required");
       }
 
-      // First, delete all gallery items associated with this gallery
+      // First, fetch all gallery items to delete their blobs if needed
+      const galleryItemsToDelete = await GalleryItem.find<GalleryItemType>(
+        {
+          parentGalleryId: galleryToDeleteId,
+          owner: authSessionUser.dbUserId,
+        },
+        null,
+        { session }
+      );
+
+      // Delete blobs for UserAssetGalleryItems
+      for (const item of galleryItemsToDelete) {
+        if (isUserAssetGalleryItem(item)) {
+          const media = item.media;
+          const userId = item.owner.toString();
+          
+          try {
+            // If video media, delete video and thumbnail blobs
+            if (isUserMedia(media)) {
+              if (media.mediaCdn.type === CdnIdType.VERCEL_BLOB_USER_VIDEO) {
+                const mediaCdnId = media.mediaCdn.cdnId;
+                const blobKey = makeUserVideoBlobKey(
+                  userId,
+                  UploadCategory.UPLOADED_VIDEO,
+                  mediaCdnId
+                );
+                await del(blobKey);
+
+                const thumbnailCdnId = media.imageCdn.cdnId;
+                const thumbnailBlobKey = makeUserImageBlobKey(
+                  userId,
+                  UploadCategory.UPLOADED_THUMBNAIL,
+                  thumbnailCdnId
+                );
+                await del(thumbnailBlobKey);
+              }
+            } else if (isUserImage(media)) {
+              if (media.imageCdn.type === CdnIdType.VERCEL_BLOB_USER_IMAGE) {
+                const cdnId = media.imageCdn.cdnId;
+                const blobKey = makeUserImageBlobKey(
+                  userId,
+                  UploadCategory.UPLOADED_IMAGE,
+                  cdnId
+                );
+                await del(blobKey);
+              }
+            }
+          } catch (blobError) {
+            // Log error but continue deleting other items
+            console.error(`Failed to delete blob for gallery item ${item._id}:`, blobError);
+          }
+        }
+      }
+
+      // Now delete all gallery items from the database
       const galleryItemsDeleteResult = await GalleryItem.deleteMany(
         {
           parentGalleryId: galleryToDeleteId,

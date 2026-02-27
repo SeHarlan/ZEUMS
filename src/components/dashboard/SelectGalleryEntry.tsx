@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserProvider";
 import { EntrySource } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
+import { isUserAssetGalleryItem } from "@/types/galleryItem";
 import { getGalleryKey } from "@/utils/gallery";
+import { getBlobUrlBuilderPropsFromItemOrEntry } from "@/utils/media";
 import { cn } from "@/utils/ui-utils";
 import { TrashIcon } from "lucide-react";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { P } from "../typography/Typography";
 import CreateGalleryDialogButton from "./editGalleries/CreateGalleryDialog";
 
@@ -76,11 +78,19 @@ interface GalleryCardProps {
 }
 
 const GalleryCard: FC<GalleryCardProps> = ({ gallery, setGallery }) => {
-  const media = gallery?.items?.[0]?.media;
   const handleClick = () => {
     setGallery?.(gallery);
   };
   const isClickable = setGallery !== undefined;
+
+  const itemOne = gallery.items?.[0];
+
+  const blobUrlBuilderProps = useMemo(() => {
+    if (!itemOne || !isUserAssetGalleryItem(itemOne)) {
+      return undefined;
+    }
+    return getBlobUrlBuilderPropsFromItemOrEntry(itemOne);
+  }, [itemOne]);
   return (
     <div
       key={gallery._id.toString()}
@@ -94,7 +104,7 @@ const GalleryCard: FC<GalleryCardProps> = ({ gallery, setGallery }) => {
       onClick={handleClick}
     >
       <div className="size-16">
-        {media && <MediaThumbnail media={media} objectFit="object-cover" />}
+        {itemOne && <MediaThumbnail media={itemOne.media} objectFit="object-cover" blobUrlBuilderProps={blobUrlBuilderProps} />}
       </div>
       <P className="font-bold">{gallery.title}</P>
     </div>

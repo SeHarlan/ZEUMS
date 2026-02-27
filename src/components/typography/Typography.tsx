@@ -87,7 +87,7 @@ const Blockquote = forwardRef<HTMLQuoteElement, BlockquoteProps>(
     return (
       <blockquote 
         ref={ref}
-        className={cn("mt-6 border-l-2 pl-6 italic", className)}
+        className={cn("mt-6 border-l-2 pl-6 border-foreground/20", className)}
         {...props}
       >
         {children}
@@ -112,4 +112,5 @@ const InlineCode = forwardRef<HTMLElement, ParagraphProps>(
 );
 InlineCode.displayName = "InlineCode";
 
-export { H1, H2, H3, H4, P, Blockquote, InlineCode };
+export { Blockquote, H1, H2, H3, H4, InlineCode, P };
+

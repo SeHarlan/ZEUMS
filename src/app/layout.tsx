@@ -19,6 +19,8 @@ import { Suspense } from "react";
 import "./globals.css";
 
 
+
+//If changing need to change the DEFAULT_HEADING_FONT and DEFAULT_BODY_FONT in GoogleFontPicker.tsx
 const dmSerif = DM_Serif_Text({
   variable: "--font-dm-serif",
   subsets: ["latin"],
@@ -105,7 +107,7 @@ export default function RootLayout({
           </WalletContextProvider>
         </AtomProvider>
         <Toaster
-          position="bottom-right"
+          position="bottom-center"
           richColors={true}
           closeButton={true}
         />

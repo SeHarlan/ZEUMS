@@ -36,6 +36,11 @@ const UserSchema: Schema = new Schema<UserDocument>(
     displayName: { type: String },
     profileImage: { type: MediaSchema },
     bannerImage: { type: MediaSchema },
+    backgroundImage: { type: MediaSchema, default: null },
+    backgroundTileCount: { type: Number, default: 0 },
+    backgroundTintHex: { type: String, default: "#000000" },
+    backgroundTintOpacity: { type: Number, default: 0 },
+    backgroundBlur: { type: Number, default: 0 },
     email: { type: String },
     bio: { type: String },
     socialHandles: {
@@ -59,6 +64,9 @@ const UserSchema: Schema = new Schema<UserDocument>(
     primaryTimeline: { type: String, enum: Object.values(EntrySource)},
     hideCreatorDates: { type: Boolean, default: false },
     hideCollectorDates: { type: Boolean, default: true },
+    timelineTheme: { type: String, enum: ["light", "dark"] },
+    timelineHeadingFont: { type: String },
+    timelineBodyFont: { type: String },
   },
   {
     timestamps: true,

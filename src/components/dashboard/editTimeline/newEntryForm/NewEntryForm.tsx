@@ -32,8 +32,9 @@ import {
   UserAssetEntry,
 } from "@/types/entry";
 import { UserVirtualGalleryType } from "@/types/gallery";
-import { CdnIdType, MediaCategory, MediaOrigin, UserImage } from "@/types/media";
-import { clientImageUpload, getFileExtension, makeUserImageBlobKey } from "@/utils/clientImageUpload";
+import { CdnIdType, MediaCategory, MediaOrigin, UserImage, UserMedia } from "@/types/media";
+import { clientImageUpload, getFileExtension, getVideoFileExtension, makeUserImageBlobKey, makeUserVideoBlobKey, sanitizeFilename } from "@/utils/clientImageUpload";
+import { clientVideoUpload } from "@/utils/clientVideoUpload";
 import { getFirstBlockchainItem } from "@/utils/gallery";
 import { addHttpsPrefix } from "@/utils/general";
 import { handleClientError } from "@/utils/handleError";
@@ -97,6 +98,9 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
     const [contentChosen, setContentChosen] = useState(false);
     const [uploadedImageFile, setUploadedImageFile] = useState<File | undefined>();
     const [previewImage, setPreviewImage] = useState<{ url: string; aspectRatio: number } | null>(null);
+    const [uploadedVideoFile, setUploadedVideoFile] = useState<File | undefined>();
+    const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
+    const [uploadedThumbnailFile, setUploadedThumbnailFile] = useState<File | undefined>();
 
     const prevEntryTypeRef = useRef<EntryTypes>(EntryTypes.BlockchainAsset);
 
@@ -125,7 +129,10 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
     const disableSubmit =
       (selectedEntryType === EntryTypes.BlockchainAsset && !blockchainAsset) ||
       (selectedEntryType === EntryTypes.Gallery && !gallery) ||
-      (selectedEntryType === EntryTypes.UserAsset && !uploadedImageFile);
+      (selectedEntryType === EntryTypes.UserAsset && 
+        !uploadedImageFile && !uploadedVideoFile) ||
+      (selectedEntryType === EntryTypes.UserAsset && 
+        uploadedVideoFile && !uploadedThumbnailFile);
 
     const timelineKey = getTimelineKey(source);
 
@@ -217,13 +224,27 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
       // Only reset if selectedEntryType changed
       if (selectedEntryType !== prevEntryTypeRef.current) {
         setBlockchainAsset(null);
+        // Clean up previews when switching entry types
+        if (prevEntryTypeRef.current === EntryTypes.UserAsset) {
+          if (previewImage?.url.startsWith("blob:")) {
+            URL.revokeObjectURL(previewImage.url);
+          }
+          if (previewVideoUrl?.startsWith("blob:")) {
+            URL.revokeObjectURL(previewVideoUrl);
+          }
+          setUploadedImageFile(undefined);
+          setUploadedVideoFile(undefined);
+          setUploadedThumbnailFile(undefined);
+          setPreviewImage(null);
+          setPreviewVideoUrl(null);
+        }
         reset((values) => ({
           ...values,
           entryType: selectedEntryType,
         }));
         prevEntryTypeRef.current = selectedEntryType;
       }
-    }, [selectedEntryType, reset]);
+    }, [selectedEntryType, reset, previewImage, previewVideoUrl]);
 
     const fullFormReset = () => {
       //don't rest state till drawer has fully closed
@@ -232,11 +253,17 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
         setGallery(null);
         setAspectRatio(null);
         setUploadedImageFile(undefined);
-        // Clean up blob URL if it exists
+        setUploadedVideoFile(undefined);
+        setUploadedThumbnailFile(undefined);
+        // Clean up blob URLs if they exist
         if (previewImage?.url.startsWith("blob:")) {
           URL.revokeObjectURL(previewImage.url);
         }
+        if (previewVideoUrl?.startsWith("blob:")) {
+          URL.revokeObjectURL(previewVideoUrl);
+        }
         setPreviewImage(null);
+        setPreviewVideoUrl(null);
         reset();
         prevEntryTypeRef.current = EntryTypes.BlockchainAsset;
         setContentChosen(false);
@@ -300,8 +327,16 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
       }
 
       if (data.entryType === EntryTypes.UserAsset) {
-        if (!uploadedImageFile) {
-          toast.error("Please select an image to upload.");
+        const isVideo = !!uploadedVideoFile;
+        
+        if (!uploadedImageFile && !uploadedVideoFile) {
+          toast.error("Please select an image or video to upload.");
+          setSubmitting(false);
+          return;
+        }
+
+        if (isVideo && !uploadedThumbnailFile) {
+          toast.error("Please select a thumbnail image for the video.");
           setSubmitting(false);
           return;
         }
@@ -315,46 +350,116 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
         const userId = user._id.toString();
 
         try {
-          // Generate image ID: use filename or UUID with extension
-          const fileExtension = getFileExtension(uploadedImageFile);
-          const filename = uploadedImageFile.name.trim();
-          const imageId = filename && filename.length > 0
-            ? filename
-            : `${crypto.randomUUID()}${fileExtension}`;
+          if (isVideo) {
+            // Handle video upload
+            const videoExtension = getVideoFileExtension(uploadedVideoFile!);
+            const originalVideoFilename = uploadedVideoFile!.name.trim();
+            
+            const sanitizedVideoFilename = originalVideoFilename && originalVideoFilename.length > 0
+              ? sanitizeFilename(originalVideoFilename)
+              : `${crypto.randomUUID()}${videoExtension}`;
+            
+            const videoId = sanitizedVideoFilename && sanitizedVideoFilename.length > 0
+              ? sanitizedVideoFilename
+              : `${crypto.randomUUID()}${videoExtension}`;
 
-          const blobKey = makeUserImageBlobKey(
-            userId,
-            UploadCategory.UPLOADED_IMAGE,
-            imageId
-          );
+            const videoBlobKey = makeUserVideoBlobKey(
+              userId,
+              UploadCategory.UPLOADED_VIDEO,
+              videoId
+            );
 
-          toast.info("Uploading image...");
+            toast.info("Uploading video...", {
+              description: "This may take some time depending on file size",
+              duration: 10000, // 10 seconds
+            });
+            await clientVideoUpload(uploadedVideoFile!, videoBlobKey);
 
-          // Upload to Vercel Blob
-          await clientImageUpload(uploadedImageFile, blobKey);
+            // Handle thumbnail upload - name it based on video filename
+            const thumbnailExtension = getFileExtension(uploadedThumbnailFile!);
+            
+            // Extract base name from videoId (remove extension)
+            const videoIdWithoutExt = videoId.substring(0, videoId.lastIndexOf(".")) || videoId;
+            
+            // Create thumbnail name as "thumbnail-${videoFilename}"
+            const thumbnailId = `thumbnail-${videoIdWithoutExt}${thumbnailExtension}`;
 
-          // Calculate aspect ratio
-          const aspectRatio = previewImage?.aspectRatio || await getFileAspectRatio(uploadedImageFile);
+            const thumbnailBlobKey = makeUserImageBlobKey(
+              userId,
+              UploadCategory.UPLOADED_THUMBNAIL,
+              thumbnailId
+            );
 
-          // Create UserImage object
-          const userImage: UserImage = {
-            origin: MediaOrigin.User,
-            category: MediaCategory.Image,
-            imageCdn: {
-              type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
-              cdnId: imageId,
-            },
-            aspectRatio,
-          };
+            toast.info("Uploading thumbnail...");
+            await clientImageUpload(uploadedThumbnailFile!, thumbnailBlobKey);
 
-          // Create UserAssetEntry creation data (similar to BlockchainAsset pattern)
-          const userAssetEntry: Omit<UserAssetEntry, "owner" | "_id"> = {
-            ...entryCreationData,
-            entryType: EntryTypes.UserAsset,
-            media: userImage,
-          };
+            // Calculate aspect ratio from thumbnail
+            const aspectRatio = previewImage?.aspectRatio || await getFileAspectRatio(uploadedThumbnailFile!);
 
-          entryCreationData = userAssetEntry;
+            // Create UserMedia object for video
+            const userMedia: UserMedia = {
+              origin: MediaOrigin.User,
+              category: MediaCategory.Video,
+              imageCdn: {
+                type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+                cdnId: thumbnailId,
+              },
+              mediaCdn: {
+                type: CdnIdType.VERCEL_BLOB_USER_VIDEO,
+                cdnId: videoId,
+              },
+              aspectRatio,
+            };
+
+            const userAssetEntry: Omit<UserAssetEntry, "owner" | "_id"> = {
+              ...entryCreationData,
+              entryType: EntryTypes.UserAsset,
+              media: userMedia,
+            };
+
+            entryCreationData = userAssetEntry;
+          } else {
+            // Handle image upload (existing logic)
+            const fileExtension = getFileExtension(uploadedImageFile!);
+            const originalFilename = uploadedImageFile!.name.trim();
+            
+            const sanitizedFilename = originalFilename && originalFilename.length > 0
+              ? sanitizeFilename(originalFilename)
+              : `${crypto.randomUUID()}${fileExtension}`;
+            
+            const imageId = sanitizedFilename && sanitizedFilename.length > 0
+              ? sanitizedFilename
+              : `${crypto.randomUUID()}${fileExtension}`;
+
+            const blobKey = makeUserImageBlobKey(
+              userId,
+              UploadCategory.UPLOADED_IMAGE,
+              imageId
+            );
+
+            toast.info("Uploading image...");
+            await clientImageUpload(uploadedImageFile!, blobKey);
+
+            const aspectRatio = previewImage?.aspectRatio || await getFileAspectRatio(uploadedImageFile!);
+
+            const userImage: UserImage = {
+              origin: MediaOrigin.User,
+              category: MediaCategory.Image,
+              imageCdn: {
+                type: CdnIdType.VERCEL_BLOB_USER_IMAGE,
+                cdnId: imageId,
+              },
+              aspectRatio,
+            };
+
+            const userAssetEntry: Omit<UserAssetEntry, "owner" | "_id"> = {
+              ...entryCreationData,
+              entryType: EntryTypes.UserAsset,
+              media: userImage,
+            };
+
+            entryCreationData = userAssetEntry;
+          }
         } catch (error) {
           handleClientError({
             error,
@@ -362,9 +467,9 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
           });
           
           if (error instanceof Error) {
-            toast.error(error.message || "Failed to upload image. Please try again.");
+            toast.error(error.message || "Failed to upload media. Please try again.");
           } else {
-            toast.error("Failed to upload image. Please try again.");
+            toast.error("Failed to upload media. Please try again.");
           }
           setSubmitting(false);
           return;
@@ -477,6 +582,12 @@ const NewEntryForm = forwardRef<HTMLButtonElement, NewEntryFormProps>(
                   setUploadedImageFile={setUploadedImageFile}
                   previewImage={previewImage}
                   setPreviewImage={setPreviewImage}
+                  uploadedVideoFile={uploadedVideoFile}
+                  setUploadedVideoFile={setUploadedVideoFile}
+                  previewVideoUrl={previewVideoUrl}
+                  setPreviewVideoUrl={setPreviewVideoUrl}
+                  uploadedThumbnailFile={uploadedThumbnailFile}
+                  setUploadedThumbnailFile={setUploadedThumbnailFile}
                 />
               </form>
             </Form>

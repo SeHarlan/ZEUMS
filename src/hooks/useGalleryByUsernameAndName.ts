@@ -1,17 +1,29 @@
 import { GALLERY_BY_USERNAME_AND_NAME_ROUTE } from "@/constants/serverRoutes";
 import { PublicGalleryType } from "@/types/gallery";
+import { BaseUserType } from "@/types/user";
 import { handleClientError } from "@/utils/handleError";
 import axios from "axios";
 import useSWR from "swr";
 
-const galleryByUsernameAndNameFetcher = async (username: string, galleryName: string) => {
+export type OwnerTimelineSettingsType = Pick<
+  BaseUserType,
+  "_id" | "backgroundImage" | "backgroundTileCount" | "backgroundTintHex" | "backgroundTintOpacity" | "backgroundBlur" | "timelineTheme" | "timelineHeadingFont" | "timelineBodyFont"
+>;
+
+interface GalleryByUsernameAndNameResponse {
+  gallery: PublicGalleryType;
+  ownerTimelineSettings: OwnerTimelineSettingsType | null;
+}
+
+const galleryByUsernameAndNameFetcher = async (
+  username: string,
+  galleryName: string
+): Promise<GalleryByUsernameAndNameResponse | null> => {
   if (!username || !galleryName) return null;
 
   return axios
-    .get<{ gallery: PublicGalleryType }>(GALLERY_BY_USERNAME_AND_NAME_ROUTE(username, galleryName))
-    .then((res) => {
-      return res.data.gallery;
-    })
+    .get<GalleryByUsernameAndNameResponse>(GALLERY_BY_USERNAME_AND_NAME_ROUTE(username, galleryName))
+    .then((res) => res.data)
     .catch((err) => {
       handleClientError({
         error: err,
@@ -31,7 +43,8 @@ const useGalleryByUsernameAndName = (
   );
 
   return {
-    gallery: data,
+    gallery: data?.gallery ?? null,
+    ownerTimelineSettings: data?.ownerTimelineSettings ?? null,
     isLoading,
     isError: error,
     mutateGallery: mutate,

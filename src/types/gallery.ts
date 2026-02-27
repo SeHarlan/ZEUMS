@@ -21,6 +21,16 @@ export type BaseGalleryType = {
   hideItemTitles?: boolean;
   hideItemDescriptions?: boolean;
   bannerImage?: ImageType | null;
+  /** When false, gallery page uses owner's timeline background/theme; when true, uses gallery's settings. */
+  useCustomBackgroundSettings?: boolean;
+  galleryTheme?: "light" | "dark";
+  backgroundImage?: ImageType | null;
+  backgroundTintHex?: string;
+  backgroundTintOpacity?: number;
+  backgroundBlur?: number;
+  backgroundTileCount?: number;
+  galleryHeadingFont?: string;
+  galleryBodyFont?: string;
 };
 
 type GalleryOwnerData = Pick<BaseUserType, "username" | "displayName" | "profileImage">;

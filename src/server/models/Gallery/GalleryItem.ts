@@ -156,6 +156,12 @@ const BlockchainAssetGalleryItemSchema =
         display_type: String,
       },
     ],
+    integrations: [
+      {
+        type: { type: String, enum: ["exchange", "mallow"], required: true },
+        action: { type: String, enum: ["link"], required: true },
+      },
+    ],
   });
 
 const BlockchainAssetGalleryItem = GalleryItem.discriminators?.[GalleryItemTypes.BlockchainAsset] ||

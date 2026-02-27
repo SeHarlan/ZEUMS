@@ -10,22 +10,47 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
 
   try {
     const authSessionUser = await getAuthSessionUser(req);
-    const { _id, title, description, hideItemTitles, hideItemDescriptions, bannerImage } =
-      (await req.json()) as Pick<
-        GalleryType,
-        | "_id"
-        | "title"
-        | "description"
-        | "hideItemTitles"
-        | "hideItemDescriptions"
-        | "bannerImage"
-      >;
-    
+    const body = (await req.json()) as Pick<
+      GalleryType,
+      | "_id"
+      | "title"
+      | "description"
+      | "hideItemTitles"
+      | "hideItemDescriptions"
+      | "bannerImage"
+      | "useCustomBackgroundSettings"
+      | "galleryTheme"
+      | "backgroundImage"
+      | "backgroundTintHex"
+      | "backgroundTintOpacity"
+      | "backgroundBlur"
+      | "backgroundTileCount"
+      | "galleryHeadingFont"
+      | "galleryBodyFont"
+    >;
+    const {
+      _id,
+      title,
+      description,
+      hideItemTitles,
+      hideItemDescriptions,
+      bannerImage,
+      useCustomBackgroundSettings,
+      galleryTheme,
+      backgroundImage,
+      backgroundTintHex,
+      backgroundTintOpacity,
+      backgroundBlur,
+      backgroundTileCount,
+      galleryHeadingFont,
+      galleryBodyFont,
+    } = body;
+
     // Validate required fields
     if (!_id) {
       throw new Error("Gallery ID is required");
     }
-    
+
     if (!title || title.trim().length === 0) {
       throw new Error("Title is required");
     }
@@ -36,7 +61,16 @@ export async function updateGalleryHandler(req: NextRequest): Promise<NextRespon
       hideItemTitles,
       hideItemDescriptions,
       bannerImage,
-    })
+      useCustomBackgroundSettings,
+      galleryTheme,
+      backgroundImage,
+      backgroundTintHex,
+      backgroundTintOpacity,
+      backgroundBlur,
+      backgroundTileCount,
+      galleryHeadingFont,
+      galleryBodyFont,
+    });
 
     // Update gallery data
     const updatedGallery = await Gallery.findOneAndUpdate(

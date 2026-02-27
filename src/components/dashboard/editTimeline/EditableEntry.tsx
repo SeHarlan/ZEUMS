@@ -69,7 +69,7 @@ const EditableEntry: FC<EntryBaseProps> = ({ entry, flip }) => {
 
   return (
     <div className="relative group/entry-preview">
-      <div className="z-10 absolute -top-5 right-6 sm:-right-5 flex gap-2 group-hover/entry-preview:opacity-100 opacity-100 sm:opacity-25 transition-opacity duration-200">
+      <div className="z-10 absolute -top-5 right-6 sm:-right-5 flex gap-2 group-hover/entry-preview:opacity-100 opacity-100 sm:opacity-25 transition-opacity duration-200 no-custom-font">
         <Button
           onClick={handleDelete}
           variant="destructive"

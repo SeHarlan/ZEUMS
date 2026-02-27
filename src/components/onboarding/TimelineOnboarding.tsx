@@ -1,4 +1,9 @@
-import { addTimelineEntriesFormOpenAtom, editProfileFormOpenAtom, rearrangeEntriesDrawerOpenAtom } from "@/atoms/dashboard";
+import {
+  addTimelineEntriesFormOpenAtom,
+  editProfileFormOpenAtom,
+  editTimelineSettingsFormOpenAtom,
+  rearrangeEntriesDrawerOpenAtom,
+} from "@/atoms/dashboard";
 import { timelineOnboardingAtoms, TimelineOnboardingKeys } from "@/atoms/onboarding/editTimeline";
 import { INITIALIZED_KEY } from "@/atoms/onboarding/onboardingStages";
 import { EDIT_GALLERIES } from "@/constants/clientRoutes";
@@ -13,6 +18,9 @@ import { OnboardingPopover } from "./OnboardingPopover";
 export const TimelineOnboardingPopover = () => {
   const { isMd } = useBreakpoints();
   const setEditProfileFormOpen = useSetAtom(editProfileFormOpenAtom);
+  const setEditTimelineSettingsFormOpen = useSetAtom(
+    editTimelineSettingsFormOpenAtom
+  );
   const addItemsOpen = useAtomValue(addTimelineEntriesFormOpenAtom);
   const rearrangeItemsOpen = useAtomValue(rearrangeEntriesDrawerOpenAtom);
 
@@ -32,15 +40,19 @@ export const TimelineOnboardingPopover = () => {
         [INITIALIZED_KEY]: {
           content: {
             title: `Welcome to your ${TITLE_COPY} Timeline editor!`,
-            description:
-              `This timeline is your homepage, the entryway into your creative world. 
+            description: `This timeline is your homepage, the entryway into your creative world. 
               Introduce yourself, highlight favorite artworks, and connect your galleries.`,
             body: (
               <div>
                 <ul className="pl-4 mt-2 list-disc mb-2">
                   <li>
                     <strong>Edit Profile: </strong>
-                    manage your public profile and choose your primary timeline.
+                    manage your public profile details like images, bio, and
+                    social links.
+                  </li>
+                  <li>
+                    <strong>Edit Settings: </strong>
+                    choose your primary timeline and adjust date visibility.
                   </li>
                   <li>
                     <strong>Add Items: </strong>
@@ -55,7 +67,8 @@ export const TimelineOnboardingPopover = () => {
                 <div className="text-muted-foreground text-center text-sm">
                   <P>
                     <strong>Galleries </strong>
-                    are pages dedicated to showcasing different collections. If you would rather create a gallery first{" "}
+                    are pages dedicated to showcasing different collections. If
+                    you would rather create a gallery first{" "}
                     <Link href={EDIT_GALLERIES} className="underline">
                       click here
                     </Link>
@@ -66,14 +79,34 @@ export const TimelineOnboardingPopover = () => {
             ),
           },
         },
+        [TimelineOnboardingKeys.EditProfile]: {
+          content: {
+            title: "Edit your profile",
+            description:
+              "Update details that appear across timelines like your profile image, bio, and social links.",
+          },
+        },
+        [TimelineOnboardingKeys.SaveProfile]: {
+          content: {
+            title: "Save your profile",
+            description:
+              "Once you've made updates, click this button to save your changes.",
+          },
+          onActive: () => {
+            setEditTimelineSettingsFormOpen(false);
+            setEditProfileFormOpen(true);
+          },
+          onNext: () => setEditProfileFormOpen(false),
+        },
         [TimelineOnboardingKeys.ChooseActiveSource]: {
           content: {
             title: "Choose the timeline you want to edit",
             body: (
               <div className="space-y-2">
                 <P className="text-muted-foreground text-center">
-                  Your timelines are separated by source.
-                  Work you've made (<strong>Created</strong>) or artwork you own (<strong>Collected</strong>).
+                  Your timelines are separated by source. Work you've made (
+                  <strong>Created</strong>) or artwork you own (
+                  <strong>Collected</strong>).
                 </P>
                 <P className="text-muted-foreground text-center text-sm">
                   *If one doesn't apply, leave it empty and it won't appear
@@ -83,11 +116,11 @@ export const TimelineOnboardingPopover = () => {
             ),
           },
         },
-        [TimelineOnboardingKeys.EditProfile]: {
+        [TimelineOnboardingKeys.EditSettings]: {
           content: {
-            title: "Edit your profile",
+            title: "Edit your settings",
             description:
-              "Choose your primary timeline and update details that appear across timelines like your profile image, bio, and social links.",
+              "Choose your primary timeline and adjust how dates are displayed.",
           },
         },
         [TimelineOnboardingKeys.ChoosePrimaryTimeline]: {
@@ -96,18 +129,10 @@ export const TimelineOnboardingPopover = () => {
             description:
               "If you have multiple timelines, this will be the first one visitors see when they go to your homepage.",
           },
-          onPrevious: () => setEditProfileFormOpen(false),
-          onActive: () => setEditProfileFormOpen(true),
+          onPrevious: () => setEditTimelineSettingsFormOpen(false),
+          onActive: () => setEditTimelineSettingsFormOpen(true),
         },
-        [TimelineOnboardingKeys.SaveProfile]: {
-          content: {
-            title: "Save your profile",
-            description:
-              "Once you've made updates, click this button to save your changes.",
-          },
-          onActive: () => setEditProfileFormOpen(true),
-          onNext: () => setEditProfileFormOpen(false),
-        },
+
         [TimelineOnboardingKeys.AddItems]: {
           content: {
             title: "Add items to your timeline",
@@ -130,8 +155,7 @@ export const TimelineOnboardingPopover = () => {
         },
         [TimelineOnboardingKeys.goToGalleries]: {
           content: {
-            title:
-              "Your galleries page is next",
+            title: "Your galleries page is next",
             description: navigateDescription,
             body: (
               <div className="w-full flex justify-center items-center gap-2 font-medium">

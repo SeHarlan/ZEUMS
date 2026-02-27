@@ -3,6 +3,7 @@
 import { useShowReturnButton } from "@/atoms/navigation";
 import FeedbackWrapper from "@/components/general/FeedbackWrapper";
 import { PageContainer } from "@/components/general/PageContainer";
+import { BackgroundImage } from "@/components/media/BackgroundImage";
 import { ShareButton } from "@/components/navigation/ShareButton";
 import EntryBase from "@/components/timeline/EntryBase";
 import ProfileHero from "@/components/timeline/ProfileHero";
@@ -15,6 +16,7 @@ import { useUser } from "@/context/UserProvider";
 import useUserByUsername from "@/hooks/useUserByUsername";
 import { EditIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { DynamicFontLoader } from "@/components/general/DynamicFontLoader";
 
 
 export default function UserTimelinePage() {
@@ -34,7 +36,7 @@ export default function UserTimelinePage() {
             variant="outline"
             className="size-10 md:w-fit"
           >
-            <EditIcon  className="size-5 md:size-4"/>
+            <EditIcon className="size-5 md:size-4" />
             <P className="hidden md:block">Edit</P>
           </LinkButton>
         )}
@@ -46,8 +48,15 @@ export default function UserTimelinePage() {
         hasData={!!timelineUser}
         noDataSubtitle="User not found"
       >
-        <ProfileHero publicUser={timelineUser} />
-        <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
+        <BackgroundImage user={timelineUser} />
+        <DynamicFontLoader
+          headingFont={timelineUser?.timelineHeadingFont}
+          bodyFont={timelineUser?.timelineBodyFont}
+        />
+        <div className="relative z-1 timeline-content">
+          <ProfileHero publicUser={timelineUser} />
+          <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
+        </div>
       </FeedbackWrapper>
     </PageContainer>
   );

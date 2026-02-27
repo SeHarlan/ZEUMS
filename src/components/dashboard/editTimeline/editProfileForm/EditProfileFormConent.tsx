@@ -1,4 +1,3 @@
-import { TimelineOnboardingKeys, useTimelineSetter } from "@/atoms/onboarding/editTimeline";
 import { BlockchainAssetEntryIcon } from "@/components/icons/EntryTypes";
 import ImageUploadDialog from "@/components/media/ImageUploadDialog";
 import { BannerImage } from "@/components/timeline/BannerImage";
@@ -7,13 +6,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input, PrefixInput } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadCategory } from "@/constants/uploadCategories";
 import { ProfileDisplayFormValues } from "@/forms/editProfileDisplayInformation";
-import { EntrySource } from "@/types/entry";
 import { CdnIdType, ImageType, MediaCategory, MediaOrigin } from "@/types/media";
 import { UserType } from "@/types/user";
 import { getFileAspectRatio } from "@/utils/media";
@@ -48,10 +43,6 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
   const [bannerImageOpen, setBannerImageOpen] = useState(false);
   const [uploadProfileDialogOpen, setUploadProfileDialogOpen] = useState(false);
   const [uploadBannerDialogOpen, setUploadBannerDialogOpen] = useState(false);
-
-  const {setStepRef: setPrimaryTimelineRef} = useTimelineSetter(
-    TimelineOnboardingKeys.ChoosePrimaryTimeline
-  );
 
   const userId = user?._id?.toString();
   // Create blobUrlBuilderProps for user-uploaded images
@@ -145,71 +136,8 @@ const EditProfileFormContent: FC<EditProfileFormContentProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 py-4">
-      <FormField
-        control={form.control}
-        name="primaryTimeline"
-        render={({ field }) => (
-          <FormItem>
-            <div className="grid gap-2"
-              ref={setPrimaryTimelineRef}
-            >
-              <FormLabel>Primary Timeline</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Primary Timeline" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={EntrySource.Creator}>Created</SelectItem>
-                  <SelectItem value={EntrySource.Collector}>
-                    Collected
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The timeline that will be displayed first when viewing your
-                profile.
-              </FormDescription>
-              <FormMessage />
-            </div>
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="hideCreatorDates"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Hide Created Timeline Dates</FormLabel>
 
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="hideCollectorDates"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Hide Collected Timeline Dates</FormLabel>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
 
-      <Separator />
-      
       <div className="relative w-full h-fit">
         <div className="absolute -top-2 -right-2 z-10 flex gap-2">
           <ImageUploadDialog

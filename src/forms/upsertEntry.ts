@@ -2,6 +2,11 @@ import { EntryTypes } from "@/types/entry";
 import { z } from "zod";
 import { urlSchema } from "./urlSchema";
 
+const integrationSchema = z.object({
+  type: z.enum(["exchange", "mallow"]),
+  action: z.literal("link"),
+});
+
 // Form schema with Zod validation
 export const entryFormSchema = z.object({
   entryType: z.nativeEnum(EntryTypes),
@@ -34,6 +39,7 @@ export const entryFormSchema = z.object({
     .max(3, {
       message: "You can add up to 3 buttons.",
     }),
+  integrations: z.array(integrationSchema).optional(),
 });
 
 export type EntryFormValues = z.infer<typeof entryFormSchema>;

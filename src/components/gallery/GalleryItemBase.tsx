@@ -1,6 +1,6 @@
 import { ImageSizing } from "@/constants/ui";
-import { UploadCategory } from "@/constants/uploadCategories";
 import { GalleryItem, GalleryItemTypes, isUserAssetGalleryItem } from "@/types/galleryItem";
+import { getBlobUrlBuilderPropsFromItemOrEntry } from "@/utils/media";
 import { FC, useMemo } from "react";
 import MediaThumbnail from "../media/MediaThumbnail";
 import { P } from "../typography/Typography";
@@ -19,14 +19,8 @@ export interface GalleryItemBaseProps {
 const GalleryItemBase: FC<GalleryItemBaseProps> = ({ item, hideTitle, hideDescription, sizeDivisor}) => {
   // Create blobUrlBuilderProps for UserAssetGalleryItem
   const blobUrlBuilderProps = useMemo(() => {
-    if (isUserAssetGalleryItem(item)) {
-      const userId = item.owner.toString();
-      return {
-        userId,
-        category: UploadCategory.UPLOADED_IMAGE,
-      };
-    }
-    return undefined;
+
+    return getBlobUrlBuilderPropsFromItemOrEntry(item);
   }, [item]);
 
   if (item.itemType === GalleryItemTypes.Text) {
@@ -53,14 +47,8 @@ interface MiniGalleryItemBaseProps {
 export const MiniGalleryItemBase: FC<MiniGalleryItemBaseProps> = ({ item, priority, imageSize }) => {
   // Create blobUrlBuilderProps for UserAssetGalleryItem
   const blobUrlBuilderProps = useMemo(() => {
-    if (isUserAssetGalleryItem(item)) {
-      const userId = item.owner.toString();
-      return {
-        userId,
-        category: UploadCategory.UPLOADED_IMAGE,
-      };
-    }
-    return undefined;
+    if (!isUserAssetGalleryItem(item)) return undefined;
+    return getBlobUrlBuilderPropsFromItemOrEntry(item);
   }, [item]);
 
   if (item.itemType === GalleryItemTypes.Text) {

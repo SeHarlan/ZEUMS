@@ -58,6 +58,21 @@ const GallerySchema = new Schema<GalleryDocument>(
       type: Boolean,
       default: true,
     },
+    useCustomBackgroundSettings: {
+      type: Boolean,
+      default: false,
+    },
+    galleryTheme: {
+      type: String,
+      enum: ["light", "dark"],
+    },
+    backgroundImage: { type: MediaSchema },
+    backgroundTintHex: { type: String },
+    backgroundTintOpacity: { type: Number },
+    backgroundBlur: { type: Number },
+    backgroundTileCount: { type: Number },
+    galleryHeadingFont: { type: String },
+    galleryBodyFont: { type: String },
   },
   {
     timestamps: true,
