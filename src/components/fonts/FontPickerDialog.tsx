@@ -194,7 +194,7 @@ const FontPickerDialog: FC<FontPickerDialogProps> = ({
             size="icon"
             className="shrink-0"
             onClick={() => onChange("")}
-            disabled={!value}
+            disabled={disabled || !value}
             aria-label="Clear font selection"
           >
             <X className="h-4 w-4" />
