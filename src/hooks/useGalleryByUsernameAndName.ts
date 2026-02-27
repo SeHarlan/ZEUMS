@@ -7,7 +7,7 @@ import useSWR from "swr";
 
 export type OwnerTimelineSettingsType = Pick<
   BaseUserType,
-  "_id" | "backgroundImage" | "backgroundTileCount" | "backgroundTintHex" | "backgroundTintOpacity" | "backgroundBlur" | "timelineTheme"
+  "_id" | "backgroundImage" | "backgroundTileCount" | "backgroundTintHex" | "backgroundTintOpacity" | "backgroundBlur" | "timelineTheme" | "timelineHeadingFont" | "timelineBodyFont"
 >;
 
 interface GalleryByUsernameAndNameResponse {

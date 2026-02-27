@@ -16,6 +16,7 @@ import { useUser } from "@/context/UserProvider";
 import useUserByUsername from "@/hooks/useUserByUsername";
 import { EditIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { DynamicFontLoader } from "@/components/general/DynamicFontLoader";
 
 
 export default function UserTimelinePage() {
@@ -48,7 +49,11 @@ export default function UserTimelinePage() {
         noDataSubtitle="User not found"
       >
         <BackgroundImage user={timelineUser} />
-        <div className="relative z-1">
+        <DynamicFontLoader
+          headingFont={timelineUser?.timelineHeadingFont}
+          bodyFont={timelineUser?.timelineBodyFont}
+        />
+        <div className="relative z-1 timeline-content">
           <ProfileHero publicUser={timelineUser} />
           <TimelineSelect user={timelineUser} EntryComponent={EntryBase} />
         </div>

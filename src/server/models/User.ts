@@ -65,6 +65,8 @@ const UserSchema: Schema = new Schema<UserDocument>(
     hideCreatorDates: { type: Boolean, default: false },
     hideCollectorDates: { type: Boolean, default: true },
     timelineTheme: { type: String, enum: ["light", "dark"] },
+    timelineHeadingFont: { type: String },
+    timelineBodyFont: { type: String },
   },
   {
     timestamps: true,

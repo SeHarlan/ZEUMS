@@ -18,6 +18,7 @@ import { resolveGalleryBackgroundAndTheme } from "@/utils/gallery";
 import { EyeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
+import { DynamicFontLoader } from "@/components/general/DynamicFontLoader";
 
 const EditGalleryPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +27,7 @@ const EditGalleryPage = () => {
 
   const viewGalleryHref = USER_GALLERY(user?.username, gallery?.title);
 
-  const { effectiveTheme, resolvedBackgroundUser } = useMemo(
+  const { effectiveTheme, effectiveHeadingFont, effectiveBodyFont, resolvedBackgroundUser } = useMemo(
     () => resolveGalleryBackgroundAndTheme(gallery, user ?? undefined),
     [gallery, user]
   );
@@ -53,7 +54,11 @@ const EditGalleryPage = () => {
       >
         <BackgroundImage user={resolvedBackgroundUser} />
         <TimelineBodyTheme theme={effectiveTheme} />
-        <div className="relative z-1">
+        <DynamicFontLoader
+          headingFont={effectiveHeadingFont}
+          bodyFont={effectiveBodyFont}
+        />
+        <div className="relative z-1 gallery-content">
           <GalleryHero gallery={gallery} editMode />
           <EditGalleryItems galleryId={id} />
         </div>
